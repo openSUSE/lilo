@@ -1,6 +1,6 @@
-diff -urN quik-2.0.orig/Makefile quik-2.0/Makefile
---- quik-2.0.orig/Makefile	Wed Nov 17 21:24:19 1999
-+++ quik-2.0/Makefile	Thu Mar 16 00:43:34 2000
+diff -ru quik-2.0/Makefile quik-2.0.modified/Makefile
+--- quik-2.0/Makefile	Fri Mar 10 21:59:28 2000
++++ quik-2.0.modified/Makefile	Wed Apr 26 11:14:35 2000
 @@ -9,11 +9,11 @@
  	install -d -m 755 $(DESTDIR)/sbin
  	install -d -m 755 $(DESTDIR)/boot
@@ -17,9 +17,19 @@ diff -urN quik-2.0.orig/Makefile quik-2.0/Makefile
 -	install -m 444 man/quik.8 man/bootstrap.8 $(DESTDIR)/usr/man/man8
 +	install -m 444 man/quik.conf.5 $(DESTDIR)/usr/share/man/man5
 +	install -m 444 man/quik.8 man/bootstrap.8 $(DESTDIR)/usr/share/man/man8
-diff -urN quik-2.0.orig/quik/quik.c quik-2.0/quik/quik.c
---- quik-2.0.orig/quik/quik.c	Wed Nov 17 21:24:19 1999
-+++ quik-2.0/quik/quik.c	Thu Mar 16 00:43:34 2000
+diff -ru quik-2.0/etc/quik.conf quik-2.0.modified/etc/quik.conf
+--- quik-2.0/etc/quik.conf	Fri Mar 10 21:59:28 2000
++++ quik-2.0.modified/etc/quik.conf	Wed Apr 26 11:59:32 2000
+@@ -3,5 +3,6 @@
+ default = linux
+ image = /boot/vmlinux
+ 	label = linux
++	root = /dev/sda3
+ image = /boot/vmlinux.old
+ 	label = old
+diff -ru quik-2.0/quik/quik.c quik-2.0.modified/quik/quik.c
+--- quik-2.0/quik/quik.c	Fri Mar 10 21:59:28 2000
++++ quik-2.0.modified/quik/quik.c	Wed Apr 26 11:14:35 2000
 @@ -547,7 +547,7 @@
  	bootdev[7] += UNIT(st1.st_dev);
      strcpy(spart, bootdev);
@@ -29,23 +39,10 @@ diff -urN quik-2.0.orig/quik/quik.c quik-2.0/quik/quik.c
  
      if (verbose)
  	printf("Second-stage loader is on %s\n", spart);
-diff -urN quik-2.0.orig/second/file.c quik-2.0/second/file.c
---- quik-2.0.orig/second/file.c	Wed Nov 17 21:24:19 1999
-+++ quik-2.0/second/file.c	Mon Mar 20 21:28:22 2000
-@@ -238,8 +238,11 @@
- static int open_ext2 (char *device)
- {
-     int retval;
-+	printf("before ext2fs_open %d \n", retval);
-+    retval = ext2fs_open(device, EXT2_FLAG_RW, 0, 0, linux_io_manager, &fs);
-+
-+    printf("second.c(open_ext2) retval (ext2fs_open %s)=%d \n", device, retval);
- 
--    retval = ext2fs_open (device, EXT2_FLAG_RW, 0, 0, linux_io_manager, &fs);
-     if (retval)
- 	return 0;
-     root = cwd = EXT2_ROOT_INO;
-@@ -400,6 +403,7 @@
+diff -ru quik-2.0/second/file.c quik-2.0.modified/second/file.c
+--- quik-2.0/second/file.c	Fri Mar 10 21:59:28 2000
++++ quik-2.0.modified/second/file.c	Wed Apr 26 11:14:35 2000
+@@ -401,6 +404,7 @@
      if (*filename == '[')
  	return dump_device_range (filename, bogusdev, len, lenfunc);
      if (!open_ext2(bogusdev)) {
@@ -53,9 +50,10 @@ diff -urN quik-2.0.orig/second/file.c quik-2.0/second/file.c
  	fatal ("Unable to open filesystem");
  	return 0;
      }
-diff -urN quik-2.0.orig/second/main.c quik-2.0/second/main.c
---- quik-2.0.orig/second/main.c	Wed Nov 17 22:35:08 1999
-+++ quik-2.0/second/main.c	Wed Mar 22 15:01:32 2000
+Only in quik-2.0.modified/second: file.c.orig
+diff -ru quik-2.0/second/main.c quik-2.0.modified/second/main.c
+--- quik-2.0/second/main.c	Fri Mar 10 21:59:28 2000
++++ quik-2.0.modified/second/main.c	Wed Apr 26 11:51:39 2000
 @@ -40,7 +40,7 @@
  #define ADDRMASK	0x0fffffff
  
@@ -111,3 +109,30 @@ diff -urN quik-2.0.orig/second/main.c quik-2.0/second/main.c
  			   TMP_BUF, TMP_END, &image_len, 1, 0);
  
  	if (!fileok) {
+@@ -497,10 +507,22 @@
+      * point may actually be a procedure descriptor.
+      */
+     start = *(unsigned *)entry;
+-    if (start < load_loc || start >= load_loc + len
+-	|| ((unsigned *)entry)[2] != 0)
+-	/* doesn't look like a procedure descriptor */
+-	start += entry;
++//    if (start < load_loc || start >= load_loc + len
++//	|| ((unsigned *)entry)[2] != 0)
++//	/* doesn't look like a procedure descriptor */
++//	start += entry;
++    /* new boot strategy - see head.S in the kernel for more info -- Cort */
++    if (start == 0x60000000/* nop */ )
++           start = load_loc;
++    /* not the new boot strategy, use old logic -- Cort */
++    else
++    {
++           if (start < load_loc || start >= load_loc + len
++               || ((unsigned *)entry)[2] != 0)
++                   /* doesn't look like a procedure descriptor */
++                   start += entry;
++    }
++
+     printf("Starting at %x\n", start);
+ #ifdef BOOTINFO    
+     /* setup the bootinfo */

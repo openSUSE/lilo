@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr 26 12:17:23 CEST 2000 - uli@suse.de
+
+- update -> release 0e, retaining old (working) start code
+
+-------------------------------------------------------------------
 Mon Mar 27 19:56:38 CEST 2000 - olh@suse.de
 
 - remove %postinstall 

@@ -7,12 +7,12 @@
 #
 
 # neededforbuild  ext2fs_d
-# usedforbuild    aaa_base aaa_dir base bash bindutil binutils bison bzip compress cpio cracklib devs diff ext2fs ext2fs_d file fileutil find flex gawk gcc gdbm gettext gpm gppshare groff gzip kbd less libc libz lx_suse make mktemp modules ncurses net_tool netcfg nkita nkitb nssv1 pam patch perl pgp ps rcs rpm sendmail sh_utils shadow shlibs strace syslogd sysvinit texinfo textutil timezone unzip util vim xdevel xf86 xshared
+# usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cracklib devs diff ext2fs ext2fs_d file fileutil find flex gawk gcc gdbm gettext gpm gppshare groff gzip kbd less libc libtool libz lx_suse make mktemp modules ncurses net_tool netcfg nkita nkitb nssv1 pam patch perl pgp ps rcs rpm sendmail sh_utils shadow shlibs strace syslogd sysvinit texinfo textutil timezone unzip util vim xdevel xf86 xshared
 
 Vendor:       SuSE GmbH, Nuernberg, Germany
-Distribution: SuSE Linux 6.4 (PPC)
+Distribution: SuSE Linux 7.0a (PPC)
 Name:         quik
-Release:      13
+Release:      23
 Packager:     feedback@suse.de
 
 Summary:      quik - bootloader for CHRP machines
@@ -57,6 +57,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/man/man?/*
 
 %changelog -n quik
+* Wed Apr 26 2000 - uli@suse.de
+- update -> release 0e, retaining old (working) start code
 * Mon Mar 27 2000 - olh@suse.de
 - remove %postinstall
 * Thu Mar 23 2000 - olh@suse.de
