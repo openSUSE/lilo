@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      18
+Release:      37
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
@@ -124,6 +124,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Nov 08 2001 - olh@suse.de
+- add patch to allow loading for zImage.initrd on ppc64
 * Mon Oct 15 2001 - olh@suse.de
 - fix yaboot.conf creation, sysmap= was wrong
 * Mon Oct 15 2001 - olh@suse.de

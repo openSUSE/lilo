@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Nov  8 14:53:42 CET 2001 - olh@suse.de
+
+- add patch to allow loading for zImage.initrd on ppc64
+
+-------------------------------------------------------------------
 Mon Oct 15 17:51:52 CEST 2001 - olh@suse.de
 
 - fix yaboot.conf creation, sysmap= was wrong
