@@ -18,7 +18,7 @@ Obsoletes:    yaboot activate quik
 Requires:     hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      280
+Release:      283
 Source0:      lilo-0.0.6.tar.bz2
 Patch0:       lilo-0.0.6.dif
 Source1:      compatible_machines.txt
@@ -136,6 +136,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Aug 27 2002 - olh@suse.de
+- fix append= handling from last change
 * Sun Aug 25 2002 - olh@suse.de
 - better handling of iSeries specific options
   write kernel to kernel slot or stream file or prep boot partition

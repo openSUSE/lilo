@@ -92,7 +92,7 @@ done
 test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
 test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
-test -z "$OPTION_APPEND"  || echo "append = $OPTION_APPEND"
+test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
 
 for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
@@ -100,7 +100,7 @@ test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 	echo "image = ${CONFIG_IMAGE_FILE[$i]}"
 test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
-test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = ${CONFIG_IMAGE_APPEND[$i]}"
+test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
 test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAP[$i]}"
 test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${CONFIG_IMAGE_INITRD[$i]}"
 done
@@ -376,7 +376,7 @@ echo OPTION_BOOTFOLDER $OPTION_BOOTFOLDER
 test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
 test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
-test -z "$OPTION_APPEND"  || echo "append = $OPTION_APPEND"
+test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 test -z "$OPTION_INITRD"  || echo "initrd = ${HFS_BOOTFOLDER}:`basename ${OPTION_INITRD}`"
 echo
 for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
@@ -384,7 +384,7 @@ test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 echo "image = ${HFS_BOOTFOLDER}:`basename ${CONFIG_IMAGE_FILE[$i]}`"
 test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
-test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = ${CONFIG_IMAGE_APPEND[$i]}"
+test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
 test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${HFS_BOOTFOLDER}:`basename ${CONFIG_IMAGE_INITRD[$i]}`"
 echo
 done
@@ -489,7 +489,7 @@ echo "default = $OPTION_DEFAULT"
 fi
 }
 test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
-test -z "$OPTION_APPEND"  || echo "append = $OPTION_APPEND"
+test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
 
 for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
@@ -501,7 +501,7 @@ else
 fi
 test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
-test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = ${CONFIG_IMAGE_APPEND[$i]}"
+test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
 #test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAP[$i]}"
 test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || ( if [ "${CONFIG_IMAGE_SYSMAPPATH[$i]}" = "copy" ] ; then
 	echo "    sysmap = `basename ${CONFIG_IMAGE_SYSMAP[$i]}`" 

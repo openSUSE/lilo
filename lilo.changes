@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 27 08:40:40 CEST 2002 - olh@suse.de
+
+- fix append= handling from last change
+
+-------------------------------------------------------------------
 Sun Aug 25 14:47:02 CEST 2002 - olh@suse.de
 
 - better handling of iSeries specific options
