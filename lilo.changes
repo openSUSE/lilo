@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb 12 17:42:28 CET 2004 - olh@suse.de
+
+- add make_zimage*.sh scripts for pmac coff and new pmac, prep
+
+-------------------------------------------------------------------
 Tue Feb 10 12:06:59 CET 2004 - olh@suse.de
 
 - add /lib/lilo/iseries/iseries-addRamDisk,
