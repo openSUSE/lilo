@@ -78,7 +78,7 @@ mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
 cd lilo.ppc
 chmod 755 show_of_path.sh
-chmod 754 lilo.sh
+chmod 754 lilo.{old,new}
 cp -av lilo.old $RPM_BUILD_ROOT/sbin/lilo.old
 cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo
 cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
@@ -124,6 +124,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Sep 05 2001 - olh@suse.de
+- fix specfile
 * Wed Sep 05 2001 - olh@suse.de
 - update yaboot to 1.2.3, use new os-chooser version per default
 * Tue Aug 14 2001 - olh@suse.de
