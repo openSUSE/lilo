@@ -12,7 +12,7 @@
 Vendor:       SuSE GmbH, Nuernberg, Germany
 Distribution: SuSE Linux 6.4 (PPC)
 Name:         quik
-Release:      10
+Release:      12
 Packager:     feedback@suse.de
 
 Summary:      quik - bootloader for CHRP machines
@@ -98,6 +98,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/man/man?/*
 
 %changelog -n quik
+* Thu Mar 23 2000 - olh@suse.de
+- load the kernel from the same partition as quik.conf
 * Thu Mar 16 2000 - olh@suse.de
 - search for /etc/quik.conf on all partitions, not only on fixed #2
 * Sun Feb 06 2000 - olh@suse.de
