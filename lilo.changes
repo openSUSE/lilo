@@ -1,4 +1,25 @@
 -------------------------------------------------------------------
+Wed Aug  1 18:08:18 CEST 2001 - olh@suse.de
+
+- set sysmap_base to 0
+
+-------------------------------------------------------------------
+Tue Jul 31 22:14:51 CEST 2001 - olh@suse.de
+
+- add yaboot-fix.diff for reiserfs mount
+
+-------------------------------------------------------------------
+Tue Jul 31 18:19:33 CEST 2001 - olh@suse.de
+
+- update default lilo.conf
+
+-------------------------------------------------------------------
+Tue Jul 31 18:13:57 CEST 2001 - olh@suse.de
+
+- update to current yaboot patch for reiserfs (jeffm)
+  add sysmap loading patch and update version to 1.2.2
+
+-------------------------------------------------------------------
 Mon Jul 23 12:37:42 CEST 2001 - olh@suse.de
 
 - fix the default= option when it is macos, use first kernel label

@@ -1,11 +1,20 @@
 --- Makefile
-+++ Makefile	2001/06/28 10:40:16
++++ Makefile	2001/08/01 16:07:47
+@@ -38,7 +38,7 @@
+ 
+ # The flags for the target compiler.
+ #
+-CFLAGS = -O0 -g -nostdinc -Wall -isystem `gcc -print-file-name=include`
++CFLAGS = -O0 -g -nostdinc -Wall -isystem `gcc -print-file-name=include` -fsigned-char
+ CFLAGS += -DVERSION=\"${VERSION}\"	#"
+ CFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG)
+ CFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
 @@ -78,7 +78,7 @@
  ## End of configuration section
  
  OBJS = crt0.o yaboot.o cache.o prom.o file.o partition.o fs.o cfg.o \
 -	setjmp.o cmdline.o fs_of.o fs_ext2.o fs_iso.o iso_util.o \
-+	setjmp.o cmdline.o fs_of.o fs_ext2.o fs_iso.o fs_reiserfs.o iso_util.o \
++	setjmp.o cmdline.o fs_of.o fs_ext2.o fs_reiserfs.o fs_iso.o iso_util.o \
  	lib/nosys.o lib/string.o lib/strtol.o \
  	lib/vsprintf.o lib/ctype.o lib/malloc.o
  
@@ -30,9 +39,59 @@
  	find . -name '*~' | xargs rm -f
  	find . -name '#*' | xargs rm -f
  	find . -name .AppleDouble | xargs rm -rf
+@@ -126,3 +130,6 @@
+ install:
+ 	install -o root -g root -m 0755 -d $(PREFIX)/lib/yaboot
+ 	install -o root -g root -m 0644 yaboot $(PREFIX)/lib/yaboot
++
++dep:
++	makedepend -Iinclude *.c lib/*.c util/*.c gui/*.c
+--- cfg.c
++++ cfg.c	2001/08/01 16:07:47
+@@ -96,9 +96,9 @@
+ static char *last_token = NULL, *last_item = NULL, *last_value = NULL;
+ static int line_num;
+ static int back = 0;		/* can go back by one char */
+-static char *currp;
+-static char *endp;
+-static char *file_name;
++static char *currp = NULL;
++static char *endp = NULL;
++static char *file_name = NULL;
+ static CONFIG *curr_table = cf_options;
+ static jmp_buf env;
+ 
 --- file.c
-+++ file.c	2001/06/28 10:40:16
-@@ -102,8 +102,6 @@
++++ file.c	2001/08/01 16:07:47
+@@ -26,9 +26,6 @@
+ #include "partition.h"
+ #include "fs.h"
+ 
+-/* Imported functions */
+-extern int strtol(const char *nptr, char **endptr, int base);
+-
+ extern char bootdevice[1024];
+ 
+ /* This function follows the device path in the devtree and separates
+@@ -54,7 +51,7 @@
+ 	
+ 	last = ++p;
+ 	while(*p && *p != ',') {
+-		if (*p < '0' || *p > '9') {
++        if (!isdigit (*p)) {
+ 			p = last;
+ 			break;
+ 		}
+@@ -63,7 +60,7 @@
+ 	if (p != last) {
+ 		*(p++) = 0;
+ 		if (partition)
+-			*partition = strtol(last, NULL, 0);
++            *partition = simple_strtol(last, NULL, 10);
+ 	}
+ 	if (*p && file_spec)
+ 		*file_spec = p;
+@@ -102,8 +99,6 @@
  	struct partition_t*	parts;
  	struct partition_t*	p;
  	struct partition_t*	found;
@@ -41,14 +100,14 @@
  	
  	parts = partitions_lookup(dev_name);
  	found = NULL;
-@@ -116,16 +114,12 @@
+@@ -116,16 +111,12 @@
  #endif
  	for (p = parts; p && !found; p=p->next) {
  #if DEBUG
 -		prom_printf("number: %02d type: %02d, start: 0x%08lx, length: 0x%08lx => %s\n",
 -			p->part_number, p->kind, p->part_start, p->part_size, p->part_name);
-+		prom_printf("number: %02d, start: 0x%08lx, length: 0x%08lx => %s\n",
-+			p->part_number, p->part_start, p->part_size, p->part_name);
++		prom_printf("number: %02d, start: 0x%08lx, length: 0x%08lx\n",
++			p->part_number, p->part_start, p->part_size );
  #endif
 -		if (p->kind == -1)
 -			continue;
@@ -62,12 +121,12 @@
  				goto bail;
  		}
  		if ((partition >= 0) && (partition == p->part_number))
-@@ -139,17 +133,14 @@
+@@ -139,17 +130,14 @@
  	/* Note: we don't skip when found is NULL since we can, in some
  	 * cases, let OF figure out a default partition.
  	 */
 -	result = filesystems[fs]->open(file, dev_name, found, file_name);
-+        DEBUG_F( "Using OF defaults..\n" );
++        DEBUG_F( "Using OF defaults.. (found = 0x%x)\n", found );
 +        file->fs = fs_open( file, dev_name, found, file_name );
  
  bail:
@@ -84,7 +143,7 @@
  }
  
  static int
-@@ -157,12 +148,7 @@
+@@ -157,12 +145,7 @@
  		const char*		dev_name,
  		const char*		file_name)
  {
@@ -98,7 +157,7 @@
  }
  
  static int
-@@ -189,6 +175,15 @@
+@@ -189,6 +172,15 @@
  	return FILE_ERR_OK;
  }
  
@@ -114,7 +173,7 @@
  
  int open_file(	const struct boot_fspec_t*	spec,
  		struct boot_file_t*		file)
-@@ -202,9 +197,7 @@
+@@ -202,9 +194,7 @@
  	int		partition;
  	
  	memset(file, 0, sizeof(struct boot_file_t*));
@@ -126,7 +185,7 @@
  	/* Lookup the OF device path */
  	/* First, see if a device was specified for the kernel
 --- fs.c
-+++ fs.c	2001/06/28 10:40:16
++++ fs.c	2001/08/01 16:07:47
 @@ -18,34 +18,34 @@
      Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
@@ -182,7 +241,7 @@
 +    return *fs;
 +}
 --- fs_ext2.c
-+++ fs_ext2.c	2001/06/28 10:40:16
++++ fs_ext2.c	2001/08/01 16:07:47
 @@ -127,10 +127,9 @@
  	static char buffer[1024];
  	int ofopened = 0;
@@ -197,8 +256,12 @@
  	if (opened) {
  		prom_printf("ext2_open() : fs busy\n");
  		return FILE_ERR_NOTFOUND;
-@@ -152,23 +151,23 @@
- 	    doff = (unsigned long long)(part->part_start) * part->blksize;
+@@ -149,26 +148,26 @@
+ 	bs = 1024;
+ 	doff = 0;
+ 	if (part)
+-	    doff = (unsigned long long)(part->part_start) * part->blksize;
++	    doff = (unsigned long long)(part->part_start) * part->blocksize;
  	cur_file = file;
  
 -#if DEBUG
@@ -451,7 +514,7 @@
  	    }
  	    blkorig = fblock * bs;
 --- fs_of.c
-+++ fs_of.c	2001/06/28 10:40:16
++++ fs_of.c	2001/08/01 16:07:47
 @@ -91,10 +91,9 @@
  {
  	static char	buffer[1024];
@@ -578,8 +641,8 @@
  	return 0;
  }
 --- fs_reiserfs.c
-+++ fs_reiserfs.c	2001/06/28 10:40:16
-@@ -0,0 +1,968 @@
++++ fs_reiserfs.c	2001/08/01 16:07:47
+@@ -0,0 +1,1025 @@
 +/* ReiserFS filesystem
 +   
 +   Copyright (C) 2001 Jeffrey Mahoney (jeffm@suse.com)
@@ -630,15 +693,20 @@
 +
 +static int reiserfs_read_super( void );
 +static int reiserfs_open_file( char *dirname );
-+static int reiserfs_read_data( char *buf, int len );
++static int reiserfs_read_data( char *buf, __u32 len );
 +
 +
 +static struct reiserfs_state reiserfs;
 +static struct reiserfs_state *INFO = &reiserfs;
 +
++/* Adapted from GRUB: */
++static char FSYS_BUF[FSYSREISER_CACHE_SIZE];
++int errnum;
++
++
 +static int
 +reiserfs_open( struct boot_file_t *file, const char *dev_name,
-+    struct partition_t *part, const char *file_name )
++               struct partition_t *part, const char *file_name )
 +{
 +    static char buffer[1024];
 +
@@ -647,25 +715,35 @@
 +
 +    memset( INFO, 0, sizeof(struct reiserfs_state) );
 +    INFO->file = file;
++
 +    if (part)
-+        INFO->partition_offset = (loff_t)(part->part_start) * part->blksize;
++    {
++        DEBUG_F( "Determining offset for partition %d\n", part->part_number );
++        INFO->partition_offset = ((__u64)(part->part_start)) * ((__u64)part->blocksize);
++        DEBUG_F( "%Lu = %lu * %hu\n", INFO->partition_offset,
++                                     part->part_start,
++                                     part->blocksize );
++    }
 +    else
 +        INFO->partition_offset = 0;
 +
 +    sprintf( buffer, "%s:%d", dev_name, /*part ? part->part_number :*/ 0 );
 +    file->of_device = prom_open( buffer );
-+    DEBUG_F( "Trying to open dev_name=%s; filename=%s\n", buffer, file_name );
++    DEBUG_F( "Trying to open dev_name=%s; filename=%s; partition offset=%Lu\n",
++             buffer, file_name, INFO->partition_offset );
 +
-+    if ( file->of_device == PROM_INVALID_HANDLE )
++    if ( file->of_device == PROM_INVALID_HANDLE || file->of_device == NULL )
 +    {
 +	DEBUG_F( "Can't open device %s\n", file->of_device );
 +        DEBUG_LEAVE(FILE_ERR_NOTFOUND);
 +	return FILE_ERR_NOTFOUND;
 +    }
 +
++    DEBUG_F( "%s was successfully opened\n" );
++
 +    if ( reiserfs_read_super() != 1 )
 +    {
-+	DEBUG_F( "Couldn't open ReiserFS @ %s\n", buffer );
++	DEBUG_F( "Couldn't open ReiserFS @ %s/%Lu\n", buffer, INFO->partition_offset );
 +	prom_close( file->of_device );
 +        DEBUG_LEAVE(FILE_ERR_NOTFOUND);
 +	return FILE_ERR_NOTFOUND;
@@ -675,6 +753,7 @@
 +    strcpy(buffer, file_name); /* reiserfs_open_file modifies argument */
 +    if( reiserfs_open_file(buffer) == 0 )
 +    {
++        DEBUG_F( "reiserfs_open_file failed. errnum = %d\n", errnum );
 +        prom_close( file->of_device );
 +        DEBUG_LEAVE(FILE_ERR_NOTFOUND);
 +        return FILE_ERR_NOTFOUND;
@@ -711,10 +790,6 @@
 +}
 +
 +
-+/* Adapted from GRUB: */
-+static char FSYS_BUF[FSYSREISER_CACHE_SIZE];
-+int errnum;
-+
 +static __inline__ __u32
 +log2( __u32 word )
 +{
@@ -730,18 +805,25 @@
 +}
 +
 +static int
-+read_disk( struct boot_file_t *file, loff_t start, loff_t length, void *buf )
++read_disk_block( struct boot_file_t *file, __u32 block, __u32 start,
++                 __u32 length, void *buf )
 +{
-+    prom_lseek( file->of_device, start + INFO->partition_offset );
++    __u16 fs_blocksize = INFO->blocksize == 0 ? REISERFS_OLD_BLOCKSIZE
++                                              : INFO->blocksize;
++    unsigned long long pos = block * fs_blocksize;
++    pos += INFO->partition_offset + start;
++    DEBUG_F( "Reading %lu bytes, starting at block %lu, disk offset %Lu\n",
++             length, block, pos );
++    prom_lseek( file->of_device, pos );
 +    return prom_read( file->of_device, buf, length );
 +}
 +
 +
 +static int
-+journal_read( int block, int len, char *buffer )
++journal_read( __u32 block, __u32 len, char *buffer )
 +{
-+    return read_disk( INFO->file,
-+                      (INFO->journal_block + block) << INFO->blocksize_shift,
++    return read_disk_block( INFO->file,
++                      (INFO->journal_block + block), 0,
 +                       len, buffer );
 +}
 +
@@ -750,15 +832,15 @@
 + * journal taken.  
 + */
 +static int
-+block_read( int blockNr, int start, int len, char *buffer )
++block_read( __u32 blockNr, __u32 start, __u32 len, char *buffer )
 +{
-+    int transactions = INFO->journal_transactions;
-+    int desc_block = INFO->journal_first_desc;
-+    int journal_mask = INFO->journal_block_count - 1;
-+    int translatedNr = blockNr;
++    __u32 transactions = INFO->journal_transactions;
++    __u32 desc_block = INFO->journal_first_desc;
++    __u32 journal_mask = INFO->journal_block_count - 1;
++    __u32 translatedNr = blockNr;
 +    __u32 *journal_table = JOURNAL_START;
 +
-+    DEBUG_F( "block_read( %d, %d, %d, ..)\n", blockNr, start, len );
++//    DEBUG_F( "block_read( %u, %u, %u, ..)\n", blockNr, start, len );
 +
 +    while ( transactions-- > 0 )
 +    {
@@ -780,7 +862,7 @@
 +	}
 +	else
 +	{
-+	    /* This is the end of cached journal marker.  The remaining * *
++	    /* This is the end of cached journal marker.  The remaining
 +	     * transactions are still on disk. */
 +	    struct reiserfs_journal_desc desc;
 +	    struct reiserfs_journal_commit commit;
@@ -798,7 +880,7 @@
 +		int commit_block = ( desc_block + 1 + j_len ) & journal_mask;
 +
 +		if ( !journal_read( commit_block,
-+			sizeof ( commit ), ( char * ) &commit ) )
++			sizeof(commit), (char *) &commit ) )
 +		    return 0;
 +
 +		while ( i < j_len )
@@ -812,17 +894,16 @@
 +	translatedNr =
 +	    INFO->journal_block + ( ( desc_block + i ) & journal_mask );
 +
-+	DEBUG_F( "block_read: block %d is mapped to journal block %d.\n",
++	DEBUG_F( "block_read: block %u is mapped to journal block %u.\n",
 +	    blockNr, translatedNr - INFO->journal_block );
 +
-+	/* We must continue the search, as this block may be overwritten * in 
++	/* We must continue the search, as this block may be overwritten in 
 +	 * later transactions. */
 +      not_found:
 +	desc_block = (desc_block + 2 + j_len) & journal_mask;
 +    }
-+    return read_disk( INFO->file,
-+                      (translatedNr << INFO->blocksize_shift) + start, len,
-+                      buffer );
++
++    return read_disk_block( INFO->file, translatedNr, start, len, buffer );
 +}
 +
 +/* Init the journal data structure.  We try to cache as much as
@@ -836,13 +917,13 @@
 +static int
 +journal_init( void )
 +{
-+    unsigned int block_count = INFO->journal_block_count;
-+    unsigned int desc_block;
-+    unsigned int commit_block;
-+    unsigned int next_trans_id;
 +    struct reiserfs_journal_header header;
 +    struct reiserfs_journal_desc desc;
 +    struct reiserfs_journal_commit commit;
++    __u32 block_count = INFO->journal_block_count;
++    __u32 desc_block;
++    __u32 commit_block;
++    __u32 next_trans_id;
 +    __u32 *journal_table = JOURNAL_START;
 +
 +    journal_read( block_count, sizeof ( header ), ( char * ) &header );
@@ -854,7 +935,7 @@
 +    INFO->journal_first_desc = desc_block;
 +    next_trans_id = le32_to_cpu(header.j_last_flush_trans_id) + 1;
 +
-+    DEBUG_F( "journal_init: last flushed %d\n", le32_to_cpu(header.j_last_flush_trans_id) );
++    DEBUG_F( "journal_init: last flushed %u\n", le32_to_cpu(header.j_last_flush_trans_id) );
 +
 +    while ( 1 )
 +    {
@@ -873,7 +954,7 @@
 +	    break;
 +
 +
-+	DEBUG_F( "Found valid transaction %d/%d at %d.\n",
++	DEBUG_F( "Found valid transaction %u/%u at %u.\n",
 +	    le32_to_cpu(desc.j_trans_id), le32_to_cpu(desc.j_mount_id),
 +            desc_block );
 +
@@ -900,7 +981,7 @@
 +		{
 +		    *journal_table++ = desc.j_realblock[i];
 +
-+		    DEBUG_F( "block %d is in journal %d.\n",
++		    DEBUG_F( "block %u is in journal %u.\n",
 +			le32_to_cpu(desc.j_realblock[i]), desc_block );
 +
 +		}
@@ -909,7 +990,7 @@
 +		    *journal_table++ =
 +			commit.j_realblock[i - JOURNAL_TRANS_HALF];
 +
-+		    DEBUG_F( "block %d is in journal %d.\n",
++		    DEBUG_F( "block %u is in journal %u.\n",
 +			le32_to_cpu(commit.j_realblock[i - JOURNAL_TRANS_HALF]),
 +			desc_block );
 +
@@ -919,7 +1000,7 @@
 +	desc_block = (commit_block + 1) & (block_count - 1);
 +    }
 +
-+    DEBUG_F( "Transaction %d/%d at %d isn't valid.\n",
++    DEBUG_F( "Transaction %u/%u at %u isn't valid.\n",
 +	le32_to_cpu(desc.j_trans_id), le32_to_cpu(desc.j_mount_id),
 +        desc_block );
 +
@@ -934,16 +1015,18 @@
 +reiserfs_read_super( void )
 +{
 +    struct reiserfs_super_block super;
-+    int superblock = REISERFS_DISK_OFFSET_IN_BYTES;
++    __u64 superblock = REISERFS_SUPERBLOCK_BLOCK;
 +
-+    read_disk( INFO->file, superblock, sizeof(super), &super );
++    read_disk_block( INFO->file, superblock, 0, sizeof(super), &super );
++
++    DEBUG_F( "Found super->magic %s\n", super.s_magic );
 +
 +    if( strcmp( REISER2FS_SUPER_MAGIC_STRING, super.s_magic ) != 0 &&
 +        strcmp( REISERFS_SUPER_MAGIC_STRING, super.s_magic ) != 0 )
 +    {
 +	/* Try old super block position */
-+	superblock = REISERFS_OLD_DISK_OFFSET_IN_BYTES;
-+	read_disk( INFO->file, superblock, sizeof (super),  &super );
++	superblock = REISERFS_OLD_SUPERBLOCK_BLOCK;
++	read_disk_block( INFO->file, superblock, 0, sizeof (super),  &super );
 +
 +	if ( strcmp( REISER2FS_SUPER_MAGIC_STRING, super.s_magic ) != 0 &&
 +             strcmp( REISERFS_SUPER_MAGIC_STRING, super.s_magic ) != 0 )
@@ -959,53 +1042,82 @@
 +	}
 +    }
 +
++    DEBUG_F( "ReiserFS superblock data:\n" );
++    DEBUG_F( "Block count: %lu\n", le32_to_cpu(super.s_block_count) )
++    DEBUG_F( "Free blocks: %lu\n", le32_to_cpu(super.s_free_blocks) );
++    DEBUG_F( "Journal block: %lu\n", le32_to_cpu(super.s_journal_block) );
++    DEBUG_F( "Journal size (in blocks): %lu\n",
++                                    le32_to_cpu(super.s_orig_journal_size) );
++    DEBUG_F( "Root block: %lu\n\n", le32_to_cpu(super.s_root_block) );
++
 +
 +    INFO->version = le16_to_cpu(super.s_version);
 +    INFO->blocksize = le16_to_cpu(super.s_blocksize);
 +    INFO->blocksize_shift = log2( INFO->blocksize );
 +
 +    INFO->journal_block = le32_to_cpu(super.s_journal_block);
-+    INFO->journal_block_count = le32_to_cpu(super.s_journal_block_count);
++    INFO->journal_block_count = le32_to_cpu(super.s_orig_journal_size);
 +
 +    INFO->cached_slots = (FSYSREISER_CACHE_SIZE >> INFO->blocksize_shift) - 1;
 +
++    /* At this point, we've found a valid superblock. If we run into problems
++     * mounting the FS, the user should probably know. */
++
 +    /* A few sanity checks ... */
 +    if ( INFO->version > REISERFS_MAX_SUPPORTED_VERSION )
++    {
++        prom_printf( "ReiserFS: Unsupported version field: %u\n",
++                     INFO->version );
 +	return 0;
++    }
 +
 +    if ( INFO->blocksize < FSYSREISER_MIN_BLOCKSIZE
 +	|| INFO->blocksize > FSYSREISER_MAX_BLOCKSIZE )
++    {
++        prom_printf( "ReiserFS: Unsupported block size: %u\n",
++                     INFO->blocksize );
 +	return 0;
++    }
 +
 +    /* Setup the journal.. */
 +    if ( INFO->journal_block != 0 )
 +    {
-+	if ( INFO->journal_block_count == 0 )
-+	    INFO->journal_block_count = le32_to_cpu(super.s_orig_journal_size);
 +	if ( !is_power_of_two( INFO->journal_block_count ) )
++        {
++            prom_printf( "ReiserFS: Unsupported journal size, "
++                         "not a power of 2: %lu\n",
++                         INFO->journal_block_count );
 +	    return 0;
++        }
 +
 +	journal_init();
 +	/* Read in super block again, maybe it is in the journal */
-+	block_read( superblock >> INFO->blocksize_shift,
-+	    0, sizeof ( struct reiserfs_super_block ), ( char * ) &super );
++	block_read( superblock, 0, sizeof (struct reiserfs_super_block),
++                    (char *) &super );
 +    }
 +
 +    /* Read in the root block */
 +    if ( !block_read( le32_to_cpu(super.s_root_block), 0,
 +            INFO->blocksize, ROOT ) )
++    {
++        prom_printf( "ReiserFS: Failed to read in root block\n" );
 +	return 0;
++    }
 +
 +    /* The root node is always the "deepest", so we can
 +       determine the hieght of the tree using it. */
 +    INFO->tree_depth = blkh_level(BLOCKHEAD(ROOT));
 +
 +
-+    DEBUG_F( "root read_in: block=%d, depth=%d\n",
++    DEBUG_F( "root read_in: block=%u, depth=%u\n",
 +	le32_to_cpu(super.s_root_block), INFO->tree_depth );
 +
 +    if ( INFO->tree_depth >= REISERFS_MAX_TREE_HEIGHT )
++    {
++        prom_printf( "ReiserFS: Unsupported tree depth (too deep): %u\n",
++                 INFO->tree_depth );
 +	return 0;
++    }
 +
 +    if ( INFO->tree_depth == BLKH_LEVEL_LEAF )
 +    {
@@ -1041,7 +1153,7 @@
 + * You must set INFO->blocks[depth] before.
 + */
 +static char *
-+read_tree_node( unsigned int blockNr, int depth )
++read_tree_node( __u32 blockNr, __u16 depth )
 +{
 +    char *cache = CACHE(depth);
 +    int num_cached = INFO->cached_slots;
@@ -1056,14 +1168,24 @@
 +    else
 +	cache = CACHE(num_cached);
 +
-+    DEBUG_F( "  next read_in: block=%d (depth=%d)\n", blockNr, depth );
++    DEBUG_F( "  next read_in: block=%u (depth=%u)\n", blockNr, depth );
 +
 +    if ( !block_read( blockNr, 0, INFO->blocksize, cache ) )
++    {
++        DEBUG_F( "block_read failed\n" );
 +	return 0;
++    }
++
++    DEBUG_F( "FOUND: blk_level=%u, blk_nr_item=%u, blk_free_space=%u\n",
++            blkh_level(BLOCKHEAD(cache)),
++            blkh_nr_item(BLOCKHEAD(cache)),
++            le16_to_cpu(BLOCKHEAD(cache)->blk_free_space) );
 +
 +    /* Make sure it has the right node level */
 +    if ( blkh_level(BLOCKHEAD(cache)) != depth )
 +    {
++        DEBUG_F( "depth = %u != %u\n", blkh_level(BLOCKHEAD(cache)), depth );
++        DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
 +	errnum = FILE_ERR_BAD_FSYS;
 +	return 0;
 +    }
@@ -1078,12 +1200,12 @@
 +static int
 +next_key( void )
 +{
-+    int depth;
++    __u16 depth;
 +    struct item_head *ih = INFO->current_ih + 1;
 +    char *cache;
 +
 +
-+    DEBUG_F( "next_key:\n  old ih: key %d:%d:%d:%d version:%d\n",
++    DEBUG_F( "next_key:\n  old ih: key %u:%u:%u:%u version:%u\n",
 +	le32_to_cpu(INFO->current_ih->ih_key.k_dir_id),
 +	le32_to_cpu(INFO->current_ih->ih_key.k_objectid),
 +	le32_to_cpu(INFO->current_ih->ih_key.u.k_offset_v1.k_offset),
@@ -1109,7 +1231,7 @@
 +	    }
 +	    depth++;
 +
-+	    DEBUG_F( "  depth=%d, i=%d\n", depth, INFO->next_key_nr[depth] );
++	    DEBUG_F( "  depth=%u, i=%u\n", depth, INFO->next_key_nr[depth] );
 +
 +	}
 +	while ( INFO->next_key_nr[depth] == 0 );
@@ -1127,11 +1249,11 @@
 +
 +	do
 +	{
-+	    int nr_item = blkh_nr_item(BLOCKHEAD( cache ));
++	    __u16 nr_item = blkh_nr_item(BLOCKHEAD( cache ));
 +	    int key_nr = INFO->next_key_nr[depth]++;
 +
 +
-+	    DEBUG_F( "  depth=%d, i=%d/%d\n", depth, key_nr, nr_item );
++	    DEBUG_F( "  depth=%u, i=%u/%u\n", depth, key_nr, nr_item );
 +
 +	    if ( key_nr == nr_item )
 +		/* This is the last item in this block, set the next_key_nr * 
@@ -1152,7 +1274,7 @@
 +    INFO->current_ih = ih;
 +    INFO->current_item = &LEAF[ih_location(ih)];
 +
-+    DEBUG_F( "  new ih: key %d:%d:%d:%d version:%d\n",
++    DEBUG_F( "  new ih: key %u:%u:%u:%u version:%u\n",
 +	le32_to_cpu(INFO->current_ih->ih_key.k_dir_id),
 +	le32_to_cpu(INFO->current_ih->ih_key.k_objectid),
 +	le32_to_cpu(INFO->current_ih->ih_key.u.k_offset_v1.k_offset),
@@ -1182,7 +1304,7 @@
 +    struct item_head *ih;
 +
 +
-+    DEBUG_F( "search_stat:\n  key %d:%d:0:0\n", le32_to_cpu(dir_id),
++    DEBUG_F( "search_stat:\n  key %u:%u:0:0\n", le32_to_cpu(dir_id),
 +            le32_to_cpu(objectid) );
 +
 +
@@ -1242,22 +1364,22 @@
 +	ih++;
 +    }
 +
++    DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
 +    errnum = FILE_ERR_BAD_FSYS;
 +    return 0;
 +}
 +
 +static int
-+reiserfs_read_data( char *buf, int len )
++reiserfs_read_data( char *buf, __u32 len )
 +{
-+    unsigned int blocksize;
-+    unsigned int offset;
-+    unsigned int to_read;
++    __u32 blocksize;
++    __u32 offset;
++    __u32 to_read;
 +    char *prev_buf = buf;
 +
 +
-+    DEBUG_F( "reiserfs_read_data: INFO->file->pos=%d len=%d, offset=%Ld\n",
-+	INFO->file->pos, len,
-+        (__u64) IH_KEY_OFFSET(INFO->current_ih) - 1 );
++    DEBUG_F( "reiserfs_read_data: INFO->file->pos=%Lu len=%u, offset=%Lu\n",
++	INFO->file->pos, len, (__u64) IH_KEY_OFFSET(INFO->current_ih) - 1 );
 +
 +
 +    if ( INFO->current_ih->ih_key.k_objectid != INFO->fileinfo.k_objectid
@@ -1276,7 +1398,7 @@
 +	blocksize = ih_item_len(INFO->current_ih);
 +
 +
-+	DEBUG_F( "  loop: INFO->file->pos=%d len=%d, offset=%d blocksize=%d\n",
++	DEBUG_F( "  loop: INFO->file->pos=%Lu len=%u, offset=%u blocksize=%u\n",
 +	    INFO->file->pos, len, offset, blocksize );
 +
 +
@@ -1307,9 +1429,8 @@
 +
 +		/* Journal is only for meta data.
 +                   Data blocks can be read directly without using block_read */
-+		read_disk( INFO->file,
-+                           (blocknr << INFO->blocksize_shift) + blk_offset,
-+                           to_read, buf );
++		read_disk_block( INFO->file, blocknr, blk_offset, to_read,
++                                 buf );
 +
 +	      update_buf_len:
 +		len -= to_read;
@@ -1359,7 +1480,7 @@
 +	    return 0;
 +
 +
-+	DEBUG_F( "sd_mode=0%o sd_size=%d\n",
++	DEBUG_F( "sd_mode=0%o sd_size=%u\n",
 +	    sd_mode((struct stat_data *) INFO->current_item ),
 +	    sd_size(INFO->current_ih, INFO->current_item ));
 +
@@ -1369,7 +1490,7 @@
 +	/* If we've got a symbolic link, then chase it. */
 +	if ( S_ISLNK( mode ) )
 +	{
-+	    int len;
++	    int len = 0;
 +
 +	    if ( ++link_count > MAX_LINK_COUNT )
 +	    {
@@ -1381,7 +1502,6 @@
 +            INFO->file->len = sd_size(INFO->current_ih, INFO->current_item);
 +
 +	    /* Find out how long our remaining name is. */
-+	    len = 0;
 +	    while ( dirname[len] && !isspace( dirname[len] ) )
 +		len++;
 +
@@ -1549,7 +1669,7 @@
 +    return TYPE_ANY;
 +}
 --- gui/effects.c
-+++ gui/effects.c	2001/06/28 10:40:16
++++ gui/effects.c	2001/08/01 16:07:47
 @@ -48,8 +48,8 @@
          return;
       }
@@ -1571,32 +1691,23 @@
       fxUpdateSB(count + result, filesize);
    }
 --- include/byteorder.h
-+++ include/byteorder.h	2001/06/28 10:40:16
-@@ -0,0 +1,22 @@
++++ include/byteorder.h	2001/08/01 16:07:47
+@@ -0,0 +1,13 @@
 +#ifndef _BYTEORDER_H_
 +#define _BYTEORDER_H_
 +
 +#include "swab.h"
 +
-+#if __BYTE_ORDER != __LITTLE_ENDIAN
-+# define le64_to_cpu(x)  ((__u64)(x))
-+# define cpu_to_le64(x)  ((__u64)(x))
-+# define le32_to_cpu(x)  ((__u32)(x))
-+# define cpu_to_le32(x)  ((__u32)(x))
-+# define le16_to_cpu(x)  ((__u16)(x))
-+# define cpu_to_le16(x)  ((__u16)(x))
-+#else
 +# define le64_to_cpu(x)  swab64((x))
 +# define cpu_to_le64(x)  swab64((x))
 +# define le32_to_cpu(x)  swab32((x))
 +# define cpu_to_le32(x)  swab32((x))
 +# define le16_to_cpu(x)  swab16((x))
 +# define cpu_to_le16(x)  swab16((x))
-+#endif
 +
 +#endif /* _BYTEORDER_H_ */
 --- include/file.h
-+++ include/file.h	2001/06/28 10:40:16
++++ include/file.h	2001/08/01 16:07:47
 @@ -26,6 +26,9 @@
  #include "stddef.h"
  #include "prom.h"
@@ -1648,7 +1759,7 @@
  //	unsigned int	part_start;
  //	unsigned int	part_count;
 --- include/fs.h
-+++ include/fs.h	2001/06/28 10:40:16
++++ include/fs.h	2001/08/01 16:07:47
 @@ -21,24 +21,9 @@
  #ifndef FS_H
  #define FS_H
@@ -1674,11 +1785,8 @@
  struct fs_t {
  	const char* name;
  
-@@ -55,9 +40,32 @@
- 			unsigned int		newpos);
- 					
+@@ -57,7 +42,29 @@
  	int (*close)(	struct boot_file_t*	file);
-+        int (*probe)(   struct boot_file_t*     file);
  };
  
 -extern const struct fs_t* filesystems[];
@@ -1698,7 +1806,7 @@
 +    prom_printf( "    %s - ", __PRETTY_FUNCTION__ );\
 +    prom_printf( fmt, ## args );\
 +}
-+# define DEBUG_OPEN DEBUG_F( "dev=%s, part=0x%08lx (%d), name=%s\n",\
++# define DEBUG_OPEN DEBUG_F( "dev=%s, part=0x%08lx (%d), file_name=%s\n",\
 +                             dev_name, part, part ? part->part_number : -1,\
 +                             file_name);
 +#else
@@ -1710,7 +1818,7 @@
  
  #endif
 --- include/partition.h
-+++ include/partition.h	2001/06/28 10:40:16
++++ include/partition.h	2001/08/01 16:07:47
 @@ -21,6 +21,8 @@
  #ifndef PARTITION_H
  #define PARTITION_H
@@ -1720,7 +1828,7 @@
  #include "types.h"
  #include "stddef.h"
  #include "prom.h"
-@@ -28,18 +30,8 @@
+@@ -28,23 +30,13 @@
  #define MAX_PARTITIONS	32
  #define MAX_PART_NAME	32
  
@@ -1738,9 +1846,17 @@
 -	int			kind;
  	int			part_number;
  	char			part_name[MAX_PART_NAME];
- 	unsigned int		part_start;
+-	unsigned int		part_start;
+-	unsigned int		part_size;
+-	unsigned int		blksize;
++	unsigned long  		part_start; /* In blocks */
++	unsigned long  		part_size; /* In blocks */
++	unsigned short		blocksize;
+ };
+ 
+ extern struct partition_t*	partitions_lookup(const char *device);
 --- include/reiserfs/reiserfs.h
-+++ include/reiserfs/reiserfs.h	2001/06/28 10:40:16
++++ include/reiserfs/reiserfs.h	2001/08/01 16:07:47
 @@ -0,0 +1,405 @@
 +#ifndef _REISERFS_H_
 +#define _REISERFS_H_
@@ -1870,7 +1986,7 @@
 +} __attribute__ ((__packed__));
 +
 +#ifndef __LITTLE_ENDIAN
-+inline __u16 offset_v2_k_type( struct offset_v2 *v2 );;
++inline __u16 offset_v2_k_type( struct offset_v2 *v2 );
 +inline loff_t offset_v2_k_offset( struct offset_v2 *v2 );
 +#else
 +# define offset_v2_k_type(v2)           ((v2)->k_type)
@@ -2079,9 +2195,9 @@
 + 
 +#define REISERFS_ROOT_OBJECTID 2
 +#define REISERFS_ROOT_PARENT_OBJECTID 1
-+#define REISERFS_DISK_OFFSET_IN_BYTES (64 * 1024)
++#define REISERFS_SUPERBLOCK_BLOCK 16
 +/* the spot for the super in versions 3.5 - 3.5.11 (inclusive) */
-+#define REISERFS_OLD_DISK_OFFSET_IN_BYTES (8 * 1024)
++#define REISERFS_OLD_SUPERBLOCK_BLOCK 2
 +#define REISERFS_OLD_BLOCKSIZE 4096
 + 
 +#define S_ISREG(mode) (((mode) & 0170000) == 0100000)
@@ -2091,7 +2207,7 @@
 +#define MAX_LINK_COUNT    5     /* number of symbolic links to follow */
 +
 +/* Cache stuff, adapted from GRUB source */
-+#define FSYSREISER_CACHE_SIZE        (24*1024)
++#define FSYSREISER_CACHE_SIZE        (REISERFS_MAX_TREE_HEIGHT*REISERFS_OLD_BLOCKSIZE)
 +#define SECTOR_SIZE                  512
 +#define FSYSREISER_MIN_BLOCKSIZE     SECTOR_SIZE
 +#define FSYSREISER_MAX_BLOCKSIZE     FSYSREISER_CACHE_SIZE / 3
@@ -2104,7 +2220,7 @@
 +    struct boot_file_t *file;
 +    struct item_head *current_ih;
 +    char *current_item;
-+    loff_t partition_offset;
++    __u64 partition_offset;
 +
 +    /* Commonly used values, cpu order */
 +    __u32 journal_block;       /* Start of journal */
@@ -2120,8 +2236,8 @@
 +    /* Cache */
 +    __u16 cached_slots;
 +    __u16 journal_transactions;
-+    unsigned int blocks[REISERFS_MAX_TREE_HEIGHT];
-+    unsigned int next_key_nr[REISERFS_MAX_TREE_HEIGHT];
++    __u32 blocks[REISERFS_MAX_TREE_HEIGHT];
++    __u32 next_key_nr[REISERFS_MAX_TREE_HEIGHT];
 +};
 +
 +#define ROOT     ((char *)FSYS_BUF)
@@ -2147,8 +2263,19 @@
 +
 +
 +#endif /* _REISERFS_H_ */
+--- include/stdlib.h
++++ include/stdlib.h	2001/08/01 16:07:47
+@@ -18,6 +18,7 @@
+ 
+ extern int sprintf(char * buf, const char *fmt, ...);
+ extern int vsprintf(char *buf, const char *fmt, va_list args);
+-
++extern long simple_strtol(const char *cp,char **endp,unsigned int base);
++#define strtol(x,y,z) simple_strtol(x,y,z)
+ 
+ #endif
 --- include/swab.h
-+++ include/swab.h	2001/06/28 10:40:16
++++ include/swab.h	2001/08/01 16:07:47
 @@ -0,0 +1,25 @@
 +#ifndef _REISERFS_SWAB_H_
 +#define _REISERFS_SWAB_H_
@@ -2176,7 +2303,7 @@
 +
 +#endif /* _REISERFS_SWAB_H_ */
 --- include/types.h
-+++ include/types.h	2001/06/28 10:40:16
++++ include/types.h	2001/08/01 16:07:47
 @@ -55,5 +55,6 @@
  typedef		__s64		int64_t;
  
@@ -2184,9 +2311,252 @@
 +typedef __u64 loff_t;
  
  #endif
+--- lib/vsprintf.c
++++ lib/vsprintf.c	2001/08/01 16:07:47
+@@ -14,6 +14,13 @@
+ #include <string.h>
+ #include <ctype.h>
+ 
++
++/**
++ * simple_strtoul - convert a string to an unsigned long
++ * @cp: The start of the string
++ * @endp: A pointer to the end of the parsed string will be placed here
++ * @base: The number base to use
++ */
+ unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
+ {
+ 	unsigned long result = 0,value;
+@@ -29,8 +36,8 @@
+ 			}
+ 		}
+ 	}
+-	while (isxdigit(*cp) && (value = isdigit(*cp) ? *cp-'0' : (islower(*cp)
+-	    ? toupper(*cp) : *cp)-'A'+10) < base) {
++	while (isxdigit(*cp) &&
++	       (value = isdigit(*cp) ? *cp-'0' : toupper(*cp)-'A'+10) < base) {
+ 		result = result*base + value;
+ 		cp++;
+ 	}
+@@ -39,6 +46,12 @@
+ 	return result;
+ }
+ 
++/**
++ * simple_strtol - convert a string to a signed long
++ * @cp: The start of the string
++ * @endp: A pointer to the end of the parsed string will be placed here
++ * @base: The number base to use
++ */
+ long simple_strtol(const char *cp,char **endp,unsigned int base)
+ {
+ 	if(*cp=='-')
+@@ -46,14 +59,55 @@
+ 	return simple_strtoul(cp,endp,base);
+ }
+ 
+-/* we use this so that we can do without the ctype library */
+-#define is_digit(c)	((c) >= '0' && (c) <= '9')
++/**
++ * simple_strtoull - convert a string to an unsigned long long
++ * @cp: The start of the string
++ * @endp: A pointer to the end of the parsed string will be placed here
++ * @base: The number base to use
++ */
++unsigned long long simple_strtoull(const char *cp,char **endp,unsigned int base)
++{
++	unsigned long long result = 0,value;
++
++	if (!base) {
++		base = 10;
++		if (*cp == '0') {
++			base = 8;
++			cp++;
++			if ((*cp == 'x') && isxdigit(cp[1])) {
++				cp++;
++				base = 16;
++			}
++		}
++	}
++	while (isxdigit(*cp) && (value = isdigit(*cp) ? *cp-'0' : (islower(*cp)
++	    ? toupper(*cp) : *cp)-'A'+10) < base) {
++		result = result*base + value;
++		cp++;
++	}
++	if (endp)
++		*endp = (char *)cp;
++	return result;
++}
++
++/**
++ * simple_strtoll - convert a string to a signed long long
++ * @cp: The start of the string
++ * @endp: A pointer to the end of the parsed string will be placed here
++ * @base: The number base to use
++ */
++long long simple_strtoll(const char *cp,char **endp,unsigned int base)
++{
++	if(*cp=='-')
++		return -simple_strtoull(cp+1,endp,base);
++	return simple_strtoull(cp,endp,base);
++}
+ 
+ static int skip_atoi(const char **s)
+ {
+ 	int i=0;
+ 
+-	while (is_digit(**s))
++	while (isdigit(**s))
+ 		i = i*10 + *((*s)++) - '0';
+ 	return i;
+ }
+@@ -66,14 +120,7 @@
+ #define SPECIAL	32		/* 0x */
+ #define LARGE	64		/* use 'ABCDEF' instead of 'abcdef' */
+ 
+-#define do_div(n,base) ({ \
+-int __res; \
+-__res = ((unsigned long) n) % (unsigned) base; \
+-n = ((unsigned long) n) / (unsigned) base; \
+-__res; })
+-
+-static char * number(char * str, long num, int base, int size, int precision
+-	,int type)
++static char * number(char * str, long long num, int base, int size, int precision, int type)
+ {
+ 	char c,sign,tmp[66];
+ 	const char *digits="0123456789abcdefghijklmnopqrstuvwxyz";
+@@ -110,7 +157,11 @@
+ 	if (num == 0)
+ 		tmp[i++]='0';
+ 	else while (num != 0)
+-		tmp[i++] = digits[do_div(num,base)];
++        {
++                int t = ((long long) num) % (unsigned int) base;
++		tmp[i++] = digits[t];
++                num = ((long long) num) / (unsigned int) base;
++        }
+ 	if (i > precision)
+ 		precision = i;
+ 	size -= precision;
+@@ -139,13 +190,19 @@
+ 	return str;
+ }
+ 
+-/* Forward decl. needed for IP address printing stuff... */
+-int sprintf(char * buf, const char *fmt, ...);
+-
++/**
++ * vsprintf - Format a string and place it in a buffer
++ * @buf: The buffer to place the result into
++ * @fmt: The format string to use
++ * @args: Arguments for the format string
++ *
++ * Call this function if you are already dealing with a va_list.
++ * You probably want sprintf instead.
++ */
+ int vsprintf(char *buf, const char *fmt, va_list args)
+ {
+ 	int len;
+-	unsigned long num;
++	unsigned long long num;
+ 	int i, base;
+ 	char * str;
+ 	const char *s;
+@@ -156,6 +213,9 @@
+ 	int precision;		/* min. # of digits for integers; max
+ 				   number of chars for from string */
+ 	int qualifier;		/* 'h', 'l', or 'L' for integer fields */
++	                        /* 'z' support added 23/7/1999 S.H.    */
++				/* 'z' changed to 'Z' --davidm 1/25/99 */
++
+ 
+ 	for (str=buf ; *fmt ; ++fmt) {
+ 		if (*fmt != '%') {
+@@ -177,7 +237,7 @@
+ 		
+ 		/* get field width */
+ 		field_width = -1;
+-		if (is_digit(*fmt))
++		if (isdigit(*fmt))
+ 			field_width = skip_atoi(&fmt);
+ 		else if (*fmt == '*') {
+ 			++fmt;
+@@ -193,7 +253,7 @@
+ 		precision = -1;
+ 		if (*fmt == '.') {
+ 			++fmt;	
+-			if (is_digit(*fmt))
++			if (isdigit(*fmt))
+ 				precision = skip_atoi(&fmt);
+ 			else if (*fmt == '*') {
+ 				++fmt;
+@@ -206,7 +266,7 @@
+ 
+ 		/* get the conversion qualifier */
+ 		qualifier = -1;
+-		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L') {
++		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L' || *fmt =='Z') {
+ 			qualifier = *fmt;
+ 			++fmt;
+ 		}
+@@ -255,6 +315,9 @@
+ 			if (qualifier == 'l') {
+ 				long * ip = va_arg(args, long *);
+ 				*ip = (str - buf);
++			} else if (qualifier == 'Z') {
++				size_t * ip = va_arg(args, size_t *);
++				*ip = (str - buf);
+ 			} else {
+ 				int * ip = va_arg(args, int *);
+ 				*ip = (str - buf);
+@@ -290,22 +353,37 @@
+ 				--fmt;
+ 			continue;
+ 		}
+-		if (qualifier == 'l')
++		if (qualifier == 'L') {
++			num = va_arg(args, unsigned long long);
++                        if( flags & SIGN)
++                                num = (signed long long) num;
++                } else if (qualifier == 'l') {
+ 			num = va_arg(args, unsigned long);
+-		else if (qualifier == 'h') {
++			if (flags & SIGN)
++				num = (signed long) num;
++		} else if (qualifier == 'Z') {
++			num = va_arg(args, size_t);
++		} else if (qualifier == 'h') {
+ 			num = (unsigned short) va_arg(args, int);
+ 			if (flags & SIGN)
+-				num = (short) num;
+-		} else if (flags & SIGN)
+-			num = va_arg(args, int);
+-		else
++				num = (signed short) num;
++		} else {
+ 			num = va_arg(args, unsigned int);
++			if (flags & SIGN)
++				num = (signed int) num;
++		}
+ 		str = number(str, num, base, field_width, precision, flags);
+ 	}
+ 	*str = '\0';
+ 	return str-buf;
+ }
+ 
++/**
++ * sprintf - Format a string and place it in a buffer
++ * @buf: The buffer to place the result into
++ * @fmt: The format string to use
++ * @...: Arguments for the format string
++ */
+ int sprintf(char * buf, const char *fmt, ...)
+ {
+ 	va_list args;
 --- partition.c
-+++ partition.c	2001/06/28 10:40:16
-@@ -30,6 +30,18 @@
++++ partition.c	2001/08/01 16:07:47
+@@ -30,32 +30,39 @@
  #include "string.h"
  #include "linux/iso_fs.h"
  
@@ -2205,48 +2575,71 @@
  /* Local functions */
  static unsigned long swab32(unsigned long value);
  
-@@ -38,7 +50,6 @@
+ #define MAX_BLOCK_SIZE	2048
+-static char block_buffer[MAX_BLOCK_SIZE];
++static unsigned char block_buffer[MAX_BLOCK_SIZE];
  
  static void
- add_partition(	struct partition_t**	list,
+-add_partition(	struct partition_t**	list,
 -		int			kind,
- 		int			part_number,
- 		const char*		part_name,
- 		unsigned int		part_start,
-@@ -50,7 +61,6 @@
+-		int			part_number,
+-		const char*		part_name,
+-		unsigned int		part_start,
+-		unsigned int		part_size,
+-		unsigned int		blksize)
++add_new_partition( struct partition_t**	list, int part_number,
++                   unsigned long part_start, unsigned long part_size,
++                   unsigned short part_blocksize )
+ {
+ 	struct partition_t*	part;
+-	
  	part = (struct partition_t*)malloc(sizeof(struct partition_t));
  	
- 	part->next = *list;
+-	part->next = *list;
 -	part->kind = kind;
  	part->part_number = part_number;
- 	strncpy(part->part_name, part_name, MAX_PART_NAME);
+-	strncpy(part->part_name, part_name, MAX_PART_NAME);
  	part->part_start = part_start;
-@@ -64,15 +74,20 @@
+ 	part->part_size = part_size;
+-	part->blksize = blksize;
++	part->blocksize = part_blocksize;
++
++        /* Tack this entry onto the list */
++	part->next = *list;
+ 	*list = part;
+ }
+ 
+@@ -64,76 +71,65 @@
   * a bit more complicated
   */
  static void
 -partition_mac_lookup(prom_handle disk, unsigned int blksize,
 -	struct partition_t** list)
 +partition_mac_lookup( const char *dev_name, prom_handle disk,
-+                      unsigned int blksize, struct partition_t** list )
++                      unsigned int prom_blksize, struct partition_t** list )
  {
 -	int block, map_size, kind, blkdiv, i;
-+	int block, map_size, blkdiv, i;
++	int block, map_size;
++
++        /* block_buffer contains block 0 from the partitions_lookup() stage */
  	struct mac_partition* part = (struct mac_partition *)block_buffer;
++        unsigned short ptable_block_size =
++                        ((struct mac_driver_desc *)block_buffer)->block_size;
  	
  	map_size = 1;
- 	blkdiv = blksize / 512;
+-	blkdiv = blksize / 512;
 -	for (block=1; block<(map_size+1); block++) {
-+	for (block=1; block<(map_size+1); block++)
+-//#if DEBUG
+-//		prom_printf("reading partition %d\n", block);
+-//#endif	
++	for (block=1; block < map_size + 1; block++)
 +        {
 +#ifdef CHECK_FOR_VALID_MAC_PARTITION_TYPE
 +                int valid = 0;
 +                const char *ptype;
 +#endif
- //#if DEBUG
- //		prom_printf("reading partition %d\n", block);
- //#endif	
-@@ -81,7 +96,9 @@
+ 		if (prom_readblocks(disk, block, 1, block_buffer) != 1) {
+ 			prom_printf("Can't read partition %d\n", block);
  			break;
  		}
  		if (part->signature != MAC_PARTITION_MAGIC) {
@@ -2256,10 +2649,18 @@
  			break;
  		}
  		if (block == 1)
-@@ -97,38 +114,31 @@
- //		prom_printf(" ->type: %.32s\n", part->type);
- //#endif	
+ 			map_size = part->map_count;
  		
+-		for (i=0; (i<32)&&(part->name[i] != 0); i++)
+-			part->name[i] = tolower(part->name[i]);
+-		for (i=0; (i<32)&&(part->type[i] != 0); i++)
+-			part->type[i] = tolower(part->type[i]);
+-
+-//#if DEBUG
+-//		prom_printf(" ->name: %.32s\n", part->name);
+-//		prom_printf(" ->type: %.32s\n", part->type);
+-//#endif	
+-		
 -		kind = partition_unknown;
 -		if (!strcmp(part->type, "apple_partition_map"))
 -			kind = -1;
@@ -2285,116 +2686,179 @@
 -//#if DEBUG		
 -//		prom_printf(" ->kind: %d\n", kind);
 -//#endif		
+-		/* We set the partition block size to 512 since I beleive that's
+-		 * what is meant by the partition map, but I have to double check
+-		 * this (HFS CDROMs may have 2048 block size)
+-		 */
+-		if (kind > 0)
+-			add_partition(	list,
+-					kind,
+-					block,
+-					part->name,
+-					(part->start_block + part->data_start) / blkdiv,
+-					part->data_count / blkdiv,
+-					512/*blksize*/);
++#ifdef CHECK_FOR_VALID_MAC_PARTITION_TYPE
 +                /* We don't bother looking at swap partitions of any type, 
 +                 * and the rest are the ones we know about */
-+#ifdef CHECK_FOR_VALID_MAC_PARTITION_TYPE
-+                for( ptype = valid_mac_partition_types; ptype; ptype++ )
-+                    if( !strcmp( part->type, ptype ) )
++                for (ptype = valid_mac_partition_types; ptype; ptype++)
++                    if (!strcmp (part->type, ptype))
 +                    {
 +                        valid = 1;
 +                        break;
 +                    }
 +#if DEBUG
-+                if( !valid )
-+                    prom_printf( "Unsupported partition #%d; type=%s/name=%s\n",
-+                        block, part->type, part->name );
++                if (!valid)
++                    prom_printf( "MAC: Unsupported partition #%d; type=%s\n",
++                        block, part->type );
 +#endif
 +#endif
 +
 +
- 		/* We set the partition block size to 512 since I beleive that's
- 		 * what is meant by the partition map, but I have to double check
- 		 * this (HFS CDROMs may have 2048 block size)
- 		 */
--		if (kind > 0)
 +#ifdef CHECK_FOR_VALID_MAC_PARTITION_TYPE
 +                if (valid)
 +#endif
- 			add_partition(	list,
--					kind,
- 					block,
- 					part->name,
- 					(part->start_block + part->data_start) / blkdiv,
-@@ -142,10 +152,11 @@
++                /* We use the partition block size from the partition table.
++                 * The filesystem implmentations are responsible for mapping
++                 * to their own fs blocksize */
++                    add_new_partition(
++                        list, /* partition list */
++                        block, /* partition number */
++                        part->start_block + part->data_start, /* start */
++                        part->data_count, /* size */
++                        ptable_block_size );
+ 	}
+ }
+ 
+@@ -142,10 +138,10 @@
   * partitioned disks.
   */
  static void
 -partition_fdisk_lookup(prom_handle disk, unsigned int blksize,
 -	struct partition_t** list)
 +partition_fdisk_lookup( const char *dev_name, prom_handle disk,
-+                        unsigned int blksize, struct partition_t** list )
++                        unsigned int prom_blksize, struct partition_t** list )
  {
 -	int partition, kind;
 +	int partition;
-+        char buf[MAX_PART_NAME];
  
  	/* fdisk partition tables start at offset 0x1be
  	 * from byte 0 of the boot drive.
-@@ -154,23 +165,25 @@
+@@ -154,24 +150,13 @@
  	  (struct fdisk_partition *) (block_buffer + 0x1be);
  
  	for (partition=1; partition <= 4 ;partition++, part++) {
 -		kind = (part->sys_ind == LINUX_NATIVE) ? partition_ext2 : -1;
 -
 -		if (kind > 0) {
-+            char pn[4];
- #if DEBUG
- 			prom_printf("  ->add_partition: %d\n", partition);
- #endif
-+            memset( buf, 0, MAX_PART_NAME );
-+            strcpy( buf, "FDISK " );
-+            strncpy( buf + 6, dev_name, MAX_PART_NAME - 3 - 6 /* "FDISK " */ );
-+            sprintf( pn, ":%02d", partition );
-+            strcat( buf, pn );
-+
- 			add_partition(  list,
+-#if DEBUG
+-			prom_printf("  ->add_partition: %d\n", partition);
+-#endif
+-			add_partition(  list,
 -					kind,
++            add_new_partition( list,
  					partition,
 -					"RS/6000 ext2",
-+                            buf,
- 					/* start_block + data_start */
+-					/* start_block + data_start */
                                          swab32(*(unsigned int *)(part->start4)),
- 					/* # blocks */
+-					/* # blocks */
                                          swab32(*(unsigned int *)(part->size4)),
  					512 /*blksize*/ );
  		}
--	}
- }
+ 	}
+-}
  
  /* I don't know if it's possible to handle multisession and other multitrack
-@@ -242,19 +255,18 @@
+  * stuffs with the current OF disklabel package. This can still be implemented
+@@ -213,7 +198,7 @@
+ 	ihandle	disk;
+ 	struct mac_driver_desc *desc = (struct mac_driver_desc *)block_buffer;
+ 	struct partition_t* list = NULL;
+-	unsigned int blksize, iso_root_block;
++	unsigned int prom_blksize, iso_root_block;
+ 	
+ 	strncpy(block_buffer, device, 2040);
+ 	strcat(block_buffer, ":0");
+@@ -224,13 +209,13 @@
+ 		prom_printf("Can't open device <%s>\n", block_buffer);
+ 		goto bail;
+ 	}
+-	blksize = prom_getblksize(disk);
++	prom_blksize = prom_getblksize(disk);
+ #if DEBUG
+-	prom_printf("block size of device is %d\n", blksize);
++	prom_printf("block size of device is %d\n", prom_blksize);
+ #endif	
+-	if (blksize <= 1)
+-		blksize = 512;
+-	if (blksize > MAX_BLOCK_SIZE) {
++	if (prom_blksize <= 1)
++		prom_blksize = 512;
++	if (prom_blksize > MAX_BLOCK_SIZE) {
+ 		prom_printf("block_size %d not supported !\n");
+ 		goto bail;
+ 	}
+@@ -242,18 +227,16 @@
  	}	
  	if (desc->signature == MAC_DRIVER_MAGIC) {
  		/* pdisk partition format */
 -		partition_mac_lookup(disk, blksize, &list);
--	} else if ((block_buffer[510] == 0x55) && (block_buffer[511] == 0xaa)) {
--		/* fdisk partition format */
++		partition_mac_lookup(device, disk, prom_blksize, &list);
+ 	} else if ((block_buffer[510] == 0x55) && (block_buffer[511] == 0xaa)) {
+ 		/* fdisk partition format */
 -		partition_fdisk_lookup(disk, blksize, &list);
-+		partition_mac_lookup(device, disk, blksize, &list);
- 	} else if (blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
- 		add_partition(	&list,
+-	} else if (blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
+-		add_partition(	&list,
 -				partition_iso,
++		partition_fdisk_lookup(device, disk, prom_blksize, &list);
++	} else if (prom_blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
++		add_new_partition(	&list,
  				0,
- 				"",
+-				"",
  				iso_root_block,
  				0,
- 				blksize);
+-				blksize);
++				prom_blksize);
  		prom_printf("ISO9660 disk\n");
-+	} else if ((block_buffer[510] == 0x55) && (block_buffer[511] == 0xaa)) {
-+		/* fdisk partition format */
-+		partition_fdisk_lookup(device, disk, blksize, &list);
  	} else {
  		prom_printf("Not a macintosh-formatted disk !\n");
- 		goto bail;
 --- yaboot.c
-+++ yaboot.c	2001/06/28 10:44:49
++++ yaboot.c	2001/08/01 16:08:14
 @@ -1,4 +1,4 @@
 -/* Yaboot - secondary boot loader for Linux on iMacs.
 +/* Yaboot - secondary boot loader for Linux on ppc.
  
     Copyright (C) 1999 Benjamin Herrenschmidt
  
-@@ -294,7 +294,7 @@
+@@ -77,7 +77,6 @@
+ 
+ /* Imported functions */
+ extern unsigned long reloc_offset(void);
+-extern int strtol(const char *nptr, char **endptr, int base);
+ extern long flush_icache_range(unsigned long start, unsigned long stop);
+ 
+ /* Exported functions */
+@@ -95,8 +94,8 @@
+ 
+ int useconf = 0;
+ char bootdevice[1024];
+-char *bootpath;
+-char *password = 0;
++char *bootpath = NULL;
++char *password = NULL;
+ int bootpartition = -1;
+ int _machine = _MACH_Pmac;
+ 
+@@ -158,7 +157,7 @@
+ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
+ {
+ 	int result;
+-	void* malloc_base;
++	void* malloc_base = NULL;
+ 	prom_handle root;
+ 	
+  	/* OF seems to do it, but I'm not very confident */
+@@ -294,7 +293,7 @@
      opened = 1;
  
      /* Read it */
@@ -2403,7 +2867,7 @@
      if (sz <= 0) {
      	prom_printf("Error, can't read config file\n");
      	goto bail;
-@@ -303,7 +303,7 @@
+@@ -303,7 +302,7 @@
  
      /* Close the file */
      if (opened)
@@ -2412,7 +2876,7 @@
      opened = 0;
  
      /* Call the parsing code in cfg.c */
-@@ -372,7 +372,7 @@
+@@ -372,7 +371,7 @@
  bail:
  
      if (opened)
@@ -2421,16 +2885,43 @@
      
      if (result != 1 && conf_file)
      	free(conf_file);
-@@ -585,6 +585,8 @@
+@@ -549,7 +548,7 @@
+ 	     prom_printf("\n");
+ 	}
+ 	if (useconf && (q = cfg_get_strg(0, "timeout")) != 0 && *q != 0)
+-	    timeout = strtol(q, NULL, 0);
++	    timeout = simple_strtol(q, NULL, 0);
+     }
+ 
+     prom_printf("boot: ");
+@@ -585,6 +584,8 @@
      }
  
      if (c == '\n' || c == '\r') {
 +         if (!imagename)
-+                imagename = cfg_get_default();
++              imagename = cfg_get_default();
  	 if (imagename)
  	      prom_printf("%s", imagename);
  	 if (params->args)
-@@ -738,6 +740,7 @@
+@@ -610,7 +611,7 @@
+ 	defdevice = cfg_get_strg(0, "device");
+ 	p = cfg_get_strg(0, "partition");
+ 	if (p) {
+-	    n = strtol(p, &endp, 10);
++	    n = simple_strtol(p, &endp, 10);
+ 	    if (endp != p && *endp == 0)
+ 		defpart = n;
+ 	}
+@@ -627,7 +628,7 @@
+ 	    if(!defdevice) defdevice=bootdevice;
+ 	    p = cfg_get_strg(label, "partition");
+ 	    if (p) {
+-		n = strtol(p, &endp, 10);
++		n = simple_strtol(p, &endp, 10);
+ 		if (endp != p && *endp == 0)
+ 		    defpart = n;
+ 	    }
+@@ -738,6 +739,7 @@
      unsigned long	sysmap_size;
      kernel_entry_t      kernel_entry;
      struct bi_record*	birec;
@@ -2438,6 +2929,14 @@
      loadinfo_t          loadinfo;
      void                *initrd_more,*initrd_want;
      unsigned long       initrd_read;
+@@ -747,6 +749,7 @@
+     for (;;) {
+     	initrd_size = 0;
+     	initrd_base = 0;
++	sysmap_base = 0;
+     	
+ 	if (get_params(&params))
+ 	    return;
 @@ -757,8 +760,19 @@
  	if (params.splash.file)
          	fxDisplaySplash(&params.splash);
@@ -2468,7 +2967,13 @@
  	    prom_printf("\nCan't read Elf e_ident/e_type/e_machine info\n");
  	    goto next;
  	}
-@@ -790,6 +804,19 @@
+@@ -785,11 +799,25 @@
+             prom_printf ("Not a valid ELF image\n");
+             goto next;
+ 	}
++        file.fs->close(&file);
+ 
+ 	/* If sysmap, load it. 
  	 */
  	if (params.sysmap.file) {
  	    prom_printf("Loading System.map ...\n");
@@ -2488,7 +2993,7 @@
  	    result = open_file(&params.sysmap, &file);
  	    if (result != FILE_ERR_OK)
  		prom_printf("\nSystem.map file not found.\n");
-@@ -799,11 +826,11 @@
+@@ -799,11 +827,11 @@
  		    prom_printf("claim failed for sysmap memory\n");
  		    sysmap_base = 0;
  		} else {
@@ -2502,7 +3007,7 @@
  	    }
  	    if (sysmap_base) {
  	    	prom_printf("System.map loaded at 0x%08lx, size: %d Kbytes\n",
-@@ -819,6 +846,19 @@
+@@ -819,6 +847,19 @@
  	 * so we claim an arbitrary amount of 4Mb
  	 */
  	if (params.rd.file) {
@@ -2522,7 +3027,7 @@
  	    prom_printf("Loading ramdisk...\n");
  	    result = open_file(&params.rd, &file);
  	    if (result != FILE_ERR_OK)
-@@ -830,7 +870,7 @@
+@@ -830,7 +871,7 @@
  		    prom_printf("claim failed for initrd memory\n");
  		    initrd_base = 0;
  		} else {
@@ -2531,7 +3036,7 @@
  	    	    if (initrd_size == 0)
  	    	        initrd_base = 0;
                      initrd_read = initrd_size;
-@@ -842,14 +882,14 @@
+@@ -842,14 +883,14 @@
  			prom_printf("claim failed for initrd memory at %x rc=%x\n",initrd_want,initrd_more);
  			break;
  		      }
@@ -2548,17 +3053,39 @@
  	    }
  	    if (initrd_base)
  	    	prom_printf("ramdisk loaded at 0x%08lx, size: %d Kbytes\n",
-@@ -937,7 +977,8 @@
+@@ -903,14 +944,15 @@
+ 	
+ 	birec->tag = BI_MACHTYPE;
+ 	birec->data[0] = _machine;
+-	birec->data[1] = 1;
+ 	birec->size = sizeof(struct bi_record) + sizeof(unsigned long);
+ 	birec = (struct bi_record *)((unsigned long)birec + birec->size);
+-	
+-	birec->tag = BI_SYSMAP;
+-	birec->data[0] = (unsigned long)sysmap_base;
+-	birec->data[1] = sysmap_size;
+-	birec->size = sizeof(struct bi_record) + sizeof(unsigned long);
++
++	if (sysmap_base) {
++		birec->tag = BI_SYSMAP;
++		birec->data[0] = (unsigned long)sysmap_base;
++		birec->data[1] = sysmap_size;
++		birec->size = sizeof(struct bi_record) + sizeof(unsigned long)*2;
++	}
+ 	birec = (struct bi_record *)((unsigned long)birec + birec->size);
+ 	birec->tag = BI_LAST;
+ 	birec->size = sizeof(struct bi_record);
+@@ -937,7 +979,8 @@
          kernel_entry(initrd_base + loadinfo.load_loc, initrd_size, prom, 0, 0);
          continue;
  next:
 -	file.close(&file);    
-+	if( file.fs != NULL )
-+		file.fs->close(&file);    
++        if( file.fs != NULL )
++            file.fs->close(&file);    
      }
  }
  
-@@ -950,7 +991,7 @@
+@@ -950,7 +993,7 @@
      int			size = sizeof(Elf32_Ehdr) - sizeof(Elf_Ident);
  
      // Read the rest of the Elf header...
@@ -2567,7 +3094,7 @@
  	prom_printf("\nCan't read Elf32 image header\n");
  	return 0;
      }
-@@ -983,11 +1024,11 @@
+@@ -983,11 +1026,11 @@
      }
  
      /* Now, we read the section header */
@@ -2581,7 +3108,7 @@
  	    sizeof(Elf32_Phdr) * e->e_phnum) {
  	prom_printf ("read error\n");
  	return 0;
-@@ -1048,7 +1089,7 @@
+@@ -1048,7 +1091,7 @@
  		    continue;
  
  	    /* Now, we skip to the image itself */
@@ -2590,7 +3117,7 @@
  		    prom_printf ("seek error\n");
  		    prom_release(loadinfo->base, loadinfo->memsize);
  		    return 0;
-@@ -1057,7 +1098,7 @@
+@@ -1057,7 +1100,7 @@
  #ifdef CONFIG_SPLASH_SCREEN
  	    if (fxReadImage(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
  #else /* CONFIG_SPLASH_SCREEN */
@@ -2599,7 +3126,7 @@
  #endif /* CONFIG_SPLASH_SCREEN */
  		    prom_printf ("read failed\n");
  		    prom_release(loadinfo->base, loadinfo->memsize);
-@@ -1068,7 +1109,7 @@
+@@ -1068,7 +1111,7 @@
  #if 0	/* to make editor happy */
      }
  #endif	
@@ -2608,7 +3135,7 @@
  
      free(ph);
      
-@@ -1085,7 +1126,7 @@
+@@ -1085,7 +1128,7 @@
      int			size = sizeof(Elf64_Ehdr) - sizeof(Elf_Ident);
  
      // Read the rest of the Elf header...
@@ -2617,7 +3144,7 @@
  	prom_printf("\nCan't read Elf64 image header\n");
  	return 0;
      }
-@@ -1118,11 +1159,11 @@
+@@ -1118,11 +1161,11 @@
      }
  
      /* Now, we read the section header */
@@ -2631,7 +3158,7 @@
  	    sizeof(Elf64_Phdr) * e->e_phnum) {
  	prom_printf ("read error\n");
  	return 0;
-@@ -1183,7 +1224,7 @@
+@@ -1183,7 +1226,7 @@
  		    continue;
  
  	    /* Now, we skip to the image itself */
@@ -2640,7 +3167,7 @@
  		    prom_printf ("seek error\n");
  		    prom_release(loadinfo->base, loadinfo->memsize);
  		    return 0;
-@@ -1192,7 +1233,7 @@
+@@ -1192,7 +1235,7 @@
  #ifdef CONFIG_SPLASH_SCREEN
  	    if (fxReadImage(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
  #else /* CONFIG_SPLASH_SCREEN */
@@ -2649,7 +3176,7 @@
  #endif /* CONFIG_SPLASH_SCREEN */
  		    prom_printf ("read failed\n");
  		    prom_release(loadinfo->base, loadinfo->memsize);
-@@ -1203,7 +1244,7 @@
+@@ -1203,7 +1246,7 @@
  #if 0	/* to make editor happy */
      }
  #endif	

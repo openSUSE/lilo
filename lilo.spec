@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.7
-Release:      31
+Release:      32
 Source0: 	lilo-0.0.6.tar.gz
 Patch0:		lilo-0.0.6.dif
 Source3:	lilo-21.tar.gz
@@ -122,6 +122,15 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Aug 01 2001 - olh@suse.de
+- set sysmap_base to 0
+* Tue Jul 31 2001 - olh@suse.de
+- add yaboot-fix.diff for reiserfs mount
+* Tue Jul 31 2001 - olh@suse.de
+- update default lilo.conf
+* Tue Jul 31 2001 - olh@suse.de
+- update to current yaboot patch for reiserfs (jeffm)
+  add sysmap loading patch and update version to 1.2.2
 * Mon Jul 23 2001 - olh@suse.de
 - fix the default= option when it is macos, use first kernel label
 * Mon Jul 02 2001 - olh@suse.de
