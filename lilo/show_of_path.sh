@@ -136,12 +136,40 @@ case "$file_full_sysfs_path" in
 esac
 
 if [ -f devspec ] ; then
+	read file_of_hw_devtype < devspec
+	: file_of_hw_devtype $file_of_hw_devtype
+	if [ -f /proc/device-tree${file_of_hw_devtype}/device_type ] ; then
+		case "$(< /proc/device-tree${file_of_hw_devtype}/device_type)" in
+			k2-sata-root)
+			: found k2-sata-root, guessing channel
+			counter=0
+			for i in host[0-9]*
+			do
+			: working on virtual scsi host $i
+				case "$file_full_sysfs_path" in
+				*/$i/*)
+					: found $i $counter
+					break
+					;;
+				*) ;;
+				esac
+				: $((counter++))
+			done
+			file_storage_type=sata
+			of_device_path=`grep -l block /proc/device-tree${file_of_hw_devtype}/*@$counter/*/device_type`
+			of_device_path=${of_device_path%/device_type}
+			of_device_path=${of_device_path##/proc/device-tree}
+		esac
+	fi
 	case "$file_storage_type" in
 	ide)
 	file_of_hw_path="$(< devspec)/disk@$of_disk_ide_channel"
 	;;
 	scsi)
 	file_of_hw_path="$(< devspec)/sd@$of_disk_scsi_id,$of_disk_scsi_lun"
+	;;
+	sata)
+	file_of_hw_path=$of_device_path
 	;;
 	esac
 else

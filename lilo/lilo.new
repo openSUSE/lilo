@@ -51,9 +51,7 @@ if [ "$OPTION_PARTITION" = "" ] ; then
 echo Installing /lib/lilo/chrp/yaboot.chrp onto $P
 dd if=/lib/lilo/chrp/yaboot.chrp of=$P
 
-  if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
-  fi
 else
 #we have the device, but better safe than sorry
   echo install on $OPTION_DEVICE
@@ -68,9 +66,7 @@ else
   fi
 echo Installing /lib/lilo/chrp/yaboot.chrp onto $OPTION_BOOT
 dd if=/lib/lilo/chrp/yaboot.chrp of=$OPTION_BOOT
-  if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
-  fi
 fi
 
 echo check the image files
@@ -241,10 +237,8 @@ if [ "$ISERIES_TARGET" = "slot" ] ; then
 echo "this will take a while... ($[$(ls -l $ISERIES_BOOT_IMAGE | awk '{ print $5 }') / 1024] kb)"
 echo "writing kernel $ISERIES_BOOT_IMAGE to /proc/iSeries/mf/$OPTION_BOOT/vmlinux"
 dd if=$ISERIES_BOOT_IMAGE of=/proc/iSeries/mf/$OPTION_BOOT/vmlinux bs=4096
-  if [ "$OPTION_ACTIVATE" = yes ] ; then
         echo activate kernel slot $OPTION_BOOT in /proc/iSeries/mf/side
         echo $OPTION_BOOT > /proc/iSeries/mf/side
-  fi
 # remove any old cmdline content, leads to newlines
 dd if=/dev/zero of=/proc/iSeries/mf/$OPTION_BOOT/cmdline count=1 bs=254
 echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/$OPTION_BOOT/cmdline
@@ -332,9 +326,7 @@ if [ "$OPTION_PARTITION" = "" ] ; then
 
   echo Installing /boot/zImage.prep onto $P
 dd if=/boot/zImage.prep of=$P
-  if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
-  fi
 else
 #we have the device, but better safe than sorry
   echo install on $OPTION_DEVICE
@@ -349,9 +341,7 @@ else
   fi
   echo Installing /boot/zImage.prep onto $OPTION_BOOT
 dd if=/boot/zImage.prep of=$OPTION_BOOT
-  if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
-  fi
 fi
 
 echo check the image files
@@ -813,7 +803,7 @@ function parse_config_file () {
 # OPTION_BOOT contains the bootloader partition
 # OPTION_OTHER contains the MacOS partition
 # OPTION_BOOTFOLDER contains the MacOS folder with the bootstuff
-# OPTION_ACTIVATE is a flag whether or not the boot partition must be set active
+# OPTION_ACTIVATE is a flag whether or not the boot partition must be set active in OF
 # OPTION_TIMEOUT contains the timeout variable in seconds
 # OPTION_DEFAULT contains the default label
 # OPTION_ROOT contains the global or local root= device

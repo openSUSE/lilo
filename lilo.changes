@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Feb 16 14:42:24 CET 2004 - olh@suse.de
+
+- run /sbin/activate unconditionally
+  handle devspec sysfs property for sata
+
+-------------------------------------------------------------------
 Thu Feb 12 17:42:28 CET 2004 - olh@suse.de
 
 - add make_zimage*.sh scripts for pmac coff and new pmac, prep

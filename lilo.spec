@@ -1,5 +1,5 @@
 #
-# spec file for package lilo (Version 0.0.12)
+# spec file for package lilo (Version 0.0.13)
 #
 # Copyright (c) 2004 SuSE Linux AG, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -10,7 +10,7 @@
 
 # norootforbuild
 # neededforbuild  
-# usedforbuild    aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libselinux libstdc++ libxcrypt m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt ps pwdutils rcs readline sed sendmail strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
+# usedforbuild    aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libselinux libstdc++ libxcrypt m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed sendmail strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
 
 Name:         lilo
 Group:        System/Boot
@@ -20,7 +20,7 @@ Requires:     hfsutils
 Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
-Version:      0.0.12
+Version:      0.0.13
 Release:      0
 Source0:      lilo-0.0.7.tar.bz2
 Source2:      boot-header-0.0.2.tar.bz2
@@ -134,6 +134,9 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Mon Feb 16 2004 - olh@suse.de
+- run /sbin/activate unconditionally
+  handle devspec sysfs property for sata
 * Thu Feb 12 2004 - olh@suse.de
 - add make_zimage*.sh scripts for pmac coff and new pmac, prep
 * Tue Feb 10 2004 - olh@suse.de
