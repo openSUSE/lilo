@@ -1,7 +1,7 @@
 #
 # spec file for package lilo (Version 0.0.6)
 # 
-# Copyright  (c)  2000  SuSE GmbH  Nuernberg, Germany.
+# Copyright  (c)  2001  SuSE GmbH  Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
 # 
@@ -12,7 +12,7 @@
 # usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cracklib db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare groff gzip kbd less libtool libz lx_suse make mktemp modutils ncurses ncurses-devel net-tools netcfg nkitb pam pam-devel patch perl pgp ps rcs rpm sash sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim xdevel xf86 xshared
 
 Vendor:       SuSE GmbH, Nuernberg, Germany
-Distribution: SuSE Linux 7.1a (PPC)
+Distribution: SuSE Linux 7.2a (PPC)
 Name:         lilo
 Packager:     feedback@suse.de
 
@@ -22,7 +22,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.6
-Release:      10
+Release:      3
 Source0: 	lilo-0.0.6.tar.gz
 #Patch0:		lilo-0.0.6.dif
 Source3:	lilo-21.tar.gz
@@ -58,7 +58,7 @@ mv lilo-0.0.6	lilo.ppc
 mv linuxrc-1.1.13.olh	linuxrc
 mv yaboot_0.9	yaboot
 cd yaboot
-%patch5 -p1
+%patch5
 cd ..
 
 %build
@@ -151,6 +151,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Jan 30 2001 - olh@suse.de
+- disable " screen" output, doesnt work anyway
 * Sun Dec 17 2000 - olh@suse.de
 - use yaboot 0.9 on pmac and chrp
 * Sun Dec 17 2000 - olh@suse.de

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan 30 15:55:56 CET 2001 - olh@suse.de
+
+- disable " screen" output, doesnt work anyway
+
+-------------------------------------------------------------------
 Sun Dec 17 20:34:26 CET 2000 - olh@suse.de
 
 - use yaboot 0.9 on pmac and chrp

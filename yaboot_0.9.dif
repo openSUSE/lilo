@@ -1,6 +1,5 @@
-diff -urN yaboot_0.9.orig/cfg.c yaboot_0.9/cfg.c
---- yaboot_0.9.orig/cfg.c	Fri Oct  6 22:14:33 2000
-+++ yaboot_0.9/cfg.c	Sun Dec 17 18:24:23 2000
+--- cfg.c
++++ cfg.c	2001/01/30 13:05:38
 @@ -48,6 +48,7 @@
      {cft_strg, "default", NULL},
      {cft_strg, "timeout", NULL},
@@ -9,9 +8,8 @@ diff -urN yaboot_0.9.orig/cfg.c yaboot_0.9/cfg.c
      {cft_strg, "root", NULL},
      {cft_strg, "ramdisk", NULL},
      {cft_flag, "read-only", NULL},
-diff -urN yaboot_0.9.orig/crt0.S yaboot_0.9/crt0.S
---- yaboot_0.9.orig/crt0.S	Fri Oct  6 22:14:33 2000
-+++ yaboot_0.9/crt0.S	Sun Dec 17 18:23:19 2000
+--- crt0.S
++++ crt0.S	2001/01/30 13:05:38
 @@ -13,6 +13,16 @@
  	.long   (0x7c000164 + ((r20) << 21))
  	isync
@@ -29,9 +27,8 @@ diff -urN yaboot_0.9.orig/crt0.S yaboot_0.9/crt0.S
  	b	yaboot_start
  
  /*
-diff -urN yaboot_0.9.orig/file.c yaboot_0.9/file.c
---- yaboot_0.9.orig/file.c	Fri Oct  6 22:14:33 2000
-+++ yaboot_0.9/file.c	Sun Dec 17 18:24:23 2000
+--- file.c
++++ file.c	2001/01/30 13:05:38
 @@ -217,7 +217,8 @@
  	if (file_name == NULL)
  		file_name = (char *)spec->file;
@@ -42,9 +39,8 @@ diff -urN yaboot_0.9.orig/file.c yaboot_0.9/file.c
  		return FILE_ERR_NOTFOUND;
  	}
  	if (partition == -1)
-diff -urN yaboot_0.9.orig/include/yaboot.h yaboot_0.9/include/yaboot.h
---- yaboot_0.9.orig/include/yaboot.h	Fri Oct  6 22:14:33 2000
-+++ yaboot_0.9/include/yaboot.h	Sun Dec 17 18:24:23 2000
+--- include/yaboot.h
++++ include/yaboot.h	2001/01/30 13:05:38
 @@ -8,6 +8,7 @@
  	struct boot_fspec_t	rd;
  	struct boot_fspec_t	sysmap;
@@ -53,9 +49,8 @@ diff -urN yaboot_0.9.orig/include/yaboot.h yaboot_0.9/include/yaboot.h
  
  	char*	args;
  };
-diff -urN yaboot_0.9.orig/partition.c yaboot_0.9/partition.c
---- yaboot_0.9.orig/partition.c	Fri Oct  6 22:14:33 2000
-+++ yaboot_0.9/partition.c	Sun Dec 17 18:23:19 2000
+--- partition.c
++++ partition.c	2001/01/30 13:05:38
 @@ -243,9 +243,6 @@
  	if (desc->signature == MAC_DRIVER_MAGIC) {
  		/* pdisk partition format */
@@ -76,9 +71,8 @@ diff -urN yaboot_0.9.orig/partition.c yaboot_0.9/partition.c
  	} else {
  		prom_printf("Not a macintosh-formatted disk !\n");
  		goto bail;
-diff -urN yaboot_0.9.orig/yaboot.c yaboot_0.9/yaboot.c
---- yaboot_0.9.orig/yaboot.c	Fri Oct  6 22:14:33 2000
-+++ yaboot_0.9/yaboot.c	Sun Dec 17 19:47:20 2000
+--- yaboot.c
++++ yaboot.c	2001/01/30 13:10:21
 @@ -48,7 +48,7 @@
  
  #define CONFIG_FILE_NAME	"yaboot.conf"
@@ -294,13 +288,7 @@ diff -urN yaboot_0.9.orig/yaboot.c yaboot_0.9/yaboot.c
  
  #if 0	/* to make editor happy */
      }
-@@ -1099,15 +1180,12 @@
- #if !DEBUG
- 	prom_printf("\xc");
- #endif	
-+	  prom_interpret ( " \" screen\" output ");
- }
- 
+@@ -1104,10 +1177,6 @@
  int
  yaboot_main(void)
  {
