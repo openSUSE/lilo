@@ -9,7 +9,7 @@
 #
 
 # neededforbuild  tetex
-# usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cracklib db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel patch perl ps rcs readline rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
+# usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel patch perl ps rcs readline rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
 
 Name:         lilo
 Group: 	System Environment/Base
@@ -18,13 +18,13 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.7
-Release:      5
+Release:      19
 Source0: 	lilo-0.0.6.tar.gz
 #Patch0:		lilo-0.0.6.dif
 Source3:	lilo-21.tar.gz
 Source4:	linuxrc-1.1.13.olh.tar.gz
-Source5:	yaboot-1.1.1.tar.gz
-Patch5:		yaboot-1.1.1.dif
+Source5:	yaboot-1.2.1.tar.gz
+Patch5:		yaboot-1.2.1.dif
 Buildroot:	/var/tmp/buildroot-lilo
 
 %description
@@ -38,7 +38,8 @@ can be booted instead of a real OS and doing a memory test.
 
 Authors:
 --------
-    Werner Almesberger <almesber@di.epfl.ch>
+    John Coffman <JohnInSD@san.rr.com>
+    Werner Almesberger <Werner.Almesberger@epfl.ch>
     PowerPC part:
     Paul Mackeras <paulus@linuxcare.com.au>
     Cort Dougan <cort@fsmlabs.com>
@@ -52,18 +53,18 @@ SuSE series: a
 %setup -q -T -c -a 0 -a 3 -a 4 -a 5
 mv lilo-0.0.6	lilo.ppc
 mv linuxrc-1.1.13.olh	linuxrc
-mv yaboot-1.1.1 yaboot
+mv yaboot-1.2.1 yaboot
 cd yaboot
 %patch5
 cd ..
 
 %build
 cd yaboot
-make DEBUG=1 VERSION=1.1.1.SuSE
+make DEBUG=1 VERSION=1.2.1.SuSE
 mv yaboot yaboot.debug
 mv yaboot.chrp yaboot.chrp.debug
 make clean
-make DEBUG=0 VERSION=1.1.1.SuSE
+make DEBUG=0 VERSION=1.2.1.SuSE
 cd ..
 cd lilo
 make activate
@@ -141,6 +142,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sat Jun 02 2001 - olh@suse.de
+- update yaboot to 1.2.1, add reiserfs patches
 * Fri Mar 09 2001 - olh@suse.de
 - rename os-chooser to Mac OS Rom
   add some support for Mac OS X to lilo.conf

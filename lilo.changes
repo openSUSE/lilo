@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Jun  2 22:27:11 CEST 2001 - olh@suse.de
+
+- update yaboot to 1.2.1, add reiserfs patches
+
+-------------------------------------------------------------------
 Fri Mar  9 19:45:11 CET 2001 - olh@suse.de
 
 - rename os-chooser to Mac OS Rom
