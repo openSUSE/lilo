@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan 14 22:38:21 CET 2002 - olh@suse.de
+
+- remove exit 0, no quoting for lilo.conf variables
+
+-------------------------------------------------------------------
 Fri Jan 11 18:21:13 CET 2002 - olh@suse.de
 
 - build a boot image with initrd=  on iSeries, when specified

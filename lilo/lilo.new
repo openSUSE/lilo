@@ -180,7 +180,6 @@ echo
 [ "$ec" != "0" ]  && { echo bootfile generation failed: ec $ec ; exit 1 ; }
 ISERIES_BOOT_IMAGE=/tmp/ppc_lilo/vmlinux.initrd
 }
-exit 0
 echo this will take a while...
 echo "writing kernel $ISERIES_BOOT_IMAGE to /proc/iSeries/mf/B/vmlinux"
 dd if=$ISERIES_BOOT_IMAGE of=/proc/iSeries/mf/B/vmlinux bs=4096
@@ -766,11 +765,11 @@ while read option sarator value ; do
 
 #	echo option "$option"
 #	echo sarator "$sarator"
-#	echo value "$value"
+#	echo value $value
 	case "$option" in
 		boot)
 			if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				OPTION_BOOT="$value"
+				OPTION_BOOT=$value
 			else 
 				echo boot option must not in an image section!
 				exit 1
@@ -797,7 +796,7 @@ while read option sarator value ; do
 		;;
 		timeout)
                        if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                OPTION_TIMEOUT="$value"
+                                OPTION_TIMEOUT=$value
                         else
                                 echo timeout option must not in an image section!
                                 exit 1
@@ -805,7 +804,7 @@ while read option sarator value ; do
 		;;
 		default)
                        if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                OPTION_DEFAULT="$value"
+                                OPTION_DEFAULT=$value
                         else
                                 echo default option must not in an image section!
                                 exit 1
@@ -820,7 +819,7 @@ while read option sarator value ; do
 			fi
 			CONFIG_PARSE_HASIMAGE=true
 			CONFIG_IMAGE_COUNT=$[CONFIG_IMAGE_COUNT+1]
-			CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]="$value"
+			CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=$value
 		;;
 		other)
                         # check if previous image section has a label
@@ -832,14 +831,14 @@ while read option sarator value ; do
                         CONFIG_PARSE_HASIMAGE=true
                         CONFIG_PARSE_HASOTHER=true
                         CONFIG_IMAGE_COUNT=$[CONFIG_IMAGE_COUNT+1]
-                        CONFIG_IMAGE_OTHER[$CONFIG_IMAGE_COUNT]="$value"
-                        OPTION_OTHER="$value"
+                        CONFIG_IMAGE_OTHER[$CONFIG_IMAGE_COUNT]=$value
+                        OPTION_OTHER=$value
                 ;;
 		root)
 			if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				OPTION_ROOT="$value"
+				OPTION_ROOT=$value
 			else
-				CONFIG_IMAGE_ROOT[$CONFIG_IMAGE_COUNT]="$value"
+				CONFIG_IMAGE_ROOT[$CONFIG_IMAGE_COUNT]=$value
 			fi
 		;;
 		copy)
@@ -855,15 +854,15 @@ while read option sarator value ; do
                                 echo ERROR: config error, label option must be in an image section!
                                 exit 1
                         else
-                                CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]="$value"
+                                CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=$value
                         fi
 
 		;;
 		append)
                         if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                OPTION_APPEND="$value"
+                                OPTION_APPEND=$value
                         else
-                                CONFIG_IMAGE_APPEND[$CONFIG_IMAGE_COUNT]="$value"
+                                CONFIG_IMAGE_APPEND[$CONFIG_IMAGE_COUNT]=$value
                         fi
 
 		;;
@@ -872,15 +871,15 @@ while read option sarator value ; do
                                 echo "ERROR: sysmap can not be global"
 				exit 1
                         else
-                                CONFIG_IMAGE_SYSMAP[$CONFIG_IMAGE_COUNT]="$value"
+                                CONFIG_IMAGE_SYSMAP[$CONFIG_IMAGE_COUNT]=$value
                         fi
 
 		;;
 		initrd)
                         if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                OPTION_INITRD="$value"
+                                OPTION_INITRD=$value
                         else
-                                CONFIG_IMAGE_INITRD[$CONFIG_IMAGE_COUNT]="$value"
+                                CONFIG_IMAGE_INITRD[$CONFIG_IMAGE_COUNT]=$value
                         fi
 		;;		
 		*)
