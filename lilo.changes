@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Dec  2 16:06:53 CET 2003 - olh@suse.de
+
+- move /boot/lib/chrp/* to /lib/lilo 
+
+-------------------------------------------------------------------
 Wed Nov 13 12:35:41 CET 2002 - olh@suse.de
 
 - requires: binutils for linking the kernel on pseries

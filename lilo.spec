@@ -1,28 +1,30 @@
 #
-# spec file for package lilo (Version 0.0.8)
+# spec file for package lilo (Version 0.0.9)
 #
-# Copyright (c) 2002 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 2003 SuSE Linux AG, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
 #
 # Please submit bugfixes or comments via http://www.suse.de/feedback/
 #
 
-# neededforbuild  tetex
-# usedforbuild    aaa_base acl attr bash bind9-utils bison cpio cpp cyrus-sasl db devs diffutils e2fsprogs file filesystem fileutils fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip kbd less libgcc libstdc++ libxcrypt m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch permissions ps rcs readline sed sendmail sh-utils shadow strace syslogd sysvinit tar texinfo textutils timezone unzip util-linux vim zlib-devel autoconf automake binutils bzip2 cracklib gcc gdbm gettext libtool perl rpm te_ams te_latex tetex zlib
+# norootforbuild
+# neededforbuild  
+# usedforbuild    aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libstdc++ libxcrypt m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-devel pam-modules patch permissions popt ps rcs readline sed sendmail shadow strace syslogd sysvinit tar texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils cracklib gcc gdbm gettext libtool perl rpm
 
 Name:         lilo
 Group:        System/Boot
 License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
 Requires:     hfsutils
-Summary:      LInux LOader
+Summary:      The LInux LOader, a boot menu
 Requires:     binutils
-Version:      0.0.8
-Release:      326
-Source0:      lilo-0.0.6.tar.bz2
-Patch0:       lilo-0.0.6.dif
+Version:      0.0.9
+Release:      0
+Source0:      lilo-0.0.7.tar.bz2
+Patch0:       lilo-0.0.7.dif
 Source1:      compatible_machines.txt
+Source2:      boot-header-0.0.1.tar.bz2
 Source3:      lilo-21.tar.gz
 Source5:      yaboot-1.3.6.tar.gz
 Patch5:       yaboot-1.3.6.dif
@@ -34,15 +36,17 @@ BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 %define __os_install_post %{nil}
 
 %description
-The LInux-LOader: LILO boots Linux from your hard drive.
-It can also boot other operating systems such as MS-DOS and OS/2,
-and can even boot DOS from the second hard drive.
-The configuration file is /etc/lilo.conf.
+The LInux-LOader: LILO boots Linux from your hard drive. It can also
+boot other operating systems such as MS-DOS and OS/2, and can even boot
+DOS from the second hard drive. The configuration file is in
+/etc/lilo.conf.
 
 The PowerPC variant can be used on new PowerMacs and CHRP machines.
 
-The ix86 variant comes along with Memtest86, offering an image that
-can be booted instead of a real OS and doing a memory test.
+The ix86 variant comes with Memtest86, offering an image that can be
+booted to perform a memory test.
+
+
 
 Authors:
 --------
@@ -54,8 +58,8 @@ Authors:
     Benjamin Herrenschmidt <benh@kernel.crashing.org>
 
 %prep
-%setup -q -T -c -a 0 -a 3 -a 5
-mv lilo-0.0.6	lilo.ppc
+%setup -q -T -c -a 0 -a 2 -a 3 -a 5
+mv lilo-0.0.7	lilo.ppc
 mv yaboot-1.3.6 yaboot
 cd yaboot
 %patch5
@@ -85,10 +89,11 @@ cd ..
 %install
 rm -rfv $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/boot
-mkdir -p $RPM_BUILD_ROOT/etc
+mkdir -p $RPM_BUILD_ROOT/lib/lilo
 mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
+cp -a boot-header-0.0.1/lib/* $RPM_BUILD_ROOT/lib/lilo
 cd lilo.ppc
 chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
@@ -98,7 +103,6 @@ cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
 cp -av Finder.bin $RPM_BUILD_ROOT/boot
 cp -av System.bin $RPM_BUILD_ROOT/boot
 cp -av %{SOURCE1} $RPM_BUILD_ROOT/boot
-cp -av lilo.conf $RPM_BUILD_ROOT/etc
 cp -av README* $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av COPYING $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av lilo.changes $RPM_BUILD_ROOT%{_docdir}/lilo/
@@ -108,35 +112,27 @@ cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/boot/
 cp -av yaboot.chrp* $RPM_BUILD_ROOT/boot/
 cd ..
 cd lilo
-install -oroot -groot activate $RPM_BUILD_ROOT/sbin
+install activate $RPM_BUILD_ROOT/sbin
 install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/lilo/activate
 install -m 644 CHANGES COPYING INCOMPAT README $RPM_BUILD_ROOT%{_docdir}/lilo/activate
-rm -f doc/*.dvi
-make -C doc all
-( cd doc ; install -m 644 tech.dvi $RPM_BUILD_ROOT%{_docdir}/lilo/activate/ )
-( cd doc ; install -m 644 user.dvi $RPM_BUILD_ROOT%{_docdir}/lilo/activate/ )
-( cd doc ; dvips tech.dvi )
-( cd doc ; gzip -f tech.ps )
-( cd doc ; install -m 644 tech.ps.gz $RPM_BUILD_ROOT%{_docdir}/lilo/activate/ )
-( cd doc ; dvips user.dvi )
-( cd doc ; gzip -f user.ps )
-( cd doc ; install -m 644 user.ps.gz $RPM_BUILD_ROOT%{_docdir}/lilo/activate/ )
-cd ..
 
 %files
+%defattr (-,root,root)
 /boot/Finder.bin
 /boot/System.bin
 /boot/compatible_machines.txt
 /boot/yaboot
 /boot/yaboot.debug
 /boot/yaboot.chrp*
-%config(noreplace)/etc/lilo.conf
+/lib/*
 /sbin/activate
 /sbin/lilo*
 /bin/show_of_path.sh
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Dec 02 2003 - olh@suse.de
+- move /boot/lib/chrp/* to /lib/lilo
 * Wed Nov 13 2002 - olh@suse.de
 - requires: binutils for linking the kernel on pseries
 * Tue Nov 12 2002 - olh@suse.de

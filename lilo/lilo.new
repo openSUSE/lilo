@@ -100,9 +100,7 @@ test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 # hack to create a zImage.initrd for pseries
 # ugly ugly ...
 test ! -z "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 && {
-this_uts="$(get_kernel_version ${CONFIG_IMAGE_FILE[$i]})"
-test -z "$this_uts" && this_uts=$(uname -r)
-bash /boot/lib/chrp/$this_uts/addRamdisk.sh \
+bash /lib/lilo/chrp/chrp64/addRamdisk.sh \
 	/tmp/ppc_lilo \
 	${CONFIG_IMAGE_FILE[$i]} \
 	${CONFIG_IMAGE_INITRD[$i]} \
