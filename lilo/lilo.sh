@@ -310,7 +310,7 @@ echo "\" get-key-map\" \" keyboard\" open-dev \$call-method
 dup 20 dump
 5 + c@ 08 = if"
 unset LOOPBLAH
-for i in `seq 1 $CONFIG_IMAGE_COUNT`;do
+MY_MACOS_STRING=$(for i in `seq 1 $CONFIG_IMAGE_COUNT`;do
  if [ ! -z "${CONFIG_IMAGE_OTHER[$i]}" -a -z "$LOOPBLAH" ] ; then
  LOOPBLAH=true
    if [ "${CONFIG_IMAGE_LABEL[$i]}" = "macosx" ] ; then
@@ -319,11 +319,23 @@ for i in `seq 1 $CONFIG_IMAGE_COUNT`;do
      echo "\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
    fi
  fi
-done
-echo "else
-\" screen\" output
-\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval
-then
+done)
+MY_YABOOT_STRING="\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval "
+if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
+# macos or macos is the default
+echo "\" screen\" output"
+echo $MY_YABOOT_STRING
+echo "else"
+echo $MY_MACOS_STRING
+
+else
+#yaboot is the default
+echo $MY_MACOS_STRING
+echo "else"
+echo "\" screen\" output"
+echo $MY_YABOOT_STRING
+fi
+echo "then
 </BOOT-SCRIPT>
 <OS-BADGE-ICONS>
 1010
@@ -434,6 +446,7 @@ echo "\" screen\" output
 </OS-BADGE-ICONS>
 </CHRP-BOOT>"
 fi) > /tmp/ppc_lilo/os-chooser
+
 
 # umount the boot = partition, or exit if that fails
 mount | grep -q "$OPTION_BOOT"

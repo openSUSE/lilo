@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun 18 01:21:41 CEST 2001 - olh@suse.de
+
+- honor default= line in lilo.conf for macos booting
+
+-------------------------------------------------------------------
 Sat Jun  2 22:27:11 CEST 2001 - olh@suse.de
 
 - update yaboot to 1.2.1, add reiserfs patches
