@@ -154,15 +154,12 @@ echo "ISERIES_IMAGE   " $ISERIES_IMAGE
 echo "ISERIES_ROOT    " $ISERIES_ROOT
 echo this will take a while...
 if [ -z "$LILO_ROOTDRIVE" ] ; then
-for i in A B C ; do
+for i in B C ; do
 echo "writing kernel $ISERIES_IMAGE to /proc/iSeries/mf/$i/vmlinux"
 dd if=$ISERIES_IMAGE of=/proc/iSeries/mf/$i/vmlinux bs=4096
 case  i in
 	C|B)
 	echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/$i/cmdline
-	;;
-	A)
-	echo "$ISERIES_ROOT $ISERIES_CMDLINE single" > /proc/iSeries/mf/$i/cmdline
 	;;
 esac
 done
