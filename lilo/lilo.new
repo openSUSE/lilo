@@ -115,19 +115,25 @@ echo running on iSeries
 if [ ! -z "$OPTION_DEFAULT" ] ; then
 # find the default= line
 for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-  if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[i]}" ] ; then
-    ISERIES_IMAGE="${CONFIG_IMAGE_FILE[i]}" 
+  if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[$i]}" ] ; then
+    ISERIES_IMAGE="${CONFIG_IMAGE_FILE[$i]}" 
     if [ ! -z "$OPTION_APPEND" ] ; then
        ISERIES_CMDLINE="$(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' )"
     fi
-    if [ ! -z "${CONFIG_IMAGE_APPEND[i]}" ] ; then
-       ISERIES_CMDLINE="$(echo ${CONFIG_IMAGE_APPEND[i]} | sed -e 's#^"##' -e 's#"$##' )"
+    if [ ! -z "${CONFIG_IMAGE_APPEND[$i]}" ] ; then
+       ISERIES_CMDLINE="$(echo ${CONFIG_IMAGE_APPEND[$i]} | sed -e 's#^"##' -e 's#"$##' )"
     fi
     if [ ! -z "$OPTION_ROOT" ] ; then
 	ISERIES_ROOT="root=$OPTION_ROOT"
     fi
-    if [ ! -z "${CONFIG_IMAGE_ROOT[i]}" ] ; then
-    	ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[i]}"
+    if [ ! -z "${CONFIG_IMAGE_ROOT[$i]}" ] ; then
+    	ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[$i]}"
+    fi
+    if [ ! -z "$OPTION_INITRD" ] ; then
+	ISERIES_INITRD=$OPTION_INITRD
+    fi
+    if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
+    	ISERIES_INITRD="${CONFIG_IMAGE_INITRD[$i]}"
     fi
   fi
 done
@@ -147,17 +153,38 @@ else
     if [ ! -z "${CONFIG_IMAGE_ROOT[1]}" ] ; then
     	ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[1]}"
     fi
+    if [ ! -z "$OPTION_INITRD" ] ; then
+	ISERIES_INITRD=$OPTION_INITRD
+    fi
+    if [ ! -z "${CONFIG_IMAGE_INITRD[1]}" ] ; then
+    	ISERIES_INITRD="${CONFIG_IMAGE_INITRD[1]}"
+    fi
+fi
 
-fi
 echo "ISERIES_CMDLINE " $ISERIES_CMDLINE
-echo "ISERIES_IMAGE   " $ISERIES_IMAGE
 echo "ISERIES_ROOT    " $ISERIES_ROOT
+echo "ISERIES_IMAGE   " $ISERIES_IMAGE
+ISERIES_BOOT_IMAGE=$ISERIES_IMAGE
+test ! -z "$ISERIES_INITRD" && {
+echo "ISERIES_INITRD  " $ISERIES_INITRD
+echo
+echo generating /tmp/ppc_lilo/vmlinux.initrd
+echo
+echo
+unset ec
+/bin/addRamDisk64 $ISERIES_INITRD \
+	/boot/System.map-`get_kernel_version $ISERIES_IMAGE` \
+	$ISERIES_IMAGE \
+	/tmp/ppc_lilo/vmlinux.initrd ; ec=$?
+echo
+[ "$ec" != "0" ]  && { echo bootfile generation failed: ec $ec ; exit 1 ; }
+ISERIES_BOOT_IMAGE=/tmp/ppc_lilo/vmlinux.initrd
+}
+exit 0
 echo this will take a while...
-if [ -z "$LILO_ROOTDRIVE" ] ; then
-echo "writing kernel $ISERIES_IMAGE to /proc/iSeries/mf/B/vmlinux"
-dd if=$ISERIES_IMAGE of=/proc/iSeries/mf/B/vmlinux bs=4096
+echo "writing kernel $ISERIES_BOOT_IMAGE to /proc/iSeries/mf/B/vmlinux"
+dd if=$ISERIES_BOOT_IMAGE of=/proc/iSeries/mf/B/vmlinux bs=4096
 echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/B/cmdline
-fi
 
 
 #only the device is given and dd to the raw device is a bad idea

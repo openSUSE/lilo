@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jan 11 18:21:13 CET 2002 - olh@suse.de
+
+- build a boot image with initrd=  on iSeries, when specified
+
+-------------------------------------------------------------------
 Thu Jan 10 23:26:39 CET 2002 - olh@suse.de
 
 - do not write to slot C on iSeries
