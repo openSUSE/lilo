@@ -1,5 +1,5 @@
 #
-# spec file for package yaboot (Version 0.4)
+# spec file for package yaboot (Version 0.5)
 # 
 # Copyright  (c)  2000  SuSE GmbH  Nuernberg, Germany.
 #
@@ -7,41 +7,51 @@
 #
 
 # neededforbuild  ext2fs_d
-# usedforbuild    aaa_base aaa_dir base bash bindutil binutils bison bzip compress cpio cracklib devs diff egcs ext2fs ext2fs_d file fileutil find flex gawk gdbm gettext gpm gppshare groff gzip kbd ldso less libc libz lx_suse make mktemp modules ncurses net_tool netcfg nkita nkitb nssv1 pam patch perl pgp ps rcs rpm sendmail sh_utils shadow shlibs strace syslogd sysvinit texinfo textutil timezone unzip util vim xdevel xf86 xshared
+# usedforbuild    aaa_base aaa_dir base bash bindutil binutils bison bzip compress cpio cracklib devs diff ext2fs ext2fs_d file fileutil find flex gawk gcc gdbm gettext gpm gppshare groff gzip kbd less libc libz lx_suse make mktemp modules ncurses net_tool netcfg nkita nkitb nssv1 pam patch perl pgp ps rcs rpm sendmail sh_utils shadow shlibs strace syslogd sysvinit texinfo textutil timezone unzip util vim xdevel xf86 xshared
 
 Vendor:       SuSE GmbH, Nuernberg, Germany
-Distribution: SuSE Linux 6.3 (PPC)
+Distribution: SuSE Linux 6.4 (PPC)
 Name:         yaboot
 Release:      0
 Packager:     feedback@suse.de
 
 Summary:      YaBoot - OF boot loader for PowerMac
-Version:      0.4
+Version:      0.5
 Copyright: GPL
 Group: Unsorted
-Source0: yaboot_0.4.src.tgz
-Source1: yaboot_0.4.gz
+Source0: yaboot_0.5.src.tgz
+Source1: yaboot_0.5.gz
 
 %description
 Yaboot is an OpenFirmware based bootloader for newworld machines.
 Netbooting works via bootp/tftp (including loading the ramdisk).
-Version 0.4 fixes a problem with kernels containing more than one ELF section.
 
 Authors:
 --------
     Benjamin Herrenschmidt <bh40@calva.net>
 
+SuSE series: a
+
 %prep
 %setup -n yaboot
 
 %build
-make
+sed 's/^DEBUG.*$/DEBUG = 1/' Makefile > Makefile.debug
+sed 's/^DEBUG.*$/DEBUG = 0/' Makefile > Makefile.nodebug
+make -f Makefile.debug
+mv yaboot yaboot.debug
+make clean
+make -f Makefile.nodebug
 
 %install
-cp -a $RPM_SOURCE_DIR/yaboot_0.4.gz .
+cp -a $RPM_SOURCE_DIR/yaboot_0.5.gz .
 %{?suse_check}
 
 %files
-%doc COPYING yaboot yaboot_0.4.gz
-# our binary doesn't work ...
+%doc COPYING yaboot yaboot.debug yaboot_0.5.gz
 
+%changelog -n yaboot
+* Mon Mar 06 2000 - olh@suse.de
+- update to version 0.5, provide also a debug binary
+* Mon Jan 17 2000 - olh@suse.de
+- add yaboot to SuSE PPC dist

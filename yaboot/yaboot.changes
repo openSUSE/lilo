@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar  6 01:43:42 CET 2000 - olh@suse.de
+
+- update to version 0.5, provide also a debug binary
+
+-------------------------------------------------------------------
 Mon Jan 17 02:55:53 CET 2000 - olh@suse.de
 
 - add yaboot to SuSE PPC dist
