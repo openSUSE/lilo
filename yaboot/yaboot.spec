@@ -53,6 +53,9 @@ cp -a $RPM_SOURCE_DIR/yaboot_0.5.gz .
 %doc COPYING yaboot yaboot.debug yaboot_0.5.gz
 
 %changelog -n yaboot
+* Wed Mar 22 2000 - uli@suse.de
+- fixed previous fix
+- added workaround for "conf from hfs, kernel from ext2" case
 * Tue Mar 21 2000 - uli@suse.de
 - load images from same folder as yaboot.conf
   add asterisk for default config
