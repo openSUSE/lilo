@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb 15 16:17:59 CET 2001 - olh@suse.de
+
+- disable misleading debug printf in yaboot
+
+-------------------------------------------------------------------
 Wed Feb 14 01:39:07 CET 2001 - olh@suse.de
 
 - handle first generation iMac in lilo

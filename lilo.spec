@@ -151,6 +151,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Feb 15 2001 - olh@suse.de
+- disable misleading debug printf in yaboot
 * Wed Feb 14 2001 - olh@suse.de
 - handle first generation iMac in lilo
 * Sun Feb 11 2001 - olh@suse.de

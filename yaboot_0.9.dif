@@ -1,5 +1,5 @@
 --- cfg.c
-+++ cfg.c	2001/02/11 12:35:17
++++ cfg.c	2001/02/15 15:17:23
 @@ -48,6 +48,7 @@
      {cft_strg, "default", NULL},
      {cft_strg, "timeout", NULL},
@@ -9,7 +9,7 @@
      {cft_strg, "ramdisk", NULL},
      {cft_flag, "read-only", NULL},
 --- crt0.S
-+++ crt0.S	2001/02/11 12:35:17
++++ crt0.S	2001/02/15 15:17:23
 @@ -13,6 +13,16 @@
  	.long   (0x7c000164 + ((r20) << 21))
  	isync
@@ -28,7 +28,7 @@
  
  /*
 --- file.c
-+++ file.c	2001/02/11 12:37:46
++++ file.c	2001/02/15 15:17:23
 @@ -53,19 +53,19 @@
  		return of_device;
  	
@@ -72,7 +72,7 @@
  	}
  	if (partition == -1)
 --- include/yaboot.h
-+++ include/yaboot.h	2001/02/11 12:35:17
++++ include/yaboot.h	2001/02/15 15:17:23
 @@ -8,6 +8,7 @@
  	struct boot_fspec_t	rd;
  	struct boot_fspec_t	sysmap;
@@ -82,8 +82,18 @@
  	char*	args;
  };
 --- partition.c
-+++ partition.c	2001/02/11 12:35:17
-@@ -243,9 +243,6 @@
++++ partition.c	2001/02/15 15:17:41
+@@ -81,7 +81,9 @@
+ 			break;
+ 		}
+ 		if (part->signature != MAC_PARTITION_MAGIC) {
++#if 0
+ 			prom_printf("Wrong partition %d signature\n", block);
++#endif
+ 			break;
+ 		}
+ 		if (block == 1)
+@@ -243,9 +245,6 @@
  	if (desc->signature == MAC_DRIVER_MAGIC) {
  		/* pdisk partition format */
  		partition_mac_lookup(disk, blksize, &list);
@@ -93,7 +103,7 @@
  	} else if (blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
  		add_partition(	&list,
  				partition_iso,
-@@ -255,6 +252,9 @@
+@@ -255,6 +254,9 @@
  				0,
  				blksize);
  		prom_printf("ISO9660 disk\n");
@@ -104,7 +114,7 @@
  		prom_printf("Not a macintosh-formatted disk !\n");
  		goto bail;
 --- util/elfextract.c
-+++ util/elfextract.c	2001/02/11 12:39:16
++++ util/elfextract.c	2001/02/15 15:17:23
 @@ -25,6 +25,7 @@
      exit(1);
  }
@@ -123,7 +133,7 @@
  	exit(0);
      }
 --- yaboot.c
-+++ yaboot.c	2001/02/11 12:38:51
++++ yaboot.c	2001/02/15 15:17:23
 @@ -48,7 +48,7 @@
  
  #define CONFIG_FILE_NAME	"yaboot.conf"
