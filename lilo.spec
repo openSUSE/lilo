@@ -119,11 +119,13 @@ cd ..
 /boot/yaboot.chrp*
 %config(noreplace)/etc/lilo.conf
 /sbin/activate
-/sbin/lilo
+/sbin/lilo*
 /bin/show_of_path.sh
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Aug 14 2001 - olh@suse.de
+- fix filelist
 * Mon Aug 13 2001 - olh@suse.de
 - update compatible_machines.txt comment
 * Mon Aug 13 2001 - olh@suse.de
