@@ -48,14 +48,19 @@ file=/
 if [ "$#" -gt 0 ] ; then
     until  [ "$#" = 0 ] ; do
 	case "$1" in
-	  --version|-v) echo $myversion ; exit 0
-		;;
-	  --help|-h)
-		echo "show OpenFirmware device path for a file or a device node"
-		echo "usage: ${0##*/} [/]|[/boot/vmlinux]"
+	    --version|-v)
+		echo $myversion
 		exit 0
 		;;
-	  *)
+  	    --help|-h)
+		echo "show OpenFirmware device path for a file or a device node"
+		echo "usage: ${0##*/} [--quiet|-q] [/]|[/boot/vmlinux]"
+		exit 0
+		;;
+	    --quiet|-q)
+		quietmode=1
+		;;
+	    *)
 	       	file=$1
 	       	break
 	       	;;
@@ -105,12 +110,13 @@ if test -d /sys/block || mount -t sysfs sysfs /sys; then
 	if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
     done
 else
-    echo sysfs not mounted on /sys and attempt to mount failed
-    echo may be no kernel 2.6.x?
+    echo 1>&2 "ERROR: sysfs not mounted on /sys and attempt to mount failed"
+    echo 1>&2 may be no kernel 2.6.x?
+    exit 1
 fi
 
 if [ -z "$file_sysfs_path" ] ; then
-    echo 1>&2 "ERROR: can not file major:minor $file_majorminor for $file"
+    [ "$quietmode" ] || echo 1>&2 "ERROR: can not find major:minor $file_majorminor for $file"
     exit 1
 fi
 
@@ -125,7 +131,7 @@ if [ ! -L "$file_sysfs_dir/device" ] ; then
 	file_sysfs_dir="${file_sysfs_dir%/*}"
 	dbg_show file_sysfs_dir
 	if [ ! -L "$file_sysfs_dir/device" ] ; then
-		echo 1>&2 "ERROR: driver for sysfs path $file_sysfs_dir has no full sysfs support"
+		[ "$quietmode" ] || echo 1>&2 "ERROR: driver for sysfs path $file_sysfs_dir has no full sysfs support"
 		exit 1
 	fi
 fi
@@ -193,11 +199,11 @@ if [ -f devspec ] ; then
 	    pci-ide|pci-ata)
 		;;
 	    *)
-	        echo Unknown device type $(< ${file_of_hw_devtype}/device_type)
+	        echo 1>&2 "ERROR: Unknown device type $(< ${file_of_hw_devtype}/device_type)"
 		exit 1
 	esac
     else
-	echo no device_type found in ${file_of_hw_devtype}
+	echo 1>&2 "ERROR: no device_type found in ${file_of_hw_devtype}"
 	exit 1
     fi
 
@@ -350,8 +356,12 @@ echo $file_of_path
 #
 # Local variables:
 #     mode: ksh
+#     mode: font-lock
+#     mode: auto-fill
 #     ksh-indent: 4
 #     ksh-multiline-offset: 2
 #     ksh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#     fill-column: 78
 # End:
 #
+

@@ -24,7 +24,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      24
+Release:      25
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source2:      boot-header-%{bootheader}.tar.bz2
 Source3:      lilo-21.tar.gz
@@ -32,6 +32,7 @@ Source5:      http://penguinppc.org/projects/yaboot/yaboot-1.3.11.tar.gz
 Source10:     lilo-addRamDisk.c
 Source11:     lilo-addSystemMap.c
 Patch5:       yaboot-1.3.6.dif
+Patch6:       yaboot-1.3.11-fat.dif
 Patch7:       yaboot-hole_data-journal.diff
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 # get rid of /usr/lib/rpm/brp-strip-debug 
@@ -67,6 +68,8 @@ mv yaboot-1.3.11 yaboot
 cd yaboot
 %patch5
 %patch7 -p1
+cp second/yaboot.c second/yaboot_fat.c
+%patch6 -p1
 cd ..
 find boot-header-%{bootheader}/lib/* -name "*.sh" | xargs chmod 755
 find boot-header-%{bootheader}/lib/* -name addnote | xargs chmod 755
@@ -87,6 +90,9 @@ mv second/yaboot.chrp yaboot.chrp.debug
 make clean
 make DEBUG=0 VERSION=1.3.11.SuSE yaboot.chrp
 mv second/yaboot.chrp yaboot.chrp
+make clean
+make DEBUG=0 VERSION=1.3.11.SuSE yaboot.fat
+mv second/yaboot.fat yaboot.fat
 cd ..
 cd lilo
 make activate
@@ -113,12 +119,13 @@ cp -av lilo-pmac.lib $RPM_BUILD_ROOT/lib/lilo/lilo-pmac.lib
 cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
 cp -av Finder.bin $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av System.bin $RPM_BUILD_ROOT/lib/lilo/pmac
+cp -av os-badge-icon $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av README* $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av COPYING $RPM_BUILD_ROOT%{_docdir}/lilo/
 cd ..
 cd yaboot
 cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/lib/lilo/pmac
-cp -av yaboot.chrp* $RPM_BUILD_ROOT/lib/lilo/chrp
+cp -av yaboot.chrp* yaboot.fat $RPM_BUILD_ROOT/lib/lilo/chrp
 cd ..
 cd lilo
 install activate $RPM_BUILD_ROOT/sbin
@@ -142,6 +149,11 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Mon May 03 2004 - jplack@suse.de
+- fixed various pmac bugs/cleanup of pmac handling
+* Mon May 03 2004 - jplack@suse.de
+- fixed typo in lilo triggering bash bug, implemented booting from non standard
+  file systems though a FAT boot file system (#34556) and others.
 * Mon Apr 26 2004 - jplack@suse.de
 - fixed show_of_path.sh: support for IPR controller and such #39033
   mounts /sys if needed, #39380

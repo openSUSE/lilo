@@ -1,0 +1,43 @@
+--- yaboot-1.3.11/Makefile.fat	2004-05-03 10:56:39.000000000 +0200
++++ yaboot-1.3.11/Makefile	2004-05-03 10:56:59.000000000 +0200
+@@ -107,6 +107,11 @@
+ 	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o second/$@
+ 	chmod -x second/$@
+ 
++yaboot.fat: $(subst yaboot,yaboot_fat,$(OBJS)) addnote.host
++	$(LD) $(LFLAGS) $(subst yaboot,yaboot_fat,$(OBJS)) $(LLIBS) $(lgcc) -o second/$@
++	chmod -x second/$@
++	util/addnote.host second/$@
++
+ yaboot.chrp: $(OBJS) addnote.host
+ 	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o second/$@
+ 	chmod -x second/$@
+--- yaboot-1.3.11/second/yaboot_fat.c.fat	2004-05-03 10:56:03.000000000 +0200
++++ yaboot-1.3.11/second/yaboot_fat.c	2004-05-03 11:01:48.000000000 +0200
+@@ -55,7 +55,7 @@
+ #include "bootinfo.h"
+ #include "debug.h"
+ 
+-#define CONFIG_FILE_NAME	"yaboot.conf"
++#define CONFIG_FILE_NAME	"yaboot.cnf"
+ #define CONFIG_FILE_MAX		0x8000		/* 32k */
+ 
+ #ifdef USE_MD5_PASSWORDS
+@@ -340,7 +340,7 @@
+      }
+ 
+      /* Build the path to the file */
+-     if (_machine == _MACH_chrp)
++     if (0 && _machine == _MACH_chrp) /* have a flat file system for FAT */
+ 	  strcpy(conf_path, "/etc/");
+      else if (path && *path)
+ 	  strcpy(conf_path, path);
+@@ -730,7 +730,7 @@
+ 	       "Note that the comma (,) is only required if you specify an OpenFirmware\n"
+ 	       "device, if you only specify a filename you should not start it with a \",\"\n\n"
+ 	       "If you omit \"device:\" and \"partno\" yaboot will use the values of \n"
+-	       "\"device=\" and \"partition=\" in yaboot.conf, right now those are set to: \n"
++	       "\"device=\" and \"partition=\" in yaboot.cnf, right now those are set to: \n"
+ 	       "device=%s\n"
+ 	       "partition=%d\n\n", defdevice, defpart);
+ 	  return 0;

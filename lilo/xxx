@@ -1,0 +1,722 @@
++ CONFIG_LILO_CONF=/etc/lilo.conf
++ SHOW_OF_PATH=/bin/show_of_path.sh
++ DEFAULT_BOOTFOLDER=suseboot
++ TEMP=/tmp/ppc_lilo
++ shopt -s extglob
++ STAT_CMD=/usr/bin/stat
++ FDISK=/sbin/fdisk
++ '[' '' ']'
++ prepare_environment
++ rm -rf /tmp/ppc_lilo
++ mkdir -p /tmp/ppc_lilo
++ trap clean_environment EXIT INT
++ check_arch
++ unset COPY_BOOT_FILES
++ read line
++ read line
++ read line
++ read line
++ read line
++ read line
++ read line
++ MACHINE=pmac
++ read line
++ read line
++ read line
++ read line
++ read line
++ read line
++ '[' pmac = pmac ']'
++ '[' -f /proc/device-tree/openprom/model ']'
+++ cat /proc/device-tree/openprom/model
++ echo OpenFirmware 4
++ read openfirmware ofversion
++ MACHINE=pmac_new
++ read openfirmware ofversion
++ parse_config_file
++ unset CONFIG_PARSE_HASIMAGE
++ CONFIG_IMAGE_COUNT=0
++ OPTION_BOOT_COUNT=0
++ read
++ REPLY=boot = /dev/sda2
++ REPLY=boot = /dev/sda2
++ REPLY=boot = /dev/sda2
++ '[' -z 'boot = /dev/sda2' ']'
++ REPLY=boot  =  /dev/sda2
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z '' ']'
++ OPTION_BOOT[$OPTION_BOOT_COUNT]=/dev/sda2
++ ((  OPTION_BOOT_COUNT++  ))
++ read
++ REPLY=timeout = 100
++ REPLY=timeout = 100
++ REPLY=timeout = 100
++ '[' -z 'timeout = 100' ']'
++ REPLY=timeout  =  100
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z '' ']'
++ OPTION_TIMEOUT=100
++ read
++ REPLY=default = linux
++ REPLY=default = linux
++ REPLY=default = linux
++ '[' -z 'default = linux' ']'
++ REPLY=default  =  linux
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z '' ']'
++ OPTION_DEFAULT=linux
++ read
++ REPLY=append = "3"
++ REPLY=append = "3"
++ REPLY=append = "3"
++ '[' -z 'append = "3"' ']'
++ REPLY=append  =  "3"
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z '' ']'
++ eval 'OPTION_APPEND="3"'
+++ OPTION_APPEND=3
++ read
++ REPLY=activate
++ REPLY=activate
++ REPLY=activate
++ '[' -z activate ']'
++ REPLY=activate
++ read option separator value
++ '[' -n '' ']'
++ '[' -z '' ']'
++ OPTION_ACTIVATE=yes
++ read
++ REPLY=root = /dev/sda4
++ REPLY=root = /dev/sda4
++ REPLY=root = /dev/sda4
++ '[' -z 'root = /dev/sda4' ']'
++ REPLY=root  =  /dev/sda4
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z '' ']'
++ OPTION_ROOT=/dev/sda4
++ read
++ REPLY=
++ REPLY=
++ REPLY=
++ '[' -z '' ']'
++ continue
++ read
++ REPLY=image = /boot/vmlinux
++ REPLY=image = /boot/vmlinux
++ REPLY=image = /boot/vmlinux
++ '[' -z 'image = /boot/vmlinux' ']'
++ REPLY=image  =  /boot/vmlinux
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' '!' -z '' ']'
++ CONFIG_PARSE_HASIMAGE=true
++ ((  CONFIG_IMAGE_COUNT++  ))
++ CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=/boot/vmlinux
++ read
++ REPLY=	label = linux
++ REPLY=	label = linux
++ REPLY=label = linux
++ '[' -z 'label = linux' ']'
++ REPLY=label  =  linux
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z true ']'
++ CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=linux
++ read
++ REPLY=	initrd = /boot/initrd
++ REPLY=	initrd = /boot/initrd
++ REPLY=initrd = /boot/initrd
++ '[' -z 'initrd = /boot/initrd' ']'
++ REPLY=initrd  =  /boot/initrd
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z true ']'
++ CONFIG_IMAGE_INITRD[$CONFIG_IMAGE_COUNT]=/boot/initrd
++ read
++ REPLY=
++ REPLY=
++ REPLY=
++ '[' -z '' ']'
++ continue
++ read
++ REPLY=image = /boot/vmlinux-usbtest
++ REPLY=image = /boot/vmlinux-usbtest
++ REPLY=image = /boot/vmlinux-usbtest
++ '[' -z 'image = /boot/vmlinux-usbtest' ']'
++ REPLY=image  =  /boot/vmlinux-usbtest
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' '!' -z true ']'
++ '[' -z linux ']'
++ CONFIG_PARSE_HASIMAGE=true
++ ((  CONFIG_IMAGE_COUNT++  ))
++ CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=/boot/vmlinux-usbtest
++ read
++ REPLY=	initrd = /boot/vmlinux-usbtest
++ REPLY=	initrd = /boot/vmlinux-usbtest
++ REPLY=initrd = /boot/vmlinux-usbtest
++ '[' -z 'initrd = /boot/vmlinux-usbtest' ']'
++ REPLY=initrd  =  /boot/vmlinux-usbtest
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z true ']'
++ CONFIG_IMAGE_INITRD[$CONFIG_IMAGE_COUNT]=/boot/vmlinux-usbtest
++ read
++ REPLY=	label = usbtest64
++ REPLY=	label = usbtest64
++ REPLY=label = usbtest64
++ '[' -z 'label = usbtest64' ']'
++ REPLY=label  =  usbtest64
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z true ']'
++ CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=usbtest64
++ read
++ REPLY=
++ REPLY=
++ REPLY=
++ '[' -z '' ']'
++ continue
++ read
++ REPLY=image = /boot/vmlinux-benh
++ REPLY=image = /boot/vmlinux-benh
++ REPLY=image = /boot/vmlinux-benh
++ '[' -z 'image = /boot/vmlinux-benh' ']'
++ REPLY=image  =  /boot/vmlinux-benh
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' '!' -z true ']'
++ '[' -z usbtest64 ']'
++ CONFIG_PARSE_HASIMAGE=true
++ ((  CONFIG_IMAGE_COUNT++  ))
++ CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=/boot/vmlinux-benh
++ read
++ REPLY=	label = benh
++ REPLY=	label = benh
++ REPLY=label = benh
++ '[' -z 'label = benh' ']'
++ REPLY=label  =  benh
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z true ']'
++ CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=benh
++ read
++ REPLY=
++ REPLY=
++ REPLY=
++ '[' -z '' ']'
++ continue
++ read
++ REPLY=image = /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
++ REPLY=image = /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
++ REPLY=image = /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
++ '[' -z 'image = /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux' ']'
++ REPLY=image  =  /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' '!' -z true ']'
++ '[' -z benh ']'
++ CONFIG_PARSE_HASIMAGE=true
++ ((  CONFIG_IMAGE_COUNT++  ))
++ CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=/home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
++ read
++ REPLY=	label = mm
++ REPLY=	label = mm
++ REPLY=label = mm
++ '[' -z 'label = mm' ']'
++ REPLY=label  =  mm
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z true ']'
++ CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=mm
++ read
++ REPLY=
++ REPLY=
++ REPLY=
++ '[' -z '' ']'
++ continue
++ read
++ REPLY=image = /boot/vmlinux-olh
++ REPLY=image = /boot/vmlinux-olh
++ REPLY=image = /boot/vmlinux-olh
++ '[' -z 'image = /boot/vmlinux-olh' ']'
++ REPLY=image  =  /boot/vmlinux-olh
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' '!' -z true ']'
++ '[' -z mm ']'
++ CONFIG_PARSE_HASIMAGE=true
++ ((  CONFIG_IMAGE_COUNT++  ))
++ CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=/boot/vmlinux-olh
++ read
++ REPLY=	label = olh
++ REPLY=	label = olh
++ REPLY=label = olh
++ '[' -z 'label = olh' ']'
++ REPLY=label  =  olh
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z true ']'
++ CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=olh
++ read
++ REPLY=
++ REPLY=
++ REPLY=
++ '[' -z '' ']'
++ continue
++ read
++ REPLY=image = /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
++ REPLY=image = /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
++ REPLY=image = /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
++ '[' -z 'image = /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux' ']'
++ REPLY=image  =  /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' '!' -z true ']'
++ '[' -z olh ']'
++ CONFIG_PARSE_HASIMAGE=true
++ ((  CONFIG_IMAGE_COUNT++  ))
++ CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=/home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
++ read
++ REPLY=	label = test
++ REPLY=	label = test
++ REPLY=label = test
++ '[' -z 'label = test' ']'
++ REPLY=label  =  test
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z true ']'
++ CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=test
++ read
++ REPLY=
++ REPLY=
++ REPLY=
++ '[' -z '' ']'
++ continue
++ read
++ REPLY=image = /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
++ REPLY=image = /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
++ REPLY=image = /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
++ '[' -z 'image = /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux' ']'
++ REPLY=image  =  /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' '!' -z true ']'
++ '[' -z test ']'
++ CONFIG_PARSE_HASIMAGE=true
++ ((  CONFIG_IMAGE_COUNT++  ))
++ CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=/home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
++ read
++ REPLY=	label = 64
++ REPLY=	label = 64
++ REPLY=label = 64
++ '[' -z 'label = 64' ']'
++ REPLY=label  =  64
++ read option separator value
++ '[' -n = ']'
++ '[' = '!=' = ']'
++ '[' -z true ']'
++ CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=64
++ read
++ check_config_file
++ '[' pmac_new '!=' iseries ']'
++ '[' '!' -b /dev/sda2 ']'
++ '[' -z /dev/sda2 ']'
++ '[' 1 -ne 1 ']'
++ '[' -z true ']'
++ (( i=1 ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ '[' '!' -f /boot/vmlinux ']'
++ '[' '!' -f /boot/initrd ']'
++ '[' '!' -f ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ '[' '!' -f /boot/vmlinux-usbtest ']'
++ '[' '!' -f /boot/vmlinux-usbtest ']'
++ '[' '!' -f ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ '[' '!' -f /boot/vmlinux-benh ']'
++ '[' '!' -f ']'
++ '[' '!' -f ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ '[' '!' -f /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux ']'
++ '[' '!' -f ']'
++ '[' '!' -f ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ '[' '!' -f /boot/vmlinux-olh ']'
++ '[' '!' -f ']'
++ '[' '!' -f ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ '[' '!' -f /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux ']'
++ '[' '!' -f ']'
++ '[' '!' -f ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ '[' '!' -f /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux ']'
++ '[' '!' -f ']'
++ '[' '!' -f ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ (( i=0 ))
++ (( i<OPTION_BOOT_COUNT ))
+++ echo /dev/sda2
+++ cut -d ' ' -f 1
++ OPTION_DEVICE[$i]=/dev/sda
+++ echo /dev/sda
+++ cut -d / -f 3
++ OPTION_NODENAME[$i]=sda 
+++ echo /dev/sda2
+++ cut -d ' ' -f 2
++ OPTION_PARTITION[$i]=2
++ (( i++  ))
++ (( i<OPTION_BOOT_COUNT ))
++ running_on_pmac_new
++ source /lib/lilo/lilo-pmac.lib
+++ unset running_on_pmac_old
+++ unset running_on_pmac_new
++ running_on_pmac_new
++ echo running on pmac_new
+running on pmac_new
++ (( i=1 ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z /boot/vmlinux
++ unset FILE_PATH
++ '[' -f /boot/vmlinux ']'
+++ /bin/show_of_path.sh /boot/vmlinux
+++ grep -v '/pci[0-9]'
++ FILE_PATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux
++ '[' -z /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux -o '' = true -o '' = true ']'
++ CONFIG_IMAGE_PATH[$i]=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux
++ unset FILE_PATH
++ '[' -n /boot/initrd ']'
+++ /bin/show_of_path.sh /boot/initrd
+++ grep -v '/pci[0-9]'
++ FILE_PATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/initrd
++ '[' -z /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/initrd -o '' = true -o '' = true ']'
++ CONFIG_IMAGE_INITRDPATH[$i]=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/initrd
++ unset FILE_PATH
++ '[' '!' -z '' ']'
+++ get_kernel_version /boot/vmlinux
++ local sysmap=/lib/modules/2.6.5-7.19-pmac64_32bit/System.map
++ test -f /lib/modules/2.6.5-7.19-pmac64_32bit/System.map
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z /boot/vmlinux-usbtest
++ unset FILE_PATH
++ '[' -f /boot/vmlinux-usbtest ']'
+++ /bin/show_of_path.sh /boot/vmlinux-usbtest
+++ grep -v '/pci[0-9]'
++ FILE_PATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest
++ '[' -z /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest -o '' = true -o '' = true ']'
++ CONFIG_IMAGE_PATH[$i]=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest
++ unset FILE_PATH
++ '[' -n /boot/vmlinux-usbtest ']'
+++ /bin/show_of_path.sh /boot/vmlinux-usbtest
+++ grep -v '/pci[0-9]'
++ FILE_PATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest
++ '[' -z /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest -o '' = true -o '' = true ']'
++ CONFIG_IMAGE_INITRDPATH[$i]=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest
++ unset FILE_PATH
++ '[' '!' -z '' ']'
+++ get_kernel_version /boot/vmlinux-usbtest
++ local sysmap=/lib/modules/2.6.5-usbtest-200405010926/System.map
++ test -f /lib/modules/2.6.5-usbtest-200405010926/System.map
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z /boot/vmlinux-benh
++ unset FILE_PATH
++ '[' -f /boot/vmlinux-benh ']'
+++ /bin/show_of_path.sh /boot/vmlinux-benh
+++ grep -v '/pci[0-9]'
++ FILE_PATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-benh
++ '[' -z /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-benh -o '' = true -o '' = true ']'
++ CONFIG_IMAGE_PATH[$i]=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-benh
++ unset FILE_PATH
++ '[' -n '' ']'
++ unset FILE_PATH
++ '[' '!' -z '' ']'
+++ get_kernel_version /boot/vmlinux-benh
++ local sysmap=/lib/modules/2.6.1-ben1/System.map
++ test -f /lib/modules/2.6.1-ben1/System.map
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
++ unset FILE_PATH
++ '[' -f /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux ']'
+++ /bin/show_of_path.sh /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
+++ grep -v '/pci[0-9]'
++ FILE_PATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
++ '[' -z /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux -o '' = true -o '' = true ']'
++ CONFIG_IMAGE_PATH[$i]=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
++ unset FILE_PATH
++ '[' -n '' ']'
++ unset FILE_PATH
++ '[' '!' -z '' ']'
+++ get_kernel_version /home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux
++ local sysmap=/lib/modules/2.6.6-rc3-mm1/System.map
++ test -f /lib/modules/2.6.6-rc3-mm1/System.map
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z /boot/vmlinux-olh
++ unset FILE_PATH
++ '[' -f /boot/vmlinux-olh ']'
+++ /bin/show_of_path.sh /boot/vmlinux-olh
+++ grep -v '/pci[0-9]'
++ FILE_PATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-olh
++ '[' -z /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-olh -o '' = true -o '' = true ']'
++ CONFIG_IMAGE_PATH[$i]=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-olh
++ unset FILE_PATH
++ '[' -n '' ']'
++ unset FILE_PATH
++ '[' '!' -z '' ']'
+++ get_kernel_version /boot/vmlinux-olh
++ local sysmap=/lib/modules/2.6.2-rc3-ben1-olh-up/System.map
++ test -f /lib/modules/2.6.2-rc3-ben1-olh-up/System.map
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
++ unset FILE_PATH
++ '[' -f /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux ']'
+++ /bin/show_of_path.sh /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
+++ grep -v '/pci[0-9]'
++ FILE_PATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
++ '[' -z /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux -o '' = true -o '' = true ']'
++ CONFIG_IMAGE_PATH[$i]=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
++ unset FILE_PATH
++ '[' -n '' ']'
++ unset FILE_PATH
++ '[' '!' -z '' ']'
+++ get_kernel_version /home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux
++ local sysmap=/lib/modules/2.6.5-0-pmac64_32bit-mac/System.map
++ test -f /lib/modules/2.6.5-0-pmac64_32bit-mac/System.map
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
++ unset FILE_PATH
++ '[' -f /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux ']'
+++ /bin/show_of_path.sh /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
+++ grep -v '/pci[0-9]'
++ FILE_PATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
++ '[' -z /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux -o '' = true -o '' = true ']'
++ CONFIG_IMAGE_PATH[$i]=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
++ unset FILE_PATH
++ '[' -n '' ']'
++ unset FILE_PATH
++ '[' '!' -z '' ']'
+++ get_kernel_version /home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux
++ local sysmap=/lib/modules/2.6.6-rc3-64bit/System.map
++ test -f /lib/modules/2.6.6-rc3-64bit/System.map
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z 100
++ echo 'timeout = 100'
++ '[' linux ']'
++ '[' linux = macos -o linux = macosx ']'
++ echo 'default = linux'
++ test -z /dev/sda4
++ echo 'root = /dev/sda4'
++ test -z 3
++ echo 'append = "3"'
++ test -z ''
++ (( i=1 ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z ''
++ '[' /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux = copy ']'
++ echo 'image = /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux'
++ test -z linux
++ echo '    label = linux'
++ test -z ''
++ test -z ''
++ '[' '' ']'
++ '[' /boot/initrd ']'
++ '[' /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/initrd = copy ']'
++ echo '    initrd = /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/initrd'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z ''
++ '[' /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest = copy ']'
++ echo 'image = /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest'
++ test -z usbtest64
++ echo '    label = usbtest64'
++ test -z ''
++ test -z ''
++ '[' '' ']'
++ '[' /boot/vmlinux-usbtest ']'
++ '[' /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest = copy ']'
++ echo '    initrd = /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-usbtest'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z ''
++ '[' /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-benh = copy ']'
++ echo 'image = /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-benh'
++ test -z benh
++ echo '    label = benh'
++ test -z ''
++ test -z ''
++ '[' '' ']'
++ '[' '' ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z ''
++ '[' /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux = copy ']'
++ echo 'image = /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3-mm1/vmlinux'
++ test -z mm
++ echo '    label = mm'
++ test -z ''
++ test -z ''
++ '[' '' ']'
++ '[' '' ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z ''
++ '[' /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-olh = copy ']'
++ echo 'image = /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/boot/vmlinux-olh'
++ test -z olh
++ echo '    label = olh'
++ test -z ''
++ test -z ''
++ '[' '' ']'
++ '[' '' ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z ''
++ '[' /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux = copy ']'
++ echo 'image = /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up-32bit-new/linux-2.6.5-mac/vmlinux'
++ test -z test
++ echo '    label = test'
++ test -z ''
++ test -z ''
++ '[' '' ']'
++ '[' '' ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
++ test -z ''
++ '[' /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux = copy ']'
++ echo 'image = /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4,/home/olaf/kernel/g5-up/linux-2.6.6-rc3/vmlinux'
++ test -z 64
++ echo '    label = 64'
++ test -z ''
++ test -z ''
++ '[' '' ']'
++ '[' '' ']'
++ (( i++  ))
++ (( i<=CONFIG_IMAGE_COUNT ))
+++ /bin/show_of_path.sh /dev/sda2
++ BOOT_DEVICEPATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:2
+++ /bin/show_of_path.sh
++ OTHER_DEVICEPATH=/ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4
++ echo 'BOOT_DEVICEPATH  =  /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:2'
+BOOT_DEVICEPATH  =  /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:2
++ echo 'OTHER_DEVICEPATH  =  /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4'
+OTHER_DEVICEPATH  =  /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:4
++ echo '<CHRP-BOOT>
+<COMPATIBLE>
+MacRISC MacRISC3 MacRISC4
+</COMPATIBLE>
+<DESCRIPTION>
+Linux/PPC Yaboot bootloader
+</DESCRIPTION>
+<BOOT-SCRIPT>
+" screen" output
+dev screen
+" "(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)" drop 0 7 set-colors
+" "(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)" drop 8 15 set-colors
+device-end
+f to foreground-color
+0 to background-color'
++ '[' '' = true ']'
++ echo '\n
+" Booting Yaboot ..." cr " boot /ht@0,f2000000/pci@7/k2-sata-root@c/k2-sata@0/disk@0:2,\\yaboot" eval'
++ echo '</BOOT-SCRIPT>
+<OS-BADGE-ICONS>
+1010
+000000000000F8FEACF6000000000000
+0000000000F5FFFFFEFEF50000000000
+00000000002BFAFEFAFCF70000000000
+0000000000F65D5857812B0000000000
+0000000000F5350B2F88560000000000
+0000000000F6335708F8FE0000000000
+00000000005600F600F5FD8100000000
+00000000F9F8000000F5FAFFF8000000
+000000008100F5F50000F6FEFE000000
+000000F8F700F500F50000FCFFF70000
+00000088F70000F50000F5FCFF2B0000
+0000002F582A00F5000008ADE02C0000
+00090B0A35A62B0000002D3B350A0000
+000A0A0B0B3BF60000505E0B0A0B0A00
+002E350B0B2F87FAFCF45F0B2E090000
+00000007335FF82BF72B575907000000
+000000000000ACFFFF81000000000000
+000000000081FFFFFFFF810000000000
+0000000000FBFFFFFFFFAC0000000000
+000000000081DFDFDFFFFB0000000000
+000000000081DD5F83FFFD0000000000
+000000000081DDDF5EACFF0000000000
+0000000000FDF981F981FFFF00000000
+00000000FFACF9F9F981FFFFAC000000
+00000000FFF98181F9F981FFFF000000
+000000ACACF981F981F9F9FFFFAC0000
+000000FFACF9F981F9F981FFFFFB0000
+00000083DFFBF981F9F95EFFFFFC0000
+005F5F5FDDFFFBF9F9F983DDDD5F0000
+005F5F5F5FDD81F9F9E7DF5F5F5F5F00
+0083DD5F5F83FFFFFFFFDF5F835F0000
+000000FBDDDFACFBACFBDFDFFB000000
+000000000000FFFFFFFF000000000000
+0000000000FFFFFFFFFFFF0000000000
+0000000000FFFFFFFFFFFF0000000000
+0000000000FFFFFFFFFFFF0000000000
+0000000000FFFFFFFFFFFF0000000000
+0000000000FFFFFFFFFFFF0000000000
+0000000000FFFFFFFFFFFFFF00000000
+00000000FFFFFFFFFFFFFFFFFF000000
+00000000FFFFFFFFFFFFFFFFFF000000
+000000FFFFFFFFFFFFFFFFFFFFFF0000
+000000FFFFFFFFFFFFFFFFFFFFFF0000
+000000FFFFFFFFFFFFFFFFFFFFFF0000
+00FFFFFFFFFFFFFFFFFFFFFFFFFF0000
+00FFFFFFFFFFFFFFFFFFFFFFFFFFFF00
+00FFFFFFFFFFFFFFFFFFFFFFFFFF0000
+000000FFFFFFFFFFFFFFFFFFFF000000
+</OS-BADGE-ICONS>
+</CHRP-BOOT>'
++ grep -q /dev/sda2
++ mount
++ '[' 1 = 0 ']'
++ humount /dev/sda2
++ humount /dev/sda2
++ hmount /dev/sda2
+Failed to initialize HFS working directories: Permission denied
++ exit 1
++ clean_environment
++ echo TEMP
+TEMP

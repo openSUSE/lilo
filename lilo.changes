@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon May  3 23:10:11 CEST 2004 - jplack@suse.de
+
+- fixed various pmac bugs/cleanup of pmac handling
+
+-------------------------------------------------------------------
+Mon May  3 11:03:01 CEST 2004 - jplack@suse.de
+
+- fixed typo in lilo triggering bash bug, implemented booting from non standard
+  file systems though a FAT boot file system (#34556) and others.
+
+-------------------------------------------------------------------
 Mon Apr 26 14:09:03 CEST 2004 - jplack@suse.de
 
 - fixed show_of_path.sh: support for IPR controller and such #39033
