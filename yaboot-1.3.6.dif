@@ -1,10 +1,34 @@
---- README
-+++ README	2001/11/13 14:20:36
-@@ -25,3 +25,23 @@
- "OldWorld" PowerMacs (with the old MacOS ROM buit-in) are not
- supported.
+--- Makefile
++++ Makefile	2002/01/08 12:06:55
+@@ -105,7 +105,15 @@
  
+ yaboot: $(OBJS)
+ 	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o second/$@
+-	chmod -x second/yaboot
++	chmod -x second/$@
 +
++yaboot.chrp: $(OBJS) addnote.host
++	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o second/$@
++	chmod -x second/$@
++	util/addnote.host second/$@
++
++addnote.host:
++	$(HOSTCC) $(UCFLAGS) -o util/addnote.host util/addnote.c
+ 
+ addnote:
+ 	$(CC) $(UCFLAGS) -o util/addnote util/addnote.c
+@@ -147,7 +155,7 @@
+ 	rm -rf ../yaboot-binary-${VERSION}
+ 
+ clean:
+-	rm -f second/yaboot util/addnote util/elfextract $(OBJS)
++	rm -f second/yaboot second/yaboot.chrp util/addnote util/addnote.host util/elfextract $(OBJS)
+ 	find . -name '#*' | xargs rm -f
+ 	find . -name '.#*' | xargs rm -f
+ 	find . -name '*~' | xargs rm -f
+--- README.new
++++ README.new	2002/01/08 12:06:55
+@@ -0,0 +1,19 @@
 +
 +yaboot must be able to handle these image path names
 +(use this as a testcase)
@@ -14,7 +38,7 @@
 +hd:9,\vmlinux
 +hd:9,\\vmlinux
 +hd:9,\folder\vmlinux
-+vmlinux	(look at the same place as yaboot.conf)
++vmlinux        (look at the same place as yaboot.conf)
 +
 +ext2, reiserfs:
 +hd:10,vmlinux
@@ -24,449 +48,70 @@
 +same goes for initrd and sysmap.
 +
 +
---- cfg.c
-+++ cfg.c	2001/11/13 14:21:00
-@@ -37,7 +37,7 @@
-     void *data;
- } CONFIG;
+--- second/file.c
++++ second/file.c	2002/01/08 12:06:55
+@@ -166,7 +166,7 @@
+ 		  p->part_number, p->part_start, p->part_size );
+ 	  if (partition == -1) {
+ 	       file->fs = fs_open( file, dev_name, p, file_name );
+-	       if (file->fs != NULL)
++	       if (fserrorno == FILE_ERR_OK)
+ 		    goto bail;
+ 	  }
+ 	  if ((partition >= 0) && (partition == p->part_number))
+--- second/yaboot.c
++++ second/yaboot.c	2002/01/08 12:26:04
+@@ -589,7 +589,6 @@
+      int beg = 0, end;
+      int singlekey = 0;
+      int restricted = 0;
+-     static int first = 1;
+      static char bootargs[1024];
+      static char imagepath[1024];
+      static char initrdpath[1024];
+@@ -605,21 +604,9 @@
+     
+      cmdinit();
  
--#define MAX_TOKEN 200
-+#define MAX_TOKEN 400
- #define MAX_VAR_NAME MAX_TOKEN
- #define EOF -1
+-     if (first) {
+-	  first = 0;
+-	  prom_get_chosen("bootargs", bootargs, sizeof(bootargs));
+-	  imagename = bootargs;
+-	  word_split(&imagename, &params->args);
+ 	  timeout = DEFAULT_TIMEOUT;
+-	  if (imagename) {
+-	       prom_printf("Default supplied on the command line: %s ", imagename);
+-	       if (params->args)
+-		    prom_printf("%s", params->args);
+-	       prom_printf("\n");
+-	  }
+ 	  if (useconf && (q = cfg_get_strg(0, "timeout")) != 0 && *q != 0)
+ 	       timeout = simple_strtol(q, NULL, 0);
+-     }
  
---- fs_reiserfs.c
-+++ fs_reiserfs.c	2001/11/13 14:20:36
-@@ -94,7 +94,7 @@
- 	return FILE_ERR_NOTFOUND;
-     }
+      prom_printf("boot: ");
+      c = -1;
+@@ -1507,22 +1494,7 @@
+      prom_printf("Welcome to yaboot version " VERSION "\n");
+      prom_printf("Enter \"help\" to get some basic usage information\n");
  
--    DEBUG_F( "%s was successfully opened\n" );
-+    DEBUG_F( "Device %s was successfully opened\n", buffer );
- 
-     if ( reiserfs_read_super() != 1 )
-     {
-@@ -104,7 +104,7 @@
- 	return FILE_ERR_NOTFOUND;
-     }
- 
--    DEBUG_F( "Attempting to open %s\n", file_name );
-+    DEBUG_F( "Attempting to open file %s\n", file_name );
-     strcpy(buffer, file_name); /* reiserfs_open_file modifies argument */
-     if( reiserfs_open_file(buffer) == 0 )
-     {
-@@ -114,7 +114,7 @@
-         return FILE_ERR_NOTFOUND;
-     }
- 
--    DEBUG_F( "Successfully opened %s\n", file_name );
-+    DEBUG_F( "Successfully opened file %s\n", file_name );
- 
-     DEBUG_LEAVE(FILE_ERR_OK);
-     return FILE_ERR_OK;
-@@ -165,12 +165,16 @@
- {
-     __u16 fs_blocksize = INFO->blocksize == 0 ? REISERFS_OLD_BLOCKSIZE
-                                               : INFO->blocksize;
--    unsigned long long pos = block * fs_blocksize;
--    pos += INFO->partition_offset + start;
-+    unsigned long long pos =
-+                (unsigned long long)block * (unsigned long long)fs_blocksize;
-+    pos += (unsigned long long)INFO->partition_offset +
-+           (unsigned long long)start;
-     DEBUG_F( "Reading %lu bytes, starting at block %lu, disk offset %Lu\n",
-              length, block, pos );
-     prom_lseek( file->of_device, pos );
--    return prom_read( file->of_device, buf, length );
-+
-+    /* return 0 on success, 1 on failure */
-+    return prom_read( file->of_device, buf, length ) == 0;
- }
- 
- 
-@@ -223,7 +227,7 @@
- 	    struct reiserfs_journal_commit commit;
- 
- 	    if ( !journal_read( desc_block, sizeof(desc), (char *) &desc ) )
--		return 0;
-+		return -1;
- 
- 	    j_len = le32_to_cpu(desc.j_len);
- 	    while ( i < j_len && i < JOURNAL_TRANS_HALF )
-@@ -236,7 +240,7 @@
- 
- 		if ( !journal_read( commit_block,
- 			sizeof(commit), (char *) &commit ) )
--		    return 0;
-+		    return -1;
- 
- 		while ( i < j_len )
- 		    if ( le32_to_cpu(commit.j_realblock[i++ - JOURNAL_TRANS_HALF]) == blockNr )
-@@ -281,7 +285,12 @@
-     __u32 next_trans_id;
-     __u32 *journal_table = JOURNAL_START;
- 
--    journal_read( block_count, sizeof ( header ), ( char * ) &header );
-+    /* Read in the header block of the journal */
-+    if (journal_read( block_count, sizeof (header), (char *) &header ) != 0) {
-+        prom_printf ("ReiserFS: Disk error while reading journal header.\n");
-+        return 0;
-+    }
-+
-     desc_block = le32_to_cpu(header.j_first_unflushed_offset);
-     if ( desc_block >= block_count )
- 	return 0;
-@@ -294,7 +303,11 @@
- 
-     while ( 1 )
-     {
--	journal_read( desc_block, sizeof(desc), (char *) &desc );
-+	if (journal_read( desc_block, sizeof(desc), (char *) &desc ) != 0) {
-+            prom_printf ("ReiserFS: Disk error while reading journal block.\n");
-+            return 0;
-+        }
-+
- 	if ( strcmp( JOURNAL_DESC_MAGIC, desc.j_magic ) != 0
- 	    || desc.j_trans_id != next_trans_id
- 	    || desc.j_mount_id != header.j_mount_id )
-@@ -302,7 +315,11 @@
- 	    break;
- 
- 	commit_block = ( desc_block + le32_to_cpu(desc.j_len) + 1 ) & ( block_count - 1 );
--	journal_read( commit_block, sizeof(commit), (char *) &commit );
-+	if (journal_read( commit_block, sizeof(commit),
-+                          (char *) &commit ) != 0) {
-+            prom_printf ("ReiserFS: Disk error while reading journal block.\n");
-+            return 0;
-+        }
- 	if ( desc.j_trans_id != commit.j_trans_id
- 	    || desc.j_len != commit.j_len )
- 	    /* no more valid transactions */
-@@ -372,7 +389,11 @@
-     struct reiserfs_super_block super;
-     __u64 superblock = REISERFS_SUPERBLOCK_BLOCK;
- 
--    read_disk_block( INFO->file, superblock, 0, sizeof(super), &super );
-+    if (read_disk_block( INFO->file, superblock, 0,
-+                         sizeof(super), &super ) != 0) {
-+        prom_printf ("ReiserFS: Disk error while reading superblock\n");
-+        return 0;
-+    }
- 
-     DEBUG_F( "Found super->magic %s\n", super.s_magic );
- 
-@@ -381,7 +402,11 @@
-     {
- 	/* Try old super block position */
- 	superblock = REISERFS_OLD_SUPERBLOCK_BLOCK;
--	read_disk_block( INFO->file, superblock, 0, sizeof (super),  &super );
-+	if (read_disk_block( INFO->file, superblock, 0,
-+                             sizeof (super),  &super ) != 0) {
-+            prom_printf ("ReiserFS: Disk error while reading old superblock\n");
-+            return 0;
-+        }
- 
- 	if ( strcmp( REISER2FS_SUPER_MAGIC_STRING, super.s_magic ) != 0 &&
-              strcmp( REISERFS_SUPER_MAGIC_STRING, super.s_magic ) != 0 )
-@@ -447,13 +472,16 @@
- 
- 	journal_init();
- 	/* Read in super block again, maybe it is in the journal */
--	block_read( superblock, 0, sizeof (struct reiserfs_super_block),
--                    (char *) &super );
-+	if (block_read( superblock, 0, sizeof (struct reiserfs_super_block),
-+                        (char *) &super ) != 0) {
-+            prom_printf ("ReiserFS: Disk error while re-reading superblock\n");
-+            return 0;
-+        }
-     }
- 
-     /* Read in the root block */
--    if ( !block_read( le32_to_cpu(super.s_root_block), 0,
--            INFO->blocksize, ROOT ) )
-+    if ( block_read( le32_to_cpu(super.s_root_block), 0,
-+            INFO->blocksize, ROOT ) != 0)
-     {
-         prom_printf( "ReiserFS: Failed to read in root block\n" );
- 	return 0;
-@@ -512,6 +540,7 @@
- {
-     char *cache = CACHE(depth);
-     int num_cached = INFO->cached_slots;
-+    errnum = 0;
- 
-     if ( depth < num_cached )
-     {
-@@ -525,7 +554,7 @@
- 
-     DEBUG_F( "  next read_in: block=%u (depth=%u)\n", blockNr, depth );
- 
--    if ( !block_read( blockNr, 0, INFO->blocksize, cache ) )
-+    if ( block_read( blockNr, 0, INFO->blocksize, cache ) != 0)
-     {
-         DEBUG_F( "block_read failed\n" );
- 	return 0;
-@@ -657,6 +686,7 @@
-     int nr_item;
-     int i;
-     struct item_head *ih;
-+    errnum = 0;
- 
- 
-     DEBUG_F( "search_stat:\n  key %u:%u:0:0\n", le32_to_cpu(dir_id),
-@@ -731,6 +761,7 @@
-     __u32 offset;
-     __u32 to_read;
-     char *prev_buf = buf;
-+    errnum = 0;
- 
- 
-     DEBUG_F( "reiserfs_read_data: INFO->file->pos=%Lu len=%u, offset=%Lu\n",
-@@ -753,7 +784,7 @@
- 	blocksize = ih_item_len(INFO->current_ih);
- 
- 
--	DEBUG_F( "  loop: INFO->file->pos=%Lu len=%u, offset=%u blocksize=%u\n",
-+	DEBUG_F( "  loop: INFO->file->pos=%Lu len=%u, offset=%u ih_item_len=%u\n",
- 	    INFO->file->pos, len, offset, blocksize );
- 
- 
-@@ -784,8 +815,12 @@
- 
- 		/* Journal is only for meta data.
-                    Data blocks can be read directly without using block_read */
--		read_disk_block( INFO->file, blocknr, blk_offset, to_read,
--                                 buf );
-+		if (read_disk_block( INFO->file, blocknr, blk_offset,
-+                                     to_read, buf ) != 0) {
-+                    prom_printf ("ReiserFS: Disk error while reading "
-+                                 "data block\n");
-+                    return 0;
-+                }
- 
- 	      update_buf_len:
- 		len -= to_read;
-@@ -821,6 +856,7 @@
-     char linkbuf[PATH_MAX];	/* buffer for following symbolic links */
-     int link_count = 0;
-     int mode;
-+    errnum = 0;
- 
-     dir_id = cpu_to_le32(REISERFS_ROOT_PARENT_OBJECTID);
-     objectid = cpu_to_le32(REISERFS_ROOT_OBJECTID);
---- yaboot.c
-+++ yaboot.c	2001/11/13 14:20:36
-@@ -111,6 +111,7 @@
- char *password = NULL;
- int bootpartition = -1;
- int _machine = _MACH_Pmac;
-+int booting_vmlinux = 1;
- 
- #ifdef CONFIG_COLOR_TEXT
- 
-@@ -298,8 +299,7 @@
-     fspec.dev = device;
-     fspec.file = conf_path;
-     fspec.part = partition;
--    result = open_file(&fspec, &file);
--    if (result != FILE_ERR_OK) {
-+    if (open_file(&fspec, &file) != FILE_ERR_OK) {
-     	prom_printf("Can't open config file '%s', err: %d\n", conf_path, result);
- 	goto bail;
-     }
-@@ -666,6 +666,15 @@
- 	}
-     }
- 
-+    if (imagename == NULL) {
-+	prom_printf(
-+"Enter the kernel image name as [device:][partno]/path, where partno is a\n"
-+"number from 0 to 16.  Instead of /path you can type [mm-nn] to specify a\n"
-+"range of disk blocks (512B)\n"
-+"Example: hd:3,/vmlinux\n");
-+        return 0;
-+    }
-+
-     if (!strcmp (imagename, "halt")) {
- 	 if (password)
- 	      check_password ("P");
-@@ -813,20 +822,22 @@
- 	if ( is_elf32(&loadinfo) ) {
-             if ( !load_elf32(&file, &loadinfo) )
-                 goto next;
--            prom_printf("   Elf32 kernel loaded...\n");
-+            prom_printf("   Elf32 %s loaded...\n",
-+		(booting_vmlinux) ? "kernel (vmlinux)" : "binary");
- 	} else if ( is_elf64(&loadinfo) ) {
-             if ( !load_elf64(&file, &loadinfo) )
-                 goto next;
--            prom_printf("   Elf64 kernel loaded...\n");
-+            prom_printf("   Elf64 %s loaded...\n",
-+		(booting_vmlinux) ? "kernel (vmlinux)" : "binary");
- 	} else {
-             prom_printf ("Not a valid ELF image\n");
-             goto next;
- 	}
-         file.fs->close(&file);
- 
--	/* If sysmap, load it. 
-+	/* If sysmap, load it if booting a vmlinux.
- 	 */
--	if (params.sysmap.file) {
-+	if (booting_vmlinux && params.sysmap.file) {
- 	    prom_printf("Loading System.map ...\n");
- 	    if(bootpath && !strcmp(bootpath,"\\\\") && params.sysmap.file[0] != '/') {
- 		    if (loc) free(loc);
-@@ -864,14 +875,12 @@
- 	    	loadinfo.memsize += _ALIGN(0x100000, 0x1000);
- 	    } else {
- 	    	prom_printf("System.map load failed !\n");
--	    	prom_pause();
- 	    }
- 	}
+-     /* I am fed up with lusers using the wrong partition type and
+-	mailing me *when* it breaks */
 -
--	/* If ramdisk, load it. For now, we can't tell the size it will be
--	 * so we claim an arbitrary amount of 4Mb
-+	/* If ramdisk, load it if booting a vmlinux.  For now, we can't
-+	 * tell the size it will be so we claim an arbitrary amount of 4Mb
- 	 */
--	if (params.rd.file) {
-+	if (booting_vmlinux && params.rd.file) {
- 	    if(bootpath && !strcmp(bootpath,"\\\\") && params.rd.file[0] != '/')
- 	    {
- 		if (loc) free(loc);
-@@ -939,52 +948,56 @@
- #endif	
+-     if (_machine == _MACH_Pmac) {
+-	  char *entry = cfg_get_strg(0, "ptypewarning");
+-	  int warn = 1;
+-	  if (entry)
+-	       warn = strcmp(entry,
+-			     "I_know_the_partition_type_is_wrong_and_will_NOT_send_mail_when_booting_breaks");
+-	  if (warn) {
+-	       ptype = get_part_type(boot.dev, boot.part);
+-	       if ((ptype != NULL) && (strcmp(ptype, "Apple_Bootstrap")))
+-		    prom_printf("\nWARNING: Bootstrap partition type is wrong: \"%s\"\n"
+-				"         type should be: \"Apple_Bootstrap\"\n\n", ptype);
+-	  }
+-     }
++     /* brain damage. censored. */
  
- 	/* 
--	 * Fill mew boot infos
--	 *
--	 * The birec is low on memory, probably inside the malloc pool, so
--	 * we don't write it earlier. At this point, we should not use anything
--	 * coming from the malloc pool
-+	 * Fill new boot infos if booting a vmlinux.
- 	 */
--	birec = (struct bi_record *)_ALIGN(loadinfo.filesize+(1<<20)-1,(1<<20));
-+	if ( booting_vmlinux ) {
-+	    /* 
-+	     * The birec is low on memory, probably inside the malloc pool,
-+	     * so we don't write it earlier. At this point, we should not
-+	     * use anything coming from the malloc pool.
-+	     */
-+	    birec = (struct bi_record *)_ALIGN(loadinfo.filesize+(1<<20)-1,(1<<20));
-+
-+	    /* We make sure it's mapped. We map only 64k for now, it's plenty
-+	     * enough we don't claim since this precise memory range may
-+	     * already be claimed by the malloc pool.
-+	     */
-+	    prom_map (birec, birec, 0x10000);
- 
--	/* We make sure it's mapped. We map only 64k for now, it's plenty enough
--	 * we don't claim since this precise memory range may already be claimed
--	 * by the malloc pool
--	 */
--	prom_map (birec, birec, 0x10000);
-+	    prom_printf("Creating birec at address 0x%.8lx...\n", birec);
- #if DEBUG
--	prom_printf("birec at 0x%08lx\n", birec);
--	{
--	    int i = prom_getms();
--	    while((prom_getms() - i) < 2000)
--		;
--	}
-+	    {
-+	        int i = prom_getms();
-+	        while((prom_getms() - i) < 2000)
-+		    ;
-+	    }
- #endif	
- 
--	birec->tag = BI_FIRST;
--	birec->size = sizeof(struct bi_record);
--	birec = (struct bi_record *)((unsigned long)birec + birec->size);
-+	    birec->tag = BI_FIRST;
-+	    birec->size = sizeof(struct bi_record);
-+	    birec = (struct bi_record *)((unsigned long)birec + birec->size);
+      yaboot_text_ui();
  	
--	birec->tag = BI_BOOTLOADER_ID;
--	sprintf( (char *)birec->data, "yaboot");
--	birec->size = sizeof(struct bi_record) + strlen("yaboot") + 1;
--	birec = (struct bi_record *)((unsigned long)birec + birec->size);
-+	    birec->tag = BI_BOOTLOADER_ID;
-+	    sprintf( (char *)birec->data, "yaboot");
-+	    birec->size = sizeof(struct bi_record) + strlen("yaboot") + 1;
-+	    birec = (struct bi_record *)((unsigned long)birec + birec->size);
- 	
--	birec->tag = BI_MACHTYPE;
--	birec->data[0] = _machine;
--	birec->size = sizeof(struct bi_record) + sizeof(unsigned long);
--	birec = (struct bi_record *)((unsigned long)birec + birec->size);
-+	    birec->tag = BI_MACHTYPE;
-+	    birec->data[0] = _machine;
-+	    birec->size = sizeof(struct bi_record) + sizeof(unsigned long);
-+	    birec = (struct bi_record *)((unsigned long)birec + birec->size);
- 
--	if (sysmap_base) {
-+	    if (sysmap_base) {
- 		birec->tag = BI_SYSMAP;
- 		birec->data[0] = (unsigned long)sysmap_base;
- 		birec->data[1] = sysmap_size;
- 		birec->size = sizeof(struct bi_record) + sizeof(unsigned long)*2;
- 		birec = (struct bi_record *)((unsigned long)birec + birec->size);
-+	    }
-+	    birec->tag = BI_LAST;
-+	    birec->size = sizeof(struct bi_record);
-+	    birec = (struct bi_record *)((unsigned long)birec + birec->size);
- 	}
--	birec->tag = BI_LAST;
--	birec->size = sizeof(struct bi_record);
--	birec = (struct bi_record *)((unsigned long)birec + birec->size);
- 
- 	/* compute the kernel's entry point. */
- 	kernel_entry = loadinfo.base + loadinfo.entry - loadinfo.load_loc;
-@@ -1099,10 +1112,21 @@
-     prom_printf("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
- #endif    
- 
-+    /* Determine whether we are trying to boot a vmlinux or some
-+     * other binary image (eg, zImage).  We load vmlinux's at
-+     * KERNELADDR and all other binaries at their e_entry value.
-+     */
-+    if (e->e_entry == KERNEL_LINK_ADDR_PPC32) {
-+	booting_vmlinux = 1;
-+	loadaddr = KERNELADDR;
-+    } else {
-+	booting_vmlinux = 0;
-+	loadaddr = e->e_entry;
-+    }
-+
-     /* On some systems, loadaddr may already be claimed, so try some
-      * other nearby addresses before giving up.
-      */
--    loadaddr = (e->e_entry == KERNEL_LINK_ADDR_PPC32) ? KERNELADDR : e->e_entry;
-     for(addr=loadaddr; addr <= loadaddr * 8 ;addr+=0x100000) {
- 	loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
- 	if (loadinfo->base != (void *)-1) break;
-@@ -1242,10 +1266,21 @@
-     prom_printf("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
- #endif    
- 
-+    /* Determine whether we are trying to boot a vmlinux or some
-+     * other binary image (eg, zImage).  We load vmlinux's at
-+     * KERNELADDR and all other binaries at their e_entry value.
-+     */
-+    if (e->e_entry == KERNEL_LINK_ADDR_PPC64) {
-+	booting_vmlinux = 1;
-+	loadaddr = KERNELADDR;
-+    } else {
-+	booting_vmlinux = 0;
-+	loadaddr = e->e_entry;
-+    }
-+
-     /* On some systems, loadaddr may already be claimed, so try some
-      * other nearby addresses before giving up.
-      */
--    loadaddr = (e->e_entry == KERNEL_LINK_ADDR_PPC64) ? KERNELADDR : e->e_entry;
-     for(addr=loadaddr; addr <= loadaddr * 8 ;addr+=0x100000) {
- 	loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
- 	if (loadinfo->base != (void *)-1) break;

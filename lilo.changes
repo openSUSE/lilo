@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan  8 13:09:50 CET 2002 - olh@suse.de
+
+- do not honor the boot-file/bootargs content in yaboot
+
+-------------------------------------------------------------------
 Tue Jan  8 04:22:56 CET 2002 - olh@suse.de
 
 - run lilo on iSeries

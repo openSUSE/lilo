@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      77
+Release:      78
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
@@ -134,6 +134,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Jan 08 2002 - olh@suse.de
+- do not honor the boot-file/bootargs content in yaboot
 * Tue Jan 08 2002 - olh@suse.de
 - run lilo on iSeries
 * Thu Dec 20 2001 - olh@suse.de
