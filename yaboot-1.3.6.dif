@@ -17,15 +17,6 @@
  
  addnote:
  	$(CC) $(UCFLAGS) -o util/addnote util/addnote.c
-@@ -147,7 +155,7 @@
- 	rm -rf ../yaboot-binary-${VERSION}
- 
- clean:
--	rm -f second/yaboot util/addnote util/elfextract $(OBJS)
-+	rm -f second/yaboot second/yaboot.chrp util/addnote util/addnote.host util/elfextract $(OBJS)
- 	find . -name '#*' | xargs rm -f
- 	find . -name '.#*' | xargs rm -f
- 	find . -name '*~' | xargs rm -f
 --- README.new
 +++ README.new	2002/01/08 12:06:55
 @@ -0,0 +1,19 @@
@@ -48,17 +39,6 @@
 +same goes for initrd and sysmap.
 +
 +
---- second/file.c
-+++ second/file.c	2002/01/08 12:06:55
-@@ -166,7 +166,7 @@
- 		  p->part_number, p->part_start, p->part_size );
- 	  if (partition == -1) {
- 	       file->fs = fs_open( file, dev_name, p, file_name );
--	       if (file->fs != NULL)
-+	       if (fserrorno == FILE_ERR_OK)
- 		    goto bail;
- 	  }
- 	  if ((partition >= 0) && (partition == p->part_number))
 --- second/yaboot.c
 +++ second/yaboot.c	2002/01/08 12:26:04
 @@ -589,7 +589,6 @@

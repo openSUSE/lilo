@@ -1,7 +1,8 @@
 #!/bin/bash
+# set -ex
 #
 # find a OF bootpath on Apple PowerMacintosh Newworld machines
-# olh@suse.de (2000)
+# Copyright (C) 2000, 2004 Olaf Hering olh@suse.de
 #
 # When booting via BootX then all symlinks are gone ...
 # The MacOS removes them and BenH didn't find (yet) a way to
@@ -10,6 +11,7 @@
 #
 # Changes
 #
+# 2004-01-30  sysfs was born
 # 2000-08-09  use hd as alias for hda instead of ultra0
 # 2000-08-04  run only on pmac new
 # 2000-07-19  remove sr* and scd*, not supported yet.
@@ -26,6 +28,27 @@
 # 2000-01-30  first try with scsi hosts
 #
 
+myversion=2004-01-30
+file=/
+
+if [ "$#" -gt 0 ] ; then
+	until  [ "$#" = 0 ] ; do
+		case "$1" in
+			--version|-v) echo $myversion ; exit 0
+			;;
+			--help|-h)
+			echo "show OpenFirmware device path for a file or a device node"
+			echo "usage: ${0##*/} [/]|[/boot/vmlinux]"
+			exit 0
+			;;
+			*)
+			file=$1
+			break
+			;;
+		esac
+	done
+fi
+
 # check if we run on a NewWorld PowerMacintosh
 if [ -f /proc/device-tree/openprom/model ] ; then
         while read openfirmware ofversion; do
@@ -37,207 +60,219 @@ if [ -f /proc/device-tree/openprom/model ] ; then
 fi
 
 test "$MACHINE" = "pmac_old" && {
-echo ERROR: This machine is an Oldworld, no need for firmware pathnames
+echo 1>&2 "ERROR: This machine is an Oldworld, no need for firmware pathnames"
 exit 1
 }
-unset LILO_ROOT_DRIVE
-if [ "$1" == "--lilo-rootdrive" ] ; then
-shift
-LILO_ROOT_DRIVE=$1
-shift
-fi
-# argument must be a file
-FILENAME="$1"
-if [ ! "$1" ]; then FILENAME="/" ; fi
-#echo try to figure out the OpenFirmware path to $FILENAME
 
-if [ -b $FILENAME ] ; then
-# cut /dev/
-FILEDEVICENAME=$FILENAME
-FILENAME=""
+mystat="`type -p stat`"
+if [ -z "$mystat" -o ! -x "$mystat" ] ; then
+echo 1>&2 "ERROR: GNU stat required"
+exit 1
+fi
+
+if [ -b $file ] ; then
+file_majorminor=`/bin/ls -l "$file" | awk '{ print $5""$6 }'`
+file_major="${file_majorminor%%,*}"
+file_minor="${file_majorminor##*,}"
+file=/
 else
-if [ ! -z "$LILO_ROOT_DRIVE" ] ; then
- FILEDEVICENAME=$(echo $LILO_ROOT_DRIVE |grep "^/dev/"|cut -d "/" -f 3|sed 's/ .*$//')
- else
- FILEDEVICENAME=$(df "$FILENAME"|grep "^/dev/"|cut -d "/" -f 3|sed 's/ .*$//')
- fi 
+file_majorminor=`"$mystat" --format="%d" "$file"`
+file_major="$[file_majorminor/256]"
+file_minor="$[file_majorminor - $file_major * 256]"
 fi
-#echo FILEDEVICENAME $FILEDEVICENAME
-FILE_DEVICE=`echo "$FILEDEVICENAME"|sed 's/[0-9]*$/ &/'|cut -d " " -f 1`
-DEVICE_NODENAME=`echo "$FILEDEVICENAME"|sed 's/[0-9]*$/ &/'|cut -d "/" -f 3`
-FILE_PARTITION=`echo "$FILEDEVICENAME"|sed 's/[0-9]*$/ &/'|cut -d " " -f 2`
-#echo FILE_DEVICE $FILE_DEVICE DEVICE_NODENAME $DEVICE_NODENAME FILE_PARTITION $FILE_PARTITION
+file_majorminor=$file_major:$file_minor
 
+file_sysfs_path=
+for i in `find /sys/block -name dev`
+do
+: looking at $i
+if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
+done
 
-# sd* scsi disks , hd* ide disks , sr* cdroms
-case "$DEVICE_NODENAME" in
-	sd*)
-#		echo $FILENAME is on SCSI drive $FILEDEVICENAME
-		# did the admin start with bootx? bad on newworld, but maybe we can handle it
-		# if there are more then 1 pci folder we are lost
-		PROC_DEVICETREE_BROKEN="0"
-		PROC_DEVICETREE_SYMLINKS=$(find /proc/device-tree/ -maxdepth 1 -type l)
-		if [ ! "$PROC_DEVICETREE_SYMLINKS" ] ; then
-			PROC_DEVICETREE_PCIENTRY=$(find /proc/device-tree/ -name pci -maxdepth 1|wc -l)
-			if [ "$PROC_DEVICETREE_PCIENTRY" -gt 1 ] ; then
-				echo "There is no symlink in /proc/device-tree/ and"
-				echo "there is more than one pci directory in /proc/device-tree/."
-				echo "Booting via BootX removes them and I can't figure out SCSI disks "
-				echo "I will try /proc/device-tree/chosen/bootpath"
-				PROC_DEVICETREE_BROKEN="$(cat /proc/device-tree/chosen/bootpath|grep -v ata|sed 's/.:.*$//')"
-				if [ ! "$PROC_DEVICETREE_BROKEN" ] ; then
-					echo "There is 'ata' in /proc/device-tree/chosen/bootpath"
-					echo "Seems not to be a SCSI boot drive"
-					echo -n "ERROR ... "
-				fi
-			fi
-		fi
+if [ -z "$file_sysfs_path" ] ; then
+echo 1>&2 "ERROR: can not file major:minor $file_majorminor for $file"
+exit 1
+fi
 
-	if [ "$PROC_DEVICETREE_BROKEN" != "0" ] ; then 
-		echo "ERROR: Don't use BootX on that machine"
-	else
-		DEVICE_NODENAME=${FILE_DEVICE##*sd}
-		FILE_HOST_SUBDEVICE_NUMBER=$[$(echo $DEVICE_NODENAME | tr a-z 0-9)+1]
-#		echo looking for $FILE_HOST_SUBDEVICE_NUMBER. scsi disk $DEVICE_NODENAME  =  $FILE_DEVICE
+: found $file_sysfs_path
 
-# first we have to figure out the SCSI ID, have to do that anyway
-# find the attached scsi disks = "Direct-Access" and stop at sda=1 sdb=2 or whatever
-# count in 3 lines steps 
-		xcount=0
-		for i in $( seq 1 $[ $( grep -v ^Attach /proc/scsi/scsi | wc -l ) /3] ) ; do
-# put every scsi device into one single line
-			x=$(grep -v ^Attach /proc/scsi/scsi |head -n $[$i*3]|tail -n 3)
-#			echo x $x
-# cut the type field, expect "Direct-Access"
-			xtype=$(echo ${x##*Type: }|cut -d " " -f 1)
-#			echo xtype $xtype
-			xid=$(echo ${x##*Id: }|cut -d " " -f 1)
-			xid=$(echo ${xid#*0})
-#			echo xid $xid
-			xhost=$(echo ${x##*Host: scsi}|cut -d " " -f 1)
-#			echo xhost $xhost 
-#			echo result run $i:  xtype $xtype xid $xid xhost $xhost i $i
-			if [ "$xtype" = "Direct-Access" ] ; then 
-				xcount=$[$xcount+1]				
-				if [ "$FILE_HOST_SUBDEVICE_NUMBER" = "$xcount" ] ; then
-					DEVICE_HOST=$xhost
-					DEVICE_ID=$xid
-					break 2
-				fi
-			fi
-		done
-#
-# now we have the data for /@$xid:$partition,$filename
-# lets do the rest
-#
-# 
-		SCSI_DRIVER=$(ls -1 /proc/scsi/*/$DEVICE_HOST |cut -d "/" -f 4) 
-		SCSI_HOSTNUMBER=$(ls -1 /proc/scsi/$SCSI_DRIVER/*|grep -n $DEVICE_HOST$|cut -d ":" -f 1)
-
-		case "$SCSI_DRIVER" in
-			aic7xxx)
-				HOST_LIST=$(for i in `find /proc/device-tree/ -name compatible`;do
-				grep -l "\(^ADPT\|^pci900[45]\|^pciclass,01000\)" $i
-				done)
-				DEVICE_PATH=$(echo ${HOST_LIST%/*}|cut -d " " -f $SCSI_HOSTNUMBER)
-				if [ "$FILENAME" = "" ] ; then
-				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION
-				else
-				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION,$FILENAME
-				fi
-			;;
-			sym53c8xx)
-                                HOST_LIST=$(for i in `find /proc/device-tree/ -name compatible`;do
-                                grep -l "\(^Symbios\|^pci1000\|^pciclass,01000\)" $i
-                                done)
-                                DEVICE_PATH=$(echo ${HOST_LIST%/*}|cut -d " " -f $SCSI_HOSTNUMBER)
-				if [ "$FILENAME" = "" ] ; then
-				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION
-				else
-				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION,$FILENAME
-				fi
-			;;
-			mesh)
-				HOST_LIST=$(for i in `find /proc/device-tree/ -name compatible`;do
-                                grep -l "mesh" $i
-                                done)
-                                DEVICE_PATH=$(echo ${HOST_LIST%/*}|cut -d " " -f $SCSI_HOSTNUMBER)
-				if [ "$FILENAME" = "" ] ; then
-				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION
-				else
-				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION,$FILENAME
-				fi
-			;;
-			*)
-				echo ERROR: driver "$SCSI_DRIVER" not yet supported
-			;;
-		esac
-	fi
-	;;
-	hda*)
-		PATH_IS_CDROM=$(grep "^drive name:" /proc/sys/dev/cdrom/info|grep hda)
-		if [ -z "$PATH_IS_CDROM" ] ; then
-			HDA_PATH=$(cat /proc/device-tree/aliases/hd)
-			echo -n "hd":"$FILE_PARTITION"
-		else
-			HDA_PATH=$(cat /proc/device-tree/aliases/cd)
-			echo -n "cd":"$FILE_PARTITION"
-		fi
-		if [ "$FILENAME" = "" ] ; then
-			echo
-		else
-			echo ,"$FILENAME"
-		fi 
-	;;
-	hdb*)
-		PATH_IS_CDROM=$(grep "^drive name:" /proc/sys/dev/cdrom/info|grep hdb)
-		if [ -z "$PATH_IS_CDROM" ] ; then
-			HDA_PATH=$(cat /proc/device-tree/aliases/ultra1)
-			echo -n "ultra1":"$FILE_PARTITION"
-		else
-			HDA_PATH=$(cat /proc/device-tree/aliases/cd)
-			echo -n "cd":"$FILE_PARTITION"
-		fi
-		if [ "$FILENAME" = "" ] ; then
-			echo
-		else
-			echo ,"$FILENAME"
-		fi 
-	;;
-	hde*)
-		echo "ERROR: hde not configured, please edit $0"
+file_sysfs_dir="${file_sysfs_path%/dev}"
+: $file_sysfs_dir
+if [ ! -L "$file_sysfs_dir/device" ] ; then
+	# maybe a partition
+	file_partition="${file_sysfs_dir##*[a-z]}"
+	: file_partition $file_partition
+	file_sysfs_dir="${file_sysfs_dir%/*}"
+	: $file_sysfs_dir
+	if [ ! -L "$file_sysfs_dir/device" ] ; then
+		echo 1>&2 "ERROR: driver for sysfs path $file_sysfs_dir has no full sysfs support"
 		exit 1
-#	choose the boot partition on the /dev/hdeX volume as active boot partition
-#	in the Startup Disk control panel in MacOS
-#	look in /proc/device-tree/options/boot-device for the correct string
-#	the string __could__ look like that:
-#	/pci@f2000000/pci-bridge@d/mac-io@7/ata-4@1f000/@0:9,\\:tbxi
-#							  ^ cut here
-#	put "/pci@f2000000/pci-bridge@d/mac-io@7/ata-4@1f000/@0" in the HDE_PATH variable
-
-			HDE_PATH="blah"
-			echo -n "$HDE_PATH":"$FILE_PARTITION"
-			if [ "$FILENAME" = "" ] ; then
-				echo
-			else
-				echo ,"$FILENAME"
-			fi 
+	fi
+fi
+cd "$file_sysfs_dir/device"
+file_full_sysfs_path="`/bin/pwd`"
+file_storage_type=
+cd "$file_full_sysfs_path"
+case "$file_full_sysfs_path" in
+	*/ide[0-9]*/[0-9]*)
+	file_storage_type=ide
+	of_disk_ide_channel="${file_full_sysfs_path##*.}"
+	cd ../..
+	case "$of_disk_ide_channel" in
+		*/*)
+		of_disk_ide_channel="${of_disk_ide_channel%%/*}"
+		cd ../..
+		;;
+	esac
+	: of_disk_ide_channel $of_disk_ide_channel
 	;;
-	hd*)
-                PATH_IS_CDROM=$(grep "^drive name:" /proc/sys/dev/cdrom/info|grep ${DEVICE_NODENAME% *})
-                if [ -z "$PATH_IS_CDROM" ] ; then
-                        echo ERROR: device ${DEVICE_NODENAME% *} not yet supported
-                else
-                        HDA_PATH=$(cat /proc/device-tree/aliases/cd)
-                        echo -n "cd":"$FILE_PARTITION"
-			if [ "$FILENAME" = "" ] ; then
-				echo
-			else
-				echo ,"$FILENAME"
-			fi 
-                fi
-	;;
-	*)
-		echo ERROR: device ${DEVICE_NODENAME% *} not yet supported
+	*/host[0-9]*/[0-9]*:[0-9]*:[0-9]*:[0-9]*)
+	file_storage_type=scsi
+	of_disk_scsi_lun="${file_full_sysfs_path##*:}"
+	of_disk_scsi_id="${file_full_sysfs_path%:*}"
+	of_disk_scsi_id="${of_disk_scsi_id##*:}"
+	cd ../..
 	;;
 esac
+
+if [ -f devspec ] ; then
+	case "$file_storage_type" in
+	ide)
+	file_of_hw_path="$(< devspec)/disk@$of_disk_ide_channel"
+	;;
+	scsi)
+	file_of_hw_path="$(< devspec)/sd@$of_disk_scsi_id,$of_disk_scsi_lun"
+	;;
+	esac
+else
+	: file_full_sysfs_path $file_full_sysfs_path
+	# find the path via the device-tree
+	dev_vendor="$(< vendor)"
+	dev_device="$(< device)"
+	dev_subsystem_vendor="$(< subsystem_vendor)"
+	dev_subsystem_device="$(< subsystem_device)"
+	for i in `find /proc/device-tree -name vendor-id`
+	do
+		: looking at $i
+		dev_of_pci_id=
+		while read a vendor_id
+		do
+			dev_of_pci_id="0x$vendor_id"
+			break
+		done  < <(od --read-bytes=8 --width=8 -t x4 $i)
+		: vendor-id $dev_of_pci_id
+		dev_of_pci_id=$(($dev_of_pci_id))
+		dev_vendor=$(($dev_vendor))
+		if [ "$dev_of_pci_id" != "$dev_vendor" ] ; then continue ; fi
+		if [ ! -f "${i%/*}/device-id" ] ; then continue ; fi
+		while read a device_id
+		do
+			dev_of_pci_id="0x$device_id"
+			break
+		done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/device-id")
+		: device-id $dev_of_pci_id
+		dev_of_pci_id=$(($dev_of_pci_id))
+		dev_device=$(($dev_device))
+		if [ "$dev_of_pci_id" != "$dev_device" ] ; then continue ; fi
+		if [ -f "${i%/*}/subsystem-vendor-id" ] ; then
+			while read a sub_vendor_id
+			do
+				dev_of_pci_id="0x$sub_vendor_id"
+				break
+			done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-vendor-id")
+			: sub-vendor-id $dev_of_pci_id
+			dev_of_pci_id=$(($dev_of_pci_id))
+			dev_subsystem_vendor=$(($dev_subsystem_vendor))
+			if [ "$dev_of_pci_id" != "$dev_subsystem_vendor" ] ; then continue ; fi
+			while read a sub_device_id
+			do
+				dev_of_pci_id="0x$sub_device_id"
+				break
+			done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-id")
+			: sub-device-id $dev_of_pci_id
+			dev_of_pci_id=$(($dev_of_pci_id))
+			dev_subsystem_device=$(($dev_subsystem_device))
+			if [ "$dev_of_pci_id" != "$dev_subsystem_device" ] ; then continue ; fi
+		fi
+		: found $i
+		if [ -z "$of_device_list" ] ; then
+			of_device_list="${i%/*}"
+		else
+			of_device_list="$of_device_list ${i%/*}"
+		fi
+	done
+	: of_device_list $of_device_list
+	case "$of_device_list" in
+		*\ *)
+		: more than one controler found, fun
+		for i in $of_device_list
+		do
+		: working on $i
+			while read a addr
+			do
+			addr="0x$addr"
+			break
+			done < <(od -t x8 -j4 -N8 < $i/assigned-addresses)
+		: addr $addr , pure guess ...
+		grep -q ^$addr resource || continue
+		: found $i
+		of_device_list=$i
+		break
+		done
+		;;
+		*)
+		;;
+	esac
+
+	case "$(< $of_device_list/device_type)" in
+		k2-sata-root)
+		: found k2-sata-root, guessing channel
+		counter=0
+		for i in host[0-9]*
+		do
+		: working on virtual scsi host $i
+			case "$file_full_sysfs_path" in
+			*/$i/*)
+				: found $i $counter
+				break
+				;;
+			*) ;;
+			esac
+			: $((counter++))
+		done
+		file_storage_type=sata
+		of_device_path=`grep -l block $of_device_list/*@$counter/*/device_type`
+		;;
+		*)
+		of_device_path=`grep -l block $of_device_list/*/device_type`
+
+		;;
+	esac
+
+	of_device_path=${of_device_path%/device_type}
+	case "$file_storage_type" in
+		ide)
+		file_of_hw_path="${of_device_path##/proc/device-tree}@$of_disk_ide_channel"
+		;;
+		scsi)
+		file_of_hw_path="${of_device_path##/proc/device-tree}@$of_disk_scsi_id,$of_disk_scsi_lun"
+		;;
+		sata)
+		file_of_hw_path="${of_device_path##/proc/device-tree}"
+		;;
+	esac
+
+# no "devspec" available
+fi
+
+#
+# done
+#
+file_of_path="$file_of_hw_path"
+if [ ! -z "$file_partition" ] ; then
+file_of_path="$file_of_hw_path:$file_partition"
+fi
+if [ "$file" != "/" ] ; then
+file_of_path="$file_of_path,$file"
+fi
+echo $file_of_path

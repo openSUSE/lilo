@@ -10,7 +10,6 @@
 CONFIG_LILO_CONF=/etc/lilo.conf
 SHOW_OF_PATH_SH=/bin/show_of_path.sh
 DEFAULT_BOOTFOLDER=suseboot
-COMPATIBLE_LIST=/boot/compatible_machines.txt
 
 if [ "$1" = "--lilo-rootdrive" ] ; then
 LILO_ROOTDRIVE=true
@@ -49,8 +48,8 @@ if [ "$OPTION_PARTITION" = "" ] ; then
   fi
   P=`echo "$PART" | awk '{print $1}'`
 
-echo Installing /boot/yaboot.chrp onto $P
-dd if=/boot/yaboot.chrp of=$P
+echo Installing /lib/lilo/chrp/yaboot.chrp onto $P
+dd if=/lib/lilo/chrp/yaboot.chrp of=$P
 
   if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
@@ -67,8 +66,8 @@ else
      echo "*********************************************************"
   exit -1
   fi
-echo Installing /boot/yaboot.chrp onto $OPTION_BOOT
-dd if=/boot/yaboot.chrp of=$OPTION_BOOT
+echo Installing /lib/lilo/chrp/yaboot.chrp onto $OPTION_BOOT
+dd if=/lib/lilo/chrp/yaboot.chrp of=$OPTION_BOOT
   if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
   fi
@@ -424,8 +423,8 @@ echo using bootfolder \'$HFS_BOOTFOLDER\' on volume `hpwd` on $OPTION_BOOT
 hmkdir $HFS_BOOTFOLDER 2>/dev/null
 hattrib -b $HFS_BOOTFOLDER
 hcd $HFS_BOOTFOLDER
-hcopy /boot/Finder.bin :Finder
-hcopy /boot/System.bin :System
+hcopy /lib/lilo/pmac/Finder.bin :Finder
+hcopy /lib/lilo/pmac/System.bin :System
 hcopy -r /tmp/ppc_lilo/miboot.conf :
 hattrib -t TEXT -c "R*ch" :miboot.conf
 hattrib -t FNDR -c MACS Finder
@@ -535,9 +534,6 @@ fi )
 done
 ) > /tmp/ppc_lilo/yaboot.conf
 
-# get the COMPATIBLE_MACHINES 
-prepare_compatible_pmacs
-
 BOOT_DEVICEPATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
 OTHER_DEVICEPATH=$($SHOW_OF_PATH_SH $OPTION_OTHER)
 
@@ -545,12 +541,19 @@ echo "BOOT_DEVICEPATH  =  $BOOT_DEVICEPATH"
 echo "OTHER_DEVICEPATH  =  $OTHER_DEVICEPATH"
 (echo "<CHRP-BOOT>
 <COMPATIBLE>
-`echo $COMPATIBLE_MACHINES`
+MacRISC MacRISC3 MacRISC4
 </COMPATIBLE>
 <DESCRIPTION>
 Linux/PPC Yaboot bootloader
 </DESCRIPTION>
-<BOOT-SCRIPT>"
+<BOOT-SCRIPT>
+\" screen\" output
+dev screen
+\" \"(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)\" drop 0 7 set-colors
+\" \"(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)\" drop 8 15 set-colors
+device-end
+f to foreground-color
+0 to background-color"
 if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
 unset LOOPBLAH
 MY_MACOS_STRING=$(for i in `seq 1 $CONFIG_IMAGE_COUNT`;do
@@ -575,14 +578,7 @@ MY_STRING_WITH_SPACE_BAR=$MY_MACOS_STRING
 MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
 SPACE_BAR_HINT="MacOS"
 fi
-echo "\" screen\" output"
 # 1 is the timeout
-echo "dev screen"
-echo "\" \"(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)\" drop 0 7 set-colors"
-echo "\" \"(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)\" drop 8 15 set-colors"
-echo "device-end"
-echo "f to foreground-color"
-echo "0 to background-color"
 echo "\" \"(0C)\" fb8-write drop"
 echo "\" \"(0d 0a)\" fb8-write drop"
 echo "\"   press space to boot $SPACE_BAR_HINT ... \" fb8-write drop"
@@ -653,7 +649,7 @@ echo "
 </OS-BADGE-ICONS>
 </CHRP-BOOT>"
 else
-echo "\" screen\" output
+echo "
 \" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval
 </BOOT-SCRIPT>
 <OS-BADGE-ICONS>
@@ -729,9 +725,9 @@ hattrib -b $HFS_BOOTFOLDER
 hcd $HFS_BOOTFOLDER
 hcopy /tmp/ppc_lilo/os-chooser :os-chooser
 hcopy /tmp/ppc_lilo/yaboot.conf :yaboot.conf
-hcopy /boot/yaboot :yaboot
-hcopy /boot/Finder.bin :Finder
-hcopy /boot/System.bin :System
+hcopy /lib/lilo/pmac/yaboot :yaboot
+hcopy /lib/lilo/pmac/Finder.bin :Finder
+hcopy /lib/lilo/pmac/System.bin :System
 hattrib -t tbxi -c chrp os-chooser
 hattrib -t BINA -c UNIX "Mac OS Rom" 2>/dev/null
 hattrib -t BINA -c UNIX "install"    2>/dev/null
@@ -800,14 +796,6 @@ if [ "$MACHINE" = "pmac" ] ; then
 	fi
 fi
 } #end function check_arch
-
-function prepare_compatible_pmacs () {
-# strip comments and empty lines
-
-COMPATIBLE_MACHINES=$(sed 's-#.*$--' < $COMPATIBLE_LIST | grep -v "\(^\W$\|^$\)" )
-# echo $COMPATIBLE_MACHINES
-
-} #end function prepare_compatible_pmacs
 
 function prepare_config_file () {
 # strip comments and empty lines

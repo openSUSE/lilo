@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Sat Jan 31 21:22:55 CET 2004 - olh@suse.de
+
+- update to yaboot-1.3.11
+  update show_of_path.sh to use sysfs
+  update lilo to use MacRISC* instead of compatible_machines.txt
+  move files from /boot to /lib/lilo/
+  preserve lilo.conf in postinstall
+
+-------------------------------------------------------------------
 Tue Dec  2 16:06:53 CET 2003 - olh@suse.de
 
 - move /boot/lib/chrp/* to /lib/lilo 

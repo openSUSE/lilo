@@ -1,7 +1,7 @@
 #
-# spec file for package lilo (Version 0.0.9)
+# spec file for package lilo (Version 0.0.10)
 #
-# Copyright (c) 2003 SuSE Linux AG, Nuernberg, Germany.
+# Copyright (c) 2004 SuSE Linux AG, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
 #
@@ -10,25 +10,23 @@
 
 # norootforbuild
 # neededforbuild  
-# usedforbuild    aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libstdc++ libxcrypt m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-devel pam-modules patch permissions popt ps rcs readline sed sendmail shadow strace syslogd sysvinit tar texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils cracklib gcc gdbm gettext libtool perl rpm
+# usedforbuild    aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libselinux libstdc++ libxcrypt m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt ps pwdutils rcs readline sed sendmail strace syslogd sysvinit tar texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
 
 Name:         lilo
 Group:        System/Boot
 License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
 Requires:     hfsutils
+Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
-Version:      0.0.9
+Version:      0.0.10
 Release:      0
 Source0:      lilo-0.0.7.tar.bz2
-Patch0:       lilo-0.0.7.dif
-Source1:      compatible_machines.txt
 Source2:      boot-header-0.0.1.tar.bz2
 Source3:      lilo-21.tar.gz
-Source5:      yaboot-1.3.6.tar.gz
+Source5:      http://penguinppc.org/projects/yaboot/yaboot-1.3.11.tar.gz
 Patch5:       yaboot-1.3.6.dif
-Patch6:       yaboot-symlink-fix.diff
 Patch7:       yaboot-hole_data-journal.diff
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 # get rid of /usr/lib/rpm/brp-strip-debug 
@@ -60,26 +58,25 @@ Authors:
 %prep
 %setup -q -T -c -a 0 -a 2 -a 3 -a 5
 mv lilo-0.0.7	lilo.ppc
-mv yaboot-1.3.6 yaboot
+mv yaboot-1.3.11 yaboot
 cd yaboot
 %patch5
-%patch6 -p1
 %patch7 -p1
 cd ..
 
 %build
 cd yaboot
 make clean
-make DEBUG=1 VERSION=1.3.6.SuSE yaboot
+make DEBUG=1 VERSION=1.3.11.SuSE yaboot
 mv second/yaboot yaboot.debug
 make clean
-make DEBUG=0 VERSION=1.3.6.SuSE yaboot
+make DEBUG=0 VERSION=1.3.11.SuSE yaboot
 mv second/yaboot yaboot
 make clean
-make DEBUG=1 VERSION=1.3.6.SuSE yaboot.chrp
+make DEBUG=1 VERSION=1.3.11.SuSE yaboot.chrp
 mv second/yaboot.chrp yaboot.chrp.debug
 make clean
-make DEBUG=0 VERSION=1.3.6.SuSE yaboot.chrp
+make DEBUG=0 VERSION=1.3.11.SuSE yaboot.chrp
 mv second/yaboot.chrp yaboot.chrp
 cd ..
 cd lilo
@@ -88,8 +85,8 @@ cd ..
 
 %install
 rm -rfv $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/boot
-mkdir -p $RPM_BUILD_ROOT/lib/lilo
+mkdir -p $RPM_BUILD_ROOT/lib/lilo/chrp
+mkdir -p $RPM_BUILD_ROOT/lib/lilo/pmac
 mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
@@ -100,37 +97,43 @@ chmod 754 lilo.{old,new}
 cp -av lilo.old $RPM_BUILD_ROOT/sbin/lilo.old
 cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo
 cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
-cp -av Finder.bin $RPM_BUILD_ROOT/boot
-cp -av System.bin $RPM_BUILD_ROOT/boot
-cp -av %{SOURCE1} $RPM_BUILD_ROOT/boot
+cp -av Finder.bin $RPM_BUILD_ROOT/lib/lilo/pmac
+cp -av System.bin $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av README* $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av COPYING $RPM_BUILD_ROOT%{_docdir}/lilo/
-cp -av lilo.changes $RPM_BUILD_ROOT%{_docdir}/lilo/
 cd ..
 cd yaboot
-cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/boot/
-cp -av yaboot.chrp* $RPM_BUILD_ROOT/boot/
+cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/lib/lilo/pmac
+cp -av yaboot.chrp* $RPM_BUILD_ROOT/lib/lilo/chrp
 cd ..
 cd lilo
 install activate $RPM_BUILD_ROOT/sbin
 install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/lilo/activate
 install -m 644 CHANGES COPYING INCOMPAT README $RPM_BUILD_ROOT%{_docdir}/lilo/activate
+find $RPM_BUILD_ROOT/lib/lilo -type f -print0 | xargs -0 chmod a-x
+
+%triggerpostun  -- lilo < 0.0.10
+# for manual updates
+if [ -f /etc/lilo.conf.rpmsave -a ! -f /etc/lilo.conf ] ; then
+mv -v /etc/lilo.conf.rpmsave /etc/lilo.conf
+fi
+exit 0
 
 %files
 %defattr (-,root,root)
-/boot/Finder.bin
-/boot/System.bin
-/boot/compatible_machines.txt
-/boot/yaboot
-/boot/yaboot.debug
-/boot/yaboot.chrp*
-/lib/*
+/lib/lilo
 /sbin/activate
 /sbin/lilo*
 /bin/show_of_path.sh
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sat Jan 31 2004 - olh@suse.de
+- update to yaboot-1.3.11
+  update show_of_path.sh to use sysfs
+  update lilo to use MacRISC* instead of compatible_machines.txt
+  move files from /boot to /lib/lilo/
+  preserve lilo.conf in postinstall
 * Tue Dec 02 2003 - olh@suse.de
 - move /boot/lib/chrp/* to /lib/lilo
 * Wed Nov 13 2002 - olh@suse.de
