@@ -346,15 +346,17 @@ if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
 # macos or macosx is the default
 MY_STRING_WITH_SPACE_BAR=$MY_YABOOT_STRING
 MY_STRING_WITHOUT_SPACE_BAR=$MY_MACOS_STRING
+SPACE_BAR_HINT="MacOS"
 else
 #yaboot is the default
 MY_STRING_WITH_SPACE_BAR=$MY_MACOS_STRING
 MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
+SPACE_BAR_HINT="linux"
 fi
 echo "\" screen\" output"
 # 1 is the timeout
 echo "\" \"(0C)\" fb8-write drop"
-echo "\" press space ... \" fb8-write drop"
+echo "\" press space to boot $SPACE_BAR_HINT ... \" fb8-write drop"
 echo "get-msecs d# 3 3E8 * +"
 echo "begin"
 echo "  key? if"

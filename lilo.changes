@@ -1,7 +1,12 @@
 -------------------------------------------------------------------
+Sat Sep 15 22:09:56 CEST 2001 - olh@suse.de
+
+- make spacebar useage more clear
+
+-------------------------------------------------------------------
 Fri Sep 14 16:36:40 CEST 2001 - olh@suse.de
 
-- improve handling of spacbar in os-chooser
+- improve handling of spacebar in os-chooser
 
 -------------------------------------------------------------------
 Wed Sep  5 21:10:16 CEST 2001 - olh@suse.de

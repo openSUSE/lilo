@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.7
-Release:      46
+Release:      47
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
@@ -124,8 +124,10 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sat Sep 15 2001 - olh@suse.de
+- make spacebar useage more clear
 * Fri Sep 14 2001 - olh@suse.de
-- improve handling of spacbar in os-chooser
+- improve handling of spacebar in os-chooser
 * Wed Sep 05 2001 - olh@suse.de
 - fix specfile
 * Wed Sep 05 2001 - olh@suse.de
