@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Apr 26 14:09:03 CEST 2004 - jplack@suse.de
+
+- fixed show_of_path.sh: support for IPR controller and such #39033
+  mounts /sys if needed, #39380
+
+-------------------------------------------------------------------
 Fri Apr  2 14:54:33 CEST 2004 - jplack@suse.de
 
 - fixed show_of_path.sh: scsi_id and scsi_lun are given in hex instead of
