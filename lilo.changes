@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 21 11:30:41 CET 2005 - olh@suse.de
+
+- update chrp/chrp64/addRamdisk.sh to use make_zimage_chrp64.sh
+
+-------------------------------------------------------------------
 Fri Mar 18 14:39:19 CET 2005 - olh@suse.de
 
 - update chrp64 zImage bootheader for 2.6.7 kernels
