@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov 13 15:21:48 CET 2001 - olh@suse.de
+
+- double MAX_TOKEN size to allow large init-message
+
+-------------------------------------------------------------------
 Thu Nov  8 18:24:42 CET 2001 - olh@suse.de
 
 - the last yaboot patch screwed the older changes, apply them again

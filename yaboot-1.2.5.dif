@@ -1,5 +1,5 @@
 --- README
-+++ README	2001/11/08 17:23:28
++++ README	2001/11/13 14:20:36
 @@ -25,3 +25,23 @@
  "OldWorld" PowerMacs (with the old MacOS ROM buit-in) are not
  supported.
@@ -24,8 +24,19 @@
 +same goes for initrd and sysmap.
 +
 +
+--- cfg.c
++++ cfg.c	2001/11/13 14:21:00
+@@ -37,7 +37,7 @@
+     void *data;
+ } CONFIG;
+ 
+-#define MAX_TOKEN 200
++#define MAX_TOKEN 400
+ #define MAX_VAR_NAME MAX_TOKEN
+ #define EOF -1
+ 
 --- fs_reiserfs.c
-+++ fs_reiserfs.c	2001/11/08 17:23:28
++++ fs_reiserfs.c	2001/11/13 14:20:36
 @@ -94,7 +94,7 @@
  	return FILE_ERR_NOTFOUND;
      }
@@ -244,7 +255,7 @@
      dir_id = cpu_to_le32(REISERFS_ROOT_PARENT_OBJECTID);
      objectid = cpu_to_le32(REISERFS_ROOT_OBJECTID);
 --- yaboot.c
-+++ yaboot.c	2001/11/08 17:24:10
++++ yaboot.c	2001/11/13 14:20:36
 @@ -111,6 +111,7 @@
  char *password = NULL;
  int bootpartition = -1;
