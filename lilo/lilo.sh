@@ -49,6 +49,7 @@ else
   echo Installing /boot/yaboot.chrp onto $P
      dd if=/boot/yaboot.chrp of=$P
 fi
+
   if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
   fi
@@ -315,7 +316,8 @@ Linux/PPC Yaboot bootloader
 </DESCRIPTION>
 <BOOT-SCRIPT>"
 if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
-echo "\" get-key-map\" \" keyboard\" open-dev \$call-method
+echo "\" screen\" output
+\" get-key-map\" \" keyboard\" open-dev \$call-method
 dup 20 dump
 5 + c@ 08 = if
 \" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval
@@ -376,7 +378,8 @@ then
 </OS-BADGE-ICONS>
 </CHRP-BOOT>"
 else
-echo "\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval
+echo "\" screen\" output
+\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval
 </BOOT-SCRIPT>
 <OS-BADGE-ICONS>
 1010
@@ -473,6 +476,14 @@ done
 hpwd
 hls -ltr
 humount
+
+if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+  NV_BOOT_PATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
+  echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
+  nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
+fi
+
+
 }
 
 
@@ -550,7 +561,7 @@ while read option sarator value ; do
 		;;
 		activate)
 			if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				OPTION_ACTIVATE="$value"
+				OPTION_ACTIVATE="yes"
 			else 
 				echo activate option must not in an image section!
 				exit 1

@@ -22,7 +22,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.6
-Release:      3
+Release:      4
 Source0: 	lilo-0.0.6.tar.gz
 #Patch0:		lilo-0.0.6.dif
 Source3:	lilo-21.tar.gz
@@ -151,6 +151,12 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Jan 31 2001 - olh@suse.de
+- add " screen" output to lilo itself
+* Tue Jan 30 2001 - olh@suse.de
+- activate partitions via nvsetenv on new PowerMacs
+* Tue Jan 30 2001 - olh@suse.de
+- avoid screen garbage on chrp serial console
 * Tue Jan 30 2001 - olh@suse.de
 - disable " screen" output, doesnt work anyway
 * Sun Dec 17 2000 - olh@suse.de
