@@ -1,5 +1,5 @@
 --- cfg.c
-+++ cfg.c	2001/01/30 18:41:04
++++ cfg.c	2001/02/11 12:35:17
 @@ -48,6 +48,7 @@
      {cft_strg, "default", NULL},
      {cft_strg, "timeout", NULL},
@@ -9,7 +9,7 @@
      {cft_strg, "ramdisk", NULL},
      {cft_flag, "read-only", NULL},
 --- crt0.S
-+++ crt0.S	2001/01/30 18:41:04
++++ crt0.S	2001/02/11 12:35:17
 @@ -13,6 +13,16 @@
  	.long   (0x7c000164 + ((r20) << 21))
  	isync
@@ -28,7 +28,39 @@
  
  /*
 --- file.c
-+++ file.c	2001/01/30 18:41:04
++++ file.c	2001/02/11 12:37:46
+@@ -53,19 +53,19 @@
+ 		return of_device;
+ 	
+ 	last = ++p;
+-	while(*p && *p != ',') {
++	while(p && *p && *p != ',') {
+ 		if (*p < '0' || *p > '9') {
+ 			p = last;
+ 			break;
+ 		}
+ 		++p;
+ 	}
+-	if (p != last) {
++	if (p && p != last) {
+ 		*(p++) = 0;
+ 		if (partition)
+ 			*partition = strtol(last, NULL, 0);
+ 	}
+-	if (*p && file_spec)
++	if (p && *p && file_spec)
+ 		*file_spec = p;
+ 		
+ 	return of_device;
+@@ -196,7 +196,7 @@
+ 	static char	temp[1024];
+ 	static char	temps[64];
+ 	char		*dev_name;
+-	char		*file_name;
++	char		*file_name = NULL;
+ 	phandle		dev;
+ 	int		result;
+ 	int		partition;
 @@ -217,7 +217,8 @@
  	if (file_name == NULL)
  		file_name = (char *)spec->file;
@@ -40,7 +72,7 @@
  	}
  	if (partition == -1)
 --- include/yaboot.h
-+++ include/yaboot.h	2001/01/30 18:41:04
++++ include/yaboot.h	2001/02/11 12:35:17
 @@ -8,6 +8,7 @@
  	struct boot_fspec_t	rd;
  	struct boot_fspec_t	sysmap;
@@ -50,7 +82,7 @@
  	char*	args;
  };
 --- partition.c
-+++ partition.c	2001/01/30 18:41:04
++++ partition.c	2001/02/11 12:35:17
 @@ -243,9 +243,6 @@
  	if (desc->signature == MAC_DRIVER_MAGIC) {
  		/* pdisk partition format */
@@ -71,8 +103,27 @@
  	} else {
  		prom_printf("Not a macintosh-formatted disk !\n");
  		goto bail;
+--- util/elfextract.c
++++ util/elfextract.c	2001/02/11 12:39:16
+@@ -25,6 +25,7 @@
+     exit(1);
+ }
+ 
++int
+ main(int ac, char **av)
+ {
+     unsigned nb, len, i;
+@@ -32,7 +33,7 @@
+     Elf32_Phdr ph;
+     unsigned long phoffset, phsize, prevaddr;
+ 
+-    if (ac > 3 || ac > 1 && av[1][0] == '-') {
++    if (ac > 3 || (ac > 1 && av[1][0] == '-')) {
+ 	fprintf(stderr, "Usage: %s [elf-file [image-file]]\n", av[0]);
+ 	exit(0);
+     }
 --- yaboot.c
-+++ yaboot.c	2001/01/30 18:42:34
++++ yaboot.c	2001/02/11 12:38:51
 @@ -48,7 +48,7 @@
  
  #define CONFIG_FILE_NAME	"yaboot.conf"
@@ -97,6 +148,15 @@
  /* Locals & globals */
  
  int useconf = 0;
+@@ -238,7 +241,7 @@
+     fspec.part = partition;
+     result = open_file(&fspec, &file);
+     if (result != FILE_ERR_OK) {
+-    	prom_printf("Can't open config file, err: %d\n", result);
++    	prom_printf("Can't open config file '%s', err=%d\n", conf_path,result);
+ 	goto bail;
+     }
+     opened = 1;
 @@ -421,8 +424,14 @@
      params->rd.part = -1;
      params->sysmap.part = -1;
@@ -301,3 +361,12 @@
  	prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
  #if DEBUG
  	prom_printf("/chosen/bootpath = %s\n", bootdevice);
+@@ -1115,7 +1186,7 @@
+ 	if (bootdevice[0] == 0)
+ 		prom_get_options("boot-device", bootdevice, sizeof(bootdevice));
+ 	if (bootdevice[0] == 0) {
+-	    prom_printf("Coundn't determine boot device\n");
++	    prom_printf("Couldn't determine boot device\n");
+ 	    return -1;
+     	}
+     	parse_device_path(bootdevice, &bootpath, &bootpartition);

@@ -195,6 +195,25 @@ case "$DEVICE_NODENAME" in
 			echo ,"$FILENAME"
 		fi 
 	;;
+	hde*)
+		echo "ERROR: hde not configured, please edit $0"
+		exit 1
+#	choose the boot partition on the /dev/hdeX volume as active boot partition
+#	in the Startup Disk control panel in MacOS
+#	look in /proc/device-tree/options/boot-device for the correct string
+#	the string __could__ look like that:
+#	/pci@f2000000/pci-bridge@d/mac-io@7/ata-4@1f000/@0:9,\\:tbxi
+#							  ^ cut here
+#	put "/pci@f2000000/pci-bridge@d/mac-io@7/ata-4@1f000/@0" in the HDE_PATH variable
+
+			HDE_PATH="blah"
+			echo -n "$HDE_PATH":"$FILE_PARTITION"
+			if [ "$FILENAME" = "" ] ; then
+				echo
+			else
+				echo ,"$FILENAME"
+			fi 
+	;;
 	hd*)
                 PATH_IS_CDROM=$(grep "^drive name:" /proc/sys/dev/cdrom/info|grep ${DEVICE_NODENAME% *})
                 if [ -z "$PATH_IS_CDROM" ] ; then

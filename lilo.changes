@@ -1,4 +1,20 @@
 -------------------------------------------------------------------
+Sun Feb 11 14:05:22 CET 2001 - olh@suse.de
+
+- handle /dev/hde in show_of_path.sh
+
+-------------------------------------------------------------------
+Sun Feb 11 13:56:28 CET 2001 - olh@suse.de
+
+- skip initrd creation with 2.4 kernel and old pmacs
+  until the loop device is fixed
+
+-------------------------------------------------------------------
+Sun Feb 11 13:41:56 CET 2001 - olh@suse.de
+
+- add small fixes for chrp to yaboot
+
+-------------------------------------------------------------------
 Wed Jan 31 00:06:04 CET 2001 - olh@suse.de
 
 - add " screen" output to lilo itself

@@ -8,8 +8,8 @@
 # please send bugfixes or comments to feedback@suse.de.
 #
 
-# neededforbuild  tetex sash
-# usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cracklib db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare groff gzip kbd less libtool libz lx_suse make mktemp modutils ncurses ncurses-devel net-tools netcfg nkitb pam pam-devel patch perl pgp ps rcs rpm sash sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim xdevel xf86 xshared
+# neededforbuild  tetex
+# usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cracklib db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare groff gzip kbd less libtool libz make mktemp modutils ncurses ncurses-devel net-tools netcfg nkitb pam pam-devel patch perl pgp ps rcs rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim xdevel xf86 xshared
 
 Vendor:       SuSE GmbH, Nuernberg, Germany
 Distribution: SuSE Linux 7.2a (PPC)
@@ -22,7 +22,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.6
-Release:      4
+Release:      7
 Source0: 	lilo-0.0.6.tar.gz
 #Patch0:		lilo-0.0.6.dif
 Source3:	lilo-21.tar.gz
@@ -151,6 +151,13 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sun Feb 11 2001 - olh@suse.de
+- handle /dev/hde in show_of_path.sh
+* Sun Feb 11 2001 - olh@suse.de
+- skip initrd creation with 2.4 kernel and old pmacs
+  until the loop device is fixed
+* Sun Feb 11 2001 - olh@suse.de
+- add small fixes for chrp to yaboot
 * Wed Jan 31 2001 - olh@suse.de
 - add " screen" output to lilo itself
 * Tue Jan 30 2001 - olh@suse.de

@@ -46,8 +46,8 @@ if [ ! -z "`grep -i POWER /proc/cpuinfo`" ] ; then
   echo Installing /boot/yaboot.chrp.64 onto $P
      dd if=/boot/yaboot.chrp.64 of=$P
 else
-  echo Installing /boot/yaboot.chrp onto $P
-     dd if=/boot/yaboot.chrp of=$P
+  echo Installing /boot/yaboot onto $P
+     dd if=/boot/yaboot of=$P
 fi
 
   if [ "$OPTION_ACTIVATE" = "yes" ] ; then
@@ -69,8 +69,8 @@ if [ ! -z "`grep -i POWER /proc/cpuinfo`" ] ; then
   echo Installing /boot/yaboot.chrp.64 onto $OPTION_BOOT
      dd if=/boot/yaboot.chrp.64 of=$OPTION_BOOT
 else
-  echo Installing /boot/yaboot.chrp onto $OPTION_BOOT
-     dd if=/boot/yaboot.chrp of=$OPTION_BOOT
+  echo Installing /boot/yaboot onto $OPTION_BOOT
+     dd if=/boot/yaboot of=$OPTION_BOOT
 fi
   if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
@@ -190,12 +190,24 @@ DEVICENAME=${CONFIG_IMAGE_ROOT[$i]}
 done
 echo $DEVICENAME > /tmp/ppc_lilo/myrootdevice
 
-# generate a generic ramdisk
-gzip -vcd /boot/initrd.pmacold.gz > /tmp/ppc_lilo/initrd
-mount -o rw,loop /tmp/ppc_lilo/initrd /tmp/ppc_lilo/ramdisk
-cp -av /tmp/ppc_lilo/myrootdevice /tmp/ppc_lilo/ramdisk/myrootdevice
-umount /tmp/ppc_lilo/ramdisk
-gzip -9v /tmp/ppc_lilo/initrd
+case `cat /proc/sys/kernel/osrelease` in
+        2.2.*)
+                echo "running with 2.2 kernel, create initrd for miboot."
+		# generate a generic ramdisk
+		gzip -vcd /boot/initrd.pmacold.gz > /tmp/ppc_lilo/initrd
+		mount -o rw,loop /tmp/ppc_lilo/initrd /tmp/ppc_lilo/ramdisk
+		cp -av /tmp/ppc_lilo/myrootdevice /tmp/ppc_lilo/ramdisk/myrootdevice
+		umount /tmp/ppc_lilo/ramdisk
+		gzip -9v /tmp/ppc_lilo/initrd
+        ;;
+        2.4.*)
+                echo "the loop device in 2.4 is not safe."
+		echo "use a 2.2 kernel to create the ramdisk for miboot."
+                echo "skipping the initrd creation."
+                cat /proc/version
+        ;;
+esac
+
 
 # umount the boot = partition, or exit if that fails
 mount | grep -q "$OPTION_BOOT"
