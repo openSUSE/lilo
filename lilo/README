@@ -1,18 +1,23 @@
 
 This is a simple lilo for ppc.
-In fact, it copies files around. PowerMac new and CHRP is currently supported.
-Support for PowerMac old and for PReP is planned. But two problems needs to be 
-solved:
-- On PReP we have no real bootloader because we can not acces any device at boot
-time. The kernel arguments are hardcoded in the zvmlinux binary, we need a way 
-to modify that without recompiling the kernel.
-- On older PowerMacs miboot should be used, quik might be possible. 
-However, miboot can not read a config file right now. This will be changed in
-the next time. The current System.bin must be modified with ResEdit,
-the root= is missing. Edit th CMDL ressource with Resedit and add the required 
-options. Example:
-root=/dev/sda7 video=atyfb:vmode17
+In fact, it copies files around. PowerMac and CHRP is currently supported.
 
+But two problems needs to be solved:
+- On PReP we have no real bootloader because we can not acces any device
+  at boot time. The kernel arguments are hardcoded in the zvmlinux binary,
+  we need a way to modify that without recompiling the kernel. 
+  We have to modify that cmd_buf[256] symbol somehow.
+- On older PowerMacs miboot should be used, quik might be possible. 
+  However, miboot can not read a config file right now. This will be
+  changed in the next time. The current System.bin loads always a
+  ramdisk.image.gz from a folder ":linuxboot:". lilo will store the root
+  device in a file called "myrootdevice" and linuxrc stores that in
+  real-root-dev. After linuxrc quits, the kernel mount the new value as
+  root device and starts init.
+  You can modify the /boot/System.bin with vi as example. But be very
+  very careful when doing that, don't change the length of the file!
+  Edit the file in replace mode. Look for "root=/dev/fd0". There are
+  some whitespaces, you can enter your own stuff here.
 
 You need hfsutils to copy files to your HFS bootpartition on a PowerMac.
 
@@ -45,5 +50,39 @@ image = /boot/vmlinux
 other = /dev/hda6
         label = macos   
 
+
+
+The lilo.conf syntax:
+- global options
+
+boot =
+ This is the partition number of your boot partition. On a
+ PowerMac it must be in HFS format because we use the hfsutils to
+ copy the files to that partition. On CHRP you need a 41 PReP
+ boot partition, /boot/second from the quik package is stored there.
+default =
+ The label that should be booted per default. Must be present.
+timeout =
+ Time to wait for user input. Not implemented on Pmac old.  10 = 1 sec
+bootfolder =
+ Only for Pmac. Folder that contains your boot stuff, this
+ folder will be blessed to mark it bootable.
+image = 
+ Path to a kernel image. At least one must be specified.
+
+- per image options
+root =
+  The partition for the root device, must be specified
+label =
+ label of the image section. 
+append =
+ appendline for optional kernel parameters
+initrd =
+ optional path to an initrd.
+copy 
+ flag to force copy of the kernel and initrd to the boot partition.
+ Always true on pmac old because miboot can't access ext2 partitions
+other = 
+ The partition of another OS, usualy MacOS.
 
 

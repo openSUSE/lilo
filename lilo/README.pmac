@@ -1,0 +1,103 @@
+Some infos how to install lilo on a PowerMacintosh:
+
+Preparing the partitions:
+You _need_ a disk with a pdisk label in any case. If MacOS is installed
+on your machine this is already the case. The bootloader must be
+installed on a partition with the type "Apple_HFS" in HFS format.
+A size of 32MB is ok.
+I would not recommend to use a partition type other than "Apple_HFS"
+because this will hide the partition in MacOS and you can not modify the
+data (like yaboot.conf or replacing the kernel)
+Note: There are some reports that MacOS will remove the blessing of the
+      faked Systemfolder. I had never expirenced that with MacOS 8.51
+      and later. If your MacOS remove the blessing, please drop me a
+      note.  <olh@suse.de>
+
+The partition can be formated later with the command hformat of the
+hfsutils (only required when the partition is in HFS+ or unformated!):
+
+dd if=/dev/zero of=/dev/my_hfs_linuxboot_partition
+hformat /dev/my_hfs_linuxboot_partition 
+
+hformat fails sometimes when the partition is already formated, dd wipes
+anything out.
+
+
+
+
+Prepare the config file:
+Edit the file /etc/lilo.conf and modify it for _your_ needs:
+
+# example
+boot=/dev/my_hfs_linuxboot_partition
+timeout=100
+default=linux
+image=/boot/vmlinux
+	label=linux
+	append="my_kernel_args"
+	root=/dev/my_current_root_partition
+image=/boot/vmlinux
+	label=install
+	append="ramdisk_size=10000"
+	root=/dev/fd0
+	initrd=/boot/initdisk.gz
+	copy
+other=/dev/my_macos_partition
+	label=mymacos
+
+
+
+The other= section should point to your MacOS installation. It is
+optional, if you leave it out the os-chooser script contains only one
+single boot line.
+The "copy" flag copies your kernel to your boot partition. This is
+usualy not the case when the files are accessible from the OpenFirmware.
+It is supposed as a fallback when you can't boot your root partition
+anymore. The ramdisk can act as a rescue disk in this case.
+
+Of course, the initrd, copy, append options are optional and must not be
+specified. A minimal lilo.conf can only contian the first section and
+the boot,timeout and default option.
+
+Please choose the boot partition in the MacOS control panel "Startup
+disk", this is the safest way.
+
+How does it work on a newworld machine?:
+Starting with the iMac Apple changed the bootstrap process. The MacOS
+ROM file is now one the hard disk and not builtin anymore. This can be
+used to boot the Linux bootloader instead of the MacOS Rom File.
+We use the bootloader yaboot to boot the kernel finally. 
+At first we need a valid System folder. The Startup volume control panel
+accepts only volumes with a valid System folder. We prepare a faked
+folder with a Finder, System and the MacOS Rom file. The latter is a
+simple script that gives you the choice at boot time (with spacebar) between
+two partitions, usualy MacOS and the yaboot partition.
+
+How does it work on an oldworld machine?:
+The oldworld machines can be booted via bootx, miboot or quik. quik is
+proably too complicated for most users. But it seems to be required for
+SMP machines.
+BootX is the easiest way if you want dual boot.
+lilo uses miboot to boot Linux.
+Miboot is supposed for Linux only boxes. Unfortunately the miboot can't
+read a config file right now. But most users have only to specify the
+root device. This can be done with an initrd, and this is the way lilo
+works on oldworld macs. 
+The specified root device will be stored in an initrd file. This value
+will be written to the kernel at boot time. After the initrd is
+unmounted the new root device will be active.
+You can (with care!) modify the System.bin file to add your own
+parameters, look for the string "root=/dev/fd0". But be very careful
+when changing the file, don't change the length of the file!
+
+What kernels to use?
+If you do a 
+make menuconfig dep clean zImage modules modules_install
+
+you will finally find some usable kernel files in /usr/src/linux:
+./vmlinx   plain kernel, can be booted with BootX,miboot and yaboot
+./arch/ppc/coffboot/miboot.image  compressed image for miboot 
+./arch/ppc/coffboot/vmlinux.elf   compressed image for yaboot, broken
+./arch/ppc/coffboot/vmlinux.gz    gzipped kernel for BootX
+
+

@@ -1,4 +1,59 @@
 -------------------------------------------------------------------
+Fri Dec  1 11:44:54 CET 2000 - olh@suse.de
+
+- remove quik, build debug binaries on CHRP
+
+-------------------------------------------------------------------
+Tue Oct 24 18:00:55 CEST 2000 - olh@suse.de
+
+- clear BSS on chrp, fix typo in /sbin/lilo, use always yaboot.conf
+
+-------------------------------------------------------------------
+Thu Oct 12 00:02:23 CEST 2000 - olaf@suse.de
+
+- update to yaboot 0.9 for chrp only, allows bootable CDs
+
+-------------------------------------------------------------------
+Mon Oct  9 23:08:07 CEST 2000 - olh@suse.de
+
+- add POWER3 support to install yaboot.chrp{,.64}
+
+-------------------------------------------------------------------
+Fri Sep 29 16:35:29 CEST 2000 - olh@suse.de
+
+- disable debug on chrp
+
+-------------------------------------------------------------------
+Wed Sep 27 18:01:05 CEST 2000 - olh@suse.de
+
+- exit when no boot= is specified
+
+-------------------------------------------------------------------
+Wed Sep 27 14:21:38 CEST 2000 - olh@suse.de
+
+- disable debug in yaboot.chrp, fix <NULL> output in defaultimage 
+
+-------------------------------------------------------------------
+Thu Sep 21 19:02:02 CEST 2000 - olh@suse.de
+
+- fix show_of_path, lilo.sh and yaboot.c at once
+
+-------------------------------------------------------------------
+Thu Sep 21 09:57:01 CEST 2000 - olh@suse.de
+
+- update yaboot for chrp, update lilo to handle chrp
+
+-------------------------------------------------------------------
+Mon Sep 11 15:01:15 CEST 2000 - olh@suse.de
+
+- add video=platinumfb:cmode:8 to System.bin, prevents garbage
+
+-------------------------------------------------------------------
+Sun Sep 10 23:54:31 CEST 2000 - olh@suse.de
+
+- update to 0.0.6, update yaboot to 0.8
+
+-------------------------------------------------------------------
 Thu Jul 20 04:14:30 CEST 2000 - olh@suse.de
 
 - update lilo to 0.0.3 

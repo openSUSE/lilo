@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# find a OF bootpath on Apple PowerMacs Newworld machines
+# find a OF bootpath on Apple PowerMacintosh Newworld machines
 # olh@suse.de (2000)
 #
 # When booting via BootX then all symlinks are gone ...
@@ -10,6 +10,8 @@
 #
 # Changes
 #
+# 2000-08-09  use hd as alias for hda instead of ultra0
+# 2000-08-04  run only on pmac new
 # 2000-07-19  remove sr* and scd*, not supported yet.
 # 2000-07-11  add mesh for Lombard PowerBook
 # 2000-07-10  finished the scsi path names for aic and symb
@@ -24,6 +26,20 @@
 # 2000-01-30  first try with scsi hosts
 #
 
+# check if we run on a NewWorld PowerMacintosh
+if [ -f /proc/device-tree/openprom/model ] ; then
+        while read openfirmware ofversion; do
+                case "$openfirmware" in
+                OpenFirmware)      MACHINE="pmac_new" ;;
+                Open)      MACHINE="pmac_old" ;;
+                esac
+        done < <(cat /proc/device-tree/openprom/model;echo)
+fi
+
+test "$MACHINE" = "pmac_old" && {
+echo ERROR: This machine is an Oldworld, no need for firmware pathnames
+exit 1
+}
 
 # argument must be a file
 FILENAME="$1"
@@ -152,22 +168,32 @@ case "$DEVICE_NODENAME" in
 	hda*)
 		PATH_IS_CDROM=$(grep "^drive name:" /proc/sys/dev/cdrom/info|grep hda)
 		if [ -z "$PATH_IS_CDROM" ] ; then
-			HDA_PATH=$(cat /proc/device-tree/aliases/ultra0)
-			echo "ultra0":"$FILE_PARTITION","$FILENAME"
+			HDA_PATH=$(cat /proc/device-tree/aliases/hd)
+			echo -n "hd":"$FILE_PARTITION"
 		else
 			HDA_PATH=$(cat /proc/device-tree/aliases/cd)
-			echo "cd":"$FILE_PARTITION","$FILENAME"
+			echo -n "cd":"$FILE_PARTITION"
 		fi
+		if [ "$FILENAME" = "" ] ; then
+			echo
+		else
+			echo ,"$FILENAME"
+		fi 
 	;;
 	hdb*)
 		PATH_IS_CDROM=$(grep "^drive name:" /proc/sys/dev/cdrom/info|grep hdb)
 		if [ -z "$PATH_IS_CDROM" ] ; then
 			HDA_PATH=$(cat /proc/device-tree/aliases/ultra1)
-			echo "ultra1":"$FILE_PARTITION","$FILENAME"
+			echo -n "ultra1":"$FILE_PARTITION"
 		else
 			HDA_PATH=$(cat /proc/device-tree/aliases/cd)
-			echo "cd":"$FILE_PARTITION","$FILENAME"
+			echo -n "cd":"$FILE_PARTITION"
 		fi
+		if [ "$FILENAME" = "" ] ; then
+			echo
+		else
+			echo ,"$FILENAME"
+		fi 
 	;;
 	hd*)
                 PATH_IS_CDROM=$(grep "^drive name:" /proc/sys/dev/cdrom/info|grep ${DEVICE_NODENAME% *})
@@ -175,7 +201,12 @@ case "$DEVICE_NODENAME" in
                         echo ERROR: device ${DEVICE_NODENAME% *} not yet supported
                 else
                         HDA_PATH=$(cat /proc/device-tree/aliases/cd)
-                        echo "cd":"$FILE_PARTITION","$FILENAME"
+                        echo -n "cd":"$FILE_PARTITION"
+			if [ "$FILENAME" = "" ] ; then
+				echo
+			else
+				echo ,"$FILENAME"
+			fi 
                 fi
 	;;
 	*)
