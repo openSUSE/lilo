@@ -26,7 +26,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      34
+Release:      35
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch5:       yaboot-1.3.6.dif
@@ -150,6 +150,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Jun 03 2004 - jplack@suse.de
+- entries without initrd have been errornously ignored
 * Tue Jun 01 2004 - jplack@suse.de
 - fixed #41333, do of screen init
 * Fri May 28 2004 - jplack@suse.de

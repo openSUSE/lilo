@@ -328,10 +328,6 @@ function running_on_chrp () {
 		    initrd_copy[$initrd_nr]="$image"
 		    CONFIG_IMAGE_INITRD[$i]=$(printf "initrd.%03d\n" $initrd_nr)
 		fi
-	    else
-		echo >&2 "Warning: initrd ${CONFIG_IMAGE_INITRD[$i]} in ${CONFIG_IMAGE_LABEL[$i]} is missing"
-		echo >&2 "         Entry ignored"
-		continue
 	    fi
 
 	    echo "image = ${CONFIG_IMAGE_FILE[$i]}"

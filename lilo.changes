@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun  3 16:46:02 CEST 2004 - jplack@suse.de
+
+- entries without initrd have been errornously ignored
+
+-------------------------------------------------------------------
 Tue Jun  1 17:55:50 CEST 2004 - jplack@suse.de
 
 - fixed #41333, do of screen init
