@@ -151,6 +151,7 @@ while [ "$1" ]; do case "$1" in
 	;;
 esac; done
 
+
 function running_on_chrp () {
     echo running on chrp
 
@@ -399,7 +400,7 @@ function running_on_chrp () {
 	# to one FAT partition
 
 	# check size of partition OPTION_BOOT, must fit at least the default kernel
-	local -i bootsize=$(( (p_end[partition]-p_start[partition])/500 ))	# size in blocks
+	local -i bootsize=$(( (p_end[partition]-p_start[partition])*2 ))	# size in blocks
 	
 	# check if default image/initrd fits, add overhead of 180 blocks approx.
 	local -i defaultsize=$(( 180 + $(fsize /lib/lilo/chrp/yaboot.fat) + $(fsize $TEMP/yaboot.conf) ));
@@ -408,7 +409,11 @@ function running_on_chrp () {
 
 	if (( bootsize < defaultsize )); then
 	    # may be resize of the partition is possible and helps?
-	    if (( (p_start[partition+1]-p_start[partition])/500 < defaultsize )); then
+	    if (( (p_start[partition+1]-p_start[partition])*2  < defaultsize )); then
+		echo $bootsize \< $defaultsize
+		echo ${p_start[$partition]}
+		echo ${p_start[$((partition+1))]}
+		bash
 		error "Boot partition '$OPTION_BOOT' cannot hold $defaultsize blocks"
 	    fi
 	    echo >&2 "Warning: Extending boot partition $OPTION_BOOT, using free disk space"
@@ -417,13 +422,13 @@ function running_on_chrp () {
 	    if ! { $PARTED $device rm $partition &&
 		$PARTED $device mkpart primary $start $end &&
 		$PARTED $device set $partition type 6; } >& /dev/null
-	    then
-		error "Partition extension failed for $OPTION_BOOT"  
+	      then
+		  error "Partition extension failed for $OPTION_BOOT"  
 	    fi
 	fi
 
 	# make it error friendly (tm) and try to unmount boot partition
-	[[ $(</proc/mounts) == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
+	[[ "$(</proc/mounts)" == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
 
 	# create the FAT partition and file system on $OPTION_BOOT
 	if [[ "${fat_part[*]} " != *$OPTION_BOOT\ * ]]; then
@@ -507,8 +512,9 @@ function running_on_chrp () {
 	cp $TEMP/yaboot.conf /etc/yaboot.conf || exit 2
 	echo "Converted /etc/lilo.conf to /etc/yaboot.conf"
     fi
+
     # TODO check whether this is neccessary
-    if [[ ${p_flags[$partition] != *boot* ]]; then
+    if [[ ${p_flags[$partition]} != *boot* ]]; then
 	$PARTED $device set $partition boot on >& /dev/null
     fi
 
@@ -820,13 +826,13 @@ function real_device () {
 function device_of_file () {
     # print device number in decimal given a file path
     local f="$1";
-
+    
     if [ ! -x $STAT_CMD -o -z "$f" ]; then
 	# be nice if /usr not mounted
 	echo 0000
 	return;
     fi
-
+    
     $STAT_CMD --format="%d" $f
 }
 
@@ -834,7 +840,7 @@ function device_of_file () {
 function device_nr () {
     # print device number in decimal given a path to a device node
     local d="$1"
-
+    
     if [ ! -x $STAT_CMD ]; then
 	# be nice if /usr not mounted
 	echo 0000

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May 25 18:13:23 CEST 2004 - jplack@suse.de
+
+- ugly typo fixed / lilo stopped execution 
+
+-------------------------------------------------------------------
 Tue May 25 01:30:38 CEST 2004 - jplack@suse.de
 
 - remove moint point from OF path in show_of_path.sh (#40999)
