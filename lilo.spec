@@ -18,13 +18,13 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.7
-Release:      35
+Release:      42
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
 Source3:	lilo-21.tar.gz
-Source5:	yaboot-1.2.1.tar.gz
-Patch5:		yaboot-1.2.1.dif
+Source5:	yaboot-1.2.3.tar.gz
+Patch5:		yaboot-1.2.3.dif
 Buildroot:	/var/tmp/buildroot-lilo
 
 %description
@@ -38,32 +38,32 @@ can be booted instead of a real OS and doing a memory test.
 
 Authors:
 --------
-    John Coffman <JohnInSD@san.rr.com>
-    Werner Almesberger <Werner.Almesberger@epfl.ch>
-    PowerPC part:
-    Paul Mackeras <paulus@linuxcare.com.au>
-    Cort Dougan <cort@fsmlabs.com>
-    Benjamin Herrenschmidt <bh40@calva.net>
-    Memtest86:
-    Chris Brady <cbrady@sgi.com>
+    John Coffman <JohnInSD@san.rr.com> 
+    Werner Almesberger <Werner.Almesberger@epfl.ch> 
+    PowerPC part: 
+    Paul Mackeras <paulus@linuxcare.com.au> 
+    Cort Dougan <cort@fsmlabs.com> 
+    Benjamin Herrenschmidt <bh40@calva.net> 
+    Memtest86: 
+    Chris Brady <crsbrady@earthlink.net>
 
 SuSE series: a
 
 %prep
 %setup -q -T -c -a 0 -a 3 -a 5
 mv lilo-0.0.6	lilo.ppc
-mv yaboot-1.2.1 yaboot
+mv yaboot-1.2.3 yaboot
 cd yaboot
 %patch5
 cd ..
 
 %build
 cd yaboot
-make DEBUG=1 VERSION=1.2.1.SuSE
+make DEBUG=1 VERSION=1.2.3.SuSE
 mv yaboot yaboot.debug
 mv yaboot.chrp yaboot.chrp.debug
 make clean
-make DEBUG=0 VERSION=1.2.1.SuSE
+make DEBUG=0 VERSION=1.2.3.SuSE
 cd ..
 cd lilo
 make activate
@@ -79,8 +79,8 @@ mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
 cd lilo.ppc
 chmod 755 show_of_path.sh
 chmod 754 lilo.sh
-cp -av lilo.sh $RPM_BUILD_ROOT/sbin/lilo
-cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo.new
+cp -av lilo.old $RPM_BUILD_ROOT/sbin/lilo.old
+cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo
 cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
 cp -av Finder.bin $RPM_BUILD_ROOT/boot
 cp -av System.bin $RPM_BUILD_ROOT/boot
@@ -124,6 +124,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Sep 05 2001 - olh@suse.de
+- update yaboot to 1.2.3, use new os-chooser version per default
 * Tue Aug 14 2001 - olh@suse.de
 - fix filelist
 * Mon Aug 13 2001 - olh@suse.de
