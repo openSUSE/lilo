@@ -1,5 +1,5 @@
 #
-# spec file for package lilo (Version 0.0.6)
+# spec file for package lilo (Version 0.0.7)
 # 
 # Copyright  (c)  2001  SuSE GmbH  Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -9,26 +9,22 @@
 #
 
 # neededforbuild  tetex
-# usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cracklib db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare groff gzip kbd less libtool libz make mktemp modutils ncurses ncurses-devel net-tools netcfg nkitb pam pam-devel patch perl pgp ps rcs rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim xdevel xf86 xshared
+# usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cracklib db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel patch perl ps rcs readline rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
 
-Vendor:       SuSE GmbH, Nuernberg, Germany
-Distribution: SuSE Linux 7.2a (PPC)
 Name:         lilo
-Packager:     feedback@suse.de
-
 Group: 	System Environment/Base
 Copyright:      GPL
 Obsoletes:	yaboot activate quik 
 Requires:	hfsutils
 Summary:      LInux LOader
-Version:      0.0.6
-Release:      7
+Version:      0.0.7
+Release:      5
 Source0: 	lilo-0.0.6.tar.gz
 #Patch0:		lilo-0.0.6.dif
 Source3:	lilo-21.tar.gz
 Source4:	linuxrc-1.1.13.olh.tar.gz
-Source5:	yaboot_0.9.tar.gz
-Patch5:		yaboot_0.9.dif
+Source5:	yaboot-1.1.1.tar.gz
+Patch5:		yaboot-1.1.1.dif
 Buildroot:	/var/tmp/buildroot-lilo
 
 %description
@@ -56,23 +52,18 @@ SuSE series: a
 %setup -q -T -c -a 0 -a 3 -a 4 -a 5
 mv lilo-0.0.6	lilo.ppc
 mv linuxrc-1.1.13.olh	linuxrc
-mv yaboot_0.9	yaboot
+mv yaboot-1.1.1 yaboot
 cd yaboot
 %patch5
 cd ..
 
 %build
 cd yaboot
-make DEBUG=0 VERSION=0.9.chrp64.SuSE CONFIG_PPC64BRIDGE=y
-mv yaboot yaboot.chrp.64
-make clean
-make DEBUG=1 VERSION=0.9.chrp64.SuSE CONFIG_PPC64BRIDGE=y
-mv yaboot yaboot.chrp.64.debug
-make clean
-make DEBUG=1 VERSION=0.9.SuSE CONFIG_PPC64BRIDGE=n
+make DEBUG=1 VERSION=1.1.1.SuSE
 mv yaboot yaboot.debug
+mv yaboot.chrp yaboot.chrp.debug
 make clean
-make DEBUG=0 VERSION=0.9.SuSE CONFIG_PPC64BRIDGE=n
+make DEBUG=0 VERSION=1.1.1.SuSE
 cd ..
 cd lilo
 make activate
@@ -135,7 +126,6 @@ make -C doc all
 ( cd doc ; gzip -f user.ps )
 ( cd doc ; install -m 644 user.ps.gz $RPM_BUILD_ROOT%{_docdir}/lilo/activate/ )
 cd ..
-%{?suse_check}
 
 %files
 /boot/Finder.bin
@@ -151,6 +141,19 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Fri Mar 09 2001 - olh@suse.de
+- rename os-chooser to Mac OS Rom
+  add some support for Mac OS X to lilo.conf
+* Mon Mar 05 2001 - olh@suse.de
+- add PowerMac4,1 for new flower power iMacs
+* Tue Feb 27 2001 - olh@suse.de
+- add PowerMac3,4 for new G4/466
+* Tue Feb 27 2001 - olh@suse.de
+- enable initrd creation again, loop-6 fix most problems
+* Tue Feb 27 2001 - olh@suse.de
+- update to 0.0.7
+  update yaboot to 1.1.1, obsoletes chrp64 binary
+  change /sbin/lilo to handle the new files
 * Thu Feb 15 2001 - olh@suse.de
 - disable misleading debug printf in yaboot
 * Wed Feb 14 2001 - olh@suse.de

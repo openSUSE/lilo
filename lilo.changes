@@ -1,4 +1,32 @@
 -------------------------------------------------------------------
+Fri Mar  9 19:45:11 CET 2001 - olh@suse.de
+
+- rename os-chooser to Mac OS Rom
+  add some support for Mac OS X to lilo.conf
+
+-------------------------------------------------------------------
+Mon Mar  5 19:24:37 CET 2001 - olh@suse.de
+
+- add PowerMac4,1 for new flower power iMacs
+
+-------------------------------------------------------------------
+Tue Feb 27 16:00:32 CET 2001 - olh@suse.de
+
+- add PowerMac3,4 for new G4/466 
+
+-------------------------------------------------------------------
+Tue Feb 27 14:51:33 CET 2001 - olh@suse.de
+
+- enable initrd creation again, loop-6 fix most problems
+
+-------------------------------------------------------------------
+Tue Feb 27 12:52:26 CET 2001 - olh@suse.de
+
+- update to 0.0.7 
+  update yaboot to 1.1.1, obsoletes chrp64 binary
+  change /sbin/lilo to handle the new files
+
+-------------------------------------------------------------------
 Thu Feb 15 16:17:59 CET 2001 - olh@suse.de
 
 - disable misleading debug printf in yaboot

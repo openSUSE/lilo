@@ -42,13 +42,8 @@ if [ "$OPTION_PARTITION" = "" ] ; then
   fi
   P=`echo "$PART" | awk '{print $1}'`
 
-if [ ! -z "`grep -i POWER /proc/cpuinfo`" ] ; then
-  echo Installing /boot/yaboot.chrp.64 onto $P
-     dd if=/boot/yaboot.chrp.64 of=$P
-else
-  echo Installing /boot/yaboot onto $P
-     dd if=/boot/yaboot of=$P
-fi
+echo Installing /boot/yaboot.chrp onto $P
+dd if=/boot/yaboot.chrp of=$P
 
   if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
@@ -65,13 +60,8 @@ else
      echo "*********************************************************"
   exit -1
   fi
-if [ ! -z "`grep -i POWER /proc/cpuinfo`" ] ; then
-  echo Installing /boot/yaboot.chrp.64 onto $OPTION_BOOT
-     dd if=/boot/yaboot.chrp.64 of=$OPTION_BOOT
-else
-  echo Installing /boot/yaboot onto $OPTION_BOOT
-     dd if=/boot/yaboot of=$OPTION_BOOT
-fi
+echo Installing /boot/yaboot.chrp onto $OPTION_BOOT
+dd if=/boot/yaboot.chrp of=$OPTION_BOOT
   if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 /sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
   fi
@@ -190,24 +180,12 @@ DEVICENAME=${CONFIG_IMAGE_ROOT[$i]}
 done
 echo $DEVICENAME > /tmp/ppc_lilo/myrootdevice
 
-case `cat /proc/sys/kernel/osrelease` in
-        2.2.*)
-                echo "running with 2.2 kernel, create initrd for miboot."
-		# generate a generic ramdisk
-		gzip -vcd /boot/initrd.pmacold.gz > /tmp/ppc_lilo/initrd
-		mount -o rw,loop /tmp/ppc_lilo/initrd /tmp/ppc_lilo/ramdisk
-		cp -av /tmp/ppc_lilo/myrootdevice /tmp/ppc_lilo/ramdisk/myrootdevice
-		umount /tmp/ppc_lilo/ramdisk
-		gzip -9v /tmp/ppc_lilo/initrd
-        ;;
-        2.4.*)
-                echo "the loop device in 2.4 is not safe."
-		echo "use a 2.2 kernel to create the ramdisk for miboot."
-                echo "skipping the initrd creation."
-                cat /proc/version
-        ;;
-esac
-
+# generate a generic ramdisk
+gzip -vcd /boot/initrd.pmacold.gz > /tmp/ppc_lilo/initrd
+mount -o rw,loop /tmp/ppc_lilo/initrd /tmp/ppc_lilo/ramdisk
+cp -av /tmp/ppc_lilo/myrootdevice /tmp/ppc_lilo/ramdisk/myrootdevice
+umount /tmp/ppc_lilo/ramdisk
+gzip -9v /tmp/ppc_lilo/initrd
 
 # umount the boot = partition, or exit if that fails
 mount | grep -q "$OPTION_BOOT"
@@ -321,19 +299,29 @@ echo "BOOT_DEVICEPATH  =  $BOOT_DEVICEPATH"
 echo "OTHER_DEVICEPATH  =  $OTHER_DEVICEPATH"
 (echo "<CHRP-BOOT>
 <COMPATIBLE>
-iMac,1 PowerMac1,1 PowerBook1,1 PowerMac2,1 PowerMac3,1 PowerBook2,1 PowerBook3,1 PowerMac2,2 PowerBook2,2 PowerMac3,3 PowerMac5,1 PowerBook3,2
+iMac,1 PowerMac1,1 PowerBook1,1 PowerMac2,1 PowerMac3,1 PowerBook2,1 PowerBook3,1 PowerMac2,2 PowerBook2,2 PowerMac3,3 PowerMac5,1 PowerBook3,2 PowerMac3,4 PowerMac4,1
 </COMPATIBLE>
 <DESCRIPTION>
 Linux/PPC Yaboot bootloader
 </DESCRIPTION>
 <BOOT-SCRIPT>"
 if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
-echo "\" screen\" output
-\" get-key-map\" \" keyboard\" open-dev \$call-method
+echo "\" get-key-map\" \" keyboard\" open-dev \$call-method
 dup 20 dump
-5 + c@ 08 = if
-\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval
-else
+5 + c@ 08 = if"
+unset LOOPBLAH
+for i in `seq 1 $CONFIG_IMAGE_COUNT`;do
+ if [ ! -z "${CONFIG_IMAGE_OTHER[$i]}" -a -z "$LOOPBLAH" ] ; then
+ LOOPBLAH=true
+   if [ "${CONFIG_IMAGE_LABEL[$i]}" = "macosx" ] ; then
+     echo "\" Booting Mac OS X ...\" cr \" boot $OTHER_DEVICEPATH,System\\Library\\CoreServices\\BootX\" eval"
+   else
+     echo "\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
+   fi
+ fi
+done
+echo "else
+\" screen\" output
 \" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval
 then
 </BOOT-SCRIPT>
@@ -464,12 +452,12 @@ fi
 hmkdir $HFS_BOOTFOLDER 2>/dev/null
 hattrib -b $HFS_BOOTFOLDER
 hcd $HFS_BOOTFOLDER
-hcopy /tmp/ppc_lilo/os-chooser :os-chooser
+hcopy /tmp/ppc_lilo/os-chooser :Mac\ OS\ Rom
 hcopy /tmp/ppc_lilo/yaboot.conf :yaboot.conf
 hcopy /boot/yaboot :yaboot
 hcopy /boot/Finder.bin :Finder
 hcopy /boot/System.bin :System
-hattrib -t tbxi -c chrp os-chooser
+hattrib -t tbxi -c chrp Mac\ OS\ Rom
 hattrib -t FNDR -c MACS Finder
 hattrib -t zsys -c MACS System
 hattrib -t TEXT -c "R*ch" yaboot.conf

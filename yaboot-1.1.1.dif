@@ -1,0 +1,153 @@
+diff -urN CHANGES CHANGES
+--- CHANGES	Mon Feb 19 09:04:39 2001
++++ CHANGES	Tue Feb 27 10:58:57 2001
+@@ -1,3 +1,11 @@
++Feb 27. 2001 - 1.1.1
++
++ - use the correct pathname to yaboot,ramdisk and sysmap when the files
++   are locatet in :\\filename and yaboot.conf contains "image=filename"
++ - use addnote to provide yaboot.chrp and yaboot.chrp64 for CHRP machines
++ - print image name instead of <NULL> when timeout= is active
++ - load image from ISO CD fixed
++   
+ Feb 18. 2001 - 1.1
+ 
+  - Added a few Makefile cleanup & fixes (Ethan Benson, Peter Bergner)
+diff -urN Makefile Makefile
+--- Makefile	Mon Feb 19 09:04:39 2001
++++ Makefile	Tue Feb 27 12:23:30 2001
+@@ -98,8 +98,11 @@
+ yaboot: $(OBJS) addnote
+ 	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o $@
+ 	strip $@
++	cp -v $@ $@.chrp
++	./util/addnote $@.chrp
+ ifeq ($(CONFIG_PPC64BRIDGE),y)
+-	./util/addnote $@
++	cp -v $@ $@.chrp64
++	./util/addnote $@.chrp64
+ endif
+ 
+ yaboot.b: yaboot elfextract
+@@ -107,6 +110,7 @@
+ 
+ clean:
+ 	rm -f yaboot util/addnote utils/elfextract $(OBJS)
++	rm -f yaboot.chrp yaboot.chrp64
+ 	find . -name '*~' | xargs rm -f
+ 	find . -name '#*' | xargs rm -f
+ 	find . -name .AppleDouble | xargs rm -rf
+diff -urN partition.c partition.c
+--- partition.c	Mon Feb 19 09:04:39 2001
++++ partition.c	Tue Feb 27 10:40:37 2001
+@@ -81,7 +81,9 @@
+ 			break;
+ 		}
+ 		if (part->signature != MAC_PARTITION_MAGIC) {
++#if 0
+ 			prom_printf("Wrong partition %d signature\n", block);
++#endif
+ 			break;
+ 		}
+ 		if (block == 1)
+@@ -243,9 +245,6 @@
+ 	if (desc->signature == MAC_DRIVER_MAGIC) {
+ 		/* pdisk partition format */
+ 		partition_mac_lookup(disk, blksize, &list);
+-	} else if ((block_buffer[510] == 0x55) && (block_buffer[511] == 0xaa)) {
+-		/* fdisk partition format */
+-		partition_fdisk_lookup(disk, blksize, &list);
+ 	} else if (blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
+ 		add_partition(	&list,
+ 				partition_iso,
+@@ -255,6 +254,9 @@
+ 				0,
+ 				blksize);
+ 		prom_printf("ISO9660 disk\n");
++	} else if ((block_buffer[510] == 0x55) && (block_buffer[511] == 0xaa)) {
++		/* fdisk partition format */
++		partition_fdisk_lookup(disk, blksize, &list);
+ 	} else {
+ 		prom_printf("Not a macintosh-formatted disk !\n");
+ 		goto bail;
+diff -urN yaboot.c yaboot.c
+--- yaboot.c	Mon Feb 19 09:04:39 2001
++++ yaboot.c	Tue Feb 27 10:51:27 2001
+@@ -533,6 +533,8 @@
+     }
+ 
+     if (c == '\n') {
++	if (!imagename)
++		imagename = cfg_get_default();
+     	if (imagename)
+ 		prom_printf("%s", imagename);
+ 	if (params->args)
+@@ -663,6 +665,7 @@
+     unsigned long	sysmap_size;
+     kernel_entry_t      kernel_entry;
+     struct bi_record*	birec;
++    char*              loc=NULL;
+     loadinfo_t          loadinfo;
+     
+     loadinfo.load_loc = 0;
+@@ -680,8 +683,19 @@
+ 	if (params.splash.file)
+         	fxDisplaySplash(&params.splash);
+ #endif /* CONFIG_SPLASH_SCREEN */
+-	prom_printf("Loading kernel...\n");
++	prom_printf("Please wait, loading kernel...\n");
+ 
++	if(bootpath && !strcmp(bootpath,"\\\\") && params.kernel.file[0] != '/') {
++		loc=(char*)malloc(strlen(params.kernel.file)+3);
++		if (!loc) {
++			prom_printf ("malloc error\n");
++			goto next;
++		}
++		strcpy(loc,bootpath);
++		strcat(loc,params.kernel.file);
++		free(params.kernel.file);
++		params.kernel.file=loc;
++	}
+         result = open_file(&params.kernel, &file);
+         if (result != FILE_ERR_OK) {
+ 	    prom_printf("\nImage not found.... try again\n");
+@@ -713,6 +727,19 @@
+ 	 */
+ 	if (params.sysmap.file) {
+ 	    prom_printf("Loading System.map ...\n");
++	    if(bootpath && !strcmp(bootpath,"\\\\") && params.sysmap.file[0] != '/') {
++		    if (loc) free(loc);
++		    loc=(char*)malloc(strlen(params.sysmap.file)+3);
++		    if (!loc) {
++			    prom_printf ("malloc error\n");
++			    goto next;
++		    }
++		    strcpy(loc,bootpath);
++		    strcat(loc,params.sysmap.file);
++		    free(params.sysmap.file);
++		    params.sysmap.file=loc;
++	    }
++
+ 	    result = open_file(&params.sysmap, &file);
+ 	    if (result != FILE_ERR_OK)
+ 		prom_printf("\nSystem.map file not found.\n");
+@@ -742,6 +769,19 @@
+ 	 * so we claim an arbitrary amount of 4Mb
+ 	 */
+ 	if (params.rd.file) {
++	    if(bootpath && !strcmp(bootpath,"\\\\") && params.rd.file[0] != '/')
++	    {
++		if (loc) free(loc);
++		loc=(char*)malloc(strlen(params.rd.file)+3);
++		if (!loc) {
++		    prom_printf ("malloc error\n");
++		    goto next;
++		}
++		strcpy(loc,bootpath);
++		strcat(loc,params.rd.file);
++		free(params.rd.file);
++		params.rd.file=loc;
++	    }
+ 	    prom_printf("Loading ramdisk...\n");
+ 	    result = open_file(&params.rd, &file);
+ 	    if (result != FILE_ERR_OK)
