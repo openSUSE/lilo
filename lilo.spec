@@ -18,7 +18,7 @@ Obsoletes:    yaboot activate quik
 Requires:     hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      311
+Release:      321
 Source0:      lilo-0.0.6.tar.bz2
 Patch0:       lilo-0.0.6.dif
 Source1:      compatible_machines.txt
@@ -26,6 +26,7 @@ Source3:      lilo-21.tar.gz
 Source5:      yaboot-1.3.6.tar.gz
 Patch5:       yaboot-1.3.6.dif
 Patch6:       yaboot-symlink-fix.diff
+Patch7:       yaboot-hole_data-journal.diff
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 # get rid of /usr/lib/rpm/brp-strip-debug 
 # it kills the zImage.chrp-rs6k 
@@ -58,6 +59,7 @@ mv yaboot-1.3.6 yaboot
 cd yaboot
 %patch5
 %patch6 -p1
+%patch7 -p1
 cd ..
 
 %build
@@ -134,6 +136,9 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sat Nov 09 2002 - olh@suse.de
+- add yaboot-hole_data-journal.diff
+  fix loading of files with holes on reiserfs
 * Thu Oct 17 2002 - olh@suse.de
 - activate a kernel slot with the 'activate' config option
   zero cmdline in kernel slot

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sat Nov  9 00:59:48 CET 2002 - olh@suse.de
+
+- add yaboot-hole_data-journal.diff
+  fix loading of files with holes on reiserfs
+
+-------------------------------------------------------------------
 Thu Oct 17 10:53:40 PDT 2002 - olh@suse.de
 
 - activate a kernel slot with the 'activate' config option
