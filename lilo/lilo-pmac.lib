@@ -89,7 +89,7 @@ function running_on_pmac_new () {
 
 	# check if the file is a real file
 	if [ -f "${CONFIG_IMAGE_FILE[$i]}" ]; then
-	    FILE_PATH=$($SHOW_OF_PATH ${CONFIG_IMAGE_FILE[$i]} | grep -v /pci[0-9])
+	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_FILE[$i]} | grep -v /pci[0-9])
 	fi
 	if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
 	    CONFIG_IMAGE_PATH[$i]="copy"
@@ -98,7 +98,7 @@ function running_on_pmac_new () {
 	fi
 	unset FILE_PATH
 	if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then 
-	    FILE_PATH=$($SHOW_OF_PATH ${CONFIG_IMAGE_INITRD[$i]} | grep -v /pci[0-9])
+	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_INITRD[$i]} | grep -v /pci[0-9])
 	    if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
         	CONFIG_IMAGE_INITRDPATH[$i]="copy"
 	    else
@@ -107,7 +107,7 @@ function running_on_pmac_new () {
 	fi
 	unset FILE_PATH
 	if [ ! -z "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
-	    FILE_PATH=$($SHOW_OF_PATH ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
+	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
 	    if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
 		CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
 	    else
@@ -117,7 +117,7 @@ function running_on_pmac_new () {
 	    local sysmap="/lib/modules/`get_kernel_version ${CONFIG_IMAGE_FILE[$i]}`/System.map"
 	    if test -f $sysmap; then
 		CONFIG_IMAGE_SYSMAP[$i]=$sysmap
-		FILE_PATH=$($SHOW_OF_PATH ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
+		FILE_PATH=$(get_of_path ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
 		if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
 		    CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
 		else
@@ -176,8 +176,8 @@ function running_on_pmac_new () {
 	done
     } > $TEMP/yaboot.conf
 
-    BOOT_DEVICEPATH=$($SHOW_OF_PATH $OPTION_BOOT)
-    OTHER_DEVICEPATH=$($SHOW_OF_PATH $OPTION_OTHER)
+    BOOT_DEVICEPATH=$(get_of_path $OPTION_BOOT)
+    OTHER_DEVICEPATH=$(get_of_path $OPTION_OTHER)
 
     echo "BOOT_DEVICEPATH  =  $BOOT_DEVICEPATH"
     echo "OTHER_DEVICEPATH  =  $OTHER_DEVICEPATH"
@@ -298,7 +298,7 @@ function running_on_pmac_new () {
     humount
 
     if [ "$OPTION_ACTIVATE" = "yes" ] ; then
-	NV_BOOT_PATH=$($SHOW_OF_PATH $OPTION_BOOT)
+	NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
 	echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
 	nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
 	if [ "$(nvsetenv boot-file)" != "boot-file=" ] ; then

@@ -42,7 +42,8 @@ else
     }
 fi
 
-myversion=2004-01-30
+myversion=2004-05-05
+# if no file path is given on cmd line check for root file system
 file=/
 
 if [ "$#" -gt 0 ] ; then
@@ -65,6 +66,7 @@ if [ "$#" -gt 0 ] ; then
 	       	break
 	       	;;
 	esac
+	shift
     done
 fi
 
@@ -125,16 +127,17 @@ dbg_show file_sysfs_path
 file_sysfs_dir="${file_sysfs_path%/dev}"
 dbg_show file_sysfs_dir
 if [ ! -L "$file_sysfs_dir/device" ] ; then
-	# maybe a partition
-	file_partition="${file_sysfs_dir##*[a-z]}"
-	dbg_show file_partition
-	file_sysfs_dir="${file_sysfs_dir%/*}"
-	dbg_show file_sysfs_dir
-	if [ ! -L "$file_sysfs_dir/device" ] ; then
-		[ "$quietmode" ] || echo 1>&2 "ERROR: driver for sysfs path $file_sysfs_dir has no full sysfs support"
-		exit 1
-	fi
+    # maybe a partition
+    file_partition="${file_sysfs_dir##*[a-z]}"
+    dbg_show file_partition
+    file_sysfs_dir="${file_sysfs_dir%/*}"
+    dbg_show file_sysfs_dir
+    if [ ! -L "$file_sysfs_dir/device" ] ; then
+	[ "$quietmode" ] || echo 1>&2 "ERROR: driver for sysfs path $file_sysfs_dir has no full sysfs support"
+	exit 1
+    fi
 fi
+
 cd "$file_sysfs_dir/device"
 file_full_sysfs_path="`/bin/pwd`"
 file_storage_type=
@@ -144,16 +147,14 @@ case "$file_full_sysfs_path" in
       	file_storage_type=ide
       	of_disk_ide_channel="${file_full_sysfs_path##*.}"
       	cd ../..
-      	case "$of_disk_ide_channel" in
-      	    */*)
-      		of_disk_ide_channel="${of_disk_ide_channel%%/*}"
-      		cd ../..
-      		;;
-      	esac
+      	if [[ "$of_disk_ide_channel" == */* ]]; then
+	    of_disk_ide_channel="${of_disk_ide_channel%%/*}"
+	    cd ../..
+	fi
       	dbg_show of_disk_ide_channel
       	;;
     */host[0-9]*/[0-9]*:[0-9]*:[0-9]*:[0-9]*)
-      	file_storage_type=scsi
+      	# file_storage_type=scsi !! or vscsi, will be determined later
 	spec="${file_full_sysfs_path##*/host[0-9]*/}"
 	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
@@ -186,17 +187,24 @@ if [ -f devspec ] ; then
 		    esac
 		    (( counter++ ))
 		done
-		file_storage_type=sata
 		of_device_path=`grep -l block ${file_of_hw_devtype}/*@$counter/*/device_type`
 		of_device_path=${of_device_path%/device_type}
 		of_device_path=${of_device_path##/proc/device-tree}
+		file_storage_type=sata
 		;;
 	    scsi*)
-		
+		file_storage_type=scsi
 		;;
 	    ide|ata)
+		# TODO
+		# check for right file-storage_type == ide ??
 		;;
 	    pci-ide|pci-ata)
+		# TODO
+		# check for right file-storage_type == ide ??
+		;;
+	    vscsi)
+		file_storage_type=vscsi
 		;;
 	    *)
 	        echo 1>&2 "ERROR: Unknown device type $(< ${file_of_hw_devtype}/device_type)"
@@ -212,14 +220,28 @@ if [ -f devspec ] ; then
 	    file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}/disk@$of_disk_ide_channel"
 	    ;;
         scsi)
-	    file_of_hw_path=$(printf  "%s/sd@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
+	    file_of_hw_path=$(printf "%s/sd@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
 	    ;;
         sata)
 	    file_of_hw_path=$of_device_path
 	    ;;
+        vscsi)
+	    (( of_disk_vscsi_nr = ( (2 << 14) | (of_disk_scsi_chan<<5) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) <<48 ));
+	    if [ -d ${file_of_hw_devtype}/disk ]; then
+		of_disk_vscsi_dir=disk
+	    elif [ -d ${file_of_hw_devtype}/sd ]; then
+		of_disk_vscsi_dir=sd
+	    else
+		echo >&2 "ERROR: Could not find a known hard disk directory under '${file_of_hw_devtype}'"
+		exit 1
+	    fi	
+	    file_of_hw_path=$(printf "%s/%s@%lx"  "${file_of_hw_devtype##/proc/device-tree}" $of_disk_vscsi_dir $of_disk_vscsi_nr)
+	    ;;
     esac
 else # no 'devspec' found
-	dbg-show file_full_sysfs_path
+    echo >&2 "WARNING: No devspec file found for $file_full_sysfs_path"
+
+	dbg_show file_full_sysfs_path
 	# find the path via the device-tree
 	dev_vendor="$(< vendor)"
 	dev_device="$(< device)"
@@ -277,7 +299,7 @@ else # no 'devspec' found
 	done
 	dbg_show of_device_list
 	case "$of_device_list" in
-		*\ *)
+	    *\ *)
 		: more than one controler found, fun
 		for i in $of_device_list
 		do
@@ -294,32 +316,30 @@ else # no 'devspec' found
 		break
 		done
 		;;
-		*)
+	    *)
 		;;
 	esac
 
 	case "$(< $of_device_list/device_type)" in
-		k2-sata-root)
+	    k2-sata-root)
 		: found k2-sata-root, guessing channel
 		counter=0
-		for i in host[0-9]*
-		do
-		: working on virtual scsi host $i
-			case "$file_full_sysfs_path" in
-			*/$i/*)
-				: found $i $counter
-				break
-				;;
+		for i in host[0-9]*; do
+		    : working on virtual scsi host $i
+		    case "$file_full_sysfs_path" in
+		        */$i/*)
+			    : found $i $counter
+			    break
+			    ;;
 			*) ;;
-			esac
-			let counter++
+		    esac
+		    let counter++
 		done
 		file_storage_type=sata
 		of_device_path=`grep -l block $of_device_list/*@$counter/*/device_type`
 		;;
-		*)
+	    *)
 		of_device_path=`grep -l block $of_device_list/*/device_type`
-
 		;;
 	esac
 
@@ -335,7 +355,6 @@ else # no 'devspec' found
 		file_of_hw_path="${of_device_path##/proc/device-tree}"
 		;;
 	esac
-
 	# no "devspec" available
 fi
 
@@ -343,14 +362,13 @@ fi
 # done
 #
 
-file_of_path="$file_of_hw_path"
-if [ ! -z "$file_partition" ] ; then
-    file_of_path="$file_of_hw_path:$file_partition"
-fi
+# print the resulting open firmware path
 if [ "$file" != "/" ] ; then
-    file_of_path="$file_of_path,$file"
+    echo ${file_of_hw_path}${file_partition:+:$file_partition},$file
+else
+    echo ${file_of_hw_path}${file_partition:+:$file_partition}
 fi
-echo $file_of_path
+
 
 
 #

@@ -24,7 +24,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      25
+Release:      26
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source2:      boot-header-%{bootheader}.tar.bz2
 Source3:      lilo-21.tar.gz
@@ -149,17 +149,26 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Fri May 07 2004 - jplack@suse.de
+- create bootinfo object, more error checking, type conversion for
+  PReP Boot partition
+* Fri May 07 2004 - jplack@suse.de
+- vscsi detection, #40002
+* Wed May 05 2004 - jplack@suse.de
+- fixed guessing of boot partition, various cleanups, fixed custom
+  error handling.
 * Mon May 03 2004 - jplack@suse.de
 - fixed various pmac bugs/cleanup of pmac handling
 * Mon May 03 2004 - jplack@suse.de
-- fixed typo in lilo triggering bash bug, implemented booting from non standard
-  file systems though a FAT boot file system (#34556) and others.
+- fixed typo in lilo triggering bash bug, implemented booting from non
+  standard file systems though a FAT boot file system (#34556) and
+  others.
 * Mon Apr 26 2004 - jplack@suse.de
 - fixed show_of_path.sh: support for IPR controller and such #39033
   mounts /sys if needed, #39380
 * Fri Apr 02 2004 - jplack@suse.de
-- fixed show_of_path.sh: scsi_id and scsi_lun are given in hex instead of
-  decimal
+- fixed show_of_path.sh: scsi_id and scsi_lun are given in hex instead
+  of decimal
 * Wed Mar 31 2004 - jplack@suse.de
 - set OF variable boot-device to point to your boot device
 * Tue Mar 30 2004 - jplack@suse.de

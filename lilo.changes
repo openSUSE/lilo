@@ -1,4 +1,21 @@
 -------------------------------------------------------------------
+Fri May  7 18:48:49 CEST 2004 - jplack@suse.de
+
+- create bootinfo object, more error checking, type conversion for
+  PReP Boot partition
+
+-------------------------------------------------------------------
+Fri May  7 15:24:32 CEST 2004 - jplack@suse.de
+
+- vscsi detection, #40002
+
+-------------------------------------------------------------------
+Wed May  5 13:39:46 CEST 2004 - jplack@suse.de
+
+- fixed guessing of boot partition, various cleanups, fixed custom
+  error handling.
+
+-------------------------------------------------------------------
 Mon May  3 23:10:11 CEST 2004 - jplack@suse.de
 
 - fixed various pmac bugs/cleanup of pmac handling
@@ -6,8 +23,9 @@ Mon May  3 23:10:11 CEST 2004 - jplack@suse.de
 -------------------------------------------------------------------
 Mon May  3 11:03:01 CEST 2004 - jplack@suse.de
 
-- fixed typo in lilo triggering bash bug, implemented booting from non standard
-  file systems though a FAT boot file system (#34556) and others.
+- fixed typo in lilo triggering bash bug, implemented booting from non
+  standard file systems though a FAT boot file system (#34556) and
+  others.
 
 -------------------------------------------------------------------
 Mon Apr 26 14:09:03 CEST 2004 - jplack@suse.de
@@ -18,8 +36,8 @@ Mon Apr 26 14:09:03 CEST 2004 - jplack@suse.de
 -------------------------------------------------------------------
 Fri Apr  2 14:54:33 CEST 2004 - jplack@suse.de
 
-- fixed show_of_path.sh: scsi_id and scsi_lun are given in hex instead of
-  decimal
+- fixed show_of_path.sh: scsi_id and scsi_lun are given in hex instead
+  of decimal
 
 -------------------------------------------------------------------
 Wed Mar 31 15:56:21 CEST 2004 - jplack@suse.de

@@ -29,7 +29,7 @@
 
 #CONFIG_LILO_CONF=~olh/ppc/lilo/lilo.conf
 CONFIG_LILO_CONF=/etc/lilo.conf
-SHOW_OF_PATH="/bin/show_of_path.sh"
+SHOW_OF_PATH="/bin/show_of_path.sh --quiet"
 DEFAULT_BOOTFOLDER=suseboot
 TEMP="/tmp/ppc_lilo"
 
@@ -53,10 +53,7 @@ function error() {
     # helper function to print _all_ error messages in a unified form
     # argument list consists of a list of msg numbers and custom strings
     until  [ "$#" = 0 ] ; do
-	case "$[ $1 ]" in
-	    0)  # plain custom string
-	        echo "ERROR: $1"
-		;;
+	case "$1" in
 	    1)
 	        echo '************************************************************'
 	       	echo '* You must create a PPC PReP Boot partition (type 0x41) or *'
@@ -86,17 +83,33 @@ function error() {
 	       	echo '************************************************************'
 	       	echo '* There is more than one PPC PReP Boot partition (type     *'
 	       	echo '* 0x41) on this system. Please specify the boot partition  *'
-	        printf '* NUMBER in boot = %-30s          *' $OPTION_BOOT
+	        printf '* NUMBER in boot = %-30s          *' $err_var1
 	       	echo '************************************************************'
 		;;
-	    *)
-	       	echo 2>&1 "Unknown error $1"
-	       	;;
+	    6)
+	        echo "ERROR: config error, no label in image = $err_var1"
+		;;
+	    *)  # plain custom string
+	        echo "ERROR: $1"
+		;;
 	esac >&2
 	shift
     done   
     exit 1
 }
+
+
+function get_of_path() {
+    local errnum=$?
+
+    $SHOW_OF_PATH $1
+    errnum=$?
+
+    if (( errnum != 0 )); then
+	error "show_of_path.sh returned error $errnum while analysing path $1"
+    fi
+}
+
 
 while [ "$1" ]; do case "$1" in
     #--lilo-rootdrive)
@@ -154,9 +167,9 @@ function running_on_chrp () {
     done < /proc/mounts
 
     #only the device is given and dd to the raw device is a bad idea
-    if [ -z "$OPTION_BOOT" ] ; then
-	echo guess the chrp boot device 
-	case $[${#prep_part} + ${#fat_part}] in
+    if [ -z "$OPTION_PARTITION" ] ; then
+	echo guessing the chrp boot device
+	case $[${#prep_part[*]} + ${#fat_part[*]}] in
 	    1)
 	       	OPTION_BOOT=$prep_part
 	       	[ "$OPTION_BOOT" ] || OPTION_BOOT=$fat_part
@@ -187,7 +200,7 @@ function running_on_chrp () {
     local -a vmlinux_copy initrd_copy
     local -i vmlinux_nr=0 initrd_nr=0
     local -i vmlinux_default=0 initrd_default=0
-    local path_boot=$($SHOW_OF_PATH $OPTION_BOOT)
+    local path_boot=$(get_of_path $OPTION_BOOT)
     local -i dev_nr_device=$(device_nr $OPTION_DEVICE)
 
     # starting the work and write the yaboot.conf
@@ -228,7 +241,7 @@ function running_on_chrp () {
 
 	    if [ -f ${CONFIG_IMAGE_FILE[$i]} ]; then
 		local image="${CONFIG_IMAGE_FILE[$i]}"
-		local path_image=$($SHOW_OF_PATH $image)
+		local path_image=$(get_of_path $image)
 		local devnr_image=$(device_of_file $image) 
 		
 		# check whether the image file lies on a file system that is
@@ -257,14 +270,6 @@ function running_on_chrp () {
 		continue
 	    fi
 
-	    if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ]; then
-		# TODO: 
-		# copy code from above if initrd handling is converted back to
-		# the native way
-		echo >&2 "Error initrd handling not yet implemented for all file systems"
-		exit 1
-	    fi
-
 	    echo "image = ${CONFIG_IMAGE_FILE[$i]}"
 	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
@@ -280,8 +285,12 @@ function running_on_chrp () {
     #echo press return to continue
     #read
 
-    local device=${OPTION_BOOT%%+([0-9])}	# split boot option to
-    local partition=${OPTION_BOOT##+([^0-9])}	# dev & part for parted
+    local device=${OPTION_BOOT%%+([0-9])}	 # split boot option to
+    local -i partition=${OPTION_BOOT##+([^0-9])} # dev & part for parted
+
+    if (( partition == 0 )); then
+	error "please specify the boot partition NUMBER in boot= $OPTION_BOOT"
+    fi
 
     if (( vmlinux_nr + initrd_nr > 0 )); then
 	# copy all kernels and initrds from non supported file systems
@@ -289,7 +298,7 @@ function running_on_chrp () {
 
 	# check size of partition OPTION_BOOT, must fit at least the default kernel
 	s=$($FDISK -l $OPTION_BOOT 2>&1)
-	s=${s%%bytes*}; s=${s#*MB,} 	# get partition size, ugly hack.
+	s=${s%%bytes*}; s=${s#*[GM]B,} 	# get partition size, ugly hack.
 	local -i bootsize=$[s/512-180]	# size in blocks minus overhead
 
 	# check if default image/initrd fits
@@ -303,10 +312,12 @@ function running_on_chrp () {
 	fi
 
 	# create the FAT partition and file system on $OPTION_BOOT
-	if [[ "${fat_part[*]}" != *$OPTION_BOOT* ]]; then
+	if [[ "${fat_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be FAT16
 	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to FAT16 type"
-	    parted $device set $partition type 6
+	    if !parted $device set $partition type 6; then
+		error "Partition conversion failed for $OPTION_BOOT"
+	    fi
 	fi
 	mkfs.msdos $OPTION_BOOT || exit 2
 	cd $TEMP
@@ -340,8 +351,29 @@ function running_on_chrp () {
 		cp -v $f boot/initrd.$(printf "%03d" $i) || exit 2
 	    fi
 	done
+
+	mkdir boot/ppc
+	# create a bootinfo object to make OF happy
+	{
+	    echo "<chrp-boot>"
+	    echo "    <description>SUSE SLES-9 (PPC)</description>"
+	    echo "    <os-name>SUSE SLES-9 (PPC)</os-name>"
+	    echo "    <boot-script>"
+	    echo "        boot &device;:$partition,yaboot"
+	    echo "    </boot-script>"
+	    echo "</chrp-boot>"
+	} > boot/ppc/bootinfo.txt
+	mkdir boot/ppc/chrp
 	umount boot
     else
+	# check for PReP partition and convert $OPTION_BOOT if neseccary
+	if [[ "${prep_part[*]} " != *$OPTION_BOOT\ * ]]; then
+	    # set type to be PReP boot
+	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to PReP boot type"
+	    if !parted $device set $partition type 0x41; then
+		error "Partition conversion failed for $OPTION_BOOT"
+	    fi
+	fi
 	echo Installing /lib/lilo/chrp/yaboot.chrp onto $OPTION_BOOT
 	dd if=/lib/lilo/chrp/yaboot.chrp of=$OPTION_BOOT 2>/dev/null
 	cp $TEMP/yaboot.conf /etc/yaboot.conf || exit 2
@@ -349,13 +381,13 @@ function running_on_chrp () {
     fi
     /sbin/activate $device $partition
 
-    NV_BOOT_PATH=$($SHOW_OF_PATH $OPTION_BOOT)
+    NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
     if (( vmlinux_nr + initrd_nr > 0 )); then
+	nvsetenv bootinfo-linux "${NV_BOOT_PATH},\ppc\bootinfo.txt"
 	NV_BOOT_PATH=${NV_BOOT_PATH},yaboot
     else
 	NV_BOOT_PATH=${NV_BOOT_PATH%:+([0-9])}
     fi
-    nvsetenv bootinfo-linux "$NV_BOOT_PATH"
 
     if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 	echo "setting open firmware variable boot-device to '$NV_BOOT_PATH'"
@@ -524,19 +556,15 @@ function running_on_iseries () {
     
 	if [ "$ISERIES_TARGET" = "block_dev" ]; then
 	    #only the device is given and dd to the raw device is a bad idea
-	    if [ "${OPTION_PARTITION[$i]}" = "" ]; then
+	    if [ -z "${OPTION_PARTITION[$i]}" ]; then
 		echo guess the prep boot device 
 		PART=`$FDISK -l $ISERIES_DEVICE | fgrep "PPC PReP"`
 		if [ -z "$PART" ] ; then
 		    error "config error, boot = $ISERIES_BOOT is not 41 PReP" 3
 		fi
 		if [ `echo "$PART" | wc -l` != 1 ] ; then
-		    echo "ERROR: config error, guessing of boot partition failed"
-		    echo "***************************************************************"
-		    echo "* There is more than one PPC PReP Boot partitions (type 0x41) *"
-		    echo "* on this system. Specify the partition NUMBER in boot= $ISERIES_BOOT *"
-		    echo "***************************************************************"
-		    exit -1
+		    err_var1="$ISERIES_BOOT"
+		    error "config error, guessing of boot partition failed" 5
 		fi
 		read P dummy <<< "$PART"
 	    else
@@ -587,6 +615,7 @@ function running_on_prep () {
 	    error "config error, boot = $OPTION_BOOT is not 41 PReP" 4
 	fi
 	if [ `echo "$PART" | wc -l` != 1 ] ; then
+	    err_var1="$OPTION_BOOT"
 	    error 'config error, guessing of boot partition failed' 5
 	fi
 	read P dummy <<< "$PART"
@@ -790,16 +819,14 @@ function parse_config_file () {
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
 		    OPTION_BOOTFOLDER=":${value}"
 		else 
-		    echo bootfolder option must not in an image section!
-		    exit 1
+		    error "bootfolder option must not in an image section!"
 		fi
 		;;
   	    timeout)
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
 		    OPTION_TIMEOUT=$value
 		else
-		    echo timeout option must not in an image section!
-		    exit 1
+		    error "timeout option must not in an image section!"
 		fi
 		;;
 	    default)
@@ -812,10 +839,9 @@ function parse_config_file () {
 		;;
 	    image)
 		# check if previous image section has a label
-		if [ ! -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    if [ -z "${CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]}" ] ; then
-		        echo "ERROR: config error, no label in image = ${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}"
-		    fi
+		if [ -n "$CONFIG_PARSE_HASIMAGE" ] ; then
+		    err_var1="${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}"
+		    if [ -z "$err_var1" ]; then	error 6; fi
 		fi
 		CONFIG_PARSE_HASIMAGE=true
 		(( CONFIG_IMAGE_COUNT++ ))
@@ -824,9 +850,8 @@ function parse_config_file () {
 	    other)
 		# check if previous image section has a label
 		if [ -n "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    if [ -z "${CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]}" ] ; then
-		        echo ERROR: config error, no label in image = ${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}
-		    fi
+		    err_var1="${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}"
+		    if [ -z "$err_var1" ]; then	error 6; fi
 		fi
 		CONFIG_PARSE_HASIMAGE=true
 		CONFIG_PARSE_HASOTHER=true
@@ -866,8 +891,7 @@ function parse_config_file () {
 		;;
 	    sysmap)
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    echo "ERROR: sysmap can not be global"
-		    exit 1
+		    error "sysmap can not be global"
 		else
 		    CONFIG_IMAGE_SYSMAP[$CONFIG_IMAGE_COUNT]=$value
 		fi
@@ -881,8 +905,7 @@ function parse_config_file () {
 		fi
 		;;		
 	    *)
-	        echo !!!!!!!!!! unkown option $option !!!!!!!!!!!!!
-	        exit 1
+	        error "!!!!!!!!!! unkown option $option !!!!!!!!!!!!!"
 		;;
 	esac
     done < $CONFIG_LILO_CONF
@@ -893,36 +916,28 @@ function parse_config_file () {
 function check_config_file () {
     if [ "$MACHINE" != "iseries" ]; then
 	if [ ! -b $OPTION_BOOT ]; then
-	    echo ERROR: boot = $OPTION_BOOT is not a valid block device
-	    exit -1 
-	fi
-	if [ -z "$OPTION_BOOT" ]; then
-	    echo "ERROR: boot= is not specified!"
-	    exit -1
+	    error "boot = $OPTION_BOOT is not a valid block device"
 	fi
 	if [ $OPTION_BOOT_COUNT -ne 1 ]; then
-	    echo "ERROR: only one boot= line allowed here!"
-	    exit -1
+	    errot "only one boot= line allowed here!"
 	fi
     fi
-    
+    if [ -z "$OPTION_BOOT" ]; then
+	error "boot= is not specified!"
+    fi
     if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-	echo ERROR: no image section is specified
-	exit -1
+	error "no image section is specified"
     fi
     
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	if [ ! -f ${CONFIG_IMAGE_FILE[$i]} ] ; then
-	    echo "ERROR: image = ${CONFIG_IMAGE_FILE[$i]} ist not a regular file"
-	    exit -1
+	    error "image = ${CONFIG_IMAGE_FILE[$i]} ist not a regular file"
 	fi
 	if [ ! -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
-	    echo "ERROR: initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
-	    exit -1
+	    error "initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
 	fi
 	if [ ! -f ${CONFIG_IMAGE_SYSMAP[$i]} ] ; then
-	    echo "ERROR: sysmap = ${CONFIG_IMAGE_SYSMAP[$i]} ist not a regular file"
-	    exit -1
+	    error "sysmap = ${CONFIG_IMAGE_SYSMAP[$i]} ist not a regular file"
 	fi
     done
     
@@ -930,19 +945,14 @@ function check_config_file () {
     #  loop for multiple OPTION_BOOT entries
     #
     for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
-	# TODO: check whether patterns are still valid !?
-
-	#  ? device := ${P%%+([0-9])}
-	#  ? partition := ${P##+([^0-9])}
-
-	OPTION_DEVICE[$i]=`echo "${OPTION_BOOT[$i]}"|sed 's/[0-9]*$/ &/'|cut -d " " -f 1`
-	OPTION_NODENAME[$i]=`echo "${OPTION_DEVICE[$i]}"|sed 's/[0-9]*$/ &/'|cut -d "/" -f 3`
-	OPTION_PARTITION[$i]=`echo "${OPTION_BOOT[$i]}"|sed 's/[0-9]*$/ &/'|cut -d " " -f 2`
+	OPTION_DEVICE[$i]="${OPTION_BOOT%%+([0-9])}"	 # split boot option to
+	OPTION_PARTITION[$i]="${OPTION_BOOT##+([^0-9])}" # dev & part for parted
     done
 } #end function check_config_file
 
 
 function fsize() { # get file size in blocks
+    local s f r
     if [ -z "$1" ]; then
 	echo 0
     else
