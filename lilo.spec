@@ -18,8 +18,8 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.7
-Release:      33
-Source0: 	lilo-0.0.6.tar.gz
+Release:      35
+Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
 Source3:	lilo-21.tar.gz
@@ -80,6 +80,7 @@ cd lilo.ppc
 chmod 755 show_of_path.sh
 chmod 754 lilo.sh
 cp -av lilo.sh $RPM_BUILD_ROOT/sbin/lilo
+cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo.new
 cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
 cp -av Finder.bin $RPM_BUILD_ROOT/boot
 cp -av System.bin $RPM_BUILD_ROOT/boot
@@ -123,6 +124,12 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Mon Aug 13 2001 - olh@suse.de
+- update compatible_machines.txt comment
+* Mon Aug 13 2001 - olh@suse.de
+- update lilo.sh, fix handling of HFSBOOTFOLDER
+  use a different way to query keys in os-chooser script
+  fix yaboot, netboot was broken in last update
 * Wed Aug 08 2001 - olh@suse.de
 - update compatible_machines.txt
 * Wed Aug 08 2001 - olh@suse.de

@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Mon Aug 13 16:17:28 CEST 2001 - olh@suse.de
+
+- update compatible_machines.txt comment
+
+-------------------------------------------------------------------
+Mon Aug 13 15:14:52 CEST 2001 - olh@suse.de
+
+- update lilo.sh, fix handling of HFSBOOTFOLDER
+  use a different way to query keys in os-chooser script
+  fix yaboot, netboot was broken in last update
+
+-------------------------------------------------------------------
 Wed Aug  8 11:11:54 CEST 2001 - olh@suse.de
 
 - update compatible_machines.txt
