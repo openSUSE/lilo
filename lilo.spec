@@ -1,7 +1,7 @@
 #
 # spec file for package lilo (Version 0.0.15)
 #
-# Copyright (c) 2004 SUSE LINUX AG, Nuernberg, Germany.
+# Copyright (c) 2004 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
 #
@@ -15,7 +15,7 @@ BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp 
 
 Name:         lilo
 #%%define     bootheader 0.0.5
-%define lilo_vers  0.1.1
+%define lilo_vers  0.1.2
 %define yaboot_vers 1.3.11
 Group:        System/Boot
 License:      BSD, Other License(s), see package
@@ -26,7 +26,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      41
+Release:      44
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch5:       yaboot-1.3.6.dif
@@ -150,6 +150,20 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Dec 16 2004 - jplack@suse.de
+- added work arounds for some problems and bugs of parted (#49317)
+  prepend root= option to append line (#48419)
+* Fri Dec 10 2004 - jplack@suse.de
+- added support for QLogic FC adapters on JS20, cleanup so that
+  all FC adapters using fc_transport class should work (# 45565 -
+  LTC11213)
+* Thu Nov 04 2004 - jplack@suse.de
+- use parted's fs resize command to resize partition inplace,
+  resolves blocker #47956, add more verbosity to parted related
+  error messages
+* Thu Nov 04 2004 - jplack@suse.de
+- added partition number to yaboot.conf to make disk migration
+  work in all cases
 * Fri Oct 29 2004 - jplack@suse.de
 - added fix for #47765
 * Wed Oct 20 2004 - jplack@suse.de
@@ -159,8 +173,8 @@ exit 0
 * Thu Oct 07 2004 - jplack@suse.de
 - remove OF path to partition if same as for the config file itself
 * Thu Oct 07 2004 - jplack@suse.de
-- check for all relevant files beeing on primary partitions, firmware
-  has problems else ...
+- check for all relevant files beeing on primary partitions,
+  firmware has problems else ...
 - added 'force_fat' option for some hopeless configurations
 * Thu Oct 07 2004 - jplack@suse.de
 - delete ambiguous PReP boot partitions (#42903)
@@ -169,9 +183,11 @@ exit 0
 * Tue Jun 29 2004 - jplack@suse.de
 - workaround an OF bug documented in #42517
 * Wed Jun 23 2004 - jplack@suse.de
-- fixed blocker bug #41772 - LTC9179-SLES9: Installation of RAID 1 failed
+- fixed blocker bug #41772 - LTC9179-SLES9: Installation of RAID
+  1 failed
 * Fri Jun 18 2004 - jplack@suse.de
-- fixed critical bug #42207 - lilo does not handle /dev/root in /proc/mounts
+- fixed critical bug #42207 - lilo does not handle /dev/root in
+  /proc/mounts
 * Thu Jun 17 2004 - jplack@suse.de
 - use TMPDIR if set
 * Thu Jun 17 2004 - jplack@suse.de

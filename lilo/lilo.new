@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 #
 # a simple lilo to store the boot loader and the kernel images 
 # in bash2 ... Think different [tm]
@@ -108,6 +108,10 @@ function error() {
 	    10)
 	        echo "ERROR: in config file, guessing of boot partition failed"
 		;;
+	    11)
+		echo "ERROR: parted complains:"
+		cat $TEMP/parted.log
+		;;
 	    *)  # plain custom string
 	        echo "ERROR: $1"
 		;;
@@ -188,7 +192,7 @@ function device_of_file () {
     $STAT_CMD --format="%d" $f
 }
 
-       
+
 function device_nr () {
     # print device number in decimal given a path to a device node
     local d="$1"
@@ -272,6 +276,15 @@ esac; done
 
 function running_on_chrp () {
     echo running on chrp
+
+
+    # TODO add support for booting over network:
+    # gooseberry:~ # nvsetenv boot-device
+    # boot-device=/pci@400000000110/pci@2,4/scsi@1/sd@a,0
+    # gooseberry:~ # nvsetenv boot-device `cat /sys/class/net/eth1/device/devspec`
+    # gooseberry:~ # nvsetenv boot-device
+    # boot-device=/pci@400000000112/pci@2,2/ethernet@1
+
 
     # find all PReP boot and FAT partitions
     local -a prep_part fat_part fat32_part
@@ -381,9 +394,13 @@ function running_on_chrp () {
     # starting the work and write the yaboot.conf
     {
 	echo "# header section"
+	echo "partition = ${yaboot_part##*:}"
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
-	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
+	if [ "$OPTION_ROOT" ]; then
+	    OPTION_APPEND="$OPTION_ROOT $OPTION_APPEND"
+	    unset OPTION_ROOT
+	fi
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 	test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
 
@@ -423,7 +440,7 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
 		    # is the boot image file on the same device/partition
 		    # from where yaboot.conf has been loaded?
 		    if [ "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
@@ -456,7 +473,7 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
 		    # is the boot initrd file on the same device/partition
 		    # from where yaboot.conf has been loaded?
 		    if [ "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
@@ -563,12 +580,11 @@ function running_on_chrp () {
 	    fi
 	    echo >&2 "Warning: Extending boot partition $OPTION_BOOT, using free disk space"
 	    local start=$(div1000 ${p_start[$partition]})
-	    local end=$(div1000 ${p_start[$((partition+1))]} )
-	    if ! { $PARTED $device rm $partition &&
-		$PARTED $device mkpart primary $start $end &&
-		$PARTED $device set $partition type 6; } >& /dev/null
+	    local end=$(div1000 $((${p_start[$((partition+1))]}-1)) )
+	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
+		$PARTED $device set $partition type 6; ) >& $TEMP/parted.log
 	      then
-		  error "Partition extension failed for $OPTION_BOOT"  
+		  error "Partition extension failed for $OPTION_BOOT" 11
 	    fi
 	fi
 
@@ -576,8 +592,8 @@ function running_on_chrp () {
 	if [[ "${fat_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be FAT16
 	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to FAT16 type"
-	    if ! $PARTED $device set $partition type 6 >& /dev/null; then
-		error "Partition conversion failed for $OPTION_BOOT"
+	    if ! $PARTED $device set $partition type 6 >& $TEMP/parted.log; then
+		error "Partition conversion failed for $OPTION_BOOT" 11
 	    fi
 	fi
 	mkfs.msdos -s 8 $OPTION_BOOT || exit 2
@@ -631,8 +647,8 @@ function running_on_chrp () {
 	if [[ "${prep_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be PReP boot
 	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to PReP boot type"
-	    if ! $PARTED $device set $partition type 0x41 >& /dev/null; then
-		error "Partition conversion failed for $OPTION_BOOT"
+	    if ! $PARTED $device set $partition type 0x41 >& $TEMP/parted.log; then
+		error "Partition conversion failed for $OPTION_BOOT" 11
 	    fi
 	fi
 
@@ -643,8 +659,9 @@ function running_on_chrp () {
 	    for (( i=0; i<partition; i++ )); do
 		if [[ "${p_flags[$i]}" = *type=41* ]]; then
 		    echo >&2 "Warning: Delete ambiguous PReP boot  partition ${device}$i"
-		    if ! $PARTED $device rm $i >& /dev/null; then
+		    if ! $PARTED $device rm $i >& $TEMP/parted.log; then
 			echo >&2 "Warning: Partition deletion failed for ${device}$i"
+			cat >&2 $TEMP/parted.log
 		    else
 			unset p_flags[$i]
 		    fi
@@ -657,11 +674,11 @@ function running_on_chrp () {
 	    echo >&2 "Warning: Shrinking PReP boot partition $OPTION_BOOT, avoiding firmware confusion"
 	    local start=$(div1000 ${p_start[$partition]})
 	    local end=$(div1000 $(( p_start[partition] + $(fsize /lib/lilo/chrp/yaboot.chrp) )) ) 
-	    if ! { $PARTED $device rm $partition &&
-		$PARTED $device mkpart primary $start $end &&
-		$PARTED $device set $partition type 0x41; } >& /dev/null
+	    dd if=/dev/zero of=$OPTION_BOOT bs=4096 count=1
+	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
+		$PARTED $device set $partition type 0x41; ) >& $TEMP/parted.log
 	    then
-		error "Partition shrink failed for $OPTION_BOOT"  
+		error "Partition shrink failed for $OPTION_BOOT" 11
 	    fi
 	fi
 
@@ -673,7 +690,7 @@ function running_on_chrp () {
 
     # TODO check whether this is neccessary
     if [[ ${p_flags[$partition]} != *boot* ]]; then
-	$PARTED $device set $partition boot on >& /dev/null
+	$PARTED $device set $partition boot on >& $TEMP/parted.log || error 11
     fi
 
     NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
@@ -690,7 +707,7 @@ function running_on_chrp () {
     fi
 
     if [ "$OPTION_ACTIVATE" = "yes" ] ; then
-	echo "prepending  '$NV_BOOT_PATH'" to open firmware variable boot-device
+	echo "Prepending  '$NV_BOOT_PATH'" to open firmware variable boot-device
 
 	local -a bootdevice=( $(nvsetenv boot-device) )
 	bootdevice[0]=${bootdevice[0]#boot-device=}
@@ -702,13 +719,13 @@ function running_on_chrp () {
 	nvsetenv boot-device "$NV_BOOT_PATH ${bootdevice[*]}"
 
 	if [ "$(nvsetenv boot-file)" != "boot-file=" ]; then
-	    echo "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
-	    nvsetenv boot-file
+	    echo >&2 "Warning: old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
+	    nvsetenv boot-file >&2
 	    nvsetenv boot-file ""
 	fi
     else
-	echo "boot path not set to boot linux as requested"
-	echo "please add '$NV_BOOT_PATH' somewhere to your boot path manually"
+	echo >&2 "Warning: boot path not set to boot linux as requested"
+	echo >&2 "Warning: please add '$NV_BOOT_PATH' somewhere to your boot path manually"
     fi
 }
 
@@ -889,7 +906,8 @@ function running_on_iseries () {
 	    dd if="$ISERIES_BOOT_IMAGE" of=$P bs=4096 2>/dev/null
 		
 	    echo setting boot flag on partition ${P%%+([0-9])} ${P##+([^0-9])}
-	    $PARTED ${P%%+([0-9])} set ${P##+([^0-9])} boot on >& /dev/null
+	    $PARTED ${P%%+([0-9])} set ${P##+([^0-9])} boot on >& $TEMP/parted.log ||
+		error 11
 	fi
     done  #  end of OPTION_BOOT loop
 
@@ -1254,12 +1272,12 @@ esac
 #
 #
 # Local variables:
-#     mode: ksh
+#     mode: sh
 #     mode: font-lock
 #     mode: auto-fill
-#     ksh-indent: 4
-#     ksh-multiline-offset: 2
-#     ksh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#     sh-indent: 4
+#     sh-multiline-offset: 2
+#     sh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
 #     fill-column: 78
 # End:
 #

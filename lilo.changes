@@ -1,4 +1,30 @@
 -------------------------------------------------------------------
+Thu Dec 16 16:05:01 CET 2004 - jplack@suse.de
+
+- added work arounds for some problems and bugs of parted (#49317)
+  prepend root= option to append line (#48419)
+
+-------------------------------------------------------------------
+Fri Dec 10 15:11:04 CET 2004 - jplack@suse.de
+
+- added support for QLogic FC adapters on JS20, cleanup so that
+  all FC adapters using fc_transport class should work (# 45565 -
+  LTC11213)
+
+-------------------------------------------------------------------
+Thu Nov  4 23:53:38 CET 2004 - jplack@suse.de
+
+- use parted's fs resize command to resize partition inplace,
+  resolves blocker #47956, add more verbosity to parted related
+  error messages
+
+-------------------------------------------------------------------
+Thu Nov  4 17:09:28 CET 2004 - jplack@suse.de
+
+- added partition number to yaboot.conf to make disk migration
+  work in all cases
+
+-------------------------------------------------------------------
 Fri Oct 29 14:39:21 CEST 2004 - jplack@suse.de
 
 - added fix for #47765
@@ -21,8 +47,8 @@ Thu Oct  7 16:30:15 CEST 2004 - jplack@suse.de
 -------------------------------------------------------------------
 Thu Oct  7 15:03:01 CEST 2004 - jplack@suse.de
 
-- check for all relevant files beeing on primary partitions, firmware
-  has problems else ...
+- check for all relevant files beeing on primary partitions,
+  firmware has problems else ...
 - added 'force_fat' option for some hopeless configurations
 
 -------------------------------------------------------------------
@@ -43,12 +69,14 @@ Tue Jun 29 11:43:32 CEST 2004 - jplack@suse.de
 -------------------------------------------------------------------
 Wed Jun 23 11:17:55 CEST 2004 - jplack@suse.de
 
-- fixed blocker bug #41772 - LTC9179-SLES9: Installation of RAID 1 failed
+- fixed blocker bug #41772 - LTC9179-SLES9: Installation of RAID
+  1 failed
 
 -------------------------------------------------------------------
 Fri Jun 18 17:42:05 CEST 2004 - jplack@suse.de
 
-- fixed critical bug #42207 - lilo does not handle /dev/root in /proc/mounts
+- fixed critical bug #42207 - lilo does not handle /dev/root in
+  /proc/mounts
 
 -------------------------------------------------------------------
 Thu Jun 17 15:36:12 CEST 2004 - jplack@suse.de
