@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May 12 17:30:09 CEST 2004 - jplack@suse.de
+
+- better error handling, work around YaST bugs (e.g. boot="" bug), some smaller
+  glitches
+
+-------------------------------------------------------------------
 Mon May 10 17:11:15 CEST 2004 - jplack@suse.de
 
 - fixed typos for PowerMac G5s

@@ -200,10 +200,6 @@ if [ -f devspec ] ; then
 		# check for right file-storage_type == ide ??
 		;;
 	    pci-ide|pci-ata)
-		of_device_path=`grep -l block ${file_of_hw_devtype}/*@*/*/device_type`
-		of_device_path=${of_device_path%/device_type}
-		of_device_path=${of_device_path##/proc/device-tree}
-		file_storage_type=pci-ide
 		# TODO
 		# check for right file-storage_type == ide ??
 		;;
@@ -226,7 +222,7 @@ if [ -f devspec ] ; then
         scsi)
 	    file_of_hw_path=$(printf "%s/sd@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
 	    ;;
-        sata|pci-ide)
+        sata)
 	    file_of_hw_path=$of_device_path
 	    ;;
         vscsi)

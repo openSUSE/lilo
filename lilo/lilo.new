@@ -64,8 +64,8 @@ function error() {
 	       	echo '************************************************************'
 	       	echo '* There is more than one PPC PReP Boot (type 0x41) or FAT  *'
 	       	echo '* on this system. Please specify the boot partition NUMBER *'
-	       	echo "* in boot= $OPTION_BOOT                                    *"
-	       	echo "************************************************************"
+	       	printf '* in boot= %-30s                  *\n' $OPTION_BOOT
+	       	echo '************************************************************'
 		;;
 	    3)
 	        echo '************************************************************'
@@ -83,11 +83,17 @@ function error() {
 	       	echo '************************************************************'
 	       	echo '* There is more than one PPC PReP Boot partition (type     *'
 	       	echo '* 0x41) on this system. Please specify the boot partition  *'
-	        printf '* NUMBER in boot = %-30s          *' $err_var1
+	        printf '* NUMBER in boot = %-30s          *\n' $err_var1
 	       	echo '************************************************************'
 		;;
 	    6)
 	        echo "ERROR: config error, no label in image = $err_var1"
+		;;
+	    7)
+	        echo "ERROR: config error, $option option must not be in an image section!"
+		;;
+	    8)
+		echo "ERROR: config error, $option option must be in an image section!"
 		;;
 	    *)  # plain custom string
 	        echo "ERROR: $1"
@@ -151,6 +157,8 @@ function running_on_chrp () {
 	      fat_part=(${fat_part[*]} $device)
 	      ;;
 	esac
+	# please note: an empty boot= will cause a full disk scan of
+	# the system
     done < <( $FDISK -l $OPTION_DEVICE )
 
     # check all mounted local file systems
@@ -166,7 +174,9 @@ function running_on_chrp () {
 	fi
     done < /proc/mounts
 
-    #only the device is given and dd to the raw device is a bad idea
+    # only the device is given and dd to the raw device is a bad idea
+    # Note: An empty boot= results in an empty OPTION_PARTITION which triggers
+    # the guessing magic
     if [ -z "$OPTION_PARTITION" ] ; then
 	echo guessing the chrp boot device
 	case $[${#prep_part[*]} + ${#fat_part[*]}] in
@@ -315,7 +325,7 @@ function running_on_chrp () {
 	if [[ "${fat_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be FAT16
 	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to FAT16 type"
-	    if !parted $device set $partition type 6; then
+	    if ! parted $device set $partition type 6; then
 		error "Partition conversion failed for $OPTION_BOOT"
 	    fi
 	fi
@@ -370,7 +380,7 @@ function running_on_chrp () {
 	if [[ "${prep_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be PReP boot
 	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to PReP boot type"
-	    if !parted $device set $partition type 0x41; then
+	    if ! parted $device set $partition type 0x41; then
 		error "Partition conversion failed for $OPTION_BOOT"
 	    fi
 	fi
@@ -772,7 +782,9 @@ function parse_config_file () {
     # CONFIG_IMAGE_FILE contains the kernel image for a section
     # CONFIG_IMAGE_OTHER contains the device of MacOS
     # CONFIG_IMAGE_COUNT is a simple counter of image sections
-    
+    declare option
+    local separator value
+
     unset CONFIG_PARSE_HASIMAGE
     CONFIG_IMAGE_COUNT=0
     OPTION_BOOT_COUNT=0
@@ -783,7 +795,8 @@ function parse_config_file () {
 	REPLY=${REPLY##+([ 	])}
 	if [ -z "$REPLY" ]; then continue; fi
 	REPLY=${REPLY/=/ = }
-
+	REPLY=${REPLY/\"\"/}	# replace quoted empty string by "itself"
+ 
 	read option separator value <<< "$REPLY"
 	#	echo option "$option"
 	#	echo separator "$separator"
@@ -796,66 +809,48 @@ function parse_config_file () {
 
 	case "$option" in
 	    boot)
-		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    OPTION_BOOT[$OPTION_BOOT_COUNT]="$value"
-		    (( OPTION_BOOT_COUNT++ ))
-		else 
-		    echo boot option must not in an image section!
-		    exit 1
-		fi
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		OPTION_BOOT[$OPTION_BOOT_COUNT]=$value
+		let OPTION_BOOT_COUNT++
 		;;
 	    activate)
-		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    OPTION_ACTIVATE="yes"
-		else 
-		    echo "activate option must not be in an image section!"
-		    exit 1
-		fi
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		OPTION_ACTIVATE="yes"
 		;;
 	    progressbar)
 		# do nothing
 		;;
 	    bootfolder)
-		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    OPTION_BOOTFOLDER=":${value}"
-		else 
-		    error "bootfolder option must not in an image section!"
-		fi
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		OPTION_BOOTFOLDER=":${value}"
 		;;
   	    timeout)
-		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    OPTION_TIMEOUT=$value
-		else
-		    error "timeout option must not in an image section!"
-		fi
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		OPTION_TIMEOUT=$value
 		;;
 	    default)
-		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    OPTION_DEFAULT=$value
-		else
-		    echo default option must not in an image section!
-		    exit 1
-		fi
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		OPTION_DEFAULT=$value
 		;;
 	    image)
 		# check if previous image section has a label
-		if [ -n "$CONFIG_PARSE_HASIMAGE" ] ; then
+		if [ "$CONFIG_PARSE_HASIMAGE" ] ; then
 		    err_var1="${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}"
 		    if [ -z "$err_var1" ]; then	error 6; fi
 		fi
 		CONFIG_PARSE_HASIMAGE=true
-		(( CONFIG_IMAGE_COUNT++ ))
+		let CONFIG_IMAGE_COUNT++
 		CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=$value
 		;;
 	    other)
 		# check if previous image section has a label
-		if [ -n "$CONFIG_PARSE_HASIMAGE" ] ; then
+		if [ "$CONFIG_PARSE_HASIMAGE" ] ; then
 		    err_var1="${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}"
 		    if [ -z "$err_var1" ]; then	error 6; fi
 		fi
 		CONFIG_PARSE_HASIMAGE=true
 		CONFIG_PARSE_HASOTHER=true
-		(( CONFIG_IMAGE_COUNT++ ))
+		let CONFIG_IMAGE_COUNT++
 		CONFIG_IMAGE_OTHER[$CONFIG_IMAGE_COUNT]=$value
 		OPTION_OTHER=$value
 		;;
@@ -867,18 +862,12 @@ function parse_config_file () {
 		fi
 		;;
 	    copy)
-		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    error "config error, label option must be in an image section!"
-		else
-		    CONFIG_IMAGE_COPY[$CONFIG_IMAGE_COUNT]="true"
-		fi
+		[ "$CONFIG_PARSE_HASIMAGE" ] || error 8
+		CONFIG_IMAGE_COPY[$CONFIG_IMAGE_COUNT]="true"
 		;;
 	    label)
-		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    error "config error, label option must be in an image section!"
-		else
-		    CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=$value
-		fi
+		[ "$CONFIG_PARSE_HASIMAGE" ] || error 8
+		CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=$value
 		;;
 	    append)
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
@@ -890,12 +879,8 @@ function parse_config_file () {
 		fi
 		;;
 	    sysmap)
-		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    error "sysmap can not be global"
-		else
-		    CONFIG_IMAGE_SYSMAP[$CONFIG_IMAGE_COUNT]=$value
-		fi
-		
+		[ "$CONFIG_PARSE_HASIMAGE" ] || error 8
+		CONFIG_IMAGE_SYSMAP[$CONFIG_IMAGE_COUNT]=$value
 		;;
 	    initrd)
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
@@ -914,16 +899,22 @@ function parse_config_file () {
 
 
 function check_config_file () {
-    if [ "$MACHINE" != "iseries" ]; then
-	if [ ! -b $OPTION_BOOT ]; then
-	    error "boot = $OPTION_BOOT is not a valid block device"
+    if [ -z $OPTION_BOOT ]; then
+	#   work around a YaST bug, which comes from a certain kind of
+	#   intel-architecture blindness, some architectures can guess boot
+	#   drive :-)
+	if [[ "$MACHINE" != @(chrp|prep) ]]; then
+	    error "boot= is not specified!"
 	fi
-	if [ $OPTION_BOOT_COUNT -ne 1 ]; then
-	    errot "only one boot= line allowed here!"
+    else
+	if [ "$MACHINE" != "iseries" ]; then
+	    if [ ! -b $OPTION_BOOT ]; then
+		error "boot = $OPTION_BOOT is not a valid block device"
+	    fi
+	    if [ $OPTION_BOOT_COUNT -ne 1 ]; then
+		errot "only one boot= line allowed here!"
+	    fi
 	fi
-    fi
-    if [ -z "$OPTION_BOOT" ]; then
-	error "boot= is not specified!"
     fi
     if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
 	error "no image section is specified"
