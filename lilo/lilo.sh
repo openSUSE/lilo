@@ -103,6 +103,7 @@ test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
 test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = ${CONFIG_IMAGE_APPEND[$i]}"
+test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAPPATH[$i]}"
 test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${CONFIG_IMAGE_INITRD[$i]}"
 done
 ) > /tmp/ppc_lilo/yaboot.conf
@@ -261,6 +262,13 @@ if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
 	else
 		CONFIG_IMAGE_INITRDPATH[$i]=$FILE_PATH
 	fi
+elif [ ! -z "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
+	FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
+	if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
+		CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
+	else
+		CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
+	fi
 else
 	continue
 fi
@@ -284,6 +292,7 @@ fi
 test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
 test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = ${CONFIG_IMAGE_APPEND[$i]}"
+test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAPPATH[$i]}"
 test -z "${CONFIG_IMAGE_INITRD[$i]}" || ( if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
 	echo "    initrd = `basename ${CONFIG_IMAGE_INITRD[$i]}`" 
 else 
@@ -630,6 +639,15 @@ while read option sarator value ; do
                         fi
 
 		;;
+		sysmap)
+                        if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+                                echo "ERROR: sysmap can not be global"
+				exit 1
+                        else
+                                CONFIG_IMAGE_SYSMAP[$CONFIG_IMAGE_COUNT]="$value"
+                        fi
+
+		;;
 		initrd)
                         if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
                                 OPTION_INITRD="$value"
@@ -673,6 +691,10 @@ exit -1
 fi
 if [ ! -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
 echo "ERROR: initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
+exit -1
+fi
+if [ ! -f ${CONFIG_IMAGE_SYSMAP[$i]} ] ; then
+echo "ERROR: sysmap = ${CONFIG_IMAGE_SYSMAP[$i]} ist not a regular file"
 exit -1
 fi
 done

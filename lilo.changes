@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Sun Dec 17 20:34:26 CET 2000 - olh@suse.de
+
+- use yaboot 0.9 on pmac and chrp
+
+-------------------------------------------------------------------
+Sun Dec 17 17:29:40 CET 2000 - olh@suse.de
+
+- add support for System.map loading (sysmap=)
+
+-------------------------------------------------------------------
 Fri Dec  1 11:44:54 CET 2000 - olh@suse.de
 
 - remove quik, build debug binaries on CHRP

@@ -1,5 +1,17 @@
---- crt0.S
-+++ crt0.S	2000/10/12 19:19:14
+diff -urN yaboot_0.9.orig/cfg.c yaboot_0.9/cfg.c
+--- yaboot_0.9.orig/cfg.c	Fri Oct  6 22:14:33 2000
++++ yaboot_0.9/cfg.c	Sun Dec 17 18:24:23 2000
+@@ -48,6 +48,7 @@
+     {cft_strg, "default", NULL},
+     {cft_strg, "timeout", NULL},
+     {cft_strg, "message", NULL},
++    {cft_strg, "progressbar", NULL},
+     {cft_strg, "root", NULL},
+     {cft_strg, "ramdisk", NULL},
+     {cft_flag, "read-only", NULL},
+diff -urN yaboot_0.9.orig/crt0.S yaboot_0.9/crt0.S
+--- yaboot_0.9.orig/crt0.S	Fri Oct  6 22:14:33 2000
++++ yaboot_0.9/crt0.S	Sun Dec 17 18:23:19 2000
 @@ -13,6 +13,16 @@
  	.long   (0x7c000164 + ((r20) << 21))
  	isync
@@ -17,19 +29,33 @@
  	b	yaboot_start
  
  /*
---- fs_ext2.c
-+++ fs_ext2.c	2000/10/24 12:53:53
-@@ -88,7 +88,7 @@
- /* Currently, we have a mess between what is in the file structure
-  * and what is stored globally here. I'll clean this up later
-  */
--static int opened;		/* We can't open twice ! */
-+static int opened = 0;		/* We can't open twice ! */
- static unsigned int bs;		/* Blocksize */
- static unsigned long long doff;	/* Byte offset where partition starts */
- static ino_t root,cwd;
---- partition.c
-+++ partition.c	2000/10/24 12:53:53
+diff -urN yaboot_0.9.orig/file.c yaboot_0.9/file.c
+--- yaboot_0.9.orig/file.c	Fri Oct  6 22:14:33 2000
++++ yaboot_0.9/file.c	Sun Dec 17 18:24:23 2000
+@@ -217,7 +217,8 @@
+ 	if (file_name == NULL)
+ 		file_name = (char *)spec->file;
+ 	if (file_name == NULL) {
+-		prom_printf("booting without a file name not yet supported !\n");
++//		prom_printf("booting without a file name not yet supported !\n");
++		prom_printf("cannot open file without filename !\n");
+ 		return FILE_ERR_NOTFOUND;
+ 	}
+ 	if (partition == -1)
+diff -urN yaboot_0.9.orig/include/yaboot.h yaboot_0.9/include/yaboot.h
+--- yaboot_0.9.orig/include/yaboot.h	Fri Oct  6 22:14:33 2000
++++ yaboot_0.9/include/yaboot.h	Sun Dec 17 18:24:23 2000
+@@ -8,6 +8,7 @@
+ 	struct boot_fspec_t	rd;
+ 	struct boot_fspec_t	sysmap;
+ 	struct boot_fspec_t	splash;
++	char progressbar;
+ 
+ 	char*	args;
+ };
+diff -urN yaboot_0.9.orig/partition.c yaboot_0.9/partition.c
+--- yaboot_0.9.orig/partition.c	Fri Oct  6 22:14:33 2000
++++ yaboot_0.9/partition.c	Sun Dec 17 18:23:19 2000
 @@ -243,9 +243,6 @@
  	if (desc->signature == MAC_DRIVER_MAGIC) {
  		/* pdisk partition format */
@@ -50,8 +76,9 @@
  	} else {
  		prom_printf("Not a macintosh-formatted disk !\n");
  		goto bail;
---- yaboot.c
-+++ yaboot.c	2000/10/24 12:59:46
+diff -urN yaboot_0.9.orig/yaboot.c yaboot_0.9/yaboot.c
+--- yaboot_0.9.orig/yaboot.c	Fri Oct  6 22:14:33 2000
++++ yaboot_0.9/yaboot.c	Sun Dec 17 19:47:20 2000
 @@ -48,7 +48,7 @@
  
  #define CONFIG_FILE_NAME	"yaboot.conf"
@@ -61,13 +88,226 @@
  
  #ifdef SPLASH_SCREEN
  #include "gui.h"
-@@ -558,8 +558,8 @@
- 	    	&params->splash.file, &params->splash.part);
- 	    validate_fspec(&params->splash, defdevice, defpart);
+@@ -86,11 +86,14 @@
+ 
+ /* Local functions */
+ static int	yaboot_main(void);
++static void	setup_display(void);
+ static int	is_elf32(loadinfo_t *loadinfo);
+ static int	is_elf64(loadinfo_t *loadinfo);
+ static int      load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo);
+ static int      load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo);
+ 
++static prom_handle videodev;
++
+ /* Locals & globals */
+ 
+ int useconf = 0;
+@@ -421,8 +424,14 @@
+     params->rd.part = -1;
+     params->sysmap.part = -1;
+     params->splash.part = -1;
++    params->splash.file = NULL;
++    params->splash.dev = NULL;
++    params->progressbar = 1;
+     defpart = bootpartition;
+-    
++
++    label = 0;
++    defdevice = bootdevice;
++
+     if (first) {
+ 	first = 0;
+ 	prom_get_chosen("bootargs", bootargs, sizeof(bootargs));
+@@ -433,6 +442,28 @@
+ 	    timeout = strtol(q, NULL, 0);
+     }
+ 
++    setup_display();
++    
++#ifdef SPLASH_SCREEN
++ 	p = cfg_get_strg(0, "splash");
++	if (p && *p) {
++#if DEBUG
++	    prom_printf("parsing splash path <%s>\n", p);
++#endif	    
++	    strncpy(splashpath, p, 1024);
++	    params->splash.dev = parse_device_path(splashpath,
++	    	&params->splash.file, &params->splash.part);
++	    validate_fspec(&params->splash, defdevice, defpart);
++	}
++	if (params->splash.file)
++	{
++        	fxDisplaySplash(&params->splash);
++	}
++
++#endif /* SPLASH_SCREEN */
++    
++    prom_printf("Welcome to yaboot version " VERSION "\n");
++	
+     prom_printf("boot: ");
+     c = -1;
+     if (timeout != -1) {
+@@ -448,6 +479,8 @@
+     }
+ 
+     if (c == '\n') {
++	if (!imagename)
++		imagename = cfg_get_default();
+ 	prom_printf("%s", imagename);
+ 	if (params->args)
+ 	    prom_printf(" %s", params->args);
+@@ -473,9 +506,6 @@
+     if ( useconf && ((imagename[0] == 0) || !cfg_get_strg(imagename, "label")) )
+ 	imagename = cfg_get_default();
+ 
+-    label = 0;
+-    defdevice = bootdevice;
+-
+     if (useconf) {
+ 	defdevice = cfg_get_strg(0, "device");
+ 	p = cfg_get_strg(0, "partition");
+@@ -487,6 +517,13 @@
+ 	p = cfg_get_strg(0, "pause-message");
+ 	if (p)
+ 	    pause_message = p;
++	p = cfg_get_strg(0, "progressbar");
++	if (p && *p)
++	{
++	    n = strtol(p, &endp, 10);
++	    if (endp != p && *endp == 0)
++		params->progressbar = n;
++	}
+ 	p = cfg_get_strg(imagename, "image");
+ 	if (p && *p) {
+ 	    label = imagename;
+@@ -548,18 +585,24 @@
+ 	    validate_fspec(&params->sysmap, defdevice, defpart);
  	}
+ #ifdef SPLASH_SCREEN
+- 	p = cfg_get_strg(label, "splash");
+-	if (p && *p) {
++	if (!params->splash.file)
++	{
++	    p = cfg_get_strg(label, "splash");
++	    if (p && *p) {
+ #if DEBUG
+-	    prom_printf("parsing splash path <%s>\n", p);
++	        prom_printf("parsing splash path <%s>\n", p);
+ #endif	    
+-	    strncpy(splashpath, p, 1024);
+-	    params->splash.dev = parse_device_path(splashpath,
+-	    	&params->splash.file, &params->splash.part);
+-	    validate_fspec(&params->splash, defdevice, defpart);
+-	}
 -   }
++	        strncpy(splashpath, p, 1024);
++	        params->splash.dev = parse_device_path(splashpath,
++	        	&params->splash.file, &params->splash.part);
++	        validate_fspec(&params->splash, defdevice, defpart);
++	    }
++	    if (params->splash.file)
++	    {
++		fxDisplaySplash(&params->splash);
++	    }
  #endif /* SPLASH_SCREEN */
 +   }
      
      return 0;
  }
+@@ -583,6 +626,7 @@
+     unsigned long	sysmap_size;
+     kernel_entry_t      kernel_entry;
+     struct bi_record*	birec;
++    char*              loc=NULL;
+     loadinfo_t          loadinfo;
+     
+     loadinfo.load_loc = 0;
+@@ -596,12 +640,19 @@
+ 	if (!params.kernel.file)
+ 	    continue;
+ 	
+-#ifdef SPLASH_SCREEN
+-	if (params.splash.file)
+-        	fxDisplaySplash(&params.splash);
+-#endif
+-	prom_printf("Loading kernel...\n");
++	prom_printf("Please wait, loading kernel...\n");
+ 
++	if(bootpath && !strcmp(bootpath,"\\\\") && params.kernel.file[0] != '/') {
++		loc=(char*)malloc(strlen(params.kernel.file)+3);
++		if (!loc) {
++			prom_printf ("malloc error\n");
++			goto next;
++		}
++		strcpy(loc,bootpath);
++		strcat(loc,params.kernel.file);
++		free(params.kernel.file);
++		params.kernel.file=loc;
++	}
+         result = open_file(&params.kernel, &file);
+         if (result != FILE_ERR_OK) {
+ 	    prom_printf("\nImage not found.... try again\n");
+@@ -662,6 +713,19 @@
+ 	 * so we claim an arbitrary amount of 4Mb
+ 	 */
+ 	if (params.rd.file) {
++	    if(bootpath && !strcmp(bootpath,"\\\\") && params.rd.file[0] != '/')
++	    {
++		if (loc) free(loc);
++		loc=(char*)malloc(strlen(params.rd.file)+3);
++		if (!loc) {
++		    prom_printf ("malloc error\n");
++		    goto next;
++		}
++		strcpy(loc,bootpath);
++		strcat(loc,params.rd.file);
++		free(params.rd.file);
++		params.rd.file=loc;
++	    }
+ 	    prom_printf("Loading ramdisk...\n");
+ 	    result = open_file(&params.rd, &file);
+ 	    if (result != FILE_ERR_OK)
+@@ -1017,15 +1081,24 @@
+ 	    }
+ 	    offset = p->p_vaddr - loadinfo->load_loc;
+ #ifdef SPLASH_SCREEN
++	    if (params.progressbar) {
+ 	    if (fxReadImage(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
++		    prom_printf ("read failed\n");
++		    prom_release(loadinfo->base, loadinfo->memsize);
++		    return 0;
++	    }
++	    } else {
+ #else
+ 	    if ((*(file->read))(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
+-#endif
+ 		    prom_printf ("read failed\n");
+ 		    prom_release(loadinfo->base, loadinfo->memsize);
+ 		    return 0;
+ 	    }
++	    }
++#if 0
+     }
++#endif
++#endif
+ 
+ #if 0	/* to make editor happy */
+     }
+@@ -1099,15 +1180,12 @@
+ #if !DEBUG
+ 	prom_printf("\xc");
+ #endif	
++	  prom_interpret ( " \" screen\" output ");
+ }
+ 
+ int
+ yaboot_main(void)
+ {
+-	setup_display();
+-	
+-	prom_printf("Welcome to yaboot version " VERSION "\n");
+-	
+ 	prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
+ #if DEBUG
+ 	prom_printf("/chosen/bootpath = %s\n", bootdevice);

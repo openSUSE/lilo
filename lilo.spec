@@ -2,7 +2,9 @@
 # spec file for package lilo (Version 0.0.6)
 # 
 # Copyright  (c)  2000  SuSE GmbH  Nuernberg, Germany.
-#
+# This file and all modifications and additions to the pristine
+# package are under the same license as the package itself.
+# 
 # please send bugfixes or comments to feedback@suse.de.
 #
 
@@ -23,8 +25,6 @@ Version:      0.0.6
 Release:      10
 Source0: 	lilo-0.0.6.tar.gz
 #Patch0:		lilo-0.0.6.dif
-Source1:	yaboot_0.8.src.tgz
-Patch1:		yaboot_0.8.dif
 Source3:	lilo-21.tar.gz
 Source4:	linuxrc-1.1.13.olh.tar.gz
 Source5:	yaboot_0.9.tar.gz
@@ -53,37 +53,26 @@ Authors:
 SuSE series: a
 
 %prep
-%setup -q -T -c -a 0 -a 1 -a 3 -a 4 -a 5
-mv yaboot_0.8	yaboot
+%setup -q -T -c -a 0 -a 3 -a 4 -a 5
 mv lilo-0.0.6	lilo.ppc
 mv linuxrc-1.1.13.olh	linuxrc
-mv yaboot_0.9	chrp
+mv yaboot_0.9	yaboot
 cd yaboot
-%patch1
-cd ..
-cd chrp
-%patch5
+%patch5 -p1
 cd ..
 
 %build
 cd yaboot
-make DEBUG=1 VERSION=0.8.SuSE CONFIG_PPC64BRIDGE=n
-mv yaboot yaboot.debug
-make clean
-make DEBUG=0 VERSION=0.8.SuSE CONFIG_PPC64BRIDGE=n
-cd ..
-cd chrp
-make DEBUG=1 VERSION=0.9.SuSE CONFIG_PPC64BRIDGE=n
-mv yaboot yaboot.chrp.debug
-make clean
-make DEBUG=0 VERSION=0.9.SuSE CONFIG_PPC64BRIDGE=n
-mv yaboot yaboot.chrp
-make clean
-make DEBUG=0 VERSION=0.9.SuSE CONFIG_PPC64BRIDGE=y
+make DEBUG=0 VERSION=0.9.chrp64.SuSE CONFIG_PPC64BRIDGE=y
 mv yaboot yaboot.chrp.64
 make clean
-make DEBUG=1 VERSION=0.9.SuSE CONFIG_PPC64BRIDGE=y
+make DEBUG=1 VERSION=0.9.chrp64.SuSE CONFIG_PPC64BRIDGE=y
 mv yaboot yaboot.chrp.64.debug
+make clean
+make DEBUG=1 VERSION=0.9.SuSE CONFIG_PPC64BRIDGE=n
+mv yaboot yaboot.debug
+make clean
+make DEBUG=0 VERSION=0.9.SuSE CONFIG_PPC64BRIDGE=n
 cd ..
 cd lilo
 make activate
@@ -126,8 +115,6 @@ cp -av lilo.changes $RPM_BUILD_ROOT%{_docdir}/lilo/
 cd ..
 cd yaboot
 cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/boot/
-cd ..
-cd chrp
 cp -av yaboot.chrp* $RPM_BUILD_ROOT/boot/
 cd ..
 cd linuxrc
@@ -164,6 +151,10 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sun Dec 17 2000 - olh@suse.de
+- use yaboot 0.9 on pmac and chrp
+* Sun Dec 17 2000 - olh@suse.de
+- add support for System.map loading (sysmap=)
 * Fri Dec 01 2000 - olh@suse.de
 - remove quik, build debug binaries on CHRP
 * Tue Oct 24 2000 - olh@suse.de
