@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Feb 14 01:39:07 CET 2001 - olh@suse.de
+
+- handle first generation iMac in lilo
+
+-------------------------------------------------------------------
 Sun Feb 11 14:05:22 CET 2001 - olh@suse.de
 
 - handle /dev/hde in show_of_path.sh

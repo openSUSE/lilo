@@ -151,6 +151,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Feb 14 2001 - olh@suse.de
+- handle first generation iMac in lilo
 * Sun Feb 11 2001 - olh@suse.de
 - handle /dev/hde in show_of_path.sh
 * Sun Feb 11 2001 - olh@suse.de

@@ -516,7 +516,7 @@ if [ "$MACHINE" = "pmac" ] ; then
 		echo `cat /proc/device-tree/openprom/model` > /tmp/ppc_lilo/openprom_model
 		while read openfirmware ofversion; do
 	        	case "$openfirmware" in
-	                OpenFirmware)      MACHINE="pmac_new" ;;
+	                iMac,1|OpenFirmware)      MACHINE="pmac_new" ;;
 	                Open)      MACHINE="pmac_old" ;;
 	        	esac
 		done < /tmp/ppc_lilo/openprom_model
