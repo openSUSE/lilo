@@ -144,7 +144,7 @@ function running_on_chrp () {
 	    #
 	    #  is no longer needed due to olh 9.3.2004
 	    # still needed, might be a bug in yaboot 26.3.2004
-	    if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 ]; then
+	    if [ -n "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 ]; then
 		if ! bash /lib/lilo/chrp/chrp64/addRamdisk.sh \
 		  /tmp/ppc_lilo \
 		  ${CONFIG_IMAGE_FILE[$i]} \
@@ -170,16 +170,17 @@ function running_on_chrp () {
     rm -f /tmp/ppc_lilo/yaboot.conf
 
 
-#if [ "$OPTION_ACTIVATE" = "yes" ] ; then
-#  NV_BOOT_PATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
-#  echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
-#  nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
-#  if [ x"$(nvsetenv boot-file)" != "xboot-file=" ] ; then
-#    echo "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
-#    nvsetenv boot-file
-#    nvsetenv boot-file ""
-#  fi
-#fi
+    if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+	NV_BOOT_PATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
+	NV_BOOT_PATH=${NV_BOOT_PATH%:+([0-9])}
+	echo "set OF boot-device $NV_BOOT_PATH"
+	nvsetenv boot-device "$NV_BOOT_PATH"
+	if [ "$(nvsetenv boot-file)" != "boot-file=" ] ; then
+	    echo "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
+	    nvsetenv boot-file
+	    nvsetenv boot-file ""
+	fi
+    fi
 
 }
 

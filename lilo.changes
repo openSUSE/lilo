@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 31 15:56:21 CEST 2004 - jplack@suse.de
+
+- set OF variable boot-device to point to your boot device
+
+-------------------------------------------------------------------
 Tue Mar 30 17:54:57 CEST 2004 - jplack@suse.de
 
 - fixes #37294: fixed command line handling, and #37291
