@@ -111,6 +111,7 @@ cp -av /tmp/ppc_lilo/yaboot.conf /etc/yaboot.conf
 function running_on_iseries () {
 
 echo running on iSeries
+ISERIES_KERNEL_TMPFILE=/tmp/ppc_lilo/vmlinux.initrd
 
 if [ ! -z "$OPTION_DEFAULT" ] ; then
 # find the default= line
@@ -118,10 +119,10 @@ for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
   if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[$i]}" ] ; then
     ISERIES_IMAGE="${CONFIG_IMAGE_FILE[$i]}" 
     if [ ! -z "$OPTION_APPEND" ] ; then
-       ISERIES_CMDLINE="$(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' )"
+       ISERIES_CMDLINE=$OPTION_APPEND
     fi
     if [ ! -z "${CONFIG_IMAGE_APPEND[$i]}" ] ; then
-       ISERIES_CMDLINE="$(echo ${CONFIG_IMAGE_APPEND[$i]} | sed -e 's#^"##' -e 's#"$##' )"
+       ISERIES_CMDLINE=${CONFIG_IMAGE_APPEND[$i]}
     fi
     if [ ! -z "$OPTION_ROOT" ] ; then
 	ISERIES_ROOT="root=$OPTION_ROOT"
@@ -142,10 +143,10 @@ else
 # pick the first image= line
     ISERIES_IMAGE="${CONFIG_IMAGE_FILE[1]}"
     if [ ! -z "$OPTION_APPEND" ] ; then
-       ISERIES_CMDLINE="$(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' )"
+       ISERIES_CMDLINE=$OPTION_APPEND
     fi
     if [ ! -z "${CONFIG_IMAGE_APPEND[1]}" ] ; then
-       ISERIES_CMDLINE="$(echo ${CONFIG_IMAGE_APPEND[1]} | sed -e 's#^"##' -e 's#"$##' )"
+       ISERIES_CMDLINE=${CONFIG_IMAGE_APPEND[1]}
     fi
     if [ ! -z "$OPTION_ROOT" ] ; then
 	ISERIES_ROOT="root=$OPTION_ROOT"
@@ -161,41 +162,87 @@ else
     fi
 fi
 
+ISERIES_BOOT=${OPTION_BOOT##*=}
+ISERIES_BOOT_IMAGE=$ISERIES_IMAGE
 echo "ISERIES_CMDLINE " $ISERIES_CMDLINE
 echo "ISERIES_ROOT    " $ISERIES_ROOT
 echo "ISERIES_IMAGE   " $ISERIES_IMAGE
-ISERIES_BOOT_IMAGE=$ISERIES_IMAGE
+echo "ISERIES_BOOT    " $ISERIES_BOOT
 test ! -z "$ISERIES_INITRD" && {
 echo "ISERIES_INITRD  " $ISERIES_INITRD
 echo
-echo generating /tmp/ppc_lilo/vmlinux.initrd
+echo generating $ISERIES_KERNEL_TMPFILE with /bin/addRamDisk64
 echo
 echo
 unset ec
 /bin/addRamDisk64 $ISERIES_INITRD \
 	/boot/System.map-`get_kernel_version $ISERIES_IMAGE` \
 	$ISERIES_IMAGE \
-	/tmp/ppc_lilo/vmlinux.initrd ; ec=$?
+	$ISERIES_KERNEL_TMPFILE ; ec=$?
 echo
 [ "$ec" != "0" ]  && { echo bootfile generation failed: ec $ec ; exit 1 ; }
-ISERIES_BOOT_IMAGE=/tmp/ppc_lilo/vmlinux.initrd
+ISERIES_BOOT_IMAGE=$ISERIES_KERNEL_TMPFILE
 }
-echo this will take a while...
-echo "writing kernel $ISERIES_BOOT_IMAGE to /proc/iSeries/mf/B/vmlinux"
-dd if=$ISERIES_BOOT_IMAGE of=/proc/iSeries/mf/B/vmlinux bs=4096
-echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/B/cmdline
+unset ISERIES_TARGET
+if test "$ISERIES_BOOT" = "B" -o "$ISERIES_BOOT" = "A" -o "$ISERIES_BOOT" = "C" ; then
+ISERIES_TARGET=slot
+elif test -c "$ISERIES_BOOT" -o -d "$ISERIES_BOOT" -o -p "$ISERIES_BOOT" -o -S "$ISERIES_BOOT" ; then
+ISERIES_TARGET=invalid
+elif test -b "$ISERIES_BOOT" ; then
+ISERIES_TARGET=block_dev
+elif test -f "$ISERIES_BOOT" -o ! -e "$ISERIES_BOOT" ; then
+ISERIES_TARGET=file
+fi
+echo ISERIES_TARGET $ISERIES_TARGET
+
+case "$ISERIES_TARGET" in
+	slot)
+		echo write to slot $ISERIES_TARGET
+		;;
+	file)
+		if [ ! "${ISERIES_BOOT:0:1}" = "/" ] ; then
+			echo boot=$OPTION_BOOT must have an absolute path
+			case "$OPTION_BOOT" in
+				a|b|c)
+					echo "Did you mean uppercase '$OPTION_BOOT'?"
+					;;
+			esac
+			exit 1
+		fi
+		echo write to file $ISERIES_BOOT
+		rm -f $ISERIES_BOOT
+		cp -a $ISERIES_BOOT_IMAGE $ISERIES_BOOT
+		;;
+	block_dev)
+		echo write to block_dev "$ISERIES_BOOT"
+		;;
+	invalid)
+		echo "Error: boot=$OPTION_BOOT invalid"
+		exit 1
+		;;
+esac
+echo ISERIES_TARGET $ISERIES_TARGET
+echo ISERIES_BOOT_IMAGE $ISERIES_BOOT_IMAGE
+
+if [ "$ISERIES_TARGET" = "slot" ] ; then
+echo "this will take a while... ($[$(ls -l $ISERIES_BOOT_IMAGE | awk '{ print $5 }') / 1024] kb)"
+echo "writing kernel $ISERIES_BOOT_IMAGE to /proc/iSeries/mf/$OPTION_BOOT/vmlinux"
+dd if=$ISERIES_BOOT_IMAGE of=/proc/iSeries/mf/$OPTION_BOOT/vmlinux bs=4096
+echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/$OPTION_BOOT/cmdline
+fi
 
 
+if [ "$ISERIES_TARGET" = "block_dev" ] ; then
 #only the device is given and dd to the raw device is a bad idea
 if [ "$OPTION_PARTITION" = "" ] ; then
   echo guess the prep boot device 
   PART=`fdisk -l $OPTION_DEVICE | fgrep "PPC PReP"`
   if [ -z "$PART" ] ; then
      echo ERROR: config error, boot = $OPTION_BOOT is not 41 PReP  
-     echo '*********************************************************'
+     echo '**********************************************************'
      echo '* You could create a PPC PReP Boot partition (type 0x41) *'
-     echo '* for the CHRP bootloader to be installed.              *'
-     echo '*********************************************************'
+     echo '* for the kernel binary to be installed.                 *'
+     echo '**********************************************************'
   exit -1
   fi
   if [ `echo "$PART" | wc -l` != 1 ] ; then
@@ -208,14 +255,12 @@ if [ "$OPTION_PARTITION" = "" ] ; then
   fi
   P=`echo "$PART" | awk '{print $1}'`
 
-  echo Installing "$ISERIES_IMAGE" onto $P
-  dd if="$ISERIES_IMAGE" of=$P bs=4096
+  echo Installing "$ISERIES_BOOT_IMAGE" onto $P
+  dd if="$ISERIES_BOOT_IMAGE" of=$P bs=4096
 
 
-  if [ "$OPTION_ACTIVATE" = "yes" ] ; then
     echo set active flag on partition $(echo "$P"|sed 's/[0-9]*$/ &/')
 /sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
-  fi
 
 else
 #we have the device, but better safe than sorry
@@ -223,20 +268,19 @@ else
   PART=`fdisk -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
   if [ -z "$PART" ] ; then
      echo "ERROR: config error, boot = $OPTION_BOOT is not 41 PReP"
-     echo "*********************************************************"
+     echo '**********************************************************'
      echo "* You could create a PPC PReP Boot partition (type 0x41) *"
-     echo "* for the CHRP bootloader to be installed.              *"
-     echo "*********************************************************"
+     echo '* for the kernel binary to be installed.                 *'
+     echo '**********************************************************'
   exit -1
   fi
 
-    echo Installing "$ISERIES_IMAGE" onto $OPTION_BOOT
-    dd if="$ISERIES_IMAGE" of=$OPTION_BOOT bs=4096
+    echo Installing "$ISERIES_BOOT_IMAGE" onto $OPTION_BOOT
+    dd if="$ISERIES_BOOT_IMAGE" of=$OPTION_BOOT bs=4096
 
-  if [ "$OPTION_ACTIVATE" = "yes" ] ; then
     echo set active flag on partition $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
 /sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
-  fi
+fi
 fi
 
 }
@@ -876,9 +920,11 @@ while read option sarator value ; do
 		;;
 		append)
                         if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                OPTION_APPEND=$value
+				# use eval to strip ""
+                                eval OPTION_APPEND=$value
                         else
-                                CONFIG_IMAGE_APPEND[$CONFIG_IMAGE_COUNT]=$value
+				# use eval to strip ""
+				eval CONFIG_IMAGE_APPEND[$CONFIG_IMAGE_COUNT]=$value
                         fi
 
 		;;
@@ -912,7 +958,7 @@ done < /tmp/ppc_lilo/config_tmp
 function check_config_file () {
 
 
-if test ! -b $OPTION_BOOT  ; then
+if test ! -b $OPTION_BOOT -a ! "$MACHINE" = "iseries" ; then
 echo ERROR: boot = $OPTION_BOOT is not a valid block device
 exit -1 
 fi

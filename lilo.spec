@@ -9,7 +9,7 @@
 #
 
 # neededforbuild  tetex
-# usedforbuild    aaa_base aaa_version bash bind9-utils bison cpio cpp cyrus-sasl db devs diffutils e2fsprogs file filesystem fileutils findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip kbd less libgcc libstdc++ libxcrypt m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch permissions ps rcs readline sed sendmail sh-utils shadow strace syslogd sysvinit tar texinfo textutils timezone unzip util-linux vim zlib-devel autoconf automake binutils bzip2 cracklib gcc gdbm gettext libtool perl rpm te_ams te_latex tetex zlib
+# usedforbuild    aaa_base aaa_version acl attr bash bind9-utils bison cpio cpp cyrus-sasl db devs diffutils e2fsprogs file filesystem fileutils fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip kbd less libgcc libstdc++ libxcrypt m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch permissions ps rcs readline sed sendmail sh-utils shadow strace syslogd sysvinit tar texinfo textutils timezone unzip util-linux vim zlib-devel autoconf automake binutils bzip2 cracklib gcc gdbm gettext libtool perl rpm te_ams te_latex tetex zlib
 
 Name:         lilo
 Group:        System/Boot
@@ -18,7 +18,7 @@ Obsoletes:    yaboot activate quik
 Requires:     hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      271
+Release:      280
 Source0:      lilo-0.0.6.tar.bz2
 Patch0:       lilo-0.0.6.dif
 Source1:      compatible_machines.txt
@@ -136,6 +136,9 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sun Aug 25 2002 - olh@suse.de
+- better handling of iSeries specific options
+  write kernel to kernel slot or stream file or prep boot partition
 * Sun Aug 11 2002 - olh@suse.de
 - check for empty image= line on newworld, avoids warning
 * Sat Aug 03 2002 - olh@suse.de
