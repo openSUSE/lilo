@@ -10,6 +10,7 @@
 CONFIG_LILO_CONF=/etc/lilo.conf
 SHOW_OF_PATH_SH=/bin/show_of_path.sh
 DEFAULT_BOOTFOLDER=suseboot
+COMPATIBLE_LIST=/boot/compatible_machines.txt
 
 
 
@@ -172,20 +173,29 @@ done
 function running_on_pmac_old () {
 
 echo running on pmac_old
+echo generating /tmp/ppc_lilo/miboot.conf ...
+echo
 
-
+# starting the work
+(
+test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
+test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
+test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
+test -z "$OPTION_APPEND"  || echo "append = $OPTION_APPEND"
+test -z "$OPTION_INITRD"  || echo "initrd = ${OPTION_BOOTFOLDER}:`basename ${OPTION_INITRD}`"
+echo
 for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" || continue
-DEVICENAME=${CONFIG_IMAGE_ROOT[$i]}
+test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+echo "image = ${OPTION_BOOTFOLDER}:`basename ${CONFIG_IMAGE_FILE[$i]}`"
+test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
+test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
+test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = ${CONFIG_IMAGE_APPEND[$i]}"
+test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${OPTION_BOOTFOLDER}:`basename ${CONFIG_IMAGE_INITRD[$i]}`"
+echo
 done
-echo $DEVICENAME > /tmp/ppc_lilo/myrootdevice
+echo
+) > /tmp/ppc_lilo/miboot.conf
 
-# generate a generic ramdisk
-gzip -vcd /boot/initrd.pmacold.gz > /tmp/ppc_lilo/initrd
-mount -o rw,loop /tmp/ppc_lilo/initrd /tmp/ppc_lilo/ramdisk
-cp -av /tmp/ppc_lilo/myrootdevice /tmp/ppc_lilo/ramdisk/myrootdevice
-umount /tmp/ppc_lilo/ramdisk
-gzip -9v /tmp/ppc_lilo/initrd
 
 # umount the boot = partition, or exit if that fails
 mount | grep -q "$OPTION_BOOT"
@@ -196,7 +206,7 @@ humount $OPTION_BOOT 2>/dev/null
 humount $OPTION_BOOT 2>/dev/null
 
 hmount $OPTION_BOOT  || exit 1
-if [ "$OPTION_BOOTFOLDER" != "" ] ; then
+if [ "$OPTION_BOOTFOLDER" != ":" ] ; then
 HFS_BOOTFOLDER="$OPTION_BOOTFOLDER"
 else
 HFS_BOOTFOLDER="$DEFAULT_BOOTFOLDER"
@@ -207,19 +217,16 @@ hattrib -b $HFS_BOOTFOLDER
 hcd $HFS_BOOTFOLDER
 hcopy /boot/Finder.bin :Finder
 hcopy /boot/System.bin :System
+hcopy -r /tmp/ppc_lilo/miboot.conf :
+hattrib -t TEXT -c "R*ch" :miboot.conf
 hattrib -t FNDR -c MACS Finder
 hattrib -t zsys -c MACS System
 
 for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" || continue
-hcopy ${CONFIG_IMAGE_FILE[$i]} :vmlinux
+test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+hcopy ${CONFIG_IMAGE_FILE[$i]} :`basename ${CONFIG_IMAGE_FILE[$i]}`
 test -z "${CONFIG_IMAGE_INITRD[$i]}" || { 
-echo using "${CONFIG_IMAGE_INITRD[$i]}" as ramdisk
-hcopy ${CONFIG_IMAGE_INITRD[$i]} :ramdisk.image.gz 
-}
-test -z "${CONFIG_IMAGE_INITRD[$i]}" && {
-echo using /boot/initrd.pmacold.gz with root device $DEVICENAME as ramdisk
-hcopy /tmp/ppc_lilo/initrd.gz :ramdisk.image.gz
+hcopy ${CONFIG_IMAGE_INITRD[$i]} :`basename ${CONFIG_IMAGE_INITRD[$i]}`
 }
 done
 hpwd
@@ -240,7 +247,7 @@ for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
 unset FILE_PATH
 # check if the file is a real file
 test -f ${CONFIG_IMAGE_FILE[$i]} && FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_FILE[$i]}|grep -v /pci[0-9])
-if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
+if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
         CONFIG_IMAGE_PATH[$i]="copy"
 else
 	CONFIG_IMAGE_PATH[$i]=$FILE_PATH
@@ -248,14 +255,14 @@ fi
 unset FILE_PATH
 if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then 
 	FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_INITRD[$i]}|grep -v /pci[0-9])
-	if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
+	if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
         	CONFIG_IMAGE_INITRDPATH[$i]="copy"
 	else
 		CONFIG_IMAGE_INITRDPATH[$i]=$FILE_PATH
 	fi
 elif [ ! -z "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
 	FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
-	if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
+	if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
 		CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
 	else
 		CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
@@ -292,6 +299,9 @@ fi )
 done
 ) > /tmp/ppc_lilo/yaboot.conf
 
+# get the COMPATIBLE_MACHINES 
+prepare_compatible_pmacs
+
 BOOT_DEVICEPATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
 OTHER_DEVICEPATH=$($SHOW_OF_PATH_SH $OPTION_OTHER)
 
@@ -299,7 +309,7 @@ echo "BOOT_DEVICEPATH  =  $BOOT_DEVICEPATH"
 echo "OTHER_DEVICEPATH  =  $OTHER_DEVICEPATH"
 (echo "<CHRP-BOOT>
 <COMPATIBLE>
-iMac,1 PowerMac1,1 PowerBook1,1 PowerMac2,1 PowerMac3,1 PowerBook2,1 PowerBook3,1 PowerMac2,2 PowerBook2,2 PowerMac3,3 PowerMac5,1 PowerBook3,2 PowerMac3,4 PowerMac4,1
+`echo $COMPATIBLE_MACHINES`
 </COMPATIBLE>
 <DESCRIPTION>
 Linux/PPC Yaboot bootloader
@@ -447,7 +457,6 @@ echo "\" screen\" output
 </CHRP-BOOT>"
 fi) > /tmp/ppc_lilo/os-chooser
 
-
 # umount the boot = partition, or exit if that fails
 mount | grep -q "$OPTION_BOOT"
 if [ "$?" = "0" ] ; then 
@@ -465,12 +474,12 @@ fi
 hmkdir $HFS_BOOTFOLDER 2>/dev/null
 hattrib -b $HFS_BOOTFOLDER
 hcd $HFS_BOOTFOLDER
-hcopy /tmp/ppc_lilo/os-chooser :Mac\ OS\ Rom
+hcopy /tmp/ppc_lilo/os-chooser :os-chooser
 hcopy /tmp/ppc_lilo/yaboot.conf :yaboot.conf
 hcopy /boot/yaboot :yaboot
 hcopy /boot/Finder.bin :Finder
 hcopy /boot/System.bin :System
-hattrib -t tbxi -c chrp Mac\ OS\ Rom
+hattrib -t tbxi -c chrp os-chooser
 hattrib -t FNDR -c MACS Finder
 hattrib -t zsys -c MACS System
 hattrib -t TEXT -c "R*ch" yaboot.conf
@@ -502,9 +511,10 @@ fi
 
 function check_arch () {
 # check for the current ppc subarch
-
+unset COPY_BOOT_FILES
 while read line; do
 	case "$line" in
+		*MacRISC2*)	MACHINE="pmac" ; COPY_BOOT_FILES="true" ;;
 		*MacRISC*)	MACHINE="pmac" ;;
 		*CHRP*)		MACHINE="chrp" ;;
 		*PReP*)		MACHINE="prep" ;;
@@ -513,8 +523,8 @@ done < /proc/cpuinfo
 
 
 if [ "$MACHINE" = "pmac" ] ; then
-	if [ -f /proc/device-tree/openprom/model ] ; then
-		echo `cat /proc/device-tree/openprom/model` > /tmp/ppc_lilo/openprom_model
+	if [ -f /proc/device-tree/openprom*/model ] ; then
+		echo `cat /proc/device-tree/openprom*/model` > /tmp/ppc_lilo/openprom_model
 		while read openfirmware ofversion; do
 	        	case "$openfirmware" in
 	                iMac,1|OpenFirmware)      MACHINE="pmac_new" ;;
@@ -523,9 +533,15 @@ if [ "$MACHINE" = "pmac" ] ; then
 		done < /tmp/ppc_lilo/openprom_model
 	fi
 fi
-
 } #end function check_arch
 
+function prepare_compatible_pmacs () {
+# strip comments and empty lines
+
+COMPATIBLE_MACHINES=$(sed 's-#.*$--' < $COMPATIBLE_LIST | grep -v "\(^\W$\|^$\)" )
+# echo $COMPATIBLE_MACHINES
+
+} #end function prepare_compatible_pmacs
 
 function prepare_config_file () {
 # strip comments and empty lines
@@ -585,7 +601,7 @@ while read option sarator value ; do
 		;;
 		bootfolder)
 			if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				OPTION_BOOTFOLDER="$value"
+				OPTION_BOOTFOLDER=":${value}"
 			else 
 				echo bootfolder option must not in an image section!
 				exit 1
@@ -737,7 +753,7 @@ OPTION_PARTITION=`echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/'|cut -d " " -f 2`
 function prepare_envoirement () {
 
 rm -f /tmp/ppc_lilo/*
-mkdir -p /tmp/ppc_lilo/ramdisk
+mkdir -p /tmp/ppc_lilo/
 
 } #end function prepare_envoirement
 

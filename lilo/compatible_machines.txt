@@ -1,0 +1,16 @@
+iMac,1		# first iMac
+PowerMac1,1	# B&W G3
+PowerMac1,2	# G4 Yikes
+PowerMac2,1	# iMac r128
+PowerMac3,1	# G4 Sawooth
+PowerMac2,2	# iMac summer 2000
+PowerMac3,3	# 
+PowerMac5,1	# first Cube
+PowerMac3,4	# 
+PowerMac4,1	# iMac 2001 flower power
+PowerBook1,1	# PowerBook Lombard
+PowerBook2,1	# first iBook
+PowerBook2,2	# iBook r128
+PowerBook3,1	# PowerBook G3 Pismo
+PowerBook3,2	# PowerBook G4 titanium
+PowerBook4,1	# iBook 2001 titanium

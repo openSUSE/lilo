@@ -1,5 +1,5 @@
 --- Makefile
-+++ Makefile	2001/06/02 20:43:48
++++ Makefile	2001/06/28 10:40:16
 @@ -78,7 +78,7 @@
  ## End of configuration section
  
@@ -31,7 +31,7 @@
  	find . -name '#*' | xargs rm -f
  	find . -name .AppleDouble | xargs rm -rf
 --- file.c
-+++ file.c	2001/06/02 20:43:48
++++ file.c	2001/06/28 10:40:16
 @@ -102,8 +102,6 @@
  	struct partition_t*	parts;
  	struct partition_t*	p;
@@ -126,7 +126,7 @@
  	/* Lookup the OF device path */
  	/* First, see if a device was specified for the kernel
 --- fs.c
-+++ fs.c	2001/06/02 20:43:48
++++ fs.c	2001/06/28 10:40:16
 @@ -18,34 +18,34 @@
      Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
@@ -182,7 +182,7 @@
 +    return *fs;
 +}
 --- fs_ext2.c
-+++ fs_ext2.c	2001/06/02 20:43:48
++++ fs_ext2.c	2001/06/28 10:40:16
 @@ -127,10 +127,9 @@
  	static char buffer[1024];
  	int ofopened = 0;
@@ -451,7 +451,7 @@
  	    }
  	    blkorig = fblock * bs;
 --- fs_of.c
-+++ fs_of.c	2001/06/02 20:43:48
++++ fs_of.c	2001/06/28 10:40:16
 @@ -91,10 +91,9 @@
  {
  	static char	buffer[1024];
@@ -578,7 +578,7 @@
  	return 0;
  }
 --- fs_reiserfs.c
-+++ fs_reiserfs.c	2001/06/01 19:47:40
++++ fs_reiserfs.c	2001/06/28 10:40:16
 @@ -0,0 +1,968 @@
 +/* ReiserFS filesystem
 +   
@@ -1549,7 +1549,7 @@
 +    return TYPE_ANY;
 +}
 --- gui/effects.c
-+++ gui/effects.c	2001/06/02 20:43:48
++++ gui/effects.c	2001/06/28 10:40:16
 @@ -48,8 +48,8 @@
          return;
       }
@@ -1571,7 +1571,7 @@
       fxUpdateSB(count + result, filesize);
    }
 --- include/byteorder.h
-+++ include/byteorder.h	2001/06/02 20:49:33
++++ include/byteorder.h	2001/06/28 10:40:16
 @@ -0,0 +1,22 @@
 +#ifndef _BYTEORDER_H_
 +#define _BYTEORDER_H_
@@ -1596,7 +1596,7 @@
 +
 +#endif /* _BYTEORDER_H_ */
 --- include/file.h
-+++ include/file.h	2001/06/02 20:43:48
++++ include/file.h	2001/06/28 10:40:16
 @@ -26,6 +26,9 @@
  #include "stddef.h"
  #include "prom.h"
@@ -1648,7 +1648,7 @@
  //	unsigned int	part_start;
  //	unsigned int	part_count;
 --- include/fs.h
-+++ include/fs.h	2001/06/02 20:43:48
++++ include/fs.h	2001/06/28 10:40:16
 @@ -21,24 +21,9 @@
  #ifndef FS_H
  #define FS_H
@@ -1710,7 +1710,7 @@
  
  #endif
 --- include/partition.h
-+++ include/partition.h	2001/06/02 20:43:48
++++ include/partition.h	2001/06/28 10:40:16
 @@ -21,6 +21,8 @@
  #ifndef PARTITION_H
  #define PARTITION_H
@@ -1740,7 +1740,7 @@
  	char			part_name[MAX_PART_NAME];
  	unsigned int		part_start;
 --- include/reiserfs/reiserfs.h
-+++ include/reiserfs/reiserfs.h	2001/06/02 20:54:22
++++ include/reiserfs/reiserfs.h	2001/06/28 10:40:16
 @@ -0,0 +1,405 @@
 +#ifndef _REISERFS_H_
 +#define _REISERFS_H_
@@ -2148,7 +2148,7 @@
 +
 +#endif /* _REISERFS_H_ */
 --- include/swab.h
-+++ include/swab.h	2001/06/02 20:49:35
++++ include/swab.h	2001/06/28 10:40:16
 @@ -0,0 +1,25 @@
 +#ifndef _REISERFS_SWAB_H_
 +#define _REISERFS_SWAB_H_
@@ -2176,7 +2176,7 @@
 +
 +#endif /* _REISERFS_SWAB_H_ */
 --- include/types.h
-+++ include/types.h	2001/06/02 20:43:48
++++ include/types.h	2001/06/28 10:40:16
 @@ -55,5 +55,6 @@
  typedef		__s64		int64_t;
  
@@ -2185,7 +2185,7 @@
  
  #endif
 --- partition.c
-+++ partition.c	2001/06/02 20:43:48
++++ partition.c	2001/06/28 10:40:16
 @@ -30,6 +30,18 @@
  #include "string.h"
  #include "linux/iso_fs.h"
@@ -2387,7 +2387,7 @@
  		prom_printf("Not a macintosh-formatted disk !\n");
  		goto bail;
 --- yaboot.c
-+++ yaboot.c	2001/06/02 20:43:48
++++ yaboot.c	2001/06/28 10:44:49
 @@ -1,4 +1,4 @@
 -/* Yaboot - secondary boot loader for Linux on iMacs.
 +/* Yaboot - secondary boot loader for Linux on ppc.
@@ -2548,16 +2548,17 @@
  	    }
  	    if (initrd_base)
  	    	prom_printf("ramdisk loaded at 0x%08lx, size: %d Kbytes\n",
-@@ -937,7 +977,7 @@
+@@ -937,7 +977,8 @@
          kernel_entry(initrd_base + loadinfo.load_loc, initrd_size, prom, 0, 0);
          continue;
  next:
 -	file.close(&file);    
-+	file.fs->close(&file);    
++	if( file.fs != NULL )
++		file.fs->close(&file);    
      }
  }
  
-@@ -950,7 +990,7 @@
+@@ -950,7 +991,7 @@
      int			size = sizeof(Elf32_Ehdr) - sizeof(Elf_Ident);
  
      // Read the rest of the Elf header...
@@ -2566,7 +2567,7 @@
  	prom_printf("\nCan't read Elf32 image header\n");
  	return 0;
      }
-@@ -983,11 +1023,11 @@
+@@ -983,11 +1024,11 @@
      }
  
      /* Now, we read the section header */
@@ -2580,7 +2581,7 @@
  	    sizeof(Elf32_Phdr) * e->e_phnum) {
  	prom_printf ("read error\n");
  	return 0;
-@@ -1048,7 +1088,7 @@
+@@ -1048,7 +1089,7 @@
  		    continue;
  
  	    /* Now, we skip to the image itself */
@@ -2589,7 +2590,7 @@
  		    prom_printf ("seek error\n");
  		    prom_release(loadinfo->base, loadinfo->memsize);
  		    return 0;
-@@ -1057,7 +1097,7 @@
+@@ -1057,7 +1098,7 @@
  #ifdef CONFIG_SPLASH_SCREEN
  	    if (fxReadImage(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
  #else /* CONFIG_SPLASH_SCREEN */
@@ -2598,7 +2599,7 @@
  #endif /* CONFIG_SPLASH_SCREEN */
  		    prom_printf ("read failed\n");
  		    prom_release(loadinfo->base, loadinfo->memsize);
-@@ -1068,7 +1108,7 @@
+@@ -1068,7 +1109,7 @@
  #if 0	/* to make editor happy */
      }
  #endif	
@@ -2607,7 +2608,7 @@
  
      free(ph);
      
-@@ -1085,7 +1125,7 @@
+@@ -1085,7 +1126,7 @@
      int			size = sizeof(Elf64_Ehdr) - sizeof(Elf_Ident);
  
      // Read the rest of the Elf header...
@@ -2616,7 +2617,7 @@
  	prom_printf("\nCan't read Elf64 image header\n");
  	return 0;
      }
-@@ -1118,11 +1158,11 @@
+@@ -1118,11 +1159,11 @@
      }
  
      /* Now, we read the section header */
@@ -2630,7 +2631,7 @@
  	    sizeof(Elf64_Phdr) * e->e_phnum) {
  	prom_printf ("read error\n");
  	return 0;
-@@ -1183,7 +1223,7 @@
+@@ -1183,7 +1224,7 @@
  		    continue;
  
  	    /* Now, we skip to the image itself */
@@ -2639,7 +2640,7 @@
  		    prom_printf ("seek error\n");
  		    prom_release(loadinfo->base, loadinfo->memsize);
  		    return 0;
-@@ -1192,7 +1232,7 @@
+@@ -1192,7 +1233,7 @@
  #ifdef CONFIG_SPLASH_SCREEN
  	    if (fxReadImage(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
  #else /* CONFIG_SPLASH_SCREEN */
@@ -2648,7 +2649,7 @@
  #endif /* CONFIG_SPLASH_SCREEN */
  		    prom_printf ("read failed\n");
  		    prom_release(loadinfo->base, loadinfo->memsize);
-@@ -1203,7 +1243,7 @@
+@@ -1203,7 +1244,7 @@
  #if 0	/* to make editor happy */
      }
  #endif	

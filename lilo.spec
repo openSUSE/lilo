@@ -18,11 +18,10 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.7
-Release:      25
+Release:      28
 Source0: 	lilo-0.0.6.tar.gz
-#Patch0:		lilo-0.0.6.dif
+Patch0:		lilo-0.0.6.dif
 Source3:	lilo-21.tar.gz
-Source4:	linuxrc-1.1.13.olh.tar.gz
 Source5:	yaboot-1.2.1.tar.gz
 Patch5:		yaboot-1.2.1.dif
 Buildroot:	/var/tmp/buildroot-lilo
@@ -33,7 +32,7 @@ It can also boot other operating systems such as MS-DOS and OS/2,
 and can even boot DOS from the second hard drive.
 The configuration file is /etc/lilo.conf.
 The PowerPC variant can be used on new PowerMacs and CHRP machines.
-The ix86 variant comes along with Memtest86, offering an image that 
+The ix86 variant comes along with Memtest86, offering an image that
 can be booted instead of a real OS and doing a memory test.
 
 Authors:
@@ -50,9 +49,8 @@ Authors:
 SuSE series: a
 
 %prep
-%setup -q -T -c -a 0 -a 3 -a 4 -a 5
+%setup -q -T -c -a 0 -a 3 -a 5
 mv lilo-0.0.6	lilo.ppc
-mv linuxrc-1.1.13.olh	linuxrc
 mv yaboot-1.2.1 yaboot
 cd yaboot
 %patch5
@@ -69,21 +67,6 @@ cd ..
 cd lilo
 make activate
 cd ..
-cd linuxrc
-make
-mkdir ramdisk
-dd if=/dev/zero of=./initrd.pmacold bs=1024 count=1024
-mke2fs -q -F -b 1024 -m 0  ./initrd.pmacold
-mount -o rw,loop ./initrd.pmacold ./ramdisk
-cd ramdisk
-mkdir dev
-mkdir proc
-cp -av ../linuxrc .
-chmod -v 755 linuxrc
-cp -av /dev/{null,zero,ram,ram0,ram1,ram2,ramdisk,fb0,console} dev/
-cd ..
-umount ./ramdisk
-gzip -v9 initrd.pmacold
 
 %install
 rm -rfv $RPM_BUILD_ROOT
@@ -99,8 +82,8 @@ cp -av lilo.sh $RPM_BUILD_ROOT/sbin/lilo
 cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
 cp -av Finder.bin $RPM_BUILD_ROOT/boot
 cp -av System.bin $RPM_BUILD_ROOT/boot
+cp -av compatible_machines.txt $RPM_BUILD_ROOT/boot
 cp -av lilo.conf $RPM_BUILD_ROOT/etc
-touch $RPM_BUILD_ROOT/etc/quik.conf
 cp -av README* $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av COPYING $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av lilo.changes $RPM_BUILD_ROOT%{_docdir}/lilo/
@@ -108,9 +91,6 @@ cd ..
 cd yaboot
 cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/boot/
 cp -av yaboot.chrp* $RPM_BUILD_ROOT/boot/
-cd ..
-cd linuxrc
-cp -av initrd.pmacold.gz $RPM_BUILD_ROOT/boot
 cd ..
 cd lilo
 install -oroot -groot activate $RPM_BUILD_ROOT/sbin
@@ -131,7 +111,7 @@ cd ..
 %files
 /boot/Finder.bin
 /boot/System.bin
-/boot/initrd.pmacold.gz
+/boot/compatible_machines.txt
 /boot/yaboot
 /boot/yaboot.debug
 /boot/yaboot.chrp*
@@ -142,6 +122,13 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Mon Jul 02 2001 - olh@suse.de
+- bring back some modifications
+  always copy the files on the new MacRISC2 machines
+* Thu Jun 28 2001 - olh@suse.de
+- fix yaboot.c  file_close
+* Thu Jun 28 2001 - olh@suse.de
+- miboot can read a config file now
 * Mon Jun 18 2001 - olh@suse.de
 - honor default= line in lilo.conf for macos booting
 * Sat Jun 02 2001 - olh@suse.de

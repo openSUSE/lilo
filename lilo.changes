@@ -1,4 +1,20 @@
 -------------------------------------------------------------------
+Mon Jul  2 21:18:23 CEST 2001 - olh@suse.de
+
+- bring back some modifications
+  always copy the files on the new MacRISC2 machines
+
+-------------------------------------------------------------------
+Thu Jun 28 12:45:21 CEST 2001 - olh@suse.de
+
+- fix yaboot.c  file_close
+
+-------------------------------------------------------------------
+Thu Jun 28 12:17:35 CEST 2001 - olh@suse.de
+
+- miboot can read a config file now
+
+-------------------------------------------------------------------
 Mon Jun 18 01:21:41 CEST 2001 - olh@suse.de
 
 - honor default= line in lilo.conf for macos booting
