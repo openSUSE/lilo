@@ -183,6 +183,7 @@ echo
 [ "$ec" != "0" ]  && { echo bootfile generation failed: ec $ec ; exit 1 ; }
 ISERIES_BOOT_IMAGE=$ISERIES_KERNEL_TMPFILE
 }
+echo ISERIES_BOOT_IMAGE $ISERIES_BOOT_IMAGE
 unset ISERIES_TARGET
 if test "$ISERIES_BOOT" = "B" -o "$ISERIES_BOOT" = "A" -o "$ISERIES_BOOT" = "C" ; then
 ISERIES_TARGET=slot
@@ -193,11 +194,10 @@ ISERIES_TARGET=block_dev
 elif test -f "$ISERIES_BOOT" -o ! -e "$ISERIES_BOOT" ; then
 ISERIES_TARGET=file
 fi
-echo ISERIES_TARGET $ISERIES_TARGET
 
 case "$ISERIES_TARGET" in
 	slot)
-		echo write to slot $ISERIES_TARGET
+		echo write to slot $OPTION_BOOT
 		;;
 	file)
 		if [ ! "${ISERIES_BOOT:0:1}" = "/" ] ; then
@@ -221,8 +221,6 @@ case "$ISERIES_TARGET" in
 		exit 1
 		;;
 esac
-echo ISERIES_TARGET $ISERIES_TARGET
-echo ISERIES_BOOT_IMAGE $ISERIES_BOOT_IMAGE
 
 if [ "$ISERIES_TARGET" = "slot" ] ; then
 echo "this will take a while... ($[$(ls -l $ISERIES_BOOT_IMAGE | awk '{ print $5 }') / 1024] kb)"

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 27 18:41:17 CEST 2002 - olh@suse.de
+
+- remove some unwanted debug output on iSeries
+
+-------------------------------------------------------------------
 Tue Aug 27 08:40:40 CEST 2002 - olh@suse.de
 
 - fix append= handling from last change
