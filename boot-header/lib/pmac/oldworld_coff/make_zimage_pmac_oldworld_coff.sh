@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
-# set -x
+  set -x
 
 obj_dir=.
-obj_dir=/lib/lilo/pmac/newworld
+obj_dir=/lib/lilo/pmac/oldworld_coff
 
 vmlinux=
 initrd=
@@ -69,9 +69,9 @@ if [ -z "$output" ] ; then
 	exit 1
 fi
 if [ -z "$tmp" ] ; then
-	tmp=`mktemp -d /tmp/mkzimage_pmac_newworld.$$.XXXXXX`
+	tmp=`mktemp -d /tmp/mkzimage_pmac_oldworld_coff.$$.XXXXXX`
 else
-	tmp=`mktemp -d $tmp/mkzimage_pmac_newworld.$$.XXXXXX`
+	tmp=`mktemp -d $tmp/mkzimage_pmac_oldworld_coff.$$.XXXXXX`
 fi
 #
 

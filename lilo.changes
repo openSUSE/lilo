@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Feb 22 21:16:31 CET 2004 - olh@suse.de
+
+- add make_zimage*.sh for pseries and iseries, fix prep script
+
+-------------------------------------------------------------------
 Mon Feb 16 14:42:24 CET 2004 - olh@suse.de
 
 - run /sbin/activate unconditionally

@@ -1,5 +1,5 @@
 #
-# spec file for package lilo (Version 0.0.13)
+# spec file for package lilo (Version 0.0.14)
 #
 # Copyright (c) 2004 SuSE Linux AG, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -13,6 +13,7 @@
 # usedforbuild    aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libselinux libstdc++ libxcrypt m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed sendmail strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
 
 Name:         lilo
+%define	bootheader 0.0.3
 Group:        System/Boot
 License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
@@ -20,10 +21,10 @@ Requires:     hfsutils
 Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
-Version:      0.0.13
+Version:      0.0.14
 Release:      0
 Source0:      lilo-0.0.7.tar.bz2
-Source2:      boot-header-0.0.2.tar.bz2
+Source2:      boot-header-%{bootheader}.tar.bz2
 Source3:      lilo-21.tar.gz
 Source5:      http://penguinppc.org/projects/yaboot/yaboot-1.3.11.tar.gz
 Source10:     lilo-addRamDisk.c
@@ -95,7 +96,7 @@ mkdir -p $RPM_BUILD_ROOT/lib/lilo/pmac
 mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
-cp -a boot-header-0.0.2/lib/* $RPM_BUILD_ROOT/lib/lilo
+cp -a boot-header-%{bootheader}/lib/* $RPM_BUILD_ROOT/lib/lilo
 cp -a iseries-* $RPM_BUILD_ROOT/lib/lilo/iseries
 cd lilo.ppc
 chmod 755 show_of_path.sh
@@ -134,6 +135,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sun Feb 22 2004 - olh@suse.de
+- add make_zimage*.sh for pseries and iseries, fix prep script
 * Mon Feb 16 2004 - olh@suse.de
 - run /sbin/activate unconditionally
   handle devspec sysfs property for sata

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-# set -x
+  set -x
 
 obj_dir=.
 obj_dir=/lib/lilo/prep
@@ -69,9 +69,9 @@ if [ -z "$output" ] ; then
 	exit 1
 fi
 if [ -z "$tmp" ] ; then
-	tmp=`mktemp -d /tmp/mkzimage_pmac_newworld.$$.XXXXXX`
+	tmp=`mktemp -d /tmp/mkzimage_prep.$$.XXXXXX`
 else
-	tmp=`mktemp -d $tmp/mkzimage_pmac_newworld.$$.XXXXXX`
+	tmp=`mktemp -d $tmp/mkzimage_prep.$$.XXXXXX`
 fi
 #
 
@@ -101,7 +101,7 @@ fi
 ld \
 	-Ttext 0x00800000 \
 	-Bstatic \
-	-T arch_ppc_boot_ld.script \
+	-T $obj_dir/arch_ppc_boot_ld.script \
 	"$obj_dir/arch_ppc_boot_prep_head.o" \
 	"$obj_dir/arch_ppc_boot_prep_misc.o" \
 	"$obj_dir/arch_ppc_boot_prep_vreset.o" \
