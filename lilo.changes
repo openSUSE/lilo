@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Oct 20 13:54:22 CEST 2004 - jplack@suse.de
+
+- added a tested fix for #45565 at least for emulex FC cards
+
+-------------------------------------------------------------------
 Mon Oct 18 16:35:03 CEST 2004 - jplack@suse.de
 
 - added some more fixes for #45565

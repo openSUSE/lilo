@@ -26,7 +26,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      39
+Release:      40
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch5:       yaboot-1.3.6.dif
@@ -150,6 +150,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Oct 20 2004 - jplack@suse.de
+- added a tested fix for #45565 at least for emulex FC cards
 * Mon Oct 18 2004 - jplack@suse.de
 - added some more fixes for #45565
 * Thu Oct 07 2004 - jplack@suse.de
