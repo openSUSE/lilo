@@ -1,0 +1,21 @@
+diff -urN yaboot.orig/yaboot.c yaboot/yaboot.c
+--- yaboot.orig/yaboot.c	Sun Jan 16 21:38:24 2000
++++ yaboot/yaboot.c	Fri Mar 10 12:43:26 2000
+@@ -461,7 +461,7 @@
+     	params->kern_dev = NULL;
+     }
+     if (params->kern_part == -1)
+-    	params->kern_part = defpart;
++    	params->kern_part = bootpartition;
+     if (!params->kern_dev)
+ 	params->kern_dev = defdevice;
+     if (!params->kern_file)
+@@ -488,7 +488,7 @@
+ 	    	params->rd_dev = NULL;
+ 	    }
+ 	    if (params->rd_part == -1)
+-	    	params->rd_part = defpart;
++	    	params->rd_part = bootpartition;
+ 	    if (!params->rd_dev)
+ 		params->rd_dev = defdevice;
+ 	    if (params->rd_file && params->rd_file[0] == ',')

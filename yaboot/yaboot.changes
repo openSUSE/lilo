@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Mar 10 14:20:55 CET 2000 - olh@suse.de
+
+- assume that the kernel is on the same partition than yaboot.conf
+
+-------------------------------------------------------------------
 Mon Mar  6 01:43:42 CET 2000 - olh@suse.de
 
 - update to version 0.5, provide also a debug binary
