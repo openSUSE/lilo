@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb 24 00:57:07 CET 2005 - schwab@suse.de
+
+- Bump version.
+
+-------------------------------------------------------------------
 Thu Jan 13 00:24:20 CET 2005 - schwab@suse.de
 
 - show_of_path.sh: handle new targetN subdir in SCSI hosts.

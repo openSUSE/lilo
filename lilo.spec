@@ -1,5 +1,5 @@
 #
-# spec file for package lilo (Version 0.0.15)
+# spec file for package lilo (Version 0.0.16)
 #
 # Copyright (c) 2005 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -11,7 +11,7 @@
 # norootforbuild
 # neededforbuild  
 
-BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv less libacl libattr libgcc libnscd libselinux libstdc++ libxcrypt libzio m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
+BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv klogd less libacl libattr libgcc libnscd libselinux libstdc++ libxcrypt libzio m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
 
 Name:         lilo
 #%%define     bootheader 0.0.5
@@ -25,8 +25,8 @@ Requires:     dosfstools
 Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
-Version:      0.0.15
-Release:      45
+Version:      0.0.16
+Release:      1
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch0:       show_of_path.diff
@@ -34,9 +34,6 @@ Patch5:       yaboot-1.3.6.dif
 Patch6:       yaboot-1.3.11-fat.dif
 Patch7:       yaboot-hole_data-journal.diff
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
-# get rid of /usr/lib/rpm/brp-strip-debug 
-# it kills the zImage.chrp-rs6k 
-%define __os_install_post %{nil}
 
 %description
 The LInux-LOader: LILO boots Linux from your hard drive. It can also
@@ -103,6 +100,9 @@ gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addSystemMap lilo-addSystemMap.c
 gcc -Wall $RPM_OPT_FLAGS -s -o mkzimage_cmdline mkzimage_cmdline.c
 
 %install
+# get rid of /usr/lib/rpm/brp-strip-debug 
+# it kills the zImage.chrp-rs6k 
+export NO_BRP_STRIP_DEBUG=true
 rm -rfv $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/chrp
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/iseries
@@ -152,6 +152,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Feb 24 2005 - schwab@suse.de
+- Bump version.
 * Thu Jan 13 2005 - schwab@suse.de
 - show_of_path.sh: handle new targetN subdir in SCSI hosts.
 * Thu Dec 16 2004 - jplack@suse.de
