@@ -108,6 +108,10 @@ function error() {
 	    10)
 	        echo "ERROR: in config file, guessing of boot partition failed"
 		;;
+	    11)
+		echo "ERROR: parted complains:"
+		cat $TEMP/parted.log
+		;;
 	    *)  # plain custom string
 	        echo "ERROR: $1"
 		;;
@@ -273,6 +277,15 @@ esac; done
 function running_on_chrp () {
     echo running on chrp
 
+
+    # TODO add support for booting over network:
+    # gooseberry:~ # nvsetenv boot-device
+    # boot-device=/pci@400000000110/pci@2,4/scsi@1/sd@a,0
+    # gooseberry:~ # nvsetenv boot-device `cat /sys/class/net/eth1/device/devspec`
+    # gooseberry:~ # nvsetenv boot-device
+    # boot-device=/pci@400000000112/pci@2,2/ethernet@1
+
+
     # find all PReP boot and FAT partitions
     local -a prep_part fat_part fat32_part
 
@@ -381,6 +394,7 @@ function running_on_chrp () {
     # starting the work and write the yaboot.conf
     {
 	echo "# header section"
+	echo "partition = ${yaboot_part##*:}"
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
 	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
@@ -564,11 +578,11 @@ function running_on_chrp () {
 	    echo >&2 "Warning: Extending boot partition $OPTION_BOOT, using free disk space"
 	    local start=$(div1000 ${p_start[$partition]})
 	    local end=$(div1000 ${p_start[$((partition+1))]} )
-	    if ! { $PARTED $device rm $partition &&
-		$PARTED $device mkpart primary $start $end &&
-		$PARTED $device set $partition type 6; } >& /dev/null
+	    if ! ( set -x; $PARTED $device mkfs $partition ext2 &&
+		$PARTED $device resize $partition $start $end &&
+		$PARTED $device set $partition type 6; ) >& $TEMP/parted.log
 	      then
-		  error "Partition extension failed for $OPTION_BOOT"  
+		  error "Partition extension failed for $OPTION_BOOT" 11
 	    fi
 	fi
 
@@ -576,8 +590,8 @@ function running_on_chrp () {
 	if [[ "${fat_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be FAT16
 	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to FAT16 type"
-	    if ! $PARTED $device set $partition type 6 >& /dev/null; then
-		error "Partition conversion failed for $OPTION_BOOT"
+	    if ! $PARTED $device set $partition type 6 >& $TEMP/parted.log; then
+		error "Partition conversion failed for $OPTION_BOOT" 11
 	    fi
 	fi
 	mkfs.msdos -s 8 $OPTION_BOOT || exit 2
@@ -631,8 +645,8 @@ function running_on_chrp () {
 	if [[ "${prep_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be PReP boot
 	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to PReP boot type"
-	    if ! $PARTED $device set $partition type 0x41 >& /dev/null; then
-		error "Partition conversion failed for $OPTION_BOOT"
+	    if ! $PARTED $device set $partition type 0x41 >& $TEMP/parted.log; then
+		error "Partition conversion failed for $OPTION_BOOT" 11
 	    fi
 	fi
 
@@ -643,8 +657,9 @@ function running_on_chrp () {
 	    for (( i=0; i<partition; i++ )); do
 		if [[ "${p_flags[$i]}" = *type=41* ]]; then
 		    echo >&2 "Warning: Delete ambiguous PReP boot  partition ${device}$i"
-		    if ! $PARTED $device rm $i >& /dev/null; then
+		    if ! $PARTED $device rm $i >& $TEMP/parted.log; then
 			echo >&2 "Warning: Partition deletion failed for ${device}$i"
+			cat >&2 $TEMP/parted.log
 		    else
 			unset p_flags[$i]
 		    fi
@@ -657,11 +672,11 @@ function running_on_chrp () {
 	    echo >&2 "Warning: Shrinking PReP boot partition $OPTION_BOOT, avoiding firmware confusion"
 	    local start=$(div1000 ${p_start[$partition]})
 	    local end=$(div1000 $(( p_start[partition] + $(fsize /lib/lilo/chrp/yaboot.chrp) )) ) 
-	    if ! { $PARTED $device rm $partition &&
-		$PARTED $device mkpart primary $start $end &&
-		$PARTED $device set $partition type 0x41; } >& /dev/null
+	    if ! ( set -x; $PARTED $device mkfs $partition ext2 &&
+		$PARTED $device resize $partition $start $end &&
+		$PARTED $device set $partition type 0x41; ) >& $TEMP/parted.log
 	    then
-		error "Partition shrink failed for $OPTION_BOOT"  
+		error "Partition shrink failed for $OPTION_BOOT" 11
 	    fi
 	fi
 
@@ -673,7 +688,7 @@ function running_on_chrp () {
 
     # TODO check whether this is neccessary
     if [[ ${p_flags[$partition]} != *boot* ]]; then
-	$PARTED $device set $partition boot on >& /dev/null
+	$PARTED $device set $partition boot on >& $TEMP/parted.log || error 11
     fi
 
     NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
@@ -889,7 +904,8 @@ function running_on_iseries () {
 	    dd if="$ISERIES_BOOT_IMAGE" of=$P bs=4096 2>/dev/null
 		
 	    echo setting boot flag on partition ${P%%+([0-9])} ${P##+([^0-9])}
-	    $PARTED ${P%%+([0-9])} set ${P##+([^0-9])} boot on >& /dev/null
+	    $PARTED ${P%%+([0-9])} set ${P##+([^0-9])} boot on >& $TEMP/parted.log ||
+		error 11
 	fi
     done  #  end of OPTION_BOOT loop
 
@@ -1219,7 +1235,7 @@ function prepare_environment () {
 
 function clean_environment () {
     [[ $(</proc/mounts) == *$TEMP/boot\ * ]] && umount $TEMP/boot
-    rm -rf $TEMP
+    # rm -rf $TEMP
 } #end function clean_environment
 
 #
