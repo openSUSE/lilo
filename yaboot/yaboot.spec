@@ -57,6 +57,9 @@ cp -a $RPM_SOURCE_DIR/os-chooser.txt /var/lib/yaboot/os-chooser
 /var/lib/yaboot
 
 %changelog -n yaboot
+* Thu Apr 06 2000 - uli@suse.de
+- fixed initrd loading bug introduced by conf hfs/kernel ext2
+  workaround triggered when not loading from system folder
 * Thu Apr 06 2000 - olh@suse.de
 - provide the os-chooser script for the MacOS side
 * Fri Mar 31 2000 - olh@suse.de
