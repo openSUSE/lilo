@@ -185,11 +185,12 @@ echo "ISERIES_BOOT    " $ISERIES_BOOT
 test ! -z "$ISERIES_INITRD" && {
 echo "ISERIES_INITRD  " $ISERIES_INITRD
 echo
-echo generating $ISERIES_KERNEL_TMPFILE with /bin/addRamDisk64
+echo generating $ISERIES_KERNEL_TMPFILE with /lib/lilo/iseries/iseries-addRamDisk
 echo
 echo
 unset ec
-/bin/addRamDisk64 $ISERIES_INITRD \
+/lib/lilo/iseries/iseries-addRamDisk \
+	$ISERIES_INITRD \
 	/boot/System.map-`get_kernel_version $ISERIES_IMAGE` \
 	$ISERIES_IMAGE \
 	$ISERIES_KERNEL_TMPFILE ; ec=$?

@@ -1,5 +1,5 @@
 #
-# spec file for package lilo (Version 0.0.10)
+# spec file for package lilo (Version 0.0.11)
 #
 # Copyright (c) 2004 SuSE Linux AG, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -20,12 +20,14 @@ Requires:     hfsutils
 Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
-Version:      0.0.10
+Version:      0.0.11
 Release:      0
 Source0:      lilo-0.0.7.tar.bz2
 Source2:      boot-header-0.0.1.tar.bz2
 Source3:      lilo-21.tar.gz
 Source5:      http://penguinppc.org/projects/yaboot/yaboot-1.3.11.tar.gz
+Source10:     lilo-addRamDisk.c
+Source11:     lilo-addSystemMap.c
 Patch5:       yaboot-1.3.6.dif
 Patch7:       yaboot-hole_data-journal.diff
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
@@ -82,15 +84,19 @@ cd ..
 cd lilo
 make activate
 cd ..
+gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addRamDisk %{S:10}
+gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addSystemMap %{S:11}
 
 %install
 rm -rfv $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/chrp
+mkdir -p $RPM_BUILD_ROOT/lib/lilo/iseries
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/pmac
 mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
 cp -a boot-header-0.0.1/lib/* $RPM_BUILD_ROOT/lib/lilo
+cp -a iseries-* $RPM_BUILD_ROOT/lib/lilo/iseries
 cd lilo.ppc
 chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
@@ -110,7 +116,7 @@ cd lilo
 install activate $RPM_BUILD_ROOT/sbin
 install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/lilo/activate
 install -m 644 CHANGES COPYING INCOMPAT README $RPM_BUILD_ROOT%{_docdir}/lilo/activate
-find $RPM_BUILD_ROOT/lib/lilo -type f -print0 | xargs -0 chmod a-x
+#find $RPM_BUILD_ROOT/lib/lilo -type f -print0 | xargs -0 chmod a-x
 
 %triggerpostun  -- lilo < 0.0.10
 # for manual updates
@@ -128,6 +134,9 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Feb 10 2004 - olh@suse.de
+- add /lib/lilo/iseries/iseries-addRamDisk,
+  from kernel-iseries64-tools
 * Sat Jan 31 2004 - olh@suse.de
 - update to yaboot-1.3.11
   update show_of_path.sh to use sysfs
