@@ -26,7 +26,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      30
+Release:      31
 Source0:      lilo-%{lilo_vers}.tar.bz2
 #Source2:      boot-header-%{bootheader}.tar.bz2
 #Source3:      lilo-21.tar.gz
@@ -153,6 +153,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue May 25 2004 - jplack@suse.de
+- remove moint point from OF path in show_of_path.sh (#40999)
 * Mon May 24 2004 - jplack@suse.de
 - fix yet another parser bug
 * Wed May 19 2004 - jplack@suse.de

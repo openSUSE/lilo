@@ -100,6 +100,11 @@ else
     file_majorminor=$($mystat --format="%d" "$file")
     file_major="$[file_majorminor >> 8]"
     file_minor="$[file_majorminor & 255]"
+
+    file_mountp=$file
+    while [ "$file_mountp" -a $($mystat --format="%d" "/${file_mountp%/*}") == $file_majorminor ]; do
+	file_mountp="${file_mountp%/*}"
+    done
 fi
 file_majorminor=$file_major:$file_minor
 dbg_show file_majorminor
@@ -368,7 +373,7 @@ fi
 
 # print the resulting open firmware path
 if [ "$file" != "/" ] ; then
-    echo ${file_of_hw_path}${file_partition:+:$file_partition},$file
+    echo ${file_of_hw_path}${file_partition:+:$file_partition},${file#$file_mountp}
 else
     echo ${file_of_hw_path}${file_partition:+:$file_partition}
 fi
