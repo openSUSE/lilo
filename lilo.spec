@@ -1,7 +1,7 @@
 #
 # spec file for package lilo (Version 0.0.15)
 #
-# Copyright (c) 2004 SUSE LINUX AG, Nuernberg, Germany.
+# Copyright (c) 2005 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
 #
@@ -15,7 +15,7 @@ BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp 
 
 Name:         lilo
 #%%define     bootheader 0.0.5
-%define lilo_vers  0.1.1
+%define lilo_vers  0.1.2
 %define yaboot_vers 1.3.11
 Group:        System/Boot
 License:      BSD, Other License(s), see package
@@ -26,7 +26,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      22.18.2
+Release:      22.22
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch5:       yaboot-1.3.6.dif
@@ -150,6 +150,10 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Fri Dec 10 2004 - jplack@suse.de
+- added support for QLogic FC adapters on JS20, cleanup so that
+  all FC adapters using fc_transport class should work (# 45565 -
+  LTC11213)
 * Thu Nov 04 2004 - jplack@suse.de
 - use parted's fs resize command to resize partition inplace,
   resolves blocker #47956, add more verbosity to parted related

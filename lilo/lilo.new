@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 #
 # a simple lilo to store the boot loader and the kernel images 
 # in bash2 ... Think different [tm]
@@ -192,7 +192,7 @@ function device_of_file () {
     $STAT_CMD --format="%d" $f
 }
 
-       
+
 function device_nr () {
     # print device number in decimal given a path to a device node
     local d="$1"
@@ -578,8 +578,7 @@ function running_on_chrp () {
 	    echo >&2 "Warning: Extending boot partition $OPTION_BOOT, using free disk space"
 	    local start=$(div1000 ${p_start[$partition]})
 	    local end=$(div1000 ${p_start[$((partition+1))]} )
-	    if ! ( set -x; $PARTED $device mkfs $partition ext2 &&
-		$PARTED $device resize $partition $start $end &&
+	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
 		$PARTED $device set $partition type 6; ) >& $TEMP/parted.log
 	      then
 		  error "Partition extension failed for $OPTION_BOOT" 11
@@ -672,8 +671,7 @@ function running_on_chrp () {
 	    echo >&2 "Warning: Shrinking PReP boot partition $OPTION_BOOT, avoiding firmware confusion"
 	    local start=$(div1000 ${p_start[$partition]})
 	    local end=$(div1000 $(( p_start[partition] + $(fsize /lib/lilo/chrp/yaboot.chrp) )) ) 
-	    if ! ( set -x; $PARTED $device mkfs $partition ext2 &&
-		$PARTED $device resize $partition $start $end &&
+	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
 		$PARTED $device set $partition type 0x41; ) >& $TEMP/parted.log
 	    then
 		error "Partition shrink failed for $OPTION_BOOT" 11
@@ -1235,7 +1233,7 @@ function prepare_environment () {
 
 function clean_environment () {
     [[ $(</proc/mounts) == *$TEMP/boot\ * ]] && umount $TEMP/boot
-    # rm -rf $TEMP
+    rm -rf $TEMP
 } #end function clean_environment
 
 #
@@ -1270,12 +1268,12 @@ esac
 #
 #
 # Local variables:
-#     mode: ksh
+#     mode: sh
 #     mode: font-lock
 #     mode: auto-fill
-#     ksh-indent: 4
-#     ksh-multiline-offset: 2
-#     ksh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#     sh-indent: 4
+#     sh-multiline-offset: 2
+#     sh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
 #     fill-column: 78
 # End:
 #

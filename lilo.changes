@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Dec 10 15:11:04 CET 2004 - jplack@suse.de
+
+- added support for QLogic FC adapters on JS20, cleanup so that
+  all FC adapters using fc_transport class should work (# 45565 -
+  LTC11213)
+
+-------------------------------------------------------------------
 Thu Nov  4 23:53:38 CET 2004 - jplack@suse.de
 
 - use parted's fs resize command to resize partition inplace,

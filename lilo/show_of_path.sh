@@ -230,17 +230,35 @@ if [ -f devspec ] ; then
 	    file_storage_type=vscsi
 	    ;;
 	fcp)
-	    # get list of WWPN to be addressed
-	    # TODO this is currently only tested on emulex cards, check others!!!
-	    [ -f info ] || error "could not find an 'info' file for FC adapter"
+	    declare of_disk_fc_wwpn
 
-	    declare -a fc_wwpns
+	    # modprobe scsi_transport_fc  ## loaded through dependencies
+	    port=$(
+		printf "/sys/class/fc_transport/%x:%x:%x:%x/port_name" \
+		    $of_disk_scsi_host $of_disk_scsi_chan \
+		    $of_disk_scsi_id $of_disk_scsi_lun \
+	    )
 
-	    while read; do
-		[[ "$REPLY" == *WWPN* ]] || continue
-		read wwpn d <<< "${REPLY#*WWPN}"
-		fc_wwpns[${#fc_wwpns}]="${wwpn//:}"
-	    done < info
+	    if [ -f "$port" ]; then
+		# read the appropriate /sys/class/fc_transport/*/port_name
+		of_disk_fc_wwpn=$(< $port)
+		of_disk_fc_wwpn=${of_disk_fc_wwpn#0x} 	# remove leading 0x
+	    elif [ -f info ]; then
+	        # TODO this is currently only tested on emulex cards, check others!!!
+		scsi_id=0
+	        while read; do
+		    [[ "$REPLY" == *WWPN* ]] || continue
+		    dbg_show scsi_id
+		    (( scsi_id++ == of_disk_scsi_id )) || continue
+		    dbg_show REPLY
+		    read of_disk_fc_wwpn d <<< "${REPLY#*WWPN}"
+		    of_disk_fc_wwpn="${of_disk_fc_wwpn//:}" 	# remove all colons within WWPN string
+		    break
+	        done < info
+	    else
+ 		error "could not find an 'info' file nor an fc_transport layer for FC adapter"
+	    fi
+	    [ "$of_disk_fc_wwpn" ] || error "could not get a WWPN for that FC disk"
 	    file_storage_type=fcp
 	    ;;
 	*)
@@ -267,7 +285,6 @@ if [ -f devspec ] ; then
 	    ;;
         fcp)
 	    declare of_disk_fc_dir
-	    declare of_disk_fc_wwpn=${fc_wwpns[$of_disk_scsi_id]}
 	    declare of_disk_fc_lun=$of_disk_scsi_lun
 
 	    if [ -d ${file_of_hw_devtype}/disk ]; then
