@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 10 17:11:15 CEST 2004 - jplack@suse.de
+
+- fixed typos for PowerMac G5s
+
+-------------------------------------------------------------------
 Fri May  7 18:48:49 CEST 2004 - jplack@suse.de
 
 - create bootinfo object, more error checking, type conversion for

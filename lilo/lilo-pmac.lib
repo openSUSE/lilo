@@ -106,19 +106,19 @@ function running_on_pmac_new () {
 	    fi
 	fi
 	unset FILE_PATH
-	if [ ! -z "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
+	if [ -n "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
 	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
-	    if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
+	    if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
 		CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
 	    else
 		CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
 	    fi
 	else
 	    local sysmap="/lib/modules/`get_kernel_version ${CONFIG_IMAGE_FILE[$i]}`/System.map"
-	    if test -f $sysmap; then
+	    if [ -f $sysmap ]; then
 		CONFIG_IMAGE_SYSMAP[$i]=$sysmap
 		FILE_PATH=$(get_of_path ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
-		if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
+		if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
 		    CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
 		else
 		    CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
@@ -131,7 +131,7 @@ function running_on_pmac_new () {
     {
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 	if [ "$OPTION_DEFAULT" ]; then
-	    if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
+	    if [[ "$OPTION_DEFAULT" = @(macos|macosx) ]] ; then
 		# yaboot.conf gets the first available imag= label as default
 		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 		    test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
@@ -148,7 +148,7 @@ function running_on_pmac_new () {
 	test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
 
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-	    test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+	    [ "${CONFIG_IMAGE_OTHER[$i]}" ] &&  continue
 	    if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
 		echo "image = `basename ${CONFIG_IMAGE_FILE[$i]}`"
 	    else
@@ -242,27 +242,24 @@ function running_on_pmac_new () {
 	    echo $MY_STRING_WITHOUT_SPACE_BAR
 	    echo
 	else
-	    echo -e "\n\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval"
+	    echo -e "\n\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\\\yaboot\" eval"
 	fi
 	echo "</BOOT-SCRIPT>"
 	cat /lib/lilo/pmac/os-badge-icon
 	echo "</CHRP-BOOT>"
-    } > $TEMP/os-choosear
+    } > $TEMP/os-chooser
 
     # umount the boot = partition, or exit if that fails
-    mount | grep -q "$OPTION_BOOT"
-    if [ "$?" = "0" ] ; then 
-	echo "unmount $OPTION_BOOT" ; umount $OPTION_BOOT || exit 1
+    if [ "$(</proc/mounts)" == *$OPTION_BOOT\ * ] ; then 
+	echo "unmount $OPTION_BOOT"
+	umount $OPTION_BOOT || exit 1
     fi
     humount $OPTION_BOOT 2>/dev/null
     humount $OPTION_BOOT 2>/dev/null
     
     hmount $OPTION_BOOT || exit 1
-    if [ "$OPTION_BOOTFOLDER" != "" ] ; then
-	HFS_BOOTFOLDER="$OPTION_BOOTFOLDER"
-    else
-	HFS_BOOTFOLDER="$DEFAULT_BOOTFOLDER"
-    fi
+
+    HFS_BOOTFOLDER="${OPTION_BOOTFOLDER:-$DEFAULT_BOOTFOLDER}"
     hmkdir $HFS_BOOTFOLDER 2>/dev/null
     hattrib -b $HFS_BOOTFOLDER
     hcd $HFS_BOOTFOLDER

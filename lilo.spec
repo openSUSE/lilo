@@ -24,7 +24,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      26
+Release:      27
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source2:      boot-header-%{bootheader}.tar.bz2
 Source3:      lilo-21.tar.gz
@@ -149,6 +149,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Mon May 10 2004 - jplack@suse.de
+- fixed typos for PowerMac G5s
 * Fri May 07 2004 - jplack@suse.de
 - create bootinfo object, more error checking, type conversion for
   PReP Boot partition
