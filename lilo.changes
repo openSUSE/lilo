@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Fri Mar 18 14:39:19 CET 2005 - olh@suse.de
+
+- update chrp64 zImage bootheader for 2.6.7 kernels
+
+-------------------------------------------------------------------
+Thu Mar 17 13:13:13 CET 2005 - olh@suse.de
+
+- handle more than one SATA drive in G5 (#73635)
+
+-------------------------------------------------------------------
 Thu Feb 24 00:57:07 CET 2005 - schwab@suse.de
 
 - Bump version.

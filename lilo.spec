@@ -26,7 +26,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.16
-Release:      1
+Release:      2
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch0:       show_of_path.diff
@@ -152,6 +152,10 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Fri Mar 18 2005 - olh@suse.de
+- update chrp64 zImage bootheader for 2.6.7 kernels
+* Thu Mar 17 2005 - olh@suse.de
+- handle more than one SATA drive in G5 (#73635)
 * Thu Feb 24 2005 - schwab@suse.de
 - Bump version.
 * Thu Jan 13 2005 - schwab@suse.de

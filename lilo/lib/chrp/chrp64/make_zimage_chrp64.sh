@@ -2,6 +2,8 @@
 set -e
 # set -x
 
+export LANG=C
+export LC_ALL=C
 obj_dir=.
 obj_dir=/lib/lilo/chrp/chrp64
 
@@ -76,10 +78,17 @@ fi
 #
 case "$(file -Lb $vmlinux)" in
 	ELF\ 64-bit*)
-		gzip -cv9 $vmlinux > $tmp/vmlinux.gz
+		cp -vp $vmlinux $tmp/vmlinux
+		vmlinux_memsize=0x`nm -n $tmp/vmlinux | sed '$s/^........\([^ ]*\).*/\1/p;d'`
+		vmlinux_filesize=0x`ls -l $tmp/vmlinux | awk '{ printf "%x\n", $5 }'`
+		strip -s $tmp/vmlinux
+		gzip -cv9 $tmp/vmlinux > $tmp/vmlinux.gz
 		;;
 	ELF\ 32-bit*)
 		objcopy -j .kernel:vmlinux -O binary $vmlinux $tmp/vmlinux.gz
+		gzip -dfcv9 $tmp/vmlinux.gz > $tmp/vmlinux
+		vmlinux_memsize=0x`nm -n $tmp/vmlinux | sed '$s/^........\([^ ]*\).*/\1/p;d'`
+		vmlinux_filesize=0x`ls -l $tmp/vmlinux | awk '{ printf "%x\n", $5 }'`
 		;;
 	*)
 		file -b $vmlinux
@@ -88,7 +97,6 @@ case "$(file -Lb $vmlinux)" in
 		;;
 esac
 #
-gzip -cd $tmp/vmlinux.gz > $tmp/vmlinux
 #
 strings $tmp/vmlinux | grep -E 'Linux version .* .gcc version' > $tmp/uts_string.txt
 cp $obj_dir/zImage.o $tmp/zImage.o
@@ -114,13 +122,16 @@ ld -Ttext 0x00400000 -e _start \
 	$obj_dir/crt0.o \
 	$obj_dir/string.o \
 	$obj_dir/prom.o \
+	$obj_dir/main.o \
+	$obj_dir/div64.o \
 	$tmp/zImage.o \
 	$obj_dir/zlib.o \
-	--defsym _vmlinux_memsize=0x`nm -n $tmp/vmlinux | sed '$s/^........\([^ ]*\).*/\1/p;d'` \
-	--defsym _vmlinux_filesize=0x`ls -l $tmp/vmlinux | awk '{ printf "%x\n", $5 }'`
+	--defsym _vmlinux_memsize=$vmlinux_memsize \
+	--defsym _vmlinux_filesize=$vmlinux_filesize
 #
 $obj_dir/addnote $tmp/output
 #
 rm -f "$output"
 cp "$tmp/output" "$output"
+rm -rf $tmp
 
