@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Apr 26 14:11:43 CEST 2000 - olh@suse.de
+
+- get rid of strings in show_of_path.sh
+
+-------------------------------------------------------------------
+Thu Apr 13 22:07:43 CEST 2000 - olh@suse.de
+
+- include ybin in the package
+  move show_of_path.sh from aaa_base to this package
+
+-------------------------------------------------------------------
 Thu Apr  6 19:39:56 CEST 2000 - uli@suse.de
 
 - fixed initrd loading bug introduced by conf hfs/kernel ext2
