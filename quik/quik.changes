@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Feb  6 23:04:18 CET 2000 - olh@suse.de
+
+- fix to find proper partition number
+  /usr/man -> /usr/share/man
+
+-------------------------------------------------------------------
 Mon Jan 24 20:43:02 CET 2000 - olh@suse.de
 
 - add quik to SuSE PPC dist

@@ -12,7 +12,7 @@
 Vendor:       SuSE GmbH, Nuernberg, Germany
 Distribution: SuSE Linux 6.3 (PPC)
 Name:         quik
-Release:      0
+Release:      2
 Packager:     feedback@suse.de
 
 Summary:      quik - bootloader for CHRP machines
@@ -21,6 +21,7 @@ Copyright: GPL
 Group: Base
 URL: http://www.ppc.kernel.org/
 Source: ftp://ftp.ppc.kernel.org/pub/linuxppc/quik/quik-2.0.tar.gz
+Patch: quik-2.0.dif
 BuildRoot: /var/tmp/buildroot-quik
 
 %description
@@ -31,8 +32,11 @@ Authors:
 --------
     Cort Dougan <cort@ppc.kernel.org>
 
+SuSE series: a
+
 %prep
 %setup
+%patch -p1
 
 %build
 make
@@ -90,8 +94,6 @@ rm -rf $RPM_BUILD_ROOT
 /boot/first.b
 /boot/second.b
 /boot/second
-%config /etc/quik.conf
-/usr/man/man5/quik.conf.5.gz
-/usr/man/man8/quik.8.gz
-/usr/man/man8/bootstrap.8.gz
+%config(noreplace) /etc/quik.conf
+/usr/share/man/man?/*
 

@@ -1,0 +1,31 @@
+diff -urN quik-2.0.orig/Makefile quik-2.0/Makefile
+--- quik-2.0.orig/Makefile	Wed Nov 17 21:24:19 1999
++++ quik-2.0/Makefile	Sun Feb  6 21:55:32 2000
+@@ -9,11 +9,11 @@
+ 	install -d -m 755 $(DESTDIR)/sbin
+ 	install -d -m 755 $(DESTDIR)/boot
+ 	install -d -m 755 $(DESTDIR)/etc
+-	install -d -m 755 $(DESTDIR)/usr/man/man5
+-	install -d -m 755 $(DESTDIR)/usr/man/man8
++	install -d -m 755 $(DESTDIR)/usr/share/man/man5
++	install -d -m 755 $(DESTDIR)/usr/share/man/man8
+ 	install -s quik/quik $(DESTDIR)/sbin
+ 	install -m 444 first/first.b second/second.b second/second $(DESTDIR)/boot
+ 	if [ -f $(DESTDIR)/etc/quik.conf ]; then :; \
+ 	  else set -x; install -m 644 etc/quik.conf $(DESTDIR)/etc; fi
+-	install -m 444 man/quik.conf.5 $(DESTDIR)/usr/man/man5
+-	install -m 444 man/quik.8 man/bootstrap.8 $(DESTDIR)/usr/man/man8
++	install -m 444 man/quik.conf.5 $(DESTDIR)/usr/share/man/man5
++	install -m 444 man/quik.8 man/bootstrap.8 $(DESTDIR)/usr/share/man/man8
+diff -urN quik-2.0.orig/quik/quik.c quik-2.0/quik/quik.c
+--- quik-2.0.orig/quik/quik.c	Sun Feb  6 21:47:28 2000
++++ quik-2.0/quik/quik.c	Sun Feb  6 21:53:38 2000
+@@ -547,7 +547,7 @@
+ 	bootdev[7] += UNIT(st1.st_dev);
+     strcpy(spart, bootdev);
+     if (PART(st1.st_dev) != 0)
+-	sprintf(spart+8, "%d", PART(st1.st_dev));
++	sprintf(spart+8, "%d", (int)PART(st1.st_dev));
+ 
+     if (verbose)
+ 	printf("Second-stage loader is on %s\n", spart);
