@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Sep 19 10:18:23 CEST 2001 - olh@suse.de
+
+- fix sysmap path for chrp
+
+-------------------------------------------------------------------
 Sat Sep 15 22:09:56 CEST 2001 - olh@suse.de
 
 - make spacebar useage more clear

@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.7
-Release:      47
+Release:      50
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
@@ -124,6 +124,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Sep 19 2001 - olh@suse.de
+- fix sysmap path for chrp
 * Sat Sep 15 2001 - olh@suse.de
 - make spacebar useage more clear
 * Fri Sep 14 2001 - olh@suse.de
