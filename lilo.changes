@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Fri Mar 18 17:37:52 CET 2005 - jplack@suse.de
+
+- avoid empty partition line in yaboot.conf
+  fixes #65759 - lilo produces unparsable yaboot.conf for FAT case
+
+-------------------------------------------------------------------
+Fri Dec 17 14:43:01 CET 2004 - jplack@suse.de
+
+- moved the problem detection for unknown OF path earlier in the
+  process flow to have less irritation in case of unknown
+  hardware (#48446)
+
+-------------------------------------------------------------------
 Thu Dec 16 16:05:01 CET 2004 - jplack@suse.de
 
 - added work arounds for some problems and bugs of parted (#49317)
