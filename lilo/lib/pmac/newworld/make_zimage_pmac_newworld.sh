@@ -69,7 +69,7 @@ if [ -z "$output" ] ; then
 	exit 1
 fi
 if [ -z "$tmp" ] ; then
-	tmp=`mktemp -d /tmp/mkzimage_pmac_newworld.$$.XXXXXX`
+	tmp=`mktemp -d ${TMPDIR:-/tmp}/mkzimage_pmac_newworld.$$.XXXXXX`
 else
 	tmp=`mktemp -d $tmp/mkzimage_pmac_newworld.$$.XXXXXX`
 fi

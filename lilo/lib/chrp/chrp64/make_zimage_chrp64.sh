@@ -69,7 +69,7 @@ if [ -z "$output" ] ; then
 	exit 1
 fi
 if [ -z "$tmp" ] ; then
-	tmp=`mktemp -d /tmp/mkzimage_chrp64.$$.XXXXXX`
+	tmp=`mktemp -d ${TMPDIR:-/tmp}/mkzimage_chrp64.$$.XXXXXX`
 else
 	tmp=`mktemp -d $tmp/mkzimage_chrp64.$$.XXXXXX`
 fi

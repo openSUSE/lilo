@@ -34,7 +34,7 @@ unset LC_CTYPE
 CONFIG_LILO_CONF=/etc/lilo.conf
 SHOW_OF_PATH="/bin/show_of_path.sh --quiet"
 DEFAULT_BOOTFOLDER=suseboot
-TEMP="/tmp/ppc_lilo"
+TEMP="${TMPDIR:-/tmp}/ppc_lilo"
 
 shopt -s extglob
 
@@ -279,7 +279,7 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		if [ "$path_image" ] && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
 		    # Is boot image file on the same device from where yaboot started?
 		    if [ "${path_image:0:${#path_boot}}" = "$path_boot" ]; then
 			CONFIG_IMAGE_FILE[$i]="$image"
@@ -310,7 +310,7 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		if [ "$path_image" ] && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
 		    # Is boot image file on the same device from where yaboot started?
 		    if [ "${path_image:0:${#path_boot}}" = "$path_boot" ]; then
 			CONFIG_IMAGE_INITRD[$i]="$image"
@@ -877,6 +877,12 @@ function device_nr () {
     # print device number in decimal given a path to a device node
     local d="$1"
     
+    # /dev/root is an alias to the root file system
+    if [ "$d" == "/dev/root" ]; then
+	device_of_file /
+	return;
+    fi
+
     if [ ! -x $STAT_CMD ]; then
 	# be nice if /usr not mounted
 	echo 0000

@@ -26,7 +26,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      36
+Release:      37
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch5:       yaboot-1.3.6.dif
@@ -150,6 +150,12 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Jun 23 2004 - jplack@suse.de
+- fixed blocker bug #41772 - LTC9179-SLES9: Installation of RAID 1 failed
+* Fri Jun 18 2004 - jplack@suse.de
+- fixed critical bug #42207 - lilo does not handle /dev/root in /proc/mounts
+* Thu Jun 17 2004 - jplack@suse.de
+- use TMPDIR if set
 * Thu Jun 17 2004 - jplack@suse.de
 - fixed #42148, lilo cannot handle more than 10 partitions
 * Wed Jun 16 2004 - olh@suse.de

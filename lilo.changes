@@ -1,4 +1,19 @@
 -------------------------------------------------------------------
+Wed Jun 23 11:17:55 CEST 2004 - jplack@suse.de
+
+- fixed blocker bug #41772 - LTC9179-SLES9: Installation of RAID 1 failed
+
+-------------------------------------------------------------------
+Fri Jun 18 17:42:05 CEST 2004 - jplack@suse.de
+
+- fixed critical bug #42207 - lilo does not handle /dev/root in /proc/mounts
+
+-------------------------------------------------------------------
+Thu Jun 17 15:36:12 CEST 2004 - jplack@suse.de
+
+- use TMPDIR if set
+
+-------------------------------------------------------------------
 Thu Jun 17 11:55:20 CEST 2004 - jplack@suse.de
 
 - fixed #42148, lilo cannot handle more than 10 partitions
