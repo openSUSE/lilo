@@ -124,6 +124,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Sep 20 2001 - olh@suse.de
+- fix sysmap for pmac
 * Wed Sep 19 2001 - olh@suse.de
 - fix sysmap path for chrp
 * Sat Sep 15 2001 - olh@suse.de

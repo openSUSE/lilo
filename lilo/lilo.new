@@ -304,7 +304,12 @@ fi
 test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
 test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = ${CONFIG_IMAGE_APPEND[$i]}"
-test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAPPATH[$i]}"
+#test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAP[$i]}"
+test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || ( if [ "${CONFIG_IMAGE_SYSMAPPATH[$i]}" = "copy" ] ; then
+	echo "    sysmap = `basename ${CONFIG_IMAGE_SYSMAP[$i]}`" 
+else 
+	echo "    sysmap = ${CONFIG_IMAGE_SYSMAPPATH[$i]}" 
+fi )
 test -z "${CONFIG_IMAGE_INITRD[$i]}" || ( if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
 	echo "    initrd = `basename ${CONFIG_IMAGE_INITRD[$i]}`" 
 else 
@@ -517,6 +522,10 @@ fi
 test -z "${CONFIG_IMAGE_INITRD[$i]}" || (
  if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
         hcopy ${CONFIG_IMAGE_INITRD[$i]} :`basename ${CONFIG_IMAGE_INITRD[$i]}`
+ fi )
+test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || (
+ if [ "${CONFIG_IMAGE_SYSMAPPATH[$i]}" = "copy" ] ; then
+        hcopy ${CONFIG_IMAGE_SYSMAP[$i]} :`basename ${CONFIG_IMAGE_SYSMAP[$i]}`
  fi )
 done
 hpwd
