@@ -15,4 +15,5 @@ PowerBook2,1	# first iBook
 PowerBook2,2	# iBook r128
 PowerBook3,1	# PowerBook G3 Pismo
 PowerBook3,2	# PowerBook G4 titanium
+PowerBook3,3	# PowerBook G4 titanium (with softmodem)
 PowerBook4,1	# iBook 2001 titanium

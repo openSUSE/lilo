@@ -9,7 +9,7 @@
 #
 
 # neededforbuild  tetex
-# usedforbuild    aaa_base aaa_dir aaa_version autoconf automake base bash bindutil binutils bison bzip compress cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch perl ps rcs readline rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
+# usedforbuild    aaa_base aaa_dir aaa_version autoconf automake base bash bindutil binutils bison bzip compress cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch perl ps rcs readline rpm rsh sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
 
 Name:         lilo
 Group: 	System Environment/Base
@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      45
+Release:      60
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
@@ -124,6 +124,10 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Dec 04 2001 - olh@suse.de
+- add new PowerBook
+* Tue Dec 04 2001 - olh@suse.de
+- running lilo on iSeries
 * Tue Nov 13 2001 - olh@suse.de
 - double MAX_TOKEN size to allow large init-message
 * Thu Nov 08 2001 - olh@suse.de

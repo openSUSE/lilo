@@ -108,6 +108,116 @@ done
 cp -av /tmp/ppc_lilo/yaboot.conf /etc/yaboot.conf
 }
 
+function running_on_iseries () {
+
+echo running on iSeries
+
+#only the device is given and dd to the raw device is a bad idea
+
+if [ "$OPTION_PARTITION" = "" ] ; then
+  echo guess the prep boot device 
+  PART=`fdisk -l $OPTION_DEVICE | fgrep "PPC PReP"`
+  if [ -z "$PART" ] ; then
+     echo ERROR: config error, boot = $OPTION_BOOT is not 41 PReP  
+     echo '*********************************************************'
+     echo '* You must create a PPC PReP Boot partition (type 0x41) *'
+     echo '* for the CHRP bootloader to be installed.              *'
+     echo '*********************************************************'
+  exit -1
+  fi
+  if [ `echo "$PART" | wc -l` != 1 ] ; then
+     echo "ERROR: config error, guessing of boot partition failed"
+     echo "**************************************************************"
+     echo "* There are more than 1 PPC PReP Boot partitions (type 0x41) *"
+     echo "* on this system. Specify the partition NUMBER in boot= $OPTION_BOOT *"
+     echo "**************************************************************"
+   exit -1
+  fi
+  P=`echo "$PART" | awk '{print $1}'`
+
+if [ ! -z "$OPTION_DEFAULT" ] ; then
+# find the default= line
+for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
+  if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[i]}" ] ; then
+    echo Installing "${CONFIG_IMAGE_FILE[i]}" onto $P
+    dd if="${CONFIG_IMAGE_FILE[i]}" of=$P bs=4096
+    if [ ! -z "${CONFIG_IMAGE_APPEND[i]}" ] ; then
+       # echo "${CONFIG_IMAGE_APPEND[i]}" > /proc/iSeries/mf/C/cmdline
+       echo $(echo ${CONFIG_IMAGE_APPEND[i]} | sed -e 's#^"##' -e 's#"$##' ) > /proc/iSeries/mf/C/cmdline
+    fi
+    if [ ! -z "$OPTION_APPEND" ] ; then
+       echo $(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' ) > /proc/iSeries/mf/C/cmdline
+    fi
+  fi
+done
+
+else
+# pick the first image= line
+    echo Installing "${CONFIG_IMAGE_FILE[1]}" onto $P
+    dd if="${CONFIG_IMAGE_FILE[1]}" of=$P bs=4096
+    if [ ! -z "${CONFIG_IMAGE_APPEND[1]}" ] ; then
+       echo $(echo ${CONFIG_IMAGE_APPEND[1]} | sed -e 's#^"##' -e 's#"$##' ) > /proc/iSeries/mf/C/cmdline
+    fi
+    if [ ! -z "$OPTION_APPEND" ] ; then
+       echo $(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' ) > /proc/iSeries/mf/C/cmdline
+    fi
+
+fi
+
+
+  if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+    echo set active flag on partition $(echo "$P"|sed 's/[0-9]*$/ &/')
+/sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
+  fi
+
+else
+#we have the device, but better safe than sorry
+  echo install on $OPTION_DEVICE
+  PART=`fdisk -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
+  if [ -z "$PART" ] ; then
+     echo "ERROR: config error, boot = $OPTION_BOOT is not 41 PReP"
+     echo "*********************************************************"
+     echo "* You must create a PPC PReP Boot partition (type 0x41) *"
+     echo "* for the CHRP bootloader to be installed.              *"
+     echo "*********************************************************"
+  exit -1
+  fi
+
+if [ ! -z "$OPTION_DEFAULT" ] ; then
+# find the default= line
+for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
+  if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[i]}" ] ; then
+    echo Installing "${CONFIG_IMAGE_FILE[i]}" onto $OPTION_BOOT
+    dd if="${CONFIG_IMAGE_FILE[i]}" of=$OPTION_BOOT bs=4096
+    if [ ! -z "${CONFIG_IMAGE_APPEND[i]}" ] ; then
+       echo $(echo ${CONFIG_IMAGE_APPEND[i]} | sed -e 's#^"##' -e 's#"$##' ) > /proc/iSeries/mf/C/cmdline
+    fi
+    if [ ! -z "$OPTION_APPEND" ] ; then
+       echo $(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' ) > /proc/iSeries/mf/C/cmdline
+    fi
+  fi
+done
+
+else
+# pick the first image= line
+    echo Installing "${CONFIG_IMAGE_FILE[1]}" onto $OPTION_BOOT
+    dd if="${CONFIG_IMAGE_FILE[1]}" of=$OPTION_BOOT bs=4096
+    if [ ! -z "${CONFIG_IMAGE_APPEND[1]}" ] ; then
+       echo $(echo ${CONFIG_IMAGE_APPEND[1]} | sed -e 's#^"##' -e 's#"$##' ) > /proc/iSeries/mf/C/cmdline
+    fi
+    if [ ! -z "$OPTION_APPEND" ] ; then
+       echo $(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' ) > /proc/iSeries/mf/C/cmdline
+    fi
+
+fi
+
+  if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+    echo set active flag on partition $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
+/sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
+  fi
+fi
+
+}
 
 function running_on_prep () {
 
@@ -572,6 +682,7 @@ while read line; do
 		*MacRISC*)	MACHINE="pmac" ;;
 		*CHRP*)		MACHINE="chrp" ;;
 		*PReP*)		MACHINE="prep" ;;
+		*iSeries*)	MACHINE="iseries" ;;
 	esac
 done < /proc/cpuinfo
 
@@ -826,6 +937,7 @@ case "$MACHINE" in
 	pmac_old)  running_on_pmac_old ;;
 	chrp)	   running_on_chrp     ;;
 	prep)	   running_on_prep     ;;
+	iseries)   running_on_iseries  ;;
 esac
 
 #
