@@ -34,6 +34,14 @@ DEFAULT_BOOTFOLDER=suseboot
 
 shopt -s extglob
 
+
+
+STAT_CMD=/usr/bin/stat
+
+FDISK=/sbin/fdisk
+
+
+
 if [ "$1" = "--lilo-rootdrive" ] ; then
     LILO_ROOTDRIVE=true
     shift
@@ -47,7 +55,7 @@ function running_on_chrp () {
     #only the device is given and dd to the raw device is a bad idea
     if [ -z "$OPTION_PARTITION" ] ; then
 	echo guess the chrp boot device 
-	PART=`fdisk -l $OPTION_DEVICE | fgrep "PPC PReP"`
+	PART=`$FDISK -l $OPTION_DEVICE | fgrep "PPC PReP"`
 	if [ -z "$PART" ] ; then
 	    echo ERROR: config error, boot = $OPTION_BOOT is not 41 PReP  
 	    echo '*********************************************************'
@@ -68,7 +76,7 @@ function running_on_chrp () {
     else
 	#we have the device, but better safe than sorry
 	echo install on $OPTION_DEVICE
-	PART=`fdisk -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
+	PART=`$FDISK -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
 	if [ -z "$PART" ] ; then
 	    echo "ERROR: config error, boot = $OPTION_BOOT is not 41 PReP"
 	    echo "*********************************************************"
@@ -116,20 +124,21 @@ function running_on_chrp () {
 	    # ugly ugly ...
 	    #
 	    #  is no longer needed due to olh 9.3.2004
-	    #if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 ]; then
-		#if ! bash /lib/lilo/chrp/chrp64/addRamdisk.sh \
-		 # /tmp/ppc_lilo \
-		 # ${CONFIG_IMAGE_FILE[$i]} \
-		 # ${CONFIG_IMAGE_INITRD[$i]} \
-		 # ${CONFIG_IMAGE_FILE[$i]}.initrd \
-		 # > /tmp/ppc_lilo/chrp_initrd_$i.log 2>&1 ; then
-		 #   cat /tmp/ppc_lilo/chrp_initrd_$i.log
-		 #   exit 1
-		#fi
-		#
-		#CONFIG_IMAGE_FILE[$i]=${CONFIG_IMAGE_FILE[$i]}.initrd
-		#unset CONFIG_IMAGE_INITRD[$i]
-	    #fi
+	    # still needed, might be a bug in yaboot 26.3.2004
+	    if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 ]; then
+		if ! bash /lib/lilo/chrp/chrp64/addRamdisk.sh \
+		  /tmp/ppc_lilo \
+		  ${CONFIG_IMAGE_FILE[$i]} \
+		  ${CONFIG_IMAGE_INITRD[$i]} \
+		  ${CONFIG_IMAGE_FILE[$i]}.initrd \
+		  > /tmp/ppc_lilo/chrp_initrd_$i.log 2>&1 ; then
+		    cat /tmp/ppc_lilo/chrp_initrd_$i.log
+		    exit 1
+		fi
+		
+		CONFIG_IMAGE_FILE[$i]=${CONFIG_IMAGE_FILE[$i]}.initrd
+		unset CONFIG_IMAGE_INITRD[$i]
+	    fi
 	    echo "image = ${CONFIG_IMAGE_FILE[$i]}"
 	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
@@ -139,6 +148,7 @@ function running_on_chrp () {
 	done
     } > /tmp/ppc_lilo/yaboot.conf
     cp -av /tmp/ppc_lilo/yaboot.conf /etc/yaboot.conf
+    rm -f /tmp/ppc_lilo/yaboot.conf
 }
 
 
@@ -287,7 +297,7 @@ function running_on_iseries () {
 	    #only the device is given and dd to the raw device is a bad idea
 	    if [ "${OPTION_PARTITION[$i]}" = "" ]; then
 		echo guess the prep boot device 
-		PART=`fdisk -l $ISERIES_DEVICE | fgrep "PPC PReP"`
+		PART=`$FDISK -l $ISERIES_DEVICE | fgrep "PPC PReP"`
 		if [ -z "$PART" ] ; then
 		    echo ERROR: config error, boot = $ISERIES_BOOT is not 41 PReP  
 		    echo '**********************************************************'
@@ -308,7 +318,7 @@ function running_on_iseries () {
 	    else
 		#we have the device, but better safe than sorry
 		echo install on $ISERIES_DEVICE
-		PART=`fdisk -l $ISERIES_DEVICE | grep $ISERIES_BOOT | fgrep "PPC PReP"`
+		PART=`$FDISK -l $ISERIES_DEVICE | grep $ISERIES_BOOT | fgrep "PPC PReP"`
 		if [ -z "$PART" ] ; then
 		    echo "ERROR: config error, boot = $ISERIES_BOOT is not 41 PReP"
 		    echo '**********************************************************'
@@ -341,7 +351,7 @@ function running_on_prep () {
     
     if [ -z "$OPTION_PARTITION" ] ; then
 	echo guess the prep boot device 
-	PART=`fdisk -l $OPTION_DEVICE | fgrep "PPC PReP"`
+	PART=`$FDISK -l $OPTION_DEVICE | fgrep "PPC PReP"`
 	if [ -z "$PART" ] ; then
 	    echo ERROR: config error, boot = $OPTION_BOOT is not 41 PReP  
 	    echo '*********************************************************'
@@ -362,7 +372,7 @@ function running_on_prep () {
     else
 	#we have the device, but better safe than sorry
 	echo install on $OPTION_DEVICE
-	PART=`fdisk -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
+	PART=`$FDISK -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
 	if [ -z "$PART" ] ; then
 	    echo "ERROR: config error, boot = $OPTION_BOOT is not 41 PReP"
 	    echo "*********************************************************"
@@ -408,8 +418,6 @@ function running_on_pmac_new () {
     running_on_pmac_new;
 }
 
-
-STAT_CMD=/usr/bin/stat
 
 function real_device () {
     # print the real device i.e. map partitions to disks

@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar 26 15:28:34 CET 2004 - jplack@suse.de
+
+- workaround for possible bug in yaboot, avoid initrd option by using
+  addRamdisk.sh, use fullpath for fdisk (path not set with
+  init=/bin/bash)
+
+-------------------------------------------------------------------
 Wed Mar 24 15:53:34 CET 2004 - jplack@suse.de
 
 - fixed type, bug with device detection, lots of clean ups
