@@ -12,16 +12,16 @@
 Vendor:       SuSE GmbH, Nuernberg, Germany
 Distribution: SuSE Linux 6.4 (PPC)
 Name:         yaboot
-Release:      4
+Release:      8
 Packager:     feedback@suse.de
 
 Summary:      YaBoot - OF boot loader for PowerMac
 Version:      0.5
 Copyright: GPL
 Group: Unsorted
-Source0: yaboot_0.5.src.tgz
+Source0: yaboot-0.5.tar.gz
 Source1: yaboot_0.5.gz
-Patch0: yaboot.dif
+Patch0: yaboot-0.5.dif
 
 %description
 Yaboot is an OpenFirmware based bootloader for newworld machines.
@@ -34,7 +34,7 @@ Authors:
 SuSE series: a
 
 %prep
-%setup -n yaboot
+%setup
 %patch0
 
 %build
@@ -53,6 +53,8 @@ cp -a $RPM_SOURCE_DIR/yaboot_0.5.gz .
 %doc COPYING yaboot yaboot.debug yaboot_0.5.gz
 
 %changelog -n yaboot
+* Fri Mar 31 2000 - olh@suse.de
+- extended Welcome message
 * Wed Mar 22 2000 - uli@suse.de
 - fixed previous fix
 - added workaround for "conf from hfs, kernel from ext2" case

@@ -1,5 +1,15 @@
+--- Makefile
++++ Makefile	2000/03/30 21:47:19
+@@ -1,6 +1,6 @@
+ ## Configuration section
+ 
+-VERSION = 0.5
++VERSION = 0.5.SuSE
+ # Debug mode (verbose)
+ DEBUG = 0 
+ 
 --- cfg.c
-+++ cfg.c	2000/03/22 17:03:30
++++ cfg.c	2000/03/30 21:39:10
 @@ -378,13 +378,13 @@
  }
  
@@ -45,7 +55,7 @@
      prom_printf ("\nYou can also type in custom image locations, in the form\n"
  	    "{prom_path;}partno/path_to_image or {prom_path;}{partno}[start-end]\n");
 --- yaboot.c
-+++ yaboot.c	2000/03/22 17:06:19
++++ yaboot.c	2000/03/30 22:00:47
 @@ -429,6 +429,7 @@
  	    label = imagename;
  	    imagename = p;
@@ -101,11 +111,12 @@
      for (;;) {
      	initrd_size = 0;
      	initrd_base = 0;
-@@ -529,8 +534,17 @@
+@@ -529,8 +534,18 @@
  	    continue;
  	
  	prom_printf("Loading kernel...\n");
 +	if(confpath)
++	   {
 +		if(!strcmp(confpath,"\\\\") && params.kern_file[0] != '/')
 +		{
 +			fullfile[0]=0;
@@ -113,14 +124,14 @@
 +			strcat(fullfile,params.kern_file);
 +		} else
 +			strcpy(fullfile,params.kern_file);
-+			
++	   }		
  	result = open_file(params.kern_dev, params.kern_part,
 -		params.kern_file, &file);
 +		fullfile, &file);
  	if (result != FILE_ERR_OK) {
  	    prom_printf("\nImage not found.... try again\n");
  	    continue;
-@@ -647,8 +661,15 @@
+@@ -647,8 +662,15 @@
  	 */
  	if (params.rd_file) {
  	    prom_printf("Loading ramdisk...\n");
@@ -137,7 +148,15 @@
  	    if (result != FILE_ERR_OK)
  		prom_printf("\nRamdisk image not found.\n");
  	    else {
-@@ -775,7 +796,7 @@
+@@ -735,6 +757,7 @@
+ 	setup_display();
+ 	
+ 	prom_printf("Welcome to yaboot version " VERSION "\n");
++	prom_printf("Hit TAB to see the available configurations or RETURN for the default configuration\n");
+ 	
+ 	prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
+ #if DEBUG
+@@ -775,7 +798,7 @@
  		bootdevice, path ? path : NULL, bootpartition);
  #endif	
  	useconf = load_config_file(bootdevice, path, bootpartition);
