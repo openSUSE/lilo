@@ -124,6 +124,19 @@ function get_of_path() {
 }
 
 
+function is_on_primary() {
+    local of_path="$1"
+
+    # check for invalid of path
+    [ "$of_path" ] || return 1;
+
+    # check whether file is on a primary partition [1234]
+    if [[ "${of_path%,/*}" != *:[1234] ]]; then return 1; fi
+
+    return 0
+}
+
+
 function div1000() {
     local s=$1
     while (( ${#s} < 4 )); do s="0$s"; done
@@ -232,9 +245,33 @@ function running_on_chrp () {
     # else if it covers not all give a warning and advice how to fix that. 
 	
     local -a vmlinux_copy initrd_copy
-    local -i vmlinux_nr=0 initrd_nr=0
+    local -i vmlinux_nr=0 initrd_nr=0 force_fat=0
     local -i vmlinux_default=0 initrd_default=0
-    local path_boot=$(get_of_path $OPTION_BOOT)
+    local boot_path=$(get_of_path $OPTION_BOOT)
+    local boot_disk=${boot_path%%:+([0-9])}
+
+    if [ "$OPTION_FORCEFAT" = "yes" ]; then force_fat=1; fi
+
+    # on CHRP the boot partition has to be on a primary partition
+    if ! is_on_primary $boot_path; then
+	error "in config file, boot = $OPTION_BOOT is not a primary partition"
+    fi
+
+    # check whether yaboot.conf is on the same disk as yaboot
+    # (i.e. disk with the PReP partition), else set force_fat=1 also
+    # check for a valid and readable partition containing the config
+    # file.
+    echo -n > /etc/yaboot.conf
+    local yaboot_path=$(get_of_path /etc/yaboot.conf)
+    local yaboot_part=${yaboot_path%,/*yaboot.conf}
+
+    if [ "${boot_disk}" != "${yaboot_part%%:+([0-9])}" ]; then
+	force_fat=1
+    fi
+    if ! is_on_primary "$yaboot_path" ||
+	[[ ${fsys[ $(device_of_file /etc/yaboot.conf)]} != @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+	force_fat=1
+    fi
 
     # starting the work and write the yaboot.conf
     {
@@ -244,7 +281,7 @@ function running_on_chrp () {
 	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 	test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
-	
+
 	echo "# image section"
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	    if [ "${CONFIG_IMAGE_OTHER[$i]}" ]; then
@@ -272,6 +309,8 @@ function running_on_chrp () {
 		unset CONFIG_IMAGE_INITRD[$i]
 	    fi
 
+	    # check for existence of image file
+	    #
 	    if [ -f ${CONFIG_IMAGE_FILE[$i]} ]; then
 		local image="${CONFIG_IMAGE_FILE[$i]}"
 		local path_image=$(get_of_path $image)
@@ -279,11 +318,11 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if [ "$path_image" ] && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
-		    # Is boot image file on the same device from where yaboot started?
-		    if [ "${path_image:0:${#path_boot}}" = "$path_boot" ]; then
+		if is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		    # is the boot image file on the same device/partition
+		    # from where yaboot.conf has been loaded?
+		    if [ "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
 			CONFIG_IMAGE_FILE[$i]="$image"
-			# test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" && echo " *" || echo
 		    else
 			CONFIG_IMAGE_FILE[$i]="${path_image}"
 		    fi
@@ -303,6 +342,8 @@ function running_on_chrp () {
 		continue
 	    fi
 
+	    # check for existence of initrd file if applicable
+	    #
 	    if [ "${CONFIG_IMAGE_INITRD[$i]}" -a -f "${CONFIG_IMAGE_INITRD[$i]}" ]; then
 		local image="${CONFIG_IMAGE_INITRD[$i]}"
 		local path_image=$(get_of_path $image)
@@ -310,11 +351,11 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if [ "$path_image" ] && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
-		    # Is boot image file on the same device from where yaboot started?
-		    if [ "${path_image:0:${#path_boot}}" = "$path_boot" ]; then
+		if is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		    # is the boot initrd file on the same device/partition
+		    # from where yaboot.conf has been loaded?
+		    if [ "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
 			CONFIG_IMAGE_INITRD[$i]="$image"
-			# test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" && echo " *" || echo
 		    else
 			CONFIG_IMAGE_INITRD[$i]="${path_image}"
 		    fi
@@ -376,12 +417,15 @@ function running_on_chrp () {
 	(( minor > 4 )) && continue
 	case $minor in
 	    1|2|3|4)
-		p_start[$minor]=${start/.}
-		p_end[$minor]=${end/.}
+		i=${start/.}
+		p_start[$minor]=${i##*(0)}
+		i=${end/.}
+		p_end[$minor]=${i##*(0)}
 		p_type[$minor]=${type}
 		p_flags[$minor]=${fs_n_flags}
 		;;
 	    Disk)
+		[ "$start" = geometry ] || continue
 		REPLY=${REPLY#Disk geometry*-}
 		REPLY=${REPLY% megabytes*}
 		p_start[5]=${REPLY/.}
@@ -392,7 +436,10 @@ function running_on_chrp () {
 	esac
     done < <( $PARTED $device print )
 
-    if (( vmlinux_nr + initrd_nr > 0 )); then
+    # make it error friendly (tm) and try to unmount boot partition
+    [[ "$(</proc/mounts)" == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
+
+    if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
 	# copy all kernels and initrds from non supported file systems
 	# to one FAT partition
 
@@ -419,9 +466,6 @@ function running_on_chrp () {
 		  error "Partition extension failed for $OPTION_BOOT"  
 	    fi
 	fi
-
-	# make it error friendly (tm) and try to unmount boot partition
-	[[ "$(</proc/mounts)" == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
 
 	# create the FAT partition and file system on $OPTION_BOOT
 	if [[ "${fat_part[*]} " != *$OPTION_BOOT\ * ]]; then
@@ -487,6 +531,22 @@ function running_on_chrp () {
 	    fi
 	fi
 
+	# check whether $OPTION_BOOT is the first PReP partition on
+	# the boot disk else delete the others to please OF
+	if [[ "${prep_part[*]} " != $OPTION_BOOT\ * ]]; then
+	    # delete all PReP partitions before the boot partition
+	    for (( i=0; i<partition; i++ )); do
+		if [[ "${p_flags[$i]}" = *type=41* ]]; then
+		    echo >&2 "Warning: Delete ambiguous PReP boot  partition ${device}$i"
+		    if ! $PARTED $device rm $i >& /dev/null; then
+			echo >&2 "Warning: Partition deletion failed for ${device}$i"
+		    else
+			unset p_flags[$i]
+		    fi
+		fi
+	    done
+	fi
+
 	# shrink PReP boot partition if bigger than 4MB
 	if (( (p_end[partition]-p_start[partition]) > 4000 )); then
 	    echo >&2 "Warning: Shrinking PReP boot partition $OPTION_BOOT, avoiding firmware confusion"
@@ -512,11 +572,13 @@ function running_on_chrp () {
     fi
 
     NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
-    if (( vmlinux_nr + initrd_nr > 0 )); then
-	nvsetenv bootinfo-linux "${NV_BOOT_PATH},\ppc\bootinfo.txt"
-	NV_BOOT_PATH=${NV_BOOT_PATH},yaboot
-    else
-	NV_BOOT_PATH=${NV_BOOT_PATH%:+([0-9])}
+    if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
+        nvsetenv bootinfo-linux "${NV_BOOT_PATH},\ppc\bootinfo.txt"
+        NV_BOOT_PATH=${NV_BOOT_PATH},yaboot
+    elif [[ "${p_flags[*]}" != *type=41*type=41* ]]; then
+        # open firmware is confused about more than one PReP partition, in that
+        # case keep full OF path
+        NV_BOOT_PATH=${NV_BOOT_PATH%:+([0-9])}
     fi
 
     if [ "$OPTION_ACTIVATE" = "yes" ] ; then
@@ -976,12 +1038,20 @@ function parse_config_file () {
 	case "$option" in
 	    boot)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
-		OPTION_BOOT[$OPTION_BOOT_COUNT]=$value
+		if [ -L "$value" ]; then
+		    OPTION_BOOT[$OPTION_BOOT_COUNT]=$(readlink -f $value)
+		else
+		    OPTION_BOOT[$OPTION_BOOT_COUNT]=$value
+		fi
 		let OPTION_BOOT_COUNT++
 		;;
 	    activate)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
 		OPTION_ACTIVATE="yes"
+		;;
+	    force_fat)
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		OPTION_FORCEFAT="yes"
 		;;
 	    progressbar)
 		# do nothing
@@ -1103,7 +1173,7 @@ function check_config_file () {
     #
     for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
 	OPTION_DEVICE[$i]="${OPTION_BOOT[$i]%%+([0-9])}"	 # split boot option to
-	OPTION_PARTITION[$i]="${OPTION_BOOT[$i]##+([^0-9])}"	 # dev & part for parted
+	OPTION_PARTITION[$i]="${OPTION_BOOT[$i]##*[^0-9]}"	 # dev & part for parted
     done
 } #end function check_config_file
 

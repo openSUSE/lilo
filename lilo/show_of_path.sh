@@ -42,6 +42,17 @@ else
     }
 fi
 
+
+function error() {
+    [ "$quietmode" ] && set --
+    while [ "$1" ]; do
+	echo 1>&2 "ERROR: $1"
+	shift;
+    done
+    exit 1
+}
+
+
 myversion=2004-05-05
 # if no file path is given on cmd line check for root file system
 file=/
@@ -81,20 +92,18 @@ if [ -f /proc/device-tree/openprom/model ] ; then
 fi
 
 if [ "$MACHINE" = "pmac_old" ]; then
-    echo 1>&2 "ERROR: This machine is an Oldworld, no need for firmware pathnames"
-    exit 1
+    error "This machine is an Oldworld, no need for firmware pathnames"
 fi
 
 if [ -b $file ] ; then
-    read i i i i file_major file_minor i < <(ls -l "$file")
+    read i i i i file_major file_minor i < <(ls -lL "$file")
     file_major="${file_major%%,*}"
     file_minor="${file_minor##*,}"
     file=/
 else
     mystat="`type -p stat`"
-    if [ -z "$mystat" -o ! -x "$mystat" ] ; then
-	echo 1>&2 "ERROR: GNU stat required"
-	exit 1
+    if [ -z "$mystat" ] || ! [ -x "$mystat" ] ; then
+	error "GNU stat required"
     fi
 
     file_majorminor=$($mystat --format="%d" "$file")
@@ -102,7 +111,7 @@ else
     file_minor="$[file_majorminor & 255]"
 
     file_mountp=$file
-    while [ "$file_mountp" -a $($mystat --format="%d" "/${file_mountp%/*}") == $file_majorminor ]; do
+    while [ "$file_mountp" -a $($mystat --format="%d" "/${file_mountp%/*}") == "$file_majorminor" ]; do
 	file_mountp="${file_mountp%/*}"
     done
 fi
@@ -117,14 +126,11 @@ if test -d /sys/block || mount -t sysfs sysfs /sys; then
 	if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
     done
 else
-    echo 1>&2 "ERROR: sysfs not mounted on /sys and attempt to mount failed"
-    echo 1>&2 may be no kernel 2.6.x?
-    exit 1
+    error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
 fi
 
 if [ -z "$file_sysfs_path" ] ; then
-    [ "$quietmode" ] || echo 1>&2 "ERROR: can not find major:minor $file_majorminor for $file"
-    exit 1
+    error "can not find major:minor $file_majorminor for $file"
 fi
 
 dbg_show file_sysfs_path
@@ -138,8 +144,7 @@ if [ ! -L "$file_sysfs_dir/device" ] ; then
     file_sysfs_dir="${file_sysfs_dir%/*}"
     dbg_show file_sysfs_dir
     if [ ! -L "$file_sysfs_dir/device" ] ; then
-	[ "$quietmode" ] || echo 1>&2 "ERROR: driver for sysfs path $file_sysfs_dir has no full sysfs support"
-	exit 1
+	error "driver for sysfs path $file_sysfs_dir has no full sysfs support"
     fi
 fi
 
@@ -160,11 +165,15 @@ case "$file_full_sysfs_path" in
       	;;
     */host[0-9]*/[0-9]*:[0-9]*:[0-9]*:[0-9]*)
       	# file_storage_type=scsi !! or vscsi, will be determined later
-	spec="${file_full_sysfs_path##*/host[0-9]*/}"
+	declare spec="${file_full_sysfs_path##*/host[0-9]*/}"
+
 	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
 	cd ../..
 	;;
+    *)
+        # TODO check the rest of the (hardware) world
+	error "could not gather enough information to create open firmware path to device"
 esac
 
 if [ -f devspec ] ; then
@@ -176,75 +185,113 @@ if [ -f devspec ] ; then
 	file_of_hw_devtype="${file_of_hw_devtype}/scsi@${of_disk_scsi_chan}"
 	dbg_show file_of_hw_devtype
     fi
-    if [ -f ${file_of_hw_devtype}/device_type ] ; then
-	case "$(< ${file_of_hw_devtype}/device_type)" in
-	    k2-sata-root)
-		: found k2-sata-root, guessing channel
-		counter=0
-		for i in host[0-9]*; do
-		    : working on virtual scsi host $i
-		    case "$file_full_sysfs_path" in
-		        */$i/*)
-			    : found $i $counter
-			    break
-			    ;;
-		        *) ;;
-		    esac
-		    (( counter++ ))
-		done
-		of_device_path=`grep -l block ${file_of_hw_devtype}/*@$counter/*/device_type`
-		of_device_path=${of_device_path%/device_type}
-		of_device_path=${of_device_path##/proc/device-tree}
-		file_storage_type=sata
-		;;
-	    scsi*)
-		file_storage_type=scsi
-		;;
-	    ide|ata)
-		# TODO
-		# check for right file-storage_type == ide ??
-		;;
-	    pci-ide|pci-ata)
-		of_device_path=`grep -l block ${file_of_hw_devtype}/*@*/*/device_type`
-		of_device_path=${of_device_path%/device_type}
-		of_device_path=${of_device_path##/proc/device-tree}
-		file_storage_type=pci-ide
-		# TODO
-		# check for right file-storage_type == ide ??
-		;;
-	    vscsi)
-		file_storage_type=vscsi
-		;;
-	    *)
-	        echo 1>&2 "ERROR: Unknown device type $(< ${file_of_hw_devtype}/device_type)"
-		exit 1
-	esac
-    else
-	echo 1>&2 "ERROR: no device_type found in ${file_of_hw_devtype}"
-	exit 1
+    if ! [ -f ${file_of_hw_devtype}/device_type ] ; then
+	error "no device_type found in ${file_of_hw_devtype}"
     fi
+
+    case "$(< ${file_of_hw_devtype}/device_type)" in
+	k2-sata-root)
+	    : found k2-sata-root, guessing channel
+	    counter=0
+	    for i in host[0-9]*; do
+		: working on virtual scsi host $i
+		case "$file_full_sysfs_path" in
+		    */$i/*)
+		        : found $i $counter
+			break
+			;;
+		    *)
+		        ;;
+		esac
+		(( counter++ ))
+	    done
+	    of_device_path=`grep -l block ${file_of_hw_devtype}/*@$counter/*/device_type`
+	    of_device_path=${of_device_path%/device_type}
+	    of_device_path=${of_device_path##/proc/device-tree}
+	    file_storage_type=sata
+	    ;;
+	scsi*)
+	    file_storage_type=scsi
+	    ;;
+	ide|ata)
+	    # TODO
+	    # check for right file-storage_type == ide ??
+	    file_storage_type=ide
+	    ;;
+	pci-ide|pci-ata)
+	    of_device_path=`grep -l block ${file_of_hw_devtype}/*@*/*/device_type`
+	    of_device_path=${of_device_path%/device_type}
+	    of_device_path=${of_device_path##/proc/device-tree}
+	    # TODO
+	    # check for right file-storage_type == ide ??
+	    file_storage_type=pci-ide
+	    ;;
+	vscsi)
+	    file_storage_type=vscsi
+	    ;;
+	fcp)
+	    file_storage_type=fcp
+	    ;;
+	*)
+	    error "Unknown device type $(< ${file_of_hw_devtype}/device_type)"
+	    ;;
+    esac
 
     case "$file_storage_type" in
         ide)
 	    file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}/disk@$of_disk_ide_channel"
 	    ;;
         scsi)
-	    file_of_hw_path=$(printf "%s/sd@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
+	    if [ -d ${file_of_hw_devtype}/disk ]; then
+		of_disk_scsi_dir=disk
+	    elif [ -d ${file_of_hw_devtype}/sd ]; then
+		of_disk_scsi_dir=sd
+	    else
+		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
+	    fi
+	    file_of_hw_path=$(
+		printf "%s/%s@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" \
+		    $of_disk_scsi_dir $of_disk_scsi_id $of_disk_scsi_lun
+	    )
+	    ;;
+        fcp)
+	    declare of_disk_fc_dir
+	    # TODO is that right? for now I just copy the 'scsi' values
+	    declare of_disk_fc_wwpn=$of_disk_scsi_id
+	    declare of_disk_fc_lun=$of_disk_scsi_lun
+
+	    if [ -d ${file_of_hw_devtype}/disk ]; then
+		of_disk_fc_dir=disk
+	    elif [ -d ${file_of_hw_devtype}/sd ]; then
+		of_disk_fc_dir=sd
+	    else
+		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
+	    fi
+	    file_of_hw_path=$(
+		printf "%s/%s@%016x,%016x" \
+		    "${file_of_hw_devtype##/proc/device-tree}" \
+		    $of_disk_fc_dir $of_disk_fc_wwpn $of_disk_fc_lun
+	    )
 	    ;;
         sata|pci-ide)
 	    file_of_hw_path=$of_device_path
 	    ;;
         vscsi)
-	    (( of_disk_vscsi_nr = ( (2 << 14) | (of_disk_scsi_chan<<5) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) <<48 ));
+	    (( of_disk_vscsi_nr = ( (2 << 14) | (of_disk_scsi_chan<<5) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) <<48 )); #
 	    if [ -d ${file_of_hw_devtype}/disk ]; then
 		of_disk_vscsi_dir=disk
 	    elif [ -d ${file_of_hw_devtype}/sd ]; then
 		of_disk_vscsi_dir=sd
 	    else
-		echo >&2 "ERROR: Could not find a known hard disk directory under '${file_of_hw_devtype}'"
-		exit 1
+		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
 	    fi	
-	    file_of_hw_path=$(printf "%s/%s@%lx"  "${file_of_hw_devtype##/proc/device-tree}" $of_disk_vscsi_dir $of_disk_vscsi_nr)
+	    file_of_hw_path=$(
+		printf "%s/%s@%lx"  "${file_of_hw_devtype##/proc/device-tree}" \
+		    $of_disk_vscsi_dir $of_disk_vscsi_nr
+	    )
+	    ;;
+	*)
+	    error "Internal error, can't handle storage type '${file_storage_type}'"
 	    ;;
     esac
 else # no 'devspec' found
@@ -260,44 +307,40 @@ else # no 'devspec' found
 	do
 		: looking at $i
 		dev_of_pci_id=
-		while read a vendor_id
-		do
-			dev_of_pci_id="0x$vendor_id"
-			break
+		while read a vendor_id; do
+		    dev_of_pci_id="0x$vendor_id"
+		    break
 		done  < <(od --read-bytes=8 --width=8 -t x4 $i)
 		: vendor-id $dev_of_pci_id
 		dev_of_pci_id=$(($dev_of_pci_id))
 		dev_vendor=$(($dev_vendor))
 		if [ "$dev_of_pci_id" != "$dev_vendor" ] ; then continue ; fi
 		if [ ! -f "${i%/*}/device-id" ] ; then continue ; fi
-		while read a device_id
-		do
-			dev_of_pci_id="0x$device_id"
-			break
+		while read a device_id; do
+		    dev_of_pci_id="0x$device_id"
+		    break
 		done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/device-id")
 		: device-id $dev_of_pci_id
 		dev_of_pci_id=$(($dev_of_pci_id))
 		dev_device=$(($dev_device))
 		if [ "$dev_of_pci_id" != "$dev_device" ] ; then continue ; fi
 		if [ -f "${i%/*}/subsystem-vendor-id" ] ; then
-			while read a sub_vendor_id
-			do
-				dev_of_pci_id="0x$sub_vendor_id"
-				break
-			done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-vendor-id")
-			: sub-vendor-id $dev_of_pci_id
-			dev_of_pci_id=$(($dev_of_pci_id))
-			dev_subsystem_vendor=$(($dev_subsystem_vendor))
-			if [ "$dev_of_pci_id" != "$dev_subsystem_vendor" ] ; then continue ; fi
-			while read a sub_device_id
-			do
-				dev_of_pci_id="0x$sub_device_id"
-				break
-			done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-id")
-			: sub-device-id $dev_of_pci_id
-			dev_of_pci_id=$(($dev_of_pci_id))
-			dev_subsystem_device=$(($dev_subsystem_device))
-			if [ "$dev_of_pci_id" != "$dev_subsystem_device" ] ; then continue ; fi
+		    while read a sub_vendor_id; do
+			dev_of_pci_id="0x$sub_vendor_id"
+			break
+		    done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-vendor-id")
+		    : sub-vendor-id $dev_of_pci_id
+		    dev_of_pci_id=$(($dev_of_pci_id))
+		    dev_subsystem_vendor=$(($dev_subsystem_vendor))
+		    if [ "$dev_of_pci_id" != "$dev_subsystem_vendor" ] ; then continue ; fi
+		    while read a sub_device_id; do
+			dev_of_pci_id="0x$sub_device_id"
+			break
+		    done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-id")
+		    : sub-device-id $dev_of_pci_id
+		    dev_of_pci_id=$(($dev_of_pci_id))
+		    dev_subsystem_device=$(($dev_subsystem_device))
+		    if [ "$dev_of_pci_id" != "$dev_subsystem_device" ] ; then continue ; fi
 		fi
 		: found $i
 		if [ -z "$of_device_list" ] ; then
@@ -362,6 +405,11 @@ else # no 'devspec' found
 		;;
 	    sata)
 		file_of_hw_path="${of_device_path##/proc/device-tree}"
+		;;
+	    fcp)
+	        # TODO is that true? current version is a copy from scsi
+	        dir=disk
+		file_of_hw_path=$(printf  "%s/${dir}@%016x,%016x"  "${of_device_path##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
 		;;
 	esac
 	# no "devspec" available

@@ -11,7 +11,7 @@
 # norootforbuild
 # neededforbuild  
 
-BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libselinux libstdc++ libxcrypt libzio m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
+BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv less libacl libattr libgcc libnscd libselinux libstdc++ libxcrypt libzio m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
 
 Name:         lilo
 #%%define     bootheader 0.0.5
@@ -26,7 +26,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      38
+Release:      39
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch5:       yaboot-1.3.6.dif
@@ -150,6 +150,18 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Mon Oct 18 2004 - jplack@suse.de
+- added some more fixes for #45565
+* Thu Oct 07 2004 - jplack@suse.de
+- remove OF path to partition if same as for the config file itself
+* Thu Oct 07 2004 - jplack@suse.de
+- check for all relevant files beeing on primary partitions, firmware
+  has problems else ...
+- added 'force_fat' option for some hopeless configurations
+* Thu Oct 07 2004 - jplack@suse.de
+- delete ambiguous PReP boot partitions (#42903)
+* Thu Jul 08 2004 - jplack@suse.de
+- fixed problem with leading zeros (#42854)
 * Tue Jun 29 2004 - jplack@suse.de
 - workaround an OF bug documented in #42517
 * Wed Jun 23 2004 - jplack@suse.de
