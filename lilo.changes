@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 23 12:37:42 CEST 2001 - olh@suse.de
+
+- fix the default= option when it is macos, use first kernel label
+
+-------------------------------------------------------------------
 Mon Jul  2 21:18:23 CEST 2001 - olh@suse.de
 
 - bring back some modifications

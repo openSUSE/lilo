@@ -275,7 +275,18 @@ done
 # starting the work
 (
 test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
-test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
+test -z "$OPTION_DEFAULT" || {
+if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
+# yaboot.conf gets the first available imag= label as default
+for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
+test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+echo "default = ${CONFIG_IMAGE_LABEL[$i]}"
+done
+else
+# a image = label is the default
+echo "default = $OPTION_DEFAULT"
+fi
+}
 test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
 test -z "$OPTION_APPEND"  || echo "append = $OPTION_APPEND"
 test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
