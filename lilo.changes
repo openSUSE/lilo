@@ -1,4 +1,36 @@
 -------------------------------------------------------------------
+Wed Oct 20 13:54:22 CEST 2004 - jplack@suse.de
+
+- added a tested fix for #45565 at least for emulex FC cards
+
+-------------------------------------------------------------------
+Mon Oct 18 16:35:03 CEST 2004 - jplack@suse.de
+
+- added some more fixes for #45565
+
+-------------------------------------------------------------------
+Thu Oct  7 16:30:15 CEST 2004 - jplack@suse.de
+
+- remove OF path to partition if same as for the config file itself
+
+-------------------------------------------------------------------
+Thu Oct  7 15:03:01 CEST 2004 - jplack@suse.de
+
+- check for all relevant files beeing on primary partitions, firmware
+  has problems else ...
+- added 'force_fat' option for some hopeless configurations
+
+-------------------------------------------------------------------
+Thu Oct  7 14:09:04 CEST 2004 - jplack@suse.de
+
+- delete ambiguous PReP boot partitions (#42903)
+
+-------------------------------------------------------------------
+Thu Jul  8 16:46:25 CEST 2004 - jplack@suse.de
+
+- fixed problem with leading zeros (#42854)
+
+-------------------------------------------------------------------
 Tue Jun 29 11:43:32 CEST 2004 - jplack@suse.de
 
 - workaround an OF bug documented in #42517
