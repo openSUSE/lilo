@@ -107,15 +107,21 @@ function running_on_chrp () {
 
 	P=$OPTION_BOOT
     fi
-	
-    echo Installing /lib/lilo/chrp/yaboot.chrp onto $P
-    dd if=/lib/lilo/chrp/yaboot.chrp of=$P
-    /sbin/activate  ${P%%+([0-9])} ${P##+([^0-9])}
 
+# TODO:
+# check all CONFIG_IMAGE_FILEs whether they are on ext2/ext2/fat/reiserfs
+# else they have to be copied to a fat partition
+# You have to create a fat partiton if any has to be copied there
+# fat partition must at least cover yaboot.fat,yaboot.cnf & default image
+# if not give a fatal error
+# else if it covers not all give a warning and advice how to fix that. 
+	
+# then set variable no_bootfs
+
+set -x
     echo check the image files
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	if [ -f ${CONFIG_IMAGE_FILE[$i]} ]; then
-
 	    # boot file has to be on the same device from where yaboot started
 	    set -e
 	    if [ $(device_of_file ${CONFIG_IMAGE_FILE[$i]}) = $(device_nr $OPTION_DEVICE) ]; then
@@ -129,6 +135,7 @@ function running_on_chrp () {
 	    echo ERROR: image ${CONFIG_IMAGE_FILE[$i]} in ${CONFIG_IMAGE_LABEL[$i]} is missing
 	fi
     done
+set +x
     # starting the work and write the yaboot.conf
     {
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
@@ -166,13 +173,36 @@ function running_on_chrp () {
 	    test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${CONFIG_IMAGE_INITRD[$i]}"
 	done
     } > /tmp/ppc_lilo/yaboot.conf
-    cp -av /tmp/ppc_lilo/yaboot.conf /etc/yaboot.conf
+
+
+
+    if [ "$no_bootfs" ]; then
+	# TODO: see descr above
+	exit 1;
+	mkfs.dos $P
+	mkdir /tmp/boot
+	mount $p /tmp/boot
+	cp /lib/lilo/yaboot.fat /tmp/boot/yaboot
+	cp /tmp/ppc_lilo/yaboot.conf /tmp/boot/yaboot.cnf
+	# copy default image 
+	# copy all images except the default ...
+    else
+	echo Installing /lib/lilo/chrp/yaboot.chrp onto $P
+	dd if=/lib/lilo/chrp/yaboot.chrp of=$P
+	cp -av /tmp/ppc_lilo/yaboot.conf /etc/yaboot.conf
+    fi
+    /sbin/activate  ${P%%+([0-9])} ${P##+([^0-9])}
     rm -f /tmp/ppc_lilo/yaboot.conf
 
 
     if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 	NV_BOOT_PATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
-	NV_BOOT_PATH=${NV_BOOT_PATH%:+([0-9])}
+
+	if [ "$no_bootfs" ]; then
+	    NV_BOOT_PATH=${NV_BOOT_PATH%},yaboot
+	else
+	    NV_BOOT_PATH=${NV_BOOT_PATH%:+([0-9])}
+	fi
 	echo "set OF boot-device $NV_BOOT_PATH"
 	nvsetenv boot-device "$NV_BOOT_PATH"
 	if [ "$(nvsetenv boot-file)" != "boot-file=" ] ; then
@@ -467,10 +497,26 @@ function running_on_pmac_new () {
 
 function real_device () {
     # print the real device i.e. map partitions to disks
-    local -i p=$1
+    local -i dev=$1 real=0
+    local -i major minor
+    local range
+    local IFS=:
 
-    # TODO this is a hack, find the real devices from /sys/block/*.../dev ...
-    echo $[ p & ~15 ]
+    # assert that /sys is mounted, else try to mount,
+    # on fail fall back to error value
+    if test -d /sys/block || mount -t sysfs sysfs /sys; then
+	# that and check whether the integer 
+	while read range; do
+	    read major minor < ${range/range/dev}
+	    (( real = major * 256 + minor ))
+	    range=$(<$range)
+	    if (( dev >= real && dev < real + range )); then
+		echo $real
+		return;
+	    fi
+	done < <( find /sys/block -name range )
+    fi
+    echo 0000
 }
 
 
@@ -539,16 +585,6 @@ function check_arch () {
 } #end function check_arch
 
 
-function prepare_config_file () {
-    # strip comments and empty lines
-    
-    # TODO: clean that mess up ... 
-    grep -v "#.*$" < $CONFIG_LILO_CONF | grep -v "\(^\W$\|^$\)" | sed 's/=/ & /' > /tmp/ppc_lilo/config_tmp
-    
-    #"
-} #end function prepare_config_file
-
-
 function parse_config_file () {
     # parse the lilo.conf and place it in CONFIG_IMAGE_FILE[]
     # other vars:
@@ -568,15 +604,51 @@ function parse_config_file () {
     # CONFIG_IMAGE_FILE contains the kernel image for a section
     # CONFIG_IMAGE_OTHER contains the device of MacOS
     # CONFIG_IMAGE_COUNT is a simple counter of image sections
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     unset CONFIG_PARSE_HASIMAGE
     CONFIG_IMAGE_COUNT=0
     OPTION_BOOT_COUNT=0
-    while read option sarator value ; do
+    while read; do
+	# strip comments and empty lines
+	REPLY=${REPLY%%#*}      
+	if [ -z "$REPLY" ]; then continue; fi
+	REPLY=${REPLY/=/ = /}
+
+	read option separator value <<< $REPLY
 	
 	#	echo option "$option"
-	#	echo sarator "$sarator"
+	#	echo separator "$separator"
 	#	echo value $value
+
+	if [ "$separator" != "=" ];then
+	    echo illegal separator $separator, line ignored
+	    continue
+	fi
+
 	case "$option" in
 	  boot)
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
@@ -699,8 +771,7 @@ function parse_config_file () {
 	     exit 1
 	     ;;
 	esac
-    done < /tmp/ppc_lilo/config_tmp
-    
+    done < $CONFIG_LILO_CONF
     
 } #end function parse_config_file
 
@@ -772,7 +843,6 @@ function prepare_environment () {
 
 prepare_environment
 check_arch
-prepare_config_file
 parse_config_file
 check_config_file
 
@@ -800,9 +870,12 @@ esac
 #
 # Local variables:
 #     mode: ksh
+#     mode: font-lock
+#     mode: auto-fill
 #     ksh-indent: 4
 #     ksh-multiline-offset: 2
 #     ksh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#     fill-column: 78
 # End:
 #
 
