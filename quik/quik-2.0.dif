@@ -1,6 +1,6 @@
 diff -urN quik-2.0.orig/Makefile quik-2.0/Makefile
 --- quik-2.0.orig/Makefile	Wed Nov 17 21:24:19 1999
-+++ quik-2.0/Makefile	Sun Feb  6 21:55:32 2000
++++ quik-2.0/Makefile	Wed Mar  8 13:13:12 2000
 @@ -9,11 +9,11 @@
  	install -d -m 755 $(DESTDIR)/sbin
  	install -d -m 755 $(DESTDIR)/boot
@@ -18,8 +18,8 @@ diff -urN quik-2.0.orig/Makefile quik-2.0/Makefile
 +	install -m 444 man/quik.conf.5 $(DESTDIR)/usr/share/man/man5
 +	install -m 444 man/quik.8 man/bootstrap.8 $(DESTDIR)/usr/share/man/man8
 diff -urN quik-2.0.orig/quik/quik.c quik-2.0/quik/quik.c
---- quik-2.0.orig/quik/quik.c	Sun Feb  6 21:47:28 2000
-+++ quik-2.0/quik/quik.c	Sun Feb  6 21:53:38 2000
+--- quik-2.0.orig/quik/quik.c	Wed Nov 17 21:24:19 1999
++++ quik-2.0/quik/quik.c	Wed Mar  8 13:13:12 2000
 @@ -547,7 +547,7 @@
  	bootdev[7] += UNIT(st1.st_dev);
      strcpy(spart, bootdev);
@@ -29,3 +29,41 @@ diff -urN quik-2.0.orig/quik/quik.c quik-2.0/quik/quik.c
  
      if (verbose)
  	printf("Second-stage loader is on %s\n", spart);
+diff -urN quik-2.0.orig/second/main.c quik-2.0/second/main.c
+--- quik-2.0.orig/second/main.c	Wed Nov 17 22:35:08 1999
++++ quik-2.0/second/main.c	Wed Mar  8 14:48:22 2000
+@@ -370,7 +370,7 @@
+ 	     * scan the disk looking for a linux FS with /etc/quik.conf.
+ 	     * -- Cort
+ 	     */
+-	    fip->conf_part = 2;
++	    fip->conf_part = 1;
+ 	    strcpy( fip->conf_file, "/etc/quik.conf" );
+     }
+ 
+@@ -398,13 +398,22 @@
+     quik_conf_part = fip->conf_part;
+     strncpy(quik_conf, fip->conf_file, sizeof(fip->conf_file));
+     if (*quik_conf && quik_conf_part >= 0) {
+-	int len;
+-	fileok = load_file(0, quik_conf_part, quik_conf,
++	int len,i,success=0;
++	for (i=quik_conf_part;i<8;i++)
++	{
++		printf("\nTrying partition %d ...", i);
++		fileok = load_file(0, i, quik_conf,
+ 			   TMP_BUF, TMP_END, &len, 1, 0);
+-	if (!fileok || (unsigned) len >= 65535)
++		if (fileok && (!((unsigned) len >= 65535))) {
++			success=1;
++			break;
++		}
++	}
++	if (!success)
+ 	    printf("\nCouldn't load %s\n", quik_conf);
+ 	else {
+ 	    char *p;
++	    fip->conf_part=quik_conf_part=i;
+ 	    if (cfg_parse(quik_conf, TMP_BUF, len) < 0)
+ 	        printf ("Syntax error or read error in %s.\n", quik_conf);
+ 	    useconf = 1;

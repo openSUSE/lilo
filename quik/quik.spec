@@ -10,9 +10,9 @@
 # usedforbuild    aaa_base aaa_dir base bash bindutil binutils bison bzip compress cpio cracklib devs diff ext2fs ext2fs_d file fileutil find flex gawk gcc gdbm gettext gpm gppshare groff gzip kbd less libc libz lx_suse make mktemp modules ncurses net_tool netcfg nkita nkitb nssv1 pam patch perl pgp ps rcs rpm sendmail sh_utils shadow shlibs strace syslogd sysvinit texinfo textutil timezone unzip util vim xdevel xf86 xshared
 
 Vendor:       SuSE GmbH, Nuernberg, Germany
-Distribution: SuSE Linux 6.3 (PPC)
+Distribution: SuSE Linux 6.4 (PPC)
 Name:         quik
-Release:      2
+Release:      10
 Packager:     feedback@suse.de
 
 Summary:      quik - bootloader for CHRP machines
@@ -97,3 +97,11 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) /etc/quik.conf
 /usr/share/man/man?/*
 
+%changelog -n quik
+* Thu Mar 16 2000 - olh@suse.de
+- search for /etc/quik.conf on all partitions, not only on fixed #2
+* Sun Feb 06 2000 - olh@suse.de
+- fix to find proper partition number
+  /usr/man -> /usr/share/man
+* Mon Jan 24 2000 - olh@suse.de
+- add quik to SuSE PPC dist

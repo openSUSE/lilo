@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar 16 10:12:35 CET 2000 - olh@suse.de
+
+- search for /etc/quik.conf on all partitions, not only on fixed #2
+
+-------------------------------------------------------------------
 Sun Feb  6 23:04:18 CET 2000 - olh@suse.de
 
 - fix to find proper partition number
