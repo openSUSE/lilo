@@ -415,6 +415,16 @@ if [ ! -z "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then
 	else
 		CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
 	fi
+else
+	if test -f /lib/modules/`get_kernel_version ${CONFIG_IMAGE_FILE[$i]}`/System.map ; then
+		CONFIG_IMAGE_SYSMAP[$i]=/lib/modules/`get_kernel_version ${CONFIG_IMAGE_FILE[$i]}`/System.map
+		FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
+		if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
+			CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
+		else
+			CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
+		fi
+	fi
 fi
 done
 
@@ -688,6 +698,11 @@ if [ "$OPTION_ACTIVATE" = "yes" ] ; then
   NV_BOOT_PATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
   echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
   nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
+  if [ x"$(nvsetenv boot-file)" != "xboot-file=" ] ; then
+    echo "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
+    nvsetenv boot-file
+    nvsetenv boot-file ""
+  fi
 fi
 
 

@@ -9,16 +9,16 @@
 #
 
 # neededforbuild  tetex
-# usedforbuild    aaa_base aaa_dir aaa_version autoconf automake base bash bindutil binutils bison bzip compat cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel glibc-locale gpm grep groff gzip kbd less libgcc libstdc++ libtool libxcrypt libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch perl permissions ps rcs readline rpm sed sendmail sh-utils shadow strace syslogd sysvinit tar te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
+# usedforbuild    aaa_base aaa_version bash bind9-utils bison cpio cpp cyrus-sasl db devs diffutils e2fsprogs file filesystem fileutils findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip kbd less libgcc libstdc++ libxcrypt m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch permissions ps rcs readline sed sendmail sh-utils shadow strace syslogd sysvinit tar texinfo textutils timezone unzip util-linux vim zlib-devel autoconf automake binutils bzip2 cracklib gcc gdbm gettext libtool perl rpm te_ams te_latex tetex zlib
 
 Name:         lilo
 Group:        System/Boot
-License:      BSD License and BSD-like, Other License(s), see package
+License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
 Requires:     hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      251
+Release:      268
 Source0:      lilo-0.0.6.tar.bz2
 Patch0:       lilo-0.0.6.dif
 Source1:      compatible_machines.txt
@@ -52,8 +52,6 @@ Authors:
     Benjamin Herrenschmidt <benh@kernel.crashing.org>
     Memtest86:
     Chris Brady <crsbrady@earthlink.net>
-
-SuSE series: a
 
 %prep
 %setup -q -T -c -a 0 -a 3 -a 5
@@ -138,6 +136,9 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sat Aug 03 2002 - olh@suse.de
+- load system.map on new pmacs, for debugger
+  unset boot-file on new pmacs, breaks yaboot
 * Wed Jul 03 2002 - olh@suse.de
 - use MacRISC as compatible string on pmac
 * Sat Jun 29 2002 - olh@suse.de
