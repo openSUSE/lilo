@@ -10,6 +10,7 @@
 #
 # Changes
 #
+# 2000-07-19  remove sr* and scd*, not supported yet.
 # 2000-07-11  add mesh for Lombard PowerBook
 # 2000-07-10  finished the scsi path names for aic and symb
 # 2000-07-09  clean up /proc/scsi/scsi parsing
@@ -45,7 +46,7 @@ FILE_PARTITION=`echo "$FILEDEVICENAME"|sed 's/[0-9]*$/ &/'|cut -d " " -f 2`
 
 # sd* scsi disks , hd* ide disks , sr* cdroms
 case "$DEVICE_NODENAME" in
-	scd*|sr*|sd*)
+	sd*)
 #		echo $FILENAME is on SCSI drive $FILEDEVICENAME
 		# did the admin start with bootx? bad on newworld, but maybe we can handle it
 		# if there are more then 1 pci folder we are lost
@@ -114,22 +115,33 @@ case "$DEVICE_NODENAME" in
 				grep -l "\(^ADPT\|^pci900[45]\|^pciclass,01000\)" $i
 				done)
 				DEVICE_PATH=$(echo ${HOST_LIST%/*}|cut -d " " -f $SCSI_HOSTNUMBER)
+				if [ "$FILENAME" = "" ] ; then
+				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION
+				else
 				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION,$FILENAME
+				fi
 			;;
 			sym53c8xx)
                                 HOST_LIST=$(for i in `find /proc/device-tree/ -name compatible`;do
                                 grep -l "\(^Symbios\|^pci1000\|^pciclass,01000\)" $i
                                 done)
                                 DEVICE_PATH=$(echo ${HOST_LIST%/*}|cut -d " " -f $SCSI_HOSTNUMBER)
-                                echo ${DEVICE_PATH##*device-tree}/@$DEVICE_HOST:$FILE_PARTITION,$FILENAME
-
+				if [ "$FILENAME" = "" ] ; then
+				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION
+				else
+				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION,$FILENAME
+				fi
 			;;
 			mesh)
 				HOST_LIST=$(for i in `find /proc/device-tree/ -name compatible`;do
                                 grep -l "mesh" $i
                                 done)
                                 DEVICE_PATH=$(echo ${HOST_LIST%/*}|cut -d " " -f $SCSI_HOSTNUMBER)
-                                echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION,$FILENAME
+				if [ "$FILENAME" = "" ] ; then
+				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION
+				else
+				echo ${DEVICE_PATH##*device-tree}/@$DEVICE_ID:$FILE_PARTITION,$FILENAME
+				fi
 			;;
 			*)
 				echo ERROR: driver "$SCSI_DRIVER" not yet supported

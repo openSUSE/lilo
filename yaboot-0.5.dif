@@ -1,5 +1,5 @@
 --- Makefile
-+++ Makefile	2000/04/13 19:26:14
++++ Makefile	2000/07/13 13:21:45
 @@ -1,6 +1,6 @@
  ## Configuration section
  
@@ -9,7 +9,7 @@
  DEBUG = 0 
  
 --- cfg.c
-+++ cfg.c	2000/04/13 19:26:14
++++ cfg.c	2000/07/13 13:21:45
 @@ -378,13 +378,13 @@
  }
  
@@ -55,7 +55,7 @@
      prom_printf ("\nYou can also type in custom image locations, in the form\n"
  	    "{prom_path;}partno/path_to_image or {prom_path;}{partno}[start-end]\n");
 --- yaboot.c
-+++ yaboot.c	2000/04/13 19:26:14
++++ yaboot.c	2000/07/13 13:21:45
 @@ -429,6 +429,7 @@
  	    label = imagename;
  	    imagename = p;

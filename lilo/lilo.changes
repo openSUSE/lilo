@@ -1,0 +1,12 @@
+-------------------------------------------------------------------
+Thu Jul 20 02:24:57 CEST 2000 - olh@suse.de
+
+- update to 0.0.3
+  add support for oldworld macs
+
+-------------------------------------------------------------------
+Wed Jul 19 14:46:06 CEST 2000 - olh@suse.de
+
+- update to 0.0.2
+  add support for "copy" option to force copy to boot partition
+
