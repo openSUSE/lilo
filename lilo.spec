@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      6
+Release:      11
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
@@ -124,6 +124,9 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Mon Oct 08 2001 - olh@suse.de
+- do nothing on oldworld when called with --lilo-rootdrive
+  might be bad for your MacOS partition
 * Wed Oct 03 2001 - olh@suse.de
 - use --lilo-rootdrive when df / produce bogus output
   needed for installer

@@ -13,6 +13,7 @@ DEFAULT_BOOTFOLDER=suseboot
 COMPATIBLE_LIST=/boot/compatible_machines.txt
 
 if [ "$1" = "--lilo-rootdrive" ] ; then
+LILO_ROOTDRIVE=true
 shift
 SHOW_OF_PATH_SH="$SHOW_OF_PATH_SH --lilo-rootdrive $1"
 shift
@@ -178,6 +179,11 @@ done
 function running_on_pmac_old () {
 
 echo running on pmac_old
+if [ "$LILO_ROOTDRIVE" = true ] ; then
+echo do nothing on oldworld with --lilo-rootdrive ...
+exit 0
+fi
+
 echo generating /tmp/ppc_lilo/miboot.conf ...
 echo
 

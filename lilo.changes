@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct  8 23:11:15 CEST 2001 - olh@suse.de
+
+- do nothing on oldworld when called with --lilo-rootdrive
+  might be bad for your MacOS partition
+
+-------------------------------------------------------------------
 Wed Oct  3 12:48:15 CEST 2001 - olh@suse.de
 
 - use --lilo-rootdrive when df / produce bogus output
