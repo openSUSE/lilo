@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jan  9 04:59:59 CET 2002 - olh@suse.de
+
+- add root= option on iseries
+
+-------------------------------------------------------------------
 Tue Jan  8 13:09:50 CET 2002 - olh@suse.de
 
 - do not honor the boot-file/bootargs content in yaboot

@@ -117,11 +117,17 @@ if [ ! -z "$OPTION_DEFAULT" ] ; then
 for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
   if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[i]}" ] ; then
     ISERIES_IMAGE="${CONFIG_IMAGE_FILE[i]}" 
+    if [ ! -z "$OPTION_APPEND" ] ; then
+       ISERIES_CMDLINE="$(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' )"
+    fi
     if [ ! -z "${CONFIG_IMAGE_APPEND[i]}" ] ; then
        ISERIES_CMDLINE="$(echo ${CONFIG_IMAGE_APPEND[i]} | sed -e 's#^"##' -e 's#"$##' )"
     fi
-    if [ ! -z "$OPTION_APPEND" ] ; then
-       ISERIES_CMDLINE="$(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' )"
+    if [ ! -z "$OPTION_ROOT" ] ; then
+	ISERIES_ROOT="root=$OPTION_ROOT"
+    fi
+    if [ ! -z "${CONFIG_IMAGE_ROOT[i]}" ] ; then
+    	ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[i]}"
     fi
   fi
 done
@@ -129,16 +135,23 @@ done
 else
 # pick the first image= line
     ISERIES_IMAGE="${CONFIG_IMAGE_FILE[1]}"
+    if [ ! -z "$OPTION_APPEND" ] ; then
+       ISERIES_CMDLINE="$(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' )"
+    fi
     if [ ! -z "${CONFIG_IMAGE_APPEND[1]}" ] ; then
        ISERIES_CMDLINE="$(echo ${CONFIG_IMAGE_APPEND[1]} | sed -e 's#^"##' -e 's#"$##' )"
     fi
-    if [ ! -z "$OPTION_APPEND" ] ; then
-       ISERIES_CMDLINE="$(echo $OPTION_APPEND | sed -e 's#^"##' -e 's#"$##' )"
+    if [ ! -z "$OPTION_ROOT" ] ; then
+	ISERIES_ROOT="root=$OPTION_ROOT"
+    fi
+    if [ ! -z "${CONFIG_IMAGE_ROOT[1]}" ] ; then
+    	ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[1]}"
     fi
 
 fi
 echo "ISERIES_CMDLINE " $ISERIES_CMDLINE
 echo "ISERIES_IMAGE   " $ISERIES_IMAGE
+echo "ISERIES_ROOT    " $ISERIES_ROOT
 echo this will take a while...
 if [ -z "$LILO_ROOTDRIVE" ] ; then
 for i in A B C ; do
@@ -146,10 +159,10 @@ echo "writing kernel $ISERIES_IMAGE to /proc/iSeries/mf/$i/vmlinux"
 dd if=$ISERIES_IMAGE of=/proc/iSeries/mf/$i/vmlinux bs=4096
 case  i in
 	C|B)
-	echo "$ISERIES_CMDLINE" > /proc/iSeries/mf/$i/cmdline
+	echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/$i/cmdline
 	;;
 	A)
-	echo "$ISERIES_CMDLINE single" > /proc/iSeries/mf/$i/cmdline
+	echo "$ISERIES_ROOT $ISERIES_CMDLINE single" > /proc/iSeries/mf/$i/cmdline
 	;;
 esac
 done
