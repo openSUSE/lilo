@@ -351,12 +351,12 @@ if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
 # macos or macosx is the default
 MY_STRING_WITH_SPACE_BAR=$MY_YABOOT_STRING
 MY_STRING_WITHOUT_SPACE_BAR=$MY_MACOS_STRING
-SPACE_BAR_HINT="MacOS"
+SPACE_BAR_HINT="linux"
 else
 #yaboot is the default
 MY_STRING_WITH_SPACE_BAR=$MY_MACOS_STRING
 MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
-SPACE_BAR_HINT="linux"
+SPACE_BAR_HINT="MacOS"
 fi
 echo "\" screen\" output"
 # 1 is the timeout
@@ -509,6 +509,8 @@ hcopy /boot/yaboot :yaboot
 hcopy /boot/Finder.bin :Finder
 hcopy /boot/System.bin :System
 hattrib -t tbxi -c chrp os-chooser
+hattrib -t BINA -c UNIX "Mac OS Rom" 2>/dev/null
+hattrib -t BINA -c UNIX "install"    2>/dev/null
 hattrib -t FNDR -c MACS Finder
 hattrib -t zsys -c MACS System
 hattrib -t TEXT -c "R*ch" yaboot.conf

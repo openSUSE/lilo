@@ -1,5 +1,5 @@
 #
-# spec file for package lilo (Version 0.0.7)
+# spec file for package lilo (Version 0.0.8)
 # 
 # Copyright  (c)  2001  SuSE GmbH  Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -17,14 +17,14 @@ Copyright:      GPL
 Obsoletes:	yaboot activate quik 
 Requires:	hfsutils
 Summary:      LInux LOader
-Version:      0.0.7
-Release:      50
+Version:      0.0.8
+Release:      0
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
 Source3:	lilo-21.tar.gz
-Source5:	yaboot-1.2.3.tar.gz
-Patch5:		yaboot-1.2.3.dif
+Source5:	yaboot-1.2.5.tar.gz
+Patch5:		yaboot-1.2.5.dif
 Buildroot:	/var/tmp/buildroot-lilo
 
 %description
@@ -52,18 +52,18 @@ SuSE series: a
 %prep
 %setup -q -T -c -a 0 -a 3 -a 5
 mv lilo-0.0.6	lilo.ppc
-mv yaboot-1.2.3 yaboot
+mv yaboot-1.2.5 yaboot
 cd yaboot
 %patch5
 cd ..
 
 %build
 cd yaboot
-make DEBUG=1 VERSION=1.2.3.SuSE
+make DEBUG=1 VERSION=1.2.5.SuSE
 mv yaboot yaboot.debug
 mv yaboot.chrp yaboot.chrp.debug
 make clean
-make DEBUG=0 VERSION=1.2.3.SuSE
+make DEBUG=0 VERSION=1.2.5.SuSE
 cd ..
 cd lilo
 make activate
@@ -124,6 +124,12 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sat Sep 22 2001 - olh@suse.de
+- fix spacebar message
+* Fri Sep 21 2001 - olh@suse.de
+- change type of Mac OS Rom and install
+* Fri Sep 21 2001 - olh@suse.de
+- update yaboot to 1.2.5, fixes for ppc64
 * Thu Sep 20 2001 - olh@suse.de
 - fix sysmap for pmac
 * Wed Sep 19 2001 - olh@suse.de

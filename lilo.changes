@@ -1,4 +1,19 @@
 -------------------------------------------------------------------
+Sat Sep 22 15:19:13 CEST 2001 - olh@suse.de
+
+- fix spacebar message 
+
+-------------------------------------------------------------------
+Fri Sep 21 00:12:27 CEST 2001 - olh@suse.de
+
+- change type of Mac OS Rom and install
+
+-------------------------------------------------------------------
+Fri Sep 21 00:07:45 CEST 2001 - olh@suse.de
+
+- update yaboot to 1.2.5, fixes for ppc64 
+
+-------------------------------------------------------------------
 Thu Sep 20 00:04:17 CEST 2001 - olh@suse.de
 
 - fix sysmap for pmac 

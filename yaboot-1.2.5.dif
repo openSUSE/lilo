@@ -1,0 +1,26 @@
+--- README
++++ README	2001/09/20 22:07:13
+@@ -25,3 +25,23 @@
+ "OldWorld" PowerMacs (with the old MacOS ROM buit-in) are not
+ supported.
+ 
++
++
++yaboot must be able to handle these image path names
++(use this as a testcase)
++
++HFS:
++hd:9,vmlinux
++hd:9,\vmlinux
++hd:9,\\vmlinux
++hd:9,\folder\vmlinux
++vmlinux	(look at the same place as yaboot.conf)
++
++ext2, reiserfs:
++hd:10,vmlinux
++hd:10,/vmlinux
++hd:10,/boot/vmlinux
++
++same goes for initrd and sysmap.
++
++
