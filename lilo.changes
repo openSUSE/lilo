@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Aug  8 11:11:54 CEST 2001 - olh@suse.de
+
+- update compatible_machines.txt
+
+-------------------------------------------------------------------
+Wed Aug  8 11:02:19 CEST 2001 - olh@suse.de
+
+- move compatible_machines.txt
+  dont force copy on new Macs until yaboot is fixed
+
+-------------------------------------------------------------------
 Thu Aug  2 22:42:22 CEST 2001 - olh@suse.de
 
 - fix birec calculation, needs still work for HFS load ...

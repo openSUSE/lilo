@@ -21,6 +21,7 @@ Version:      0.0.7
 Release:      33
 Source0: 	lilo-0.0.6.tar.gz
 Patch0:		lilo-0.0.6.dif
+Source1:        compatible_machines.txt
 Source3:	lilo-21.tar.gz
 Source5:	yaboot-1.2.1.tar.gz
 Patch5:		yaboot-1.2.1.dif
@@ -82,7 +83,7 @@ cp -av lilo.sh $RPM_BUILD_ROOT/sbin/lilo
 cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
 cp -av Finder.bin $RPM_BUILD_ROOT/boot
 cp -av System.bin $RPM_BUILD_ROOT/boot
-cp -av compatible_machines.txt $RPM_BUILD_ROOT/boot
+cp -av %{SOURCE1} $RPM_BUILD_ROOT/boot
 cp -av lilo.conf $RPM_BUILD_ROOT/etc
 cp -av README* $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av COPYING $RPM_BUILD_ROOT%{_docdir}/lilo/
@@ -122,6 +123,11 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Aug 08 2001 - olh@suse.de
+- update compatible_machines.txt
+* Wed Aug 08 2001 - olh@suse.de
+- move compatible_machines.txt
+  dont force copy on new Macs until yaboot is fixed
 * Thu Aug 02 2001 - olh@suse.de
 - fix birec calculation, needs still work for HFS load ...
 * Wed Aug 01 2001 - olh@suse.de

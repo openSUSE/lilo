@@ -525,7 +525,8 @@ function check_arch () {
 unset COPY_BOOT_FILES
 while read line; do
 	case "$line" in
-		*MacRISC2*)	MACHINE="pmac" ; COPY_BOOT_FILES="true" ;;
+#		dont force copy on new macs until yaboot is fixed
+#		*MacRISC2*)	MACHINE="pmac" ; COPY_BOOT_FILES="true" ;;
 		*MacRISC*)	MACHINE="pmac" ;;
 		*CHRP*)		MACHINE="chrp" ;;
 		*PReP*)		MACHINE="prep" ;;
