@@ -1,31 +1,32 @@
 #
 # spec file for package lilo (Version 0.0.8)
-# 
-# Copyright  (c)  2002  SuSE GmbH  Nuernberg, Germany.
+#
+# Copyright (c) 2002 SuSE Linux AG, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
-# 
+#
 # please send bugfixes or comments to feedback@suse.de.
 #
 
 # neededforbuild  tetex
-# usedforbuild    aaa_base aaa_dir aaa_version autoconf automake base bash bindutil binutils bison bzip compress cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch perl ps rcs readline rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
+# usedforbuild    aaa_base aaa_dir aaa_version autoconf automake base bash bindutil binutils bison bzip compat cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel glibc-locale gpm grep groff gzip kbd less libgcc libstdc++ libtool libxcrypt libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch perl permissions ps rcs readline rpm sed sendmail sh-utils shadow strace syslogd sysvinit tar te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
 
 Name:         lilo
-Group: 	System Environment/Base
-Copyright:      GPL
-Obsoletes:	yaboot activate quik 
-Requires:	hfsutils
+Group:        System/Boot
+License:      BSD License and BSD-like, Other License(s), see package
+Obsoletes:    yaboot activate quik 
+Requires:     hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      93
-Source0: 	lilo-0.0.6.tar.bz2
-Patch0:		lilo-0.0.6.dif
-Source1:        compatible_machines.txt
-Source3:	lilo-21.tar.gz
-Source5:	yaboot-1.3.6.tar.gz
-Patch5:		yaboot-1.3.6.dif
-Buildroot:	/var/tmp/buildroot-lilo
+Release:      251
+Source0:      lilo-0.0.6.tar.bz2
+Patch0:       lilo-0.0.6.dif
+Source1:      compatible_machines.txt
+Source3:      lilo-21.tar.gz
+Source5:      yaboot-1.3.6.tar.gz
+Patch5:       yaboot-1.3.6.dif
+Patch6:       yaboot-symlink-fix.diff
+BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 # get rid of /usr/lib/rpm/brp-strip-debug 
 # it kills the zImage.chrp-rs6k 
 %define __os_install_post %{nil}
@@ -35,19 +36,21 @@ The LInux-LOader: LILO boots Linux from your hard drive.
 It can also boot other operating systems such as MS-DOS and OS/2,
 and can even boot DOS from the second hard drive.
 The configuration file is /etc/lilo.conf.
+
 The PowerPC variant can be used on new PowerMacs and CHRP machines.
+
 The ix86 variant comes along with Memtest86, offering an image that
 can be booted instead of a real OS and doing a memory test.
 
 Authors:
 --------
-    John Coffman <JohnInSD@san.rr.com> 
-    Werner Almesberger <Werner.Almesberger@epfl.ch> 
-    PowerPC part: 
-    Paul Mackeras <paulus@samba.org> 
-    Cort Dougan <cort@fsmlabs.com> 
-    Benjamin Herrenschmidt <benh@kernel.crashing.org> 
-    Memtest86: 
+    John Coffman <JohnInSD@san.rr.com>
+    Werner Almesberger <Werner.Almesberger@epfl.ch>
+    PowerPC part:
+    Paul Mackeras <paulus@samba.org>
+    Cort Dougan <cort@fsmlabs.com>
+    Benjamin Herrenschmidt <benh@kernel.crashing.org>
+    Memtest86:
     Chris Brady <crsbrady@earthlink.net>
 
 SuSE series: a
@@ -58,6 +61,7 @@ mv lilo-0.0.6	lilo.ppc
 mv yaboot-1.3.6 yaboot
 cd yaboot
 %patch5
+%patch6 -p1
 cd ..
 
 %build
@@ -134,6 +138,10 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Jul 03 2002 - olh@suse.de
+- use MacRISC as compatible string on pmac
+* Sat Jun 29 2002 - olh@suse.de
+- add yaboot-symlink-fix.diff (#16742), allow symlinks on reiserfs
 * Mon Jan 14 2002 - olh@suse.de
 - remove exit 0, no quoting for lilo.conf variables
 * Fri Jan 11 2002 - olh@suse.de

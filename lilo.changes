@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Jul  3 22:23:17 CEST 2002 - olh@suse.de
+
+- use MacRISC as compatible string on pmac
+
+-------------------------------------------------------------------
+Sat Jun 29 13:12:11 CEST 2002 - olh@suse.de
+
+- add yaboot-symlink-fix.diff (#16742), allow symlinks on reiserfs
+
+-------------------------------------------------------------------
 Mon Jan 14 22:38:21 CET 2002 - olh@suse.de
 
 - remove exit 0, no quoting for lilo.conf variables
