@@ -12,6 +12,11 @@ SHOW_OF_PATH_SH=/bin/show_of_path.sh
 DEFAULT_BOOTFOLDER=suseboot
 COMPATIBLE_LIST=/boot/compatible_machines.txt
 
+if [ "$1" = "--lilo-rootdrive" ] ; then
+shift
+SHOW_OF_PATH_SH="$SHOW_OF_PATH_SH --lilo-rootdrive $1"
+shift
+fi
 
 
 
@@ -360,8 +365,15 @@ SPACE_BAR_HINT="MacOS"
 fi
 echo "\" screen\" output"
 # 1 is the timeout
+echo "dev screen"
+echo "\" \"(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)\" drop 0 7 set-colors"
+echo "\" \"(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)\" drop 8 15 set-colors"
+echo "device-end"
+echo "f to foreground-color"
+echo "0 to background-color"
 echo "\" \"(0C)\" fb8-write drop"
-echo "\" press space to boot $SPACE_BAR_HINT ... \" fb8-write drop"
+echo "\" \"(0d 0a)\" fb8-write drop"
+echo "\"   press space to boot $SPACE_BAR_HINT ... \" fb8-write drop"
 echo "get-msecs d# 3 3E8 * +"
 echo "begin"
 echo "  key? if"

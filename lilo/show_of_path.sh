@@ -40,7 +40,12 @@ test "$MACHINE" = "pmac_old" && {
 echo ERROR: This machine is an Oldworld, no need for firmware pathnames
 exit 1
 }
-
+unset LILO_ROOT_DRIVE
+if [ "$1" == "--lilo-rootdrive" ] ; then
+shift
+LILO_ROOT_DRIVE=$1
+shift
+fi
 # argument must be a file
 FILENAME="$1"
 if [ ! "$1" ]; then FILENAME="/" ; fi
@@ -51,9 +56,13 @@ if [ -b $FILENAME ] ; then
 FILEDEVICENAME=$FILENAME
 FILENAME=""
 else
-FILEDEVICENAME=$(df "$FILENAME"|grep "^/dev/"|cut -d "/" -f 3|sed 's/ .*$//')
-#echo FILEDEVICENAME $FILEDEVICENAME
+if [ ! -z "$LILO_ROOT_DRIVE" ] ; then
+ FILEDEVICENAME=$(echo $LILO_ROOT_DRIVE |grep "^/dev/"|cut -d "/" -f 3|sed 's/ .*$//')
+ else
+ FILEDEVICENAME=$(df "$FILENAME"|grep "^/dev/"|cut -d "/" -f 3|sed 's/ .*$//')
+ fi 
 fi
+#echo FILEDEVICENAME $FILEDEVICENAME
 FILE_DEVICE=`echo "$FILEDEVICENAME"|sed 's/[0-9]*$/ &/'|cut -d " " -f 1`
 DEVICE_NODENAME=`echo "$FILEDEVICENAME"|sed 's/[0-9]*$/ &/'|cut -d "/" -f 3`
 FILE_PARTITION=`echo "$FILEDEVICENAME"|sed 's/[0-9]*$/ &/'|cut -d " " -f 2`

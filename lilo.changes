@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Wed Oct  3 12:48:15 CEST 2001 - olh@suse.de
+
+- use --lilo-rootdrive when df / produce bogus output
+  needed for installer
+
+-------------------------------------------------------------------
+Mon Sep 24 18:12:33 CEST 2001 - olh@suse.de
+
+- do not exit when sysmap can not be loaded
+
+-------------------------------------------------------------------
 Sat Sep 22 15:19:13 CEST 2001 - olh@suse.de
 
 - fix spacebar message 

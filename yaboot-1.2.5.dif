@@ -24,3 +24,13 @@
 +same goes for initrd and sysmap.
 +
 +
+--- /olaf/sources/tmp/yaboot/yaboot.c	Thu Sep 20 14:16:53 2001
++++ yaboot.c	Mon Sep 24 17:47:41 2001
+@@ -864,7 +864,6 @@
+ 	    	loadinfo.memsize += _ALIGN(0x100000, 0x1000);
+ 	    } else {
+ 	    	prom_printf("System.map load failed !\n");
+-	    	prom_pause();
+ 	    }
+ 	}
+ 

@@ -9,7 +9,7 @@
 #
 
 # neededforbuild  tetex
-# usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel patch perl ps rcs readline rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
+# usedforbuild    aaa_base aaa_dir aaa_version autoconf automake base bash bindutil binutils bison bzip compress cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel patch perl ps rcs readline rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
 
 Name:         lilo
 Group: 	System Environment/Base
@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      0
+Release:      6
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
@@ -124,6 +124,11 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Oct 03 2001 - olh@suse.de
+- use --lilo-rootdrive when df / produce bogus output
+  needed for installer
+* Mon Sep 24 2001 - olh@suse.de
+- do not exit when sysmap can not be loaded
 * Sat Sep 22 2001 - olh@suse.de
 - fix spacebar message
 * Fri Sep 21 2001 - olh@suse.de
