@@ -1,0 +1,49 @@
+
+This is a simple lilo for ppc.
+In fact, it copies files around. PowerMac new and CHRP is currently supported.
+Support for PowerMac old and for PReP is planned. But two problems needs to be 
+solved:
+- On PReP we have no real bootloader because we can not acces any device at boot
+time. The kernel arguments are hardcoded in the zvmlinux binary, we need a way 
+to modify that without recompiling the kernel.
+- On older PowerMacs miboot should be used, quik might be possible. 
+However, miboot can not read a config file right now. This will be changed in
+the next time. The current System.bin must be modified with ResEdit,
+the root= is missing. Edit th CMDL ressource with Resedit and add the required 
+options. Example:
+root=/dev/sda7 video=atyfb:vmode17
+
+
+You need hfsutils to copy files to your HFS bootpartition on a PowerMac.
+
+
+An example lilo.conf looks like that:
+
+-------------------------------------------------
+# don't mess with the config file syntax ;)
+
+# you want to set this root device to a valid value!
+#boot=/dev/hda7
+default=linux
+timeout=10
+# useless on chrp and prep
+bootfolder=linuxboot
+
+# blah
+  #blubb
+image = /boot/vmlinux
+        root = /dev/sda2
+        label = linux
+        append = "blubber blah=blu"
+image = /boot/vmlinux-2.2.15pre14
+        root=/dev/sda2
+        label = benh
+image = /boot/vmlinux
+        root = /dev/fd0
+        initrd = /boot/initdisk7.gz
+        label = 7install 
+other = /dev/hda6
+        label = macos   
+
+
+
