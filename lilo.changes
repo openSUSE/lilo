@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar  2 18:03:45 CET 2004 - olh@suse.de
+
+- make zImage helpers exectable, copy dummy .o file on chrp
+
+-------------------------------------------------------------------
 Sun Feb 22 21:16:31 CET 2004 - olh@suse.de
 
 - add make_zimage*.sh for pseries and iseries, fix prep script

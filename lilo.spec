@@ -1,5 +1,5 @@
 #
-# spec file for package lilo (Version 0.0.14)
+# spec file for package lilo (Version 0.0.15)
 #
 # Copyright (c) 2004 SuSE Linux AG, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -13,7 +13,7 @@
 # usedforbuild    aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libselinux libstdc++ libxcrypt m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed sendmail strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
 
 Name:         lilo
-%define	bootheader 0.0.3
+%define	bootheader 0.0.4
 Group:        System/Boot
 License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
@@ -21,7 +21,7 @@ Requires:     hfsutils
 Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
-Version:      0.0.14
+Version:      0.0.15
 Release:      0
 Source0:      lilo-0.0.7.tar.bz2
 Source2:      boot-header-%{bootheader}.tar.bz2
@@ -66,6 +66,10 @@ cd yaboot
 %patch5
 %patch7 -p1
 cd ..
+find boot-header-%{bootheader}/lib/* -name "*.sh" | xargs chmod 755
+find boot-header-%{bootheader}/lib/* -name addnote | xargs chmod 755
+find boot-header-%{bootheader}/lib/* -name hack-coff | xargs chmod 755
+find boot-header-%{bootheader}/lib/* -name mkprep | xargs chmod 755
 
 %build
 cd yaboot
@@ -135,6 +139,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Mar 02 2004 - olh@suse.de
+- make zImage helpers exectable, copy dummy .o file on chrp
 * Sun Feb 22 2004 - olh@suse.de
 - add make_zimage*.sh for pseries and iseries, fix prep script
 * Mon Feb 16 2004 - olh@suse.de

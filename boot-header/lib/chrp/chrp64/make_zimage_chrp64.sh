@@ -91,6 +91,7 @@ esac
 gzip -cd $tmp/vmlinux.gz > $tmp/vmlinux
 #
 strings $tmp/vmlinux | grep -E 'Linux version .* .gcc version' > $tmp/uts_string.txt
+cp $obj_dir/zImage.o $tmp/zImage.o
 objcopy $tmp/zImage.o \
 	--add-section=.kernel:uts_string=$tmp/uts_string.txt \
 	--set-section-flags=.kernel:uts_string=contents,alloc,load,readonly,data
