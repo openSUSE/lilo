@@ -10,10 +10,11 @@
 
 # norootforbuild
 # neededforbuild  
-# usedforbuild    aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libselinux libstdc++ libxcrypt m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed sendmail strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
+
+BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libselinux libstdc++ libxcrypt m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed sendmail strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
 
 Name:         lilo
-%define	bootheader 0.0.4
+%define	bootheader 0.0.5
 Group:        System/Boot
 License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
@@ -22,8 +23,8 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      0
-Source0:      lilo-0.0.7.tar.bz2
+Release:      10
+Source0:      lilo-0.0.8.tar.bz2
 Source2:      boot-header-%{bootheader}.tar.bz2
 Source3:      lilo-21.tar.gz
 Source5:      http://penguinppc.org/projects/yaboot/yaboot-1.3.11.tar.gz
@@ -60,7 +61,7 @@ Authors:
 
 %prep
 %setup -q -T -c -a 0 -a 2 -a 3 -a 5
-mv lilo-0.0.7	lilo.ppc
+mv lilo-0.0.8	lilo.ppc
 mv yaboot-1.3.11 yaboot
 cd yaboot
 %patch5
@@ -107,6 +108,7 @@ chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
 cp -av lilo.old $RPM_BUILD_ROOT/sbin/lilo.old
 cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo
+cp -av lilo-pmac.lib $RPM_BUILD_ROOT/lib/lilo/lilo-pmac.lib
 cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
 cp -av Finder.bin $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av System.bin $RPM_BUILD_ROOT/lib/lilo/pmac
@@ -139,6 +141,11 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Mar 23 2004 - jplack@suse.de
+- update to bootheader-0.0.5, mac fix
+* Tue Mar 23 2004 - jplack@suse.de
+- update to version lilo-0.0.8, support of multiple boot= lines for
+  iSeries, more clean ups
 * Tue Mar 02 2004 - olh@suse.de
 - make zImage helpers exectable, copy dummy .o file on chrp
 * Sun Feb 22 2004 - olh@suse.de

@@ -4,7 +4,28 @@
 # in bash2 ... Think different [tm]
 #
 # olh@suse.de
+# jplack@suse.de
 #
+
+
+# interprete a file like the following:
+
+
+## Modified by YaST2. Last modification on Sun Mar  7 16:27:46 2004
+##
+##
+## default = linux
+## timeout = 100
+## boot = /boot/suse_linux_bootfile
+## boot = B
+##
+## image = /boot/vmlinux
+##     ###Don't change this comment - YaST2 identifier: Original name: linux###
+##     label = Linux
+##     root = /dev/iseries/vda3
+##     append = "hwinfo=-cdrom 3 desktop"
+##
+
 
 #CONFIG_LILO_CONF=~olh/ppc/lilo/lilo.conf
 CONFIG_LILO_CONF=/etc/lilo.conf
@@ -12,996 +33,628 @@ SHOW_OF_PATH_SH=/bin/show_of_path.sh
 DEFAULT_BOOTFOLDER=suseboot
 
 if [ "$1" = "--lilo-rootdrive" ] ; then
-LILO_ROOTDRIVE=true
-shift
-SHOW_OF_PATH_SH="$SHOW_OF_PATH_SH --lilo-rootdrive $1"
-shift
+    LILO_ROOTDRIVE=true
+    shift
+    SHOW_OF_PATH_SH="$SHOW_OF_PATH_SH --lilo-rootdrive $1"
+    shift
 fi
-
-
-
 
 function running_on_chrp () {
+    echo running on chrp
 
-echo running on chrp
-
-#only the device is given and dd to the raw device is a bad idea
-
-if [ "$OPTION_PARTITION" = "" ] ; then
-  echo guess the chrp boot device 
-  PART=`fdisk -l $OPTION_DEVICE | fgrep "PPC PReP"`
-  if [ -z "$PART" ] ; then
-     echo ERROR: config error, boot = $OPTION_BOOT is not 41 PReP  
-     echo '*********************************************************'
-     echo '* You must create a PPC PReP Boot partition (type 0x41) *'
-     echo '* for the CHRP bootloader to be installed.              *'
-     echo '*********************************************************'
-  exit -1
-  fi
-  if [ `echo "$PART" | wc -l` != 1 ] ; then
-     echo "ERROR: config error, guessing of boot partition failed"
-     echo "**************************************************************"
-     echo "* There are more than 1 PPC PReP Boot partitions (type 0x41) *"
-     echo "* on this system. Specify the partition NUMBER in boot= $OPTION_BOOT *"
-     echo "**************************************************************"
-   exit -1
-  fi
-  P=`echo "$PART" | awk '{print $1}'`
-
-echo Installing /lib/lilo/chrp/yaboot.chrp onto $P
-dd if=/lib/lilo/chrp/yaboot.chrp of=$P
-
-/sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
-else
-#we have the device, but better safe than sorry
-  echo install on $OPTION_DEVICE
-  PART=`fdisk -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
-  if [ -z "$PART" ] ; then
-     echo "ERROR: config error, boot = $OPTION_BOOT is not 41 PReP"
-     echo "*********************************************************"
-     echo "* You must create a PPC PReP Boot partition (type 0x41) *"
-     echo "* for the CHRP bootloader to be installed.              *"
-     echo "*********************************************************"
-  exit -1
-  fi
-echo Installing /lib/lilo/chrp/yaboot.chrp onto $OPTION_BOOT
-dd if=/lib/lilo/chrp/yaboot.chrp of=$OPTION_BOOT
-/sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
-fi
-
-echo check the image files
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-if test -f ${CONFIG_IMAGE_FILE[$i]} ; then
-	if df ${CONFIG_IMAGE_FILE[$i]}|grep -sq ^$OPTION_DEVICE ; then
-	echo -n ${CONFIG_IMAGE_LABEL[$i]}
-	test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" && echo " *" || echo
-	else
-	echo ERROR: image ${CONFIG_IMAGE_FILE[$i]} is not on bootdevice $OPTION_DEVICE
+    #only the device is given and dd to the raw device is a bad idea
+    if [ "$OPTION_PARTITION" = "" ] ; then
+	echo guess the chrp boot device 
+	PART=`fdisk -l $OPTION_DEVICE | fgrep "PPC PReP"`
+	if [ -z "$PART" ] ; then
+	    echo ERROR: config error, boot = $OPTION_BOOT is not 41 PReP  
+	    echo '*********************************************************'
+	    echo '* You must create a PPC PReP Boot partition (type 0x41) *'
+	    echo '* for the CHRP bootloader to be installed.              *'
+	    echo '*********************************************************'
+	    exit -1
 	fi
-else
-	echo ERROR: image ${CONFIG_IMAGE_FILE[$i]} in ${CONFIG_IMAGE_LABEL[$i]} is missing
-fi
-done
-# starting the work and write the yaboot.conf
-(
-test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
-test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
-test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
-test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
-test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
+	if [ `echo "$PART" | wc -l` != 1 ] ; then
+	    echo "ERROR: config error, guessing of boot partition failed"
+	    echo "**************************************************************"
+	    echo "* There are more than 1 PPC PReP Boot partitions (type 0x41) *"
+	    echo "* on this system. Specify the partition NUMBER in boot= $OPTION_BOOT *"
+	    echo "**************************************************************"
+	    exit -1
+	fi
+	P=`echo "$PART" | awk '{print $1}'`
+	
+	echo Installing /lib/lilo/chrp/yaboot.chrp onto $P
+	dd if=/lib/lilo/chrp/yaboot.chrp of=$P
+	
+	/sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
+    else
+	#we have the device, but better safe than sorry
+	echo install on $OPTION_DEVICE
+	PART=`fdisk -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
+	if [ -z "$PART" ] ; then
+	    echo "ERROR: config error, boot = $OPTION_BOOT is not 41 PReP"
+	    echo "*********************************************************"
+	    echo "* You must create a PPC PReP Boot partition (type 0x41) *"
+	    echo "* for the CHRP bootloader to be installed.              *"
+	    echo "*********************************************************"
+	    exit -1
+	fi
+	echo Installing /lib/lilo/chrp/yaboot.chrp onto $OPTION_BOOT
+	dd if=/lib/lilo/chrp/yaboot.chrp of=$OPTION_BOOT
+	/sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
+    fi
 
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-# hack to create a zImage.initrd for pseries
-# ugly ugly ...
-test ! -z "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 && {
-bash /lib/lilo/chrp/chrp64/addRamdisk.sh \
-	/tmp/ppc_lilo \
-	${CONFIG_IMAGE_FILE[$i]} \
-	${CONFIG_IMAGE_INITRD[$i]} \
-	${CONFIG_IMAGE_FILE[$i]}.initrd \
-	> /tmp/ppc_lilo/chrp_initrd_$i.log 2>&1 || {
-		cat /tmp/ppc_lilo/chrp_initrd_$i.log
-		exit 1
-	}
-CONFIG_IMAGE_FILE[$i]=${CONFIG_IMAGE_FILE[$i]}.initrd
-unset CONFIG_IMAGE_INITRD[$i]
+    echo check the image files
+    for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+	if [ -f ${CONFIG_IMAGE_FILE[$i]} ]; then
+	    if df ${CONFIG_IMAGE_FILE[$i]} | grep -sq ^$OPTION_DEVICE ; then
+		echo -n ${CONFIG_IMAGE_LABEL[$i]}
+		test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" && echo " *" || echo
+	    else
+		echo ERROR: image ${CONFIG_IMAGE_FILE[$i]} is not on bootdevice $OPTION_DEVICE
+	    fi
+	else
+	    echo ERROR: image ${CONFIG_IMAGE_FILE[$i]} in ${CONFIG_IMAGE_LABEL[$i]} is missing
+	fi
+    done
+    # starting the work and write the yaboot.conf
+    {
+	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
+	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
+	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
+	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
+	test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
+	
+	for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
+	    test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+	    # hack to create a zImage.initrd for pseries
+	    # ugly ugly ...
+	    #
+	    #  is no longer needed due to olh 9.3.2004
+	    #if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 ]; then
+		#if ! bash /lib/lilo/chrp/chrp64/addRamdisk.sh \
+		 # /tmp/ppc_lilo \
+		 # ${CONFIG_IMAGE_FILE[$i]} \
+		 # ${CONFIG_IMAGE_INITRD[$i]} \
+		 # ${CONFIG_IMAGE_FILE[$i]}.initrd \
+		 # > /tmp/ppc_lilo/chrp_initrd_$i.log 2>&1 ; then
+		 #   cat /tmp/ppc_lilo/chrp_initrd_$i.log
+		 #   exit 1
+		#fi
+		#
+		#CONFIG_IMAGE_FILE[$i]=${CONFIG_IMAGE_FILE[$i]}.initrd
+		#unset CONFIG_IMAGE_INITRD[$i]
+	    #fi
+	    echo "image = ${CONFIG_IMAGE_FILE[$i]}"
+	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
+	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
+	    test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
+	    test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAP[$i]}"
+	    test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${CONFIG_IMAGE_INITRD[$i]}"
+	done
+    } > /tmp/ppc_lilo/yaboot.conf
+    cp -av /tmp/ppc_lilo/yaboot.conf /etc/yaboot.conf
 }
-	echo "image = ${CONFIG_IMAGE_FILE[$i]}"
-test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
-test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
-test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
-test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAP[$i]}"
-test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${CONFIG_IMAGE_INITRD[$i]}"
-done
-) > /tmp/ppc_lilo/yaboot.conf
-cp -av /tmp/ppc_lilo/yaboot.conf /etc/yaboot.conf
-}
+
+
 
 function running_on_iseries () {
+    echo running on iSeries
+    ISERIES_KERNEL_TMPFILE=/tmp/ppc_lilo/vmlinux.initrd
+    
+    if [ ! -z "$OPTION_DEFAULT" ] ; then
+	# find the default= line
+	for ((i=1; i<=CONFIG_IMAGE_COUNT; i++)); do
+	    if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[$i]}" ] ; then
+		ISERIES_IMAGE="${CONFIG_IMAGE_FILE[$i]}" 
+		if [ -n "$OPTION_APPEND" ] ; then
+		    ISERIES_CMDLINE=$OPTION_APPEND
+		fi
+		if [ -n "${CONFIG_IMAGE_APPEND[$i]}" ] ; then
+		    ISERIES_CMDLINE=${CONFIG_IMAGE_APPEND[$i]}
+		fi
+		if [ -n "$OPTION_ROOT" ] ; then
+		    ISERIES_ROOT="root=$OPTION_ROOT"
+		fi
+		if [ -n "${CONFIG_IMAGE_ROOT[$i]}" ] ; then
+		    ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[$i]}"
+		fi
+		if [ -n "$OPTION_INITRD" ] ; then
+		    ISERIES_INITRD=$OPTION_INITRD
+		fi
+		if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
+		    ISERIES_INITRD="${CONFIG_IMAGE_INITRD[$i]}"
+		fi
+	    fi
+	done
+    else
+	# pick the first image= line
+	ISERIES_IMAGE="${CONFIG_IMAGE_FILE[1]}"
+	if [ -n "$OPTION_APPEND" ] ; then
+	    ISERIES_CMDLINE=$OPTION_APPEND
+	fi
+	if [ -n "${CONFIG_IMAGE_APPEND[1]}" ] ; then
+	    ISERIES_CMDLINE=${CONFIG_IMAGE_APPEND[1]}
+	fi
+	if [ -n "$OPTION_ROOT" ] ; then
+	    ISERIES_ROOT="root=$OPTION_ROOT"
+	fi
+	if [ -n "${CONFIG_IMAGE_ROOT[1]}" ] ; then
+	    ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[1]}"
+	fi
+	if [ -n "$OPTION_INITRD" ] ; then
+	    ISERIES_INITRD=$OPTION_INITRD
+	fi
+	if [ -n "${CONFIG_IMAGE_INITRD[1]}" ] ; then
+	    ISERIES_INITRD="${CONFIG_IMAGE_INITRD[1]}"
+	fi
+    fi
+    
+    #
+    #  loop for multiple OPTION_BOOT entries
+    #
+    for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
 
-echo running on iSeries
-ISERIES_KERNEL_TMPFILE=/tmp/ppc_lilo/vmlinux.initrd
+	ISERIES_BOOT="${OPTION_BOOT[$i]##*=}"
+	ISERIES_DEVICE="${OPTION_DEVICE[$i]}" 
+	ISERIES_BOOT_IMAGE="$ISERIES_IMAGE"
 
-if [ ! -z "$OPTION_DEFAULT" ] ; then
-# find the default= line
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-  if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[$i]}" ] ; then
-    ISERIES_IMAGE="${CONFIG_IMAGE_FILE[$i]}" 
-    if [ ! -z "$OPTION_APPEND" ] ; then
-       ISERIES_CMDLINE=$OPTION_APPEND
-    fi
-    if [ ! -z "${CONFIG_IMAGE_APPEND[$i]}" ] ; then
-       ISERIES_CMDLINE=${CONFIG_IMAGE_APPEND[$i]}
-    fi
-    if [ ! -z "$OPTION_ROOT" ] ; then
-	ISERIES_ROOT="root=$OPTION_ROOT"
-    fi
-    if [ ! -z "${CONFIG_IMAGE_ROOT[$i]}" ] ; then
-    	ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[$i]}"
-    fi
-    if [ ! -z "$OPTION_INITRD" ] ; then
-	ISERIES_INITRD=$OPTION_INITRD
-    fi
-    if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
-    	ISERIES_INITRD="${CONFIG_IMAGE_INITRD[$i]}"
-    fi
-  fi
-done
+	echo "ISERIES_CMDLINE " $ISERIES_CMDLINE
+	echo "ISERIES_ROOT    " $ISERIES_ROOT
+	echo "ISERIES_IMAGE   " $ISERIES_IMAGE
+	echo "ISERIES_BOOT    " $ISERIES_BOOT
 
-else
-# pick the first image= line
-    ISERIES_IMAGE="${CONFIG_IMAGE_FILE[1]}"
-    if [ ! -z "$OPTION_APPEND" ] ; then
-       ISERIES_CMDLINE=$OPTION_APPEND
-    fi
-    if [ ! -z "${CONFIG_IMAGE_APPEND[1]}" ] ; then
-       ISERIES_CMDLINE=${CONFIG_IMAGE_APPEND[1]}
-    fi
-    if [ ! -z "$OPTION_ROOT" ] ; then
-	ISERIES_ROOT="root=$OPTION_ROOT"
-    fi
-    if [ ! -z "${CONFIG_IMAGE_ROOT[1]}" ] ; then
-    	ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[1]}"
-    fi
-    if [ ! -z "$OPTION_INITRD" ] ; then
-	ISERIES_INITRD=$OPTION_INITRD
-    fi
-    if [ ! -z "${CONFIG_IMAGE_INITRD[1]}" ] ; then
-    	ISERIES_INITRD="${CONFIG_IMAGE_INITRD[1]}"
-    fi
-fi
-
-ISERIES_BOOT=${OPTION_BOOT##*=}
-ISERIES_BOOT_IMAGE=$ISERIES_IMAGE
-echo "ISERIES_CMDLINE " $ISERIES_CMDLINE
-echo "ISERIES_ROOT    " $ISERIES_ROOT
-echo "ISERIES_IMAGE   " $ISERIES_IMAGE
-echo "ISERIES_BOOT    " $ISERIES_BOOT
-test ! -z "$ISERIES_INITRD" && {
-echo "ISERIES_INITRD  " $ISERIES_INITRD
-echo
-echo generating $ISERIES_KERNEL_TMPFILE with /lib/lilo/iseries/iseries-addRamDisk
-echo
-echo
-unset ec
-/lib/lilo/iseries/iseries-addRamDisk \
-	$ISERIES_INITRD \
-	/boot/System.map-`get_kernel_version $ISERIES_IMAGE` \
-	$ISERIES_IMAGE \
-	$ISERIES_KERNEL_TMPFILE ; ec=$?
-echo
-[ "$ec" != "0" ]  && { echo bootfile generation failed: ec $ec ; exit 1 ; }
-ISERIES_BOOT_IMAGE=$ISERIES_KERNEL_TMPFILE
-}
-echo ISERIES_BOOT_IMAGE $ISERIES_BOOT_IMAGE
-unset ISERIES_TARGET
-if test "$ISERIES_BOOT" = "B" -o "$ISERIES_BOOT" = "A" -o "$ISERIES_BOOT" = "C" ; then
-ISERIES_TARGET=slot
-elif test -c "$ISERIES_BOOT" -o -d "$ISERIES_BOOT" -o -p "$ISERIES_BOOT" -o -S "$ISERIES_BOOT" ; then
-ISERIES_TARGET=invalid
-elif test -b "$ISERIES_BOOT" ; then
-ISERIES_TARGET=block_dev
-elif test -f "$ISERIES_BOOT" -o ! -e "$ISERIES_BOOT" ; then
-ISERIES_TARGET=file
-fi
-
-case "$ISERIES_TARGET" in
-	slot)
-		echo write to slot $OPTION_BOOT
+	if [ -n "$ISERIES_INITRD" ]; then
+	    echo "ISERIES_INITRD  " $ISERIES_INITRD
+	    echo
+	    echo generating $ISERIES_KERNEL_TMPFILE with /lib/lilo/iseries/iseries-addRamDisk
+	    echo
+	    echo
+	    unset ec
+	    /lib/lilo/iseries/iseries-addRamDisk \
+	      $ISERIES_INITRD \
+	      /boot/System.map-`get_kernel_version $ISERIES_IMAGE` \
+	      $ISERIES_IMAGE \
+	      $ISERIES_KERNEL_TMPFILE ; ec=$?
+	    echo
+	    if [ "$ec" != "0" ]; then
+		echo bootfile generation failed: ec $ec ;
+		exit 1 ;
+	    fi
+	    ISERIES_BOOT_IMAGE=$ISERIES_KERNEL_TMPFILE
+	fi
+	echo ISERIES_BOOT_IMAGE $ISERIES_BOOT_IMAGE
+	unset ISERIES_TARGET
+	if [[ "$ISERIES_BOOT" == [AB] ]]; then
+	    ISERIES_TARGET=slot
+	elif [ -c "$ISERIES_BOOT" -o -d "$ISERIES_BOOT" -o -p "$ISERIES_BOOT" -o -S "$ISERIES_BOOT" ]; then
+	    ISERIES_TARGET=invalid
+	elif [ -b "$ISERIES_BOOT" ]; then
+	    ISERIES_TARGET=block_dev
+	elif [ -f "$ISERIES_BOOT" -o ! -e "$ISERIES_BOOT" ]; then
+	    ISERIES_TARGET=file
+	else
+	    ISERIES_TARGET=invalid
+	fi
+    
+	case "$ISERIES_TARGET" in
+	  slot)
+		echo write to slot $ISERIES_BOOT
 		;;
-	file)
-		if [ ! "${ISERIES_BOOT:0:1}" = "/" ] ; then
-			echo boot=$OPTION_BOOT must have an absolute path
-			case "$OPTION_BOOT" in
-				a|b|c)
-					echo "Did you mean uppercase '$OPTION_BOOT'?"
-					;;
-			esac
-			exit 1
+	  file)
+		if [ "${ISERIES_BOOT:0:1}" != "/" ] ; then
+		    echo boot=$ISERIES_BOOT must have an absolute path
+		    case "$ISERIES_BOOT" in
+		      a|b|c)
+			     echo "Did you mean uppercase '$ISERIES_BOOT'?"
+			     ;;
+		    esac
+		    exit 1
 		fi
 		echo write to file $ISERIES_BOOT
 		rm -f $ISERIES_BOOT
 		cp -a $ISERIES_BOOT_IMAGE $ISERIES_BOOT
 		;;
-	block_dev)
-		echo write to block_dev "$ISERIES_BOOT"
-		;;
-	invalid)
-		echo "Error: boot=$OPTION_BOOT invalid"
-		exit 1
-		;;
-esac
-
-if [ "$ISERIES_TARGET" = "slot" ] ; then
-echo "this will take a while... ($[$(ls -l $ISERIES_BOOT_IMAGE | awk '{ print $5 }') / 1024] kb)"
-echo "writing kernel $ISERIES_BOOT_IMAGE to /proc/iSeries/mf/$OPTION_BOOT/vmlinux"
-dd if=$ISERIES_BOOT_IMAGE of=/proc/iSeries/mf/$OPTION_BOOT/vmlinux bs=4096
-        echo activate kernel slot $OPTION_BOOT in /proc/iSeries/mf/side
-        echo $OPTION_BOOT > /proc/iSeries/mf/side
-# remove any old cmdline content, leads to newlines
-dd if=/dev/zero of=/proc/iSeries/mf/$OPTION_BOOT/cmdline count=1 bs=254
-echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/$OPTION_BOOT/cmdline
-fi
-
-
-if [ "$ISERIES_TARGET" = "block_dev" ] ; then
-#only the device is given and dd to the raw device is a bad idea
-if [ "$OPTION_PARTITION" = "" ] ; then
-  echo guess the prep boot device 
-  PART=`fdisk -l $OPTION_DEVICE | fgrep "PPC PReP"`
-  if [ -z "$PART" ] ; then
-     echo ERROR: config error, boot = $OPTION_BOOT is not 41 PReP  
-     echo '**********************************************************'
-     echo '* You could create a PPC PReP Boot partition (type 0x41) *'
-     echo '* for the kernel binary to be installed.                 *'
-     echo '**********************************************************'
-  exit -1
-  fi
-  if [ `echo "$PART" | wc -l` != 1 ] ; then
-     echo "ERROR: config error, guessing of boot partition failed"
-     echo "**************************************************************"
-     echo "* There are more than 1 PPC PReP Boot partitions (type 0x41) *"
-     echo "* on this system. Specify the partition NUMBER in boot= $OPTION_BOOT *"
-     echo "**************************************************************"
-   exit -1
-  fi
-  P=`echo "$PART" | awk '{print $1}'`
-
-  echo Installing "$ISERIES_BOOT_IMAGE" onto $P
-  dd if="$ISERIES_BOOT_IMAGE" of=$P bs=4096
-
-
-    echo set active flag on partition $(echo "$P"|sed 's/[0-9]*$/ &/')
-/sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
-
-else
-#we have the device, but better safe than sorry
-  echo install on $OPTION_DEVICE
-  PART=`fdisk -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
-  if [ -z "$PART" ] ; then
-     echo "ERROR: config error, boot = $OPTION_BOOT is not 41 PReP"
-     echo '**********************************************************'
-     echo "* You could create a PPC PReP Boot partition (type 0x41) *"
-     echo '* for the kernel binary to be installed.                 *'
-     echo '**********************************************************'
-  exit -1
-  fi
-
-    echo Installing "$ISERIES_BOOT_IMAGE" onto $OPTION_BOOT
-    dd if="$ISERIES_BOOT_IMAGE" of=$OPTION_BOOT bs=4096
-
-    echo set active flag on partition $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
-/sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
-fi
-fi
-
+	  block_dev)
+		     echo write to block_dev "$ISERIES_BOOT"
+		     ;;
+	  invalid)
+		   echo "Error: boot=$ISERIES_BOOT invalid"
+		   exit 1
+		   ;;
+	esac
+	
+	if [ "$ISERIES_TARGET" = "slot" -a -n "$ISERIES_BOOT_IMAGE" -a -f "$ISERIES_BOOT_IMAGE" ] ; then
+	    echo "this will take a while... ($[$(ls -l $ISERIES_BOOT_IMAGE | awk '{ print $5 }') / 1024] kb)"
+	    echo "writing kernel $ISERIES_BOOT_IMAGE to /proc/iSeries/mf/$ISERIES_BOOT/vmlinux"
+	    dd if=$ISERIES_BOOT_IMAGE of=/proc/iSeries/mf/$ISERIES_BOOT/vmlinux bs=4096
+	    echo activate kernel slot $ISERIES_BOOT in /proc/iSeries/mf/side
+	    echo $ISERIES_BOOT > /proc/iSeries/mf/side
+	        
+	    # remove any old cmdline content, leads to newlines
+	    dd if=/dev/zero of=/proc/iSeries/mf/$ISERIES_BOOT/cmdline count=1 bs=254
+	    echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/$ISERIES_BOOT/cmdline
+	fi
+    
+    
+	if [ "$ISERIES_TARGET" = "block_dev" ]; then
+	    #only the device is given and dd to the raw device is a bad idea
+	    if [ "${OPTION_PARTITION[$i]}" = "" ]; then
+		echo guess the prep boot device 
+		PART=`fdisk -l $ISERIES_DEVICE | fgrep "PPC PReP"`
+		if [ -z "$PART" ] ; then
+		    echo ERROR: config error, boot = $ISERIES_BOOT is not 41 PReP  
+		    echo '**********************************************************'
+		    echo '* You could create a PPC PReP Boot partition (type 0x41) *'
+		    echo '* for the kernel binary to be installed.                 *'
+		    echo '**********************************************************'
+		    exit -1
+		fi
+		if [ `echo "$PART" | wc -l` != 1 ] ; then
+		    echo "ERROR: config error, guessing of boot partition failed"
+		    echo "**************************************************************"
+		    echo "* There are more than 1 PPC PReP Boot partitions (type 0x41) *"
+		    echo "* on this system. Specify the partition NUMBER in boot= $ISERIES_BOOT *"
+		    echo "**************************************************************"
+		    exit -1
+		fi
+		P=`echo "$PART" | awk '{print $1}'`
+		
+		echo Installing "$ISERIES_BOOT_IMAGE" onto $P
+		dd if="$ISERIES_BOOT_IMAGE" of=$P bs=4096
+		    
+	    	echo set active flag on partition $(echo "$P"|sed 's/[0-9]*$/ &/')
+	    	/sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
+	    else
+		#we have the device, but better safe than sorry
+		echo install on $ISERIES_DEVICE
+		PART=`fdisk -l $ISERIES_DEVICE | grep $ISERIES_BOOT | fgrep "PPC PReP"`
+		if [ -z "$PART" ] ; then
+		    echo "ERROR: config error, boot = $ISERIES_BOOT is not 41 PReP"
+		    echo '**********************************************************'
+		    echo "* You could create a PPC PReP Boot partition (type 0x41) *"
+		    echo '* for the kernel binary to be installed.                 *'
+		    echo '**********************************************************'
+		    exit -1
+		fi
+		
+		echo Installing "$ISERIES_BOOT_IMAGE" onto $ISERIES_BOOT
+		dd if="$ISERIES_BOOT_IMAGE" of=$ISERIES_BOOT bs=4096
+		    
+	    	echo set active flag on partition $(echo "$ISERIES_BOOT"|sed 's/[0-9]*$/ &/')
+	    	/sbin/activate $(echo "$ISERIES_BOOT"|sed 's/[0-9]*$/ &/')
+	    fi
+	fi
+    done  #  end of OPTION_BOOT loop
 }
+
+
+
+
 
 function running_on_prep () {
 
-echo running on prep
-#only the device is given and dd to the raw device is a bad idea
-
-if [ "$OPTION_PARTITION" = "" ] ; then
-  echo guess the prep boot device 
-  PART=`fdisk -l $OPTION_DEVICE | fgrep "PPC PReP"`
-  if [ -z "$PART" ] ; then
-     echo ERROR: config error, boot = $OPTION_BOOT is not 41 PReP  
-     echo '*********************************************************'
-     echo '* You must create a PPC PReP Boot partition (type 0x41) *'
-     echo '* for the CHRP bootloader to be installed.              *'
-     echo '*********************************************************'
-  exit -1
-  fi
-  if [ `echo "$PART" | wc -l` != 1 ] ; then
-     echo "ERROR: config error, guessing of boot partition failed"
-     echo "**************************************************************"
-     echo "* There are more than 1 PPC PReP Boot partitions (type 0x41) *"
-     echo "* on this system. Specify the partition NUMBER in boot= $OPTION_BOOT *"
-     echo "**************************************************************"
-   exit -1
-  fi
-  P=`echo "$PART" | awk '{print $1}'`
-
-  echo Installing /boot/zImage.prep onto $P
-dd if=/boot/zImage.prep of=$P
-/sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
-else
-#we have the device, but better safe than sorry
-  echo install on $OPTION_DEVICE
-  PART=`fdisk -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
-  if [ -z "$PART" ] ; then
-     echo "ERROR: config error, boot = $OPTION_BOOT is not 41 PReP"
-     echo "*********************************************************"
-     echo "* You must create a PPC PReP Boot partition (type 0x41) *"
-     echo "* for the CHRP bootloader to be installed.              *"
-     echo "*********************************************************"
-  exit -1
-  fi
-  echo Installing /boot/zImage.prep onto $OPTION_BOOT
-dd if=/boot/zImage.prep of=$OPTION_BOOT
-/sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
-fi
-
-echo check the image files
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-if test -f ${CONFIG_IMAGE_FILE[$i]} ; then
-	if df ${CONFIG_IMAGE_FILE[$i]}|grep -sq ^$OPTION_DEVICE ; then
-	echo -n ${CONFIG_IMAGE_LABEL[$i]}
-	test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" && echo " *" || echo
-	else
-	echo ERROR: image ${CONFIG_IMAGE_FILE[$i]} is not on bootdevice $OPTION_DEVICE
+    echo running on prep
+    #only the device is given and dd to the raw device is a bad idea
+    
+    if [ "$OPTION_PARTITION" = "" ] ; then
+	echo guess the prep boot device 
+	PART=`fdisk -l $OPTION_DEVICE | fgrep "PPC PReP"`
+	if [ -z "$PART" ] ; then
+	    echo ERROR: config error, boot = $OPTION_BOOT is not 41 PReP  
+	    echo '*********************************************************'
+	    echo '* You must create a PPC PReP Boot partition (type 0x41) *'
+	    echo '* for the CHRP bootloader to be installed.              *'
+	    echo '*********************************************************'
+	    exit -1
 	fi
-else
-	echo ERROR: image ${CONFIG_IMAGE_FILE[$i]} in ${CONFIG_IMAGE_LABEL[$i]} is missing
-fi
-done
-
+	if [ `echo "$PART" | wc -l` != 1 ] ; then
+	    echo "ERROR: config error, guessing of boot partition failed"
+	    echo "**************************************************************"
+	    echo "* There are more than 1 PPC PReP Boot partitions (type 0x41) *"
+	    echo "* on this system. Specify the partition NUMBER in boot= $OPTION_BOOT *"
+	    echo "**************************************************************"
+	    exit -1
+	fi
+	P=`echo "$PART" | awk '{print $1}'`
+	
+	echo Installing /boot/zImage.prep onto $P
+	dd if=/boot/zImage.prep of=$P
+	    /sbin/activate $(echo "$P"|sed 's/[0-9]*$/ &/')
+    else
+	#we have the device, but better safe than sorry
+	echo install on $OPTION_DEVICE
+	PART=`fdisk -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
+	if [ -z "$PART" ] ; then
+	    echo "ERROR: config error, boot = $OPTION_BOOT is not 41 PReP"
+	    echo "*********************************************************"
+	    echo "* You must create a PPC PReP Boot partition (type 0x41) *"
+	    echo "* for the CHRP bootloader to be installed.              *"
+	    echo "*********************************************************"
+	    exit -1
+	fi
+	echo Installing /boot/zImage.prep onto $OPTION_BOOT
+	dd if=/boot/zImage.prep of=$OPTION_BOOT
+	    /sbin/activate $(echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/')
+    fi
+    
+    echo check the image files
+    for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
+	if test -f ${CONFIG_IMAGE_FILE[$i]} ; then
+	    if df ${CONFIG_IMAGE_FILE[$i]}|grep -sq ^$OPTION_DEVICE ; then
+		echo -n ${CONFIG_IMAGE_LABEL[$i]}
+		test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" && echo " *" || echo
+	    else
+		echo ERROR: image ${CONFIG_IMAGE_FILE[$i]} is not on bootdevice $OPTION_DEVICE
+	    fi
+	else
+	    echo ERROR: image ${CONFIG_IMAGE_FILE[$i]} in ${CONFIG_IMAGE_LABEL[$i]} is missing
+	fi
+    done
 }
 
 
 function running_on_pmac_old () {
-
-echo running on pmac_old
-if [ "$LILO_ROOTDRIVE" = true ] ; then
-echo do nothing on oldworld with --lilo-rootdrive ...
-exit 0
-fi
-
-echo generating /tmp/ppc_lilo/miboot.conf ...
-echo
-
-if [ "$OPTION_BOOTFOLDER" != "" ] ; then
-HFS_BOOTFOLDER=":$OPTION_BOOTFOLDER"
-else
-HFS_BOOTFOLDER=":$DEFAULT_BOOTFOLDER"
-fi
-echo HFS_BOOTFOLDER $HFS_BOOTFOLDER
-echo OPTION_BOOTFOLDER $OPTION_BOOTFOLDER
-
-# starting the work
-(
-test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
-test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
-test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
-test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
-test -z "$OPTION_INITRD"  || echo "initrd = ${HFS_BOOTFOLDER}:`basename ${OPTION_INITRD}`"
-echo
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-echo "image = ${HFS_BOOTFOLDER}:`basename ${CONFIG_IMAGE_FILE[$i]}`"
-test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
-test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
-test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
-test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${HFS_BOOTFOLDER}:`basename ${CONFIG_IMAGE_INITRD[$i]}`"
-echo
-done
-echo
-) > /tmp/ppc_lilo/miboot.conf
-
-
-# umount the boot = partition, or exit if that fails
-mount | grep -q "$OPTION_BOOT"
-if [ "$?" = "0" ] ; then 
-echo "unmount $OPTION_BOOT" ; umount $OPTION_BOOT || exit 1
-fi
-humount $OPTION_BOOT 2>/dev/null
-humount $OPTION_BOOT 2>/dev/null
-
-hmount $OPTION_BOOT  || exit 1
-echo using bootfolder \'$HFS_BOOTFOLDER\' on volume `hpwd` on $OPTION_BOOT 
-hmkdir $HFS_BOOTFOLDER 2>/dev/null
-hattrib -b $HFS_BOOTFOLDER
-hcd $HFS_BOOTFOLDER
-hcopy /lib/lilo/pmac/Finder.bin :Finder
-hcopy /lib/lilo/pmac/System.bin :System
-hcopy -r /tmp/ppc_lilo/miboot.conf :
-hattrib -t TEXT -c "R*ch" :miboot.conf
-hattrib -t FNDR -c MACS Finder
-hattrib -t zsys -c MACS System
-
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-hcopy ${CONFIG_IMAGE_FILE[$i]} :`basename ${CONFIG_IMAGE_FILE[$i]}`
-test -z "${CONFIG_IMAGE_INITRD[$i]}" || { 
-hcopy ${CONFIG_IMAGE_INITRD[$i]} :`basename ${CONFIG_IMAGE_INITRD[$i]}`
-}
-done
-hpwd
-hls -ltr
-humount
-
+    source /lib/lilo/lilo-pmac.lib
+    running_on_pmac_old;
 }
 
 
 function running_on_pmac_new () {
-
-echo running on pmac_new
-
-# build the temp yaboot.conf
-
-# build the pathnames, copy the files to bootfolder if / is not bootable
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-test -z ${CONFIG_IMAGE_FILE[$i]} && continue
-unset FILE_PATH
-# check if the file is a real file
-test -f ${CONFIG_IMAGE_FILE[$i]} && FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_FILE[$i]}|grep -v /pci[0-9])
-if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
-        CONFIG_IMAGE_PATH[$i]="copy"
-else
-	CONFIG_IMAGE_PATH[$i]=$FILE_PATH
-fi
-unset FILE_PATH
-if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then 
-	FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_INITRD[$i]}|grep -v /pci[0-9])
-	if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
-        	CONFIG_IMAGE_INITRDPATH[$i]="copy"
-	else
-		CONFIG_IMAGE_INITRDPATH[$i]=$FILE_PATH
-	fi
-fi
-unset FILE_PATH
-if [ ! -z "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
-	FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
-	if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
-		CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
-	else
-		CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
-	fi
-else
-	if test -f /lib/modules/`get_kernel_version ${CONFIG_IMAGE_FILE[$i]}`/System.map ; then
-		CONFIG_IMAGE_SYSMAP[$i]=/lib/modules/`get_kernel_version ${CONFIG_IMAGE_FILE[$i]}`/System.map
-		FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
-		if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
-			CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
-		else
-			CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
-		fi
-	fi
-fi
-done
-
-# starting the work
-(
-test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
-test -z "$OPTION_DEFAULT" || {
-if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
-# yaboot.conf gets the first available imag= label as default
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-echo "default = ${CONFIG_IMAGE_LABEL[$i]}"
-done
-else
-# a image = label is the default
-echo "default = $OPTION_DEFAULT"
-fi
+    source /lib/lilo/lilo-pmac.lib
+    running_on_pmac_new;
 }
-test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
-test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
-test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
 
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
-	echo "image = `basename ${CONFIG_IMAGE_FILE[$i]}`"
-else
-	echo "image = ${CONFIG_IMAGE_PATH[$i]}"
-fi
-test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
-test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
-test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
-#test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAP[$i]}"
-test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || ( if [ "${CONFIG_IMAGE_SYSMAPPATH[$i]}" = "copy" ] ; then
-	echo "    sysmap = `basename ${CONFIG_IMAGE_SYSMAP[$i]}`" 
-else 
-	echo "    sysmap = ${CONFIG_IMAGE_SYSMAPPATH[$i]}" 
-fi )
-test -z "${CONFIG_IMAGE_INITRD[$i]}" || ( if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
-	echo "    initrd = `basename ${CONFIG_IMAGE_INITRD[$i]}`" 
-else 
-	echo "    initrd = ${CONFIG_IMAGE_INITRDPATH[$i]}" 
-fi )
-done
-) > /tmp/ppc_lilo/yaboot.conf
-
-BOOT_DEVICEPATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
-OTHER_DEVICEPATH=$($SHOW_OF_PATH_SH $OPTION_OTHER)
-
-echo "BOOT_DEVICEPATH  =  $BOOT_DEVICEPATH"
-echo "OTHER_DEVICEPATH  =  $OTHER_DEVICEPATH"
-(echo "<CHRP-BOOT>
-<COMPATIBLE>
-MacRISC MacRISC3 MacRISC4
-</COMPATIBLE>
-<DESCRIPTION>
-Linux/PPC Yaboot bootloader
-</DESCRIPTION>
-<BOOT-SCRIPT>
-\" screen\" output
-dev screen
-\" \"(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)\" drop 0 7 set-colors
-\" \"(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)\" drop 8 15 set-colors
-device-end
-f to foreground-color
-0 to background-color"
-if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
-unset LOOPBLAH
-MY_MACOS_STRING=$(for i in `seq 1 $CONFIG_IMAGE_COUNT`;do
- if [ ! -z "${CONFIG_IMAGE_OTHER[$i]}" -a -z "$LOOPBLAH" ] ; then
- LOOPBLAH=true
-   if [ "${CONFIG_IMAGE_LABEL[$i]}" = "macosx" ] ; then
-     echo "\" Booting Mac OS X ...\" cr \" boot $OTHER_DEVICEPATH,System\\Library\\CoreServices\\BootX\" eval"
-   else
-     echo "\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
-   fi
- fi
-done)
-MY_YABOOT_STRING="\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval "
-if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
-# macos or macosx is the default
-MY_STRING_WITH_SPACE_BAR=$MY_YABOOT_STRING
-MY_STRING_WITHOUT_SPACE_BAR=$MY_MACOS_STRING
-SPACE_BAR_HINT="linux"
-else
-#yaboot is the default
-MY_STRING_WITH_SPACE_BAR=$MY_MACOS_STRING
-MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
-SPACE_BAR_HINT="MacOS"
-fi
-# 1 is the timeout
-echo "\" \"(0C)\" fb8-write drop"
-echo "\" \"(0d 0a)\" fb8-write drop"
-echo "\"   press space to boot $SPACE_BAR_HINT ... \" fb8-write drop"
-echo "get-msecs d# 3 3E8 * +"
-echo "begin"
-echo "  key? if"
-echo "    key case"
-echo -n "      hex 20 of "
-echo " $MY_STRING_WITH_SPACE_BAR  endof"
-echo "    endcase"
-echo "  then"
-echo "  dup get-msecs &lt;"
-echo "until"
-echo "drop"
-echo $MY_STRING_WITHOUT_SPACE_BAR
-echo "
-</BOOT-SCRIPT>
-<OS-BADGE-ICONS>
-1010
-000000000000F8FEACF6000000000000
-0000000000F5FFFFFEFEF50000000000
-00000000002BFAFEFAFCF70000000000
-0000000000F65D5857812B0000000000
-0000000000F5350B2F88560000000000
-0000000000F6335708F8FE0000000000
-00000000005600F600F5FD8100000000
-00000000F9F8000000F5FAFFF8000000
-000000008100F5F50000F6FEFE000000
-000000F8F700F500F50000FCFFF70000
-00000088F70000F50000F5FCFF2B0000
-0000002F582A00F5000008ADE02C0000
-00090B0A35A62B0000002D3B350A0000
-000A0A0B0B3BF60000505E0B0A0B0A00
-002E350B0B2F87FAFCF45F0B2E090000
-00000007335FF82BF72B575907000000
-000000000000ACFFFF81000000000000
-000000000081FFFFFFFF810000000000
-0000000000FBFFFFFFFFAC0000000000
-000000000081DFDFDFFFFB0000000000
-000000000081DD5F83FFFD0000000000
-000000000081DDDF5EACFF0000000000
-0000000000FDF981F981FFFF00000000
-00000000FFACF9F9F981FFFFAC000000
-00000000FFF98181F9F981FFFF000000
-000000ACACF981F981F9F9FFFFAC0000
-000000FFACF9F981F9F981FFFFFB0000
-00000083DFFBF981F9F95EFFFFFC0000
-005F5F5FDDFFFBF9F9F983DDDD5F0000
-005F5F5F5FDD81F9F9E7DF5F5F5F5F00
-0083DD5F5F83FFFFFFFFDF5F835F0000
-000000FBDDDFACFBACFBDFDFFB000000
-000000000000FFFFFFFF000000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFFFF00000000
-00000000FFFFFFFFFFFFFFFFFF000000
-00000000FFFFFFFFFFFFFFFFFF000000
-000000FFFFFFFFFFFFFFFFFFFFFF0000
-000000FFFFFFFFFFFFFFFFFFFFFF0000
-000000FFFFFFFFFFFFFFFFFFFFFF0000
-00FFFFFFFFFFFFFFFFFFFFFFFFFF0000
-00FFFFFFFFFFFFFFFFFFFFFFFFFFFF00
-00FFFFFFFFFFFFFFFFFFFFFFFFFF0000
-000000FFFFFFFFFFFFFFFFFFFF000000
-</OS-BADGE-ICONS>
-</CHRP-BOOT>"
-else
-echo "
-\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval
-</BOOT-SCRIPT>
-<OS-BADGE-ICONS>
-1010
-000000000000F8FEACF6000000000000
-0000000000F5FFFFFEFEF50000000000
-00000000002BFAFEFAFCF70000000000
-0000000000F65D5857812B0000000000
-0000000000F5350B2F88560000000000
-0000000000F6335708F8FE0000000000
-00000000005600F600F5FD8100000000
-00000000F9F8000000F5FAFFF8000000
-000000008100F5F50000F6FEFE000000
-000000F8F700F500F50000FCFFF70000
-00000088F70000F50000F5FCFF2B0000
-0000002F582A00F5000008ADE02C0000
-00090B0A35A62B0000002D3B350A0000
-000A0A0B0B3BF60000505E0B0A0B0A00
-002E350B0B2F87FAFCF45F0B2E090000
-00000007335FF82BF72B575907000000
-000000000000ACFFFF81000000000000
-000000000081FFFFFFFF810000000000
-0000000000FBFFFFFFFFAC0000000000
-000000000081DFDFDFFFFB0000000000
-000000000081DD5F83FFFD0000000000
-000000000081DDDF5EACFF0000000000
-0000000000FDF981F981FFFF00000000
-00000000FFACF9F9F981FFFFAC000000
-00000000FFF98181F9F981FFFF000000
-000000ACACF981F981F9F9FFFFAC0000
-000000FFACF9F981F9F981FFFFFB0000
-00000083DFFBF981F9F95EFFFFFC0000
-005F5F5FDDFFFBF9F9F983DDDD5F0000
-005F5F5F5FDD81F9F9E7DF5F5F5F5F00
-0083DD5F5F83FFFFFFFFDF5F835F0000
-000000FBDDDFACFBACFBDFDFFB000000
-000000000000FFFFFFFF000000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFF0000000000
-0000000000FFFFFFFFFFFFFF00000000
-00000000FFFFFFFFFFFFFFFFFF000000
-00000000FFFFFFFFFFFFFFFFFF000000
-000000FFFFFFFFFFFFFFFFFFFFFF0000
-000000FFFFFFFFFFFFFFFFFFFFFF0000
-000000FFFFFFFFFFFFFFFFFFFFFF0000
-00FFFFFFFFFFFFFFFFFFFFFFFFFF0000
-00FFFFFFFFFFFFFFFFFFFFFFFFFFFF00
-00FFFFFFFFFFFFFFFFFFFFFFFFFF0000
-000000FFFFFFFFFFFFFFFFFFFF000000
-</OS-BADGE-ICONS>
-</CHRP-BOOT>"
-fi) > /tmp/ppc_lilo/os-chooser
-
-# umount the boot = partition, or exit if that fails
-mount | grep -q "$OPTION_BOOT"
-if [ "$?" = "0" ] ; then 
-echo "unmount $OPTION_BOOT" ; umount $OPTION_BOOT || exit 1
-fi
-humount $OPTION_BOOT 2>/dev/null
-humount $OPTION_BOOT 2>/dev/null
-
-hmount $OPTION_BOOT || exit 1
-if [ "$OPTION_BOOTFOLDER" != "" ] ; then
-HFS_BOOTFOLDER="$OPTION_BOOTFOLDER"
-else
-HFS_BOOTFOLDER="$DEFAULT_BOOTFOLDER"
-fi
-hmkdir $HFS_BOOTFOLDER 2>/dev/null
-hattrib -b $HFS_BOOTFOLDER
-hcd $HFS_BOOTFOLDER
-hcopy /tmp/ppc_lilo/os-chooser :os-chooser
-hcopy /tmp/ppc_lilo/yaboot.conf :yaboot.conf
-hcopy /lib/lilo/pmac/yaboot :yaboot
-hcopy /lib/lilo/pmac/Finder.bin :Finder
-hcopy /lib/lilo/pmac/System.bin :System
-hattrib -t tbxi -c chrp os-chooser
-hattrib -t BINA -c UNIX "Mac OS Rom" 2>/dev/null
-hattrib -t BINA -c UNIX "install"    2>/dev/null
-hattrib -t FNDR -c MACS Finder
-hattrib -t zsys -c MACS System
-hattrib -t TEXT -c "R*ch" yaboot.conf
-hattrib -t BINA -c UNIX yaboot
-
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
-        hcopy ${CONFIG_IMAGE_FILE[$i]} :`basename ${CONFIG_IMAGE_FILE[$i]}`
-fi
-test -z "${CONFIG_IMAGE_INITRD[$i]}" || (
- if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
-        hcopy ${CONFIG_IMAGE_INITRD[$i]} :`basename ${CONFIG_IMAGE_INITRD[$i]}`
- fi )
-test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || (
- if [ "${CONFIG_IMAGE_SYSMAPPATH[$i]}" = "copy" ] ; then
-        hcopy ${CONFIG_IMAGE_SYSMAP[$i]} :`basename ${CONFIG_IMAGE_SYSMAP[$i]}`
- fi )
-done
-hpwd
-hls -ltr
-humount
-
-if [ "$OPTION_ACTIVATE" = "yes" ] ; then
-  NV_BOOT_PATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
-  echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
-  nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
-  if [ x"$(nvsetenv boot-file)" != "xboot-file=" ] ; then
-    echo "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
-    nvsetenv boot-file
-    nvsetenv boot-file ""
-  fi
-fi
-
-
-}
 
 
 function check_arch () {
-# check for the current ppc subarch
-unset COPY_BOOT_FILES
-while read line; do
+    # check for the current ppc subarch
+    unset COPY_BOOT_FILES
+    while read line; do
 	case "$line" in
-#		dont force copy on new macs until yaboot is fixed
-#		*MacRISC2*)	MACHINE="pmac" ; COPY_BOOT_FILES="true" ;;
-		*MacRISC*)	MACHINE="pmac" ;;
-		*CHRP*)		MACHINE="chrp" ;;
-		*PReP*)		MACHINE="prep" ;;
-		*iSeries*)	MACHINE="iseries" ;;
+	  #		dont force copy on new macs until yaboot is fixed
+	  #		*MacRISC2*)	MACHINE="pmac" ; COPY_BOOT_FILES="true" ;;
+	  *MacRISC*)	MACHINE="pmac" ;;
+	  *CHRP*)		MACHINE="chrp" ;;
+	  *PReP*)		MACHINE="prep" ;;
+	  *iSeries*)	MACHINE="iseries" ;;
 	esac
-done < /proc/cpuinfo
-
-
-if [ "$MACHINE" = "pmac" ] ; then
+    done < /proc/cpuinfo
+    
+    if [ "$MACHINE" = "pmac" ] ; then
 	if [ -f /proc/device-tree/openprom*/model ] ; then
-		echo `cat /proc/device-tree/openprom*/model` > /tmp/ppc_lilo/openprom_model
-		while read openfirmware ofversion; do
-	        	case "$openfirmware" in
-	                iMac,1|OpenFirmware)      MACHINE="pmac_new" ;;
-	                Open)      MACHINE="pmac_old" ;;
-	        	esac
-		done < /tmp/ppc_lilo/openprom_model
+	    echo `cat /proc/device-tree/openprom*/model` > /tmp/ppc_lilo/openprom_model
+	    while read openfirmware ofversion; do
+		case "$openfirmware" in
+		  iMac,1|OpenFirmware)      MACHINE="pmac_new" ;;
+		  Open)      MACHINE="pmac_old" ;;
+		esac
+	    done < /tmp/ppc_lilo/openprom_model
 	fi
-fi
+    fi
 } #end function check_arch
 
+
 function prepare_config_file () {
-# strip comments and empty lines
-
-grep -v "#.*$" < $CONFIG_LILO_CONF | grep -v "\(^\W$\|^$\)" | sed 's/=/ & /' > /tmp/ppc_lilo/config_tmp
-
-
+    # strip comments and empty lines
+    
+    grep -v "#.*$" < $CONFIG_LILO_CONF | grep -v "\(^\W$\|^$\)" | sed 's/=/ & /' > /tmp/ppc_lilo/config_tmp
+    
+    #"
 } #end function prepare_config_file
 
 
 function parse_config_file () {
-# parse the lilo.conf and place it in CONFIG_IMAGE_FILE[]
-# other vars:
-# OPTION_BOOT contains the bootloader partition
-# OPTION_OTHER contains the MacOS partition
-# OPTION_BOOTFOLDER contains the MacOS folder with the bootstuff
-# OPTION_ACTIVATE is a flag whether or not the boot partition must be set active in OF
-# OPTION_TIMEOUT contains the timeout variable in seconds
-# OPTION_DEFAULT contains the default label
-# OPTION_ROOT contains the global or local root= device
-# OPTION_APPEND contains the global or local append= strings
-# OPTION_INITRD containes the global or local initrd filename
-# OPTION_IMAGE_COPY contains a flag to force copy to the boot partition
-# internal vars:
-# CONFIG_PARSE_HASIMAGE is a flag if we have a image section.
-# CONFIG_IMAGE_FILE contains the kernel image for a section
-# CONFIG_IMAGE_OTHER contains the device of MacOS
-# CONFIG_IMAGE_COUNT is a simple counter of image sections
-
-
-unset CONFIG_PARSE_HASIMAGE
-CONFIG_IMAGE_COUNT=0
-while read option sarator value ; do
-
-#	echo option "$option"
-#	echo sarator "$sarator"
-#	echo value $value
+    # parse the lilo.conf and place it in CONFIG_IMAGE_FILE[]
+    # other vars:
+    # OPTION_BOOT is an array to contains the bootloader partition and/or targets
+    # OPTION_BOOT_COUNT is a counter to the array above
+    # OPTION_OTHER contains the MacOS partition
+    # OPTION_BOOTFOLDER contains the MacOS folder with the bootstuff
+    # OPTION_ACTIVATE is a flag whether or not the boot partition must be set active in OF
+    # OPTION_TIMEOUT contains the timeout variable in seconds
+    # OPTION_DEFAULT contains the default label
+    # OPTION_ROOT contains the global or local root= device
+    # OPTION_APPEND contains the global or local append= strings
+    # OPTION_INITRD containes the global or local initrd filename
+    # OPTION_IMAGE_COPY contains a flag to force copy to the boot partition
+    # internal vars:
+    # CONFIG_PARSE_HASIMAGE is a flag if we have a image section.
+    # CONFIG_IMAGE_FILE contains the kernel image for a section
+    # CONFIG_IMAGE_OTHER contains the device of MacOS
+    # CONFIG_IMAGE_COUNT is a simple counter of image sections
+    
+    unset CONFIG_PARSE_HASIMAGE
+    CONFIG_IMAGE_COUNT=0
+    OPTION_BOOT_COUNT=0
+    while read option sarator value ; do
+	
+	#	echo option "$option"
+	#	echo sarator "$sarator"
+	#	echo value $value
 	case "$option" in
-		boot)
-			if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				OPTION_BOOT=$value
-			else 
-				echo boot option must not in an image section!
-				exit 1
-			fi
+	  boot)
+		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		    OPTION_BOOT[$OPTION_BOOT_COUNT]="$value"
+		    (( OPTION_BOOT_COUNT++ ))
+		else 
+		    echo boot option must not in an image section!
+		    exit 1
+		fi
 		;;
-		activate)
-			if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				OPTION_ACTIVATE="yes"
-			else 
-				echo activate option must not in an image section!
-				exit 1
-			fi
-		;;
-		progressbar)
-			# do nothing
-		;;
-		bootfolder)
-			if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				OPTION_BOOTFOLDER=":${value}"
-			else 
-				echo bootfolder option must not in an image section!
-				exit 1
-			fi
-		;;
-		timeout)
-                       if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                OPTION_TIMEOUT=$value
-                        else
-                                echo timeout option must not in an image section!
-                                exit 1
-                        fi
-		;;
-		default)
-                       if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                OPTION_DEFAULT=$value
-                        else
-                                echo default option must not in an image section!
-                                exit 1
-                        fi
-		;;
-		image)
-			# check if previous image section has a label
-			if [ ! -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				if [ -z "${CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]}" ] ; then
-				echo ERROR: config error, no label in image = ${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}
-				fi
-			fi
-			CONFIG_PARSE_HASIMAGE=true
-			CONFIG_IMAGE_COUNT=$[CONFIG_IMAGE_COUNT+1]
-			CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=$value
-		;;
-		other)
-                        # check if previous image section has a label
-                        if [ ! -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                if [ -z "${CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]}" ] ; then
-                                echo ERROR: config error, no label in image = ${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}
-                                fi
-                        fi
-                        CONFIG_PARSE_HASIMAGE=true
-                        CONFIG_PARSE_HASOTHER=true
-                        CONFIG_IMAGE_COUNT=$[CONFIG_IMAGE_COUNT+1]
-                        CONFIG_IMAGE_OTHER[$CONFIG_IMAGE_COUNT]=$value
-                        OPTION_OTHER=$value
-                ;;
-		root)
-			if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				OPTION_ROOT=$value
-			else
-				CONFIG_IMAGE_ROOT[$CONFIG_IMAGE_COUNT]=$value
-			fi
-		;;
-		copy)
-			if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                echo ERROR: config error, label option must be in an image section!
-                                exit 1
-			else
-				CONFIG_IMAGE_COPY[$CONFIG_IMAGE_COUNT]="true"
-			fi
-		;;
-		label)
-                        if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                echo ERROR: config error, label option must be in an image section!
-                                exit 1
-                        else
-                                CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=$value
-                        fi
-
-		;;
-		append)
-                        if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-				# use eval to strip ""
-                                eval OPTION_APPEND=$value
-                        else
-				# use eval to strip ""
-				eval CONFIG_IMAGE_APPEND[$CONFIG_IMAGE_COUNT]=$value
-                        fi
-
-		;;
-		sysmap)
-                        if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                echo "ERROR: sysmap can not be global"
-				exit 1
-                        else
-                                CONFIG_IMAGE_SYSMAP[$CONFIG_IMAGE_COUNT]=$value
-                        fi
-
-		;;
-		initrd)
-                        if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-                                OPTION_INITRD=$value
-                        else
-                                CONFIG_IMAGE_INITRD[$CONFIG_IMAGE_COUNT]=$value
-                        fi
-		;;		
-		*)
-			echo !!!!!!!!!! unkown option $option !!!!!!!!!!!!!
+	  activate)
+		    if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+			OPTION_ACTIVATE="yes"
+		    else 
+			echo activate option must not in an image section!
 			exit 1
+		    fi
+		    ;;
+	  progressbar)
+		       # do nothing
+		       ;;
+	  bootfolder)
+		      if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+			  OPTION_BOOTFOLDER=":${value}"
+		      else 
+			  echo bootfolder option must not in an image section!
+			  exit 1
+		      fi
+		      ;;
+	  timeout)
+		   if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		       OPTION_TIMEOUT=$value
+		   else
+		       echo timeout option must not in an image section!
+		       exit 1
+		   fi
+		   ;;
+	  default)
+		   if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		       OPTION_DEFAULT=$value
+		   else
+		       echo default option must not in an image section!
+		       exit 1
+		   fi
+		   ;;
+	  image)
+		 # check if previous image section has a label
+		 if [ ! -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		     if [ -z "${CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]}" ] ; then
+			 echo ERROR: config error, no label in image = ${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}
+		     fi
+		 fi
+		 CONFIG_PARSE_HASIMAGE=true
+		 (( CONFIG_IMAGE_COUNT++ ))
+		 CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=$value
+		 ;;
+	  other)
+		 # check if previous image section has a label
+		 if [ -n "$CONFIG_PARSE_HASIMAGE" ] ; then
+		     if [ -z "${CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]}" ] ; then
+			 echo ERROR: config error, no label in image = ${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}
+		     fi
+		 fi
+		 CONFIG_PARSE_HASIMAGE=true
+		 CONFIG_PARSE_HASOTHER=true
+		 (( CONFIG_IMAGE_COUNT++ ))
+		 CONFIG_IMAGE_OTHER[$CONFIG_IMAGE_COUNT]=$value
+		 OPTION_OTHER=$value
+		 ;;
+	  root)
+		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		    OPTION_ROOT=$value
+		else
+		    CONFIG_IMAGE_ROOT[$CONFIG_IMAGE_COUNT]=$value
+		fi
 		;;
+	  copy)
+		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		    echo ERROR: config error, label option must be in an image section!
+		    exit 1
+		else
+		    CONFIG_IMAGE_COPY[$CONFIG_IMAGE_COUNT]="true"
+		fi
+		;;
+	  label)
+		 if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		     echo ERROR: config error, label option must be in an image section!
+		     exit 1
+		 else
+		     CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=$value
+		 fi
+		 ;;
+	  append)
+		  if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		      # use eval to strip ""
+		      eval OPTION_APPEND=$value
+		  else
+		      # use eval to strip ""
+		      eval CONFIG_IMAGE_APPEND[$CONFIG_IMAGE_COUNT]=$value
+		  fi
+		  ;;
+	  sysmap)
+		  if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		      echo "ERROR: sysmap can not be global"
+		      exit 1
+		  else
+		      CONFIG_IMAGE_SYSMAP[$CONFIG_IMAGE_COUNT]=$value
+		  fi
+		  
+		  ;;
+	  initrd)
+		  if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+		      OPTION_INITRD=$value
+		  else
+		      CONFIG_IMAGE_INITRD[$CONFIG_IMAGE_COUNT]=$value
+		  fi
+		  ;;		
+	  *)
+	     echo !!!!!!!!!! unkown option $option !!!!!!!!!!!!!
+	     exit 1
+	     ;;
 	esac
-done < /tmp/ppc_lilo/config_tmp
-
-
+    done < /tmp/ppc_lilo/config_tmp
+    
+    
 } #end function parse_config_file
 
 
 function check_config_file () {
 
-
-if test ! -b $OPTION_BOOT -a ! "$MACHINE" = "iseries" ; then
-echo ERROR: boot = $OPTION_BOOT is not a valid block device
-exit -1 
-fi
-
-if [ -z "$OPTION_BOOT" -a "$MACHINE" != "iseries" ] ; then
-echo "ERROR: boot= is not specified!"
-exit -1
-fi
-
-if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-echo ERROR: no image section is specified
-exit -1
-fi
-
-for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
-if [ ! -f ${CONFIG_IMAGE_FILE[$i]} ] ; then
-echo "ERROR: image = ${CONFIG_IMAGE_FILE[$i]} ist not a regular file"
-exit -1
-fi
-if [ ! -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
-echo "ERROR: initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
-exit -1
-fi
-if [ ! -f ${CONFIG_IMAGE_SYSMAP[$i]} ] ; then
-echo "ERROR: sysmap = ${CONFIG_IMAGE_SYSMAP[$i]} ist not a regular file"
-exit -1
-fi
-done
-
-
-OPTION_DEVICE=`echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/'|cut -d " " -f 1`
-OPTION_NODENAME=`echo "$OPTION_DEVICE"|sed 's/[0-9]*$/ &/'|cut -d "/" -f 3`
-OPTION_PARTITION=`echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/'|cut -d " " -f 2`
-
-
+    if [ "$MACHINE" != "iseries" ]; then
+	if [ ! -b $OPTION_BOOT ]; then
+	    echo ERROR: boot = $OPTION_BOOT is not a valid block device
+	    exit -1 
+	fi
+	if [ -z "$OPTION_BOOT" ]; then
+	    echo "ERROR: boot= is not specified!"
+	    exit -1
+	fi
+	if [ $OPTION_BOOT_COUNT -ne 1 ]; then
+	    echo "ERROR: only one boot= line allowed here!"
+	    exit -1
+	fi
+    fi
+    
+    if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
+	echo ERROR: no image section is specified
+	exit -1
+    fi
+    
+    for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
+	if [ ! -f ${CONFIG_IMAGE_FILE[$i]} ] ; then
+	    echo "ERROR: image = ${CONFIG_IMAGE_FILE[$i]} ist not a regular file"
+	    exit -1
+	fi
+	if [ ! -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
+	    echo "ERROR: initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
+	    exit -1
+	fi
+	if [ ! -f ${CONFIG_IMAGE_SYSMAP[$i]} ] ; then
+	    echo "ERROR: sysmap = ${CONFIG_IMAGE_SYSMAP[$i]} ist not a regular file"
+	    exit -1
+	fi
+    done
+    
+    #
+    #  loop for multiple OPTION_BOOT entries
+    #
+    for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
+	# TODO: check whether patterns are still valid !?
+	OPTION_DEVICE[$i]=`echo "$OPTION_BOOT[$i]"|sed 's/[0-9]*$/ &/'|cut -d " " -f 1`
+	OPTION_NODENAME[$i]=`echo "$OPTION_DEVICE[$i]"|sed 's/[0-9]*$/ &/'|cut -d "/" -f 3`
+	OPTION_PARTITION[$i]=`echo "$OPTION_BOOT[$i]"|sed 's/[0-9]*$/ &/'|cut -d " " -f 2`
+    done
 
 } #end function check_config_file
 
 
 
 function prepare_envoirement () {
-
-rm -f /tmp/ppc_lilo/* 2>/dev/null
-mkdir -p /tmp/ppc_lilo/
-
+    rm -f /tmp/ppc_lilo/* 2>/dev/null
+    mkdir -p /tmp/ppc_lilo/
 } #end function prepare_envoirement
 
 #
@@ -1033,3 +686,14 @@ esac
 #done
 #
 # set | less
+
+#
+#
+# Local variables:
+#     mode: ksh
+#     ksh-indent: 4
+#     ksh-multiline-offset: 2
+#     ksh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+# End:
+#
+

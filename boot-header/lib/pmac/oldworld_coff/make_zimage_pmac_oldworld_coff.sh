@@ -108,7 +108,7 @@ ld \
 	"$obj_dir/arch_ppc_boot_openfirmware_misc.o" \
 	"$obj_dir/arch_ppc_boot_openfirmware_common.o" \
 	"$obj_dir/arch_ppc_boot_openfirmware_coffmain.o" \
-	"$tmp/arch_ppc_boot_openfirmware_image.o" \
+	"$OBJCOPY_RAMDISK_OBJECT" \
 	"$obj_dir/lib_lib.a" \
 	"$obj_dir/arch_ppc_boot_lib_lib.a" \
 	"$obj_dir/arch_ppc_boot_of1275_lib.a" \

@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Tue Mar 23 19:13:56 CET 2004 - jplack@suse.de
+
+- update to bootheader-0.0.5, mac fix
+
+-------------------------------------------------------------------
+Tue Mar 23 18:29:57 CET 2004 - jplack@suse.de
+
+- update to version lilo-0.0.8, support of multiple boot= lines for
+  iSeries, more clean ups
+
+-------------------------------------------------------------------
 Tue Mar  2 18:03:45 CET 2004 - olh@suse.de
 
 - make zImage helpers exectable, copy dummy .o file on chrp

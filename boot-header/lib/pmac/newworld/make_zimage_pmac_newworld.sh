@@ -120,6 +120,6 @@ objcopy \
 	$OBJCOPY_RAMDISK \
 	-R .comment 
 #
-rm -f "$output"
+rm -f "$output" || :
 cp "$tmp/output" "$output"
 
