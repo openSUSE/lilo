@@ -353,7 +353,9 @@ MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
 fi
 echo "\" screen\" output"
 # 1 is the timeout
-echo "get-msecs d# 1 3E8 * +"
+echo "\" \"(0C)\" fb8-write drop"
+echo "\" press space ... \" fb8-write drop"
+echo "get-msecs d# 3 3E8 * +"
 echo "begin"
 echo "  key? if"
 echo "    key case"
