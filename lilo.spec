@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.7
-Release:      32
+Release:      33
 Source0: 	lilo-0.0.6.tar.gz
 Patch0:		lilo-0.0.6.dif
 Source3:	lilo-21.tar.gz
@@ -122,6 +122,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Aug 02 2001 - olh@suse.de
+- fix birec calculation, needs still work for HFS load ...
 * Wed Aug 01 2001 - olh@suse.de
 - set sysmap_base to 0
 * Tue Jul 31 2001 - olh@suse.de

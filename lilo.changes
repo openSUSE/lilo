@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug  2 22:42:22 CEST 2001 - olh@suse.de
+
+- fix birec calculation, needs still work for HFS load ...
+
+-------------------------------------------------------------------
 Wed Aug  1 18:08:18 CEST 2001 - olh@suse.de
 
 - set sysmap_base to 0
