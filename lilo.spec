@@ -150,6 +150,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Fri Oct 29 2004 - jplack@suse.de
+- added fix for #47765
 * Wed Oct 20 2004 - jplack@suse.de
 - added a tested fix for #45565 at least for emulex FC cards
 * Mon Oct 18 2004 - jplack@suse.de

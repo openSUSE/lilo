@@ -94,13 +94,19 @@ function error() {
 	       	echo '************************************************************'
 		;;
 	    6)
-	        echo "ERROR: config error, no label in section image/other = $err_var1"
+	        echo "ERROR: in config file, no label in section image/other = $err_var1"
 		;;
 	    7)
-	        echo "ERROR: config error, $option option must not be in an image/other section!"
+	        echo "ERROR: in config file, $option option must not be in an image/other section!"
 		;;
 	    8)
-		echo "ERROR: config error, $option option must be in an image/other section!"
+		echo "ERROR: in config file, $option option has to be in an image/other section!"
+		;;
+	    9)
+	        echo "ERROR: in config file, boot = $err_var1 is not 41 PReP"
+		;;
+	    10)
+	        echo "ERROR: in config file, guessing of boot partition failed"
 		;;
 	    *)  # plain custom string
 	        echo "ERROR: $1"
@@ -143,6 +149,105 @@ function div1000() {
     echo ${s%???}.${s:$[${#s}-3]}
 }
 
+
+function real_device () {
+    # print the real device i.e. map partitions to disks
+    local -i dev=$1 real=0
+    local -i major minor
+    local range
+    local IFS=:
+
+    # assert that /sys is mounted, else try to mount,
+    # on fail fall back to error value
+    if test -d /sys/block || mount -t sysfs sysfs /sys; then
+	# that and check whether the integer 
+	while read range; do
+	    read major minor < ${range/range/dev}
+	    (( real = major * 256 + minor ))
+	    range=$(<$range)
+	    if (( dev >= real && dev < real + range )); then
+		echo $real
+		return;
+	    fi
+	done < <( find /sys/block -name range )
+    fi
+    echo 0000
+}
+
+
+function device_of_file () {
+    # print device number in decimal given a file path
+    local f="$1";
+    
+    if [ ! -x $STAT_CMD -o -z "$f" ]; then
+	# be nice if /usr not mounted
+	echo 0000
+	return;
+    fi
+    
+    $STAT_CMD --format="%d" $f
+}
+
+       
+function device_nr () {
+    # print device number in decimal given a path to a device node
+    local d="$1"
+    
+    # /dev/root is an alias to the root file system
+    if [ "$d" == "/dev/root" ]; then
+	device_of_file /
+	return;
+    fi
+
+    if [ ! -x $STAT_CMD ]; then
+	# be nice if /usr not mounted
+	echo 0000
+	return;
+    fi
+
+    # test whether its a block device ?
+    if [ ! -b "$d" ]; then
+	# this should never happen
+	echo >&2 "Path '$d' does not point to a block device node!"
+	echo 0000
+	return;
+    fi
+
+    echo $[ $($STAT_CMD --format "0x%t*256 + 0x%T" $d) ]
+}
+
+
+function check_arch () {
+    # check for the current ppc subarch
+    unset COPY_BOOT_FILES
+    while read line; do
+	case "$line" in
+	  #		dont force copy on new macs until yaboot is fixed
+	  #		*MacRISC2*)	MACHINE="pmac" ; COPY_BOOT_FILES="true" ;;
+	  *MacRISC*)	MACHINE="pmac" ;;
+	  *CHRP*)	MACHINE="chrp" ;;
+	  *PReP*)	MACHINE="prep" ;;
+	  *iSeries*)	MACHINE="iseries" ;;
+	esac
+    done < /proc/cpuinfo
+    
+    if [ "$MACHINE" = "pmac" ] ; then
+	if [ -f /proc/device-tree/openprom*/model ] ; then
+	    echo `cat /proc/device-tree/openprom*/model` > $TEMP/openprom_model
+	    while read openfirmware ofversion; do
+		case "$openfirmware" in
+		  iMac,1|OpenFirmware)	MACHINE="pmac_new" ;;
+		  Open) 		MACHINE="pmac_old" ;;
+		esac
+	    done < $TEMP/openprom_model
+	fi
+    fi
+} #end function check_arch
+
+
+#
+#   main script
+#
 
 while [ "$1" ]; do case "$1" in
     #--lilo-rootdrive)
@@ -222,17 +327,17 @@ function running_on_chrp () {
 		if [ ${#fat32_part[*]} == 1 ]; then
 		    OPTION_BOOT=$fat32_part
 		else
-	            error "in config file, boot = $OPTION_BOOT is not 41 PReP nor FAT"  1
+	            err_var1=$OPTION_BOOT; error 9 1
 		fi
 	       	;;
 	    *)
-	       	error "in config file, guessing of boot partition failed" 2
+	       	error 10 2
 	       	;;
  	esac
     else
 	# we have the device, but better safe than sorry
 	if [[ "${prep_part[*]} ${fat_part[*]} ${fat32_part[*]}" != *$OPTION_BOOT* ]]; then
-	    error "in config file, boot = $OPTION_BOOT is not 41 PReP nor FAT"  1
+	    err_var1=$OPTION_BOOT; error 9 1
 	fi
     fi
     echo Boot target is ${OPTION_BOOT%%+([0-9])}
@@ -572,6 +677,9 @@ function running_on_chrp () {
     fi
 
     NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
+    if [ -z "$NV_BOOT_PATH" ]; then
+	error "Internal problem: Could not determine open firmware path to '$OPTION_BOOT'" 
+    fi
     if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
         nvsetenv bootinfo-linux "${NV_BOOT_PATH},\ppc\bootinfo.txt"
         NV_BOOT_PATH=${NV_BOOT_PATH},yaboot
@@ -582,8 +690,17 @@ function running_on_chrp () {
     fi
 
     if [ "$OPTION_ACTIVATE" = "yes" ] ; then
-	echo "setting open firmware variable boot-device to '$NV_BOOT_PATH'"
-	nvsetenv boot-device "$NV_BOOT_PATH"
+	echo "prepending  '$NV_BOOT_PATH'" to open firmware variable boot-device
+
+	local -a bootdevice=( $(nvsetenv boot-device) )
+	bootdevice[0]=${bootdevice[0]#boot-device=}
+	for (( i=${#bootdevice[*]}; i-- >0; )); do
+	    if [[ "${bootdevice[$i]}" == ${NV_BOOT_PATH}* ]]; then
+		unset bootdevice[$i];
+	    fi
+	done
+	nvsetenv boot-device "$NV_BOOT_PATH ${bootdevice[*]}"
+
 	if [ "$(nvsetenv boot-file)" != "boot-file=" ]; then
 	    echo "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
 	    nvsetenv boot-file
@@ -691,35 +808,33 @@ function running_on_iseries () {
 	else
 	    ISERIES_TARGET=invalid
 	fi
-    
+	
 	case "$ISERIES_TARGET" in
-	  slot)
-		echo write to slot $ISERIES_BOOT
+	    slot)
+                echo write to slot $ISERIES_BOOT
 		;;
-	  file)
-		if [ "${ISERIES_BOOT:0:1}" != "/" ] ; then
+	    file)
+	        if [ "${ISERIES_BOOT:0:1}" != "/" ] ; then
 		    echo boot=$ISERIES_BOOT must have an absolute path
-		    case "$ISERIES_BOOT" in
-		      a|b|c)
-			     echo "Did you mean uppercase '$ISERIES_BOOT'?"
-			     ;;
-		    esac
+		    if [[ "$ISERIES_BOOT" = ?(a|b|c) ]]; then
+			echo "Did you mean uppercase '$ISERIES_BOOT'?"
+		    fi
 		    exit 1
 		fi
 		echo write to file $ISERIES_BOOT
 		rm -f $ISERIES_BOOT
-		cp -a $ISERIES_BOOT_IMAGE $ISERIES_BOOT
+		cp -av $ISERIES_BOOT_IMAGE $ISERIES_BOOT
 		;;
-	  block_dev)
-		     echo write to block_dev "$ISERIES_BOOT"
-		     ;;
-	  invalid)
-		   echo "Error: boot=$ISERIES_BOOT invalid"
-		   exit 1
-		   ;;
+	    block_dev)
+	        echo write to block_dev "$ISERIES_BOOT"
+		;;
+	    invalid)
+		error "boot=$ISERIES_BOOT invalid"
+		;;
 	esac
 	
-	if [ "$ISERIES_TARGET" = "slot" -a -n "$ISERIES_BOOT_IMAGE" -a -f "$ISERIES_BOOT_IMAGE" ] ; then
+	if [ "$ISERIES_TARGET" = "slot" -a -n "$ISERIES_BOOT_IMAGE" ] &&
+	    [ -f "$ISERIES_BOOT_IMAGE" ] ; then
 	    local size name bs=1024 target=/proc/iSeries/mf/$ISERIES_BOOT/vmlinux
 
 	    read size name < <(ls -Ls --block-size=1024 $ISERIES_BOOT_IMAGE)
@@ -748,14 +863,15 @@ function running_on_iseries () {
 	if [ "$ISERIES_TARGET" = "block_dev" ]; then
 	    #only the device is given and dd to the raw device is a bad idea
 	    if [ -z "${OPTION_PARTITION[$i]}" ]; then
-		echo guess the prep boot device 
+		echo guess the PReP boot device 
 		PART=`$FDISK -l $ISERIES_DEVICE | fgrep "PPC PReP"`
 		if [ -z "$PART" ] ; then
-		    error "config error, boot = $ISERIES_BOOT is not 41 PReP" 3
+		    err_var1="$ISERIES_BOOT"
+		    error 9 3
 		fi
 		if [ `echo "$PART" | wc -l` != 1 ] ; then
 		    err_var1="$ISERIES_BOOT"
-		    error "config error, guessing of boot partition failed" 5
+		    error 10 5
 		fi
 		read P dummy <<< "$PART"
 	    else
@@ -763,7 +879,7 @@ function running_on_iseries () {
 		echo Boot target is $ISERIES_DEVICE
 		PART=`$FDISK -l $ISERIES_DEVICE | grep $ISERIES_BOOT | fgrep "PPC PReP"`
 		if [ -z "$PART" ] ; then
-		    error "config error, boot = $ISERIES_BOOT is not 41 PReP" 3
+		    err_var1=$ISERIES_BOOT; error 9 3
 		fi
 		
 		P=$ISERIES_BOOT
@@ -793,18 +909,18 @@ function running_on_iseries () {
 
 
 function running_on_prep () {
-    echo running on prep
+    echo running on PReP
     #only the device is given and dd to the raw device is a bad idea
     
     if [ -z "$OPTION_PARTITION" ] ; then
-	echo guess the prep boot device 
+	echo guess the PReP boot device 
 	PART=`$FDISK -l $OPTION_DEVICE | fgrep "PPC PReP"`
 	if [ -z "$PART" ] ; then
-	    error "config error, boot = $OPTION_BOOT is not 41 PReP" 4
+	    err_var1=$OPTION_BOOT; error 9 4
 	fi
 	if [ `echo "$PART" | wc -l` != 1 ] ; then
 	    err_var1="$OPTION_BOOT"
-	    error 'config error, guessing of boot partition failed' 5
+	    error 10 5
 	fi
 	read P dummy <<< "$PART"
     else
@@ -812,7 +928,7 @@ function running_on_prep () {
 	echo Boot target is $OPTION_DEVICE
 	PART=`$FDISK -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
 	if [ -z "$PART" ] ; then
-	    error "config error, boot = $OPTION_BOOT is not 41 PReP" 4
+	    err_var1=$OPTION_BOOT; error 9 4
 	fi
 
 	P=$OPTION_BOOT
@@ -894,101 +1010,6 @@ function running_on_pmac_new () {
     source /lib/lilo/lilo-pmac.lib
     running_on_pmac_new;
 }
-
-
-function real_device () {
-    # print the real device i.e. map partitions to disks
-    local -i dev=$1 real=0
-    local -i major minor
-    local range
-    local IFS=:
-
-    # assert that /sys is mounted, else try to mount,
-    # on fail fall back to error value
-    if test -d /sys/block || mount -t sysfs sysfs /sys; then
-	# that and check whether the integer 
-	while read range; do
-	    read major minor < ${range/range/dev}
-	    (( real = major * 256 + minor ))
-	    range=$(<$range)
-	    if (( dev >= real && dev < real + range )); then
-		echo $real
-		return;
-	    fi
-	done < <( find /sys/block -name range )
-    fi
-    echo 0000
-}
-
-
-function device_of_file () {
-    # print device number in decimal given a file path
-    local f="$1";
-    
-    if [ ! -x $STAT_CMD -o -z "$f" ]; then
-	# be nice if /usr not mounted
-	echo 0000
-	return;
-    fi
-    
-    $STAT_CMD --format="%d" $f
-}
-
-       
-function device_nr () {
-    # print device number in decimal given a path to a device node
-    local d="$1"
-    
-    # /dev/root is an alias to the root file system
-    if [ "$d" == "/dev/root" ]; then
-	device_of_file /
-	return;
-    fi
-
-    if [ ! -x $STAT_CMD ]; then
-	# be nice if /usr not mounted
-	echo 0000
-	return;
-    fi
-
-    # test whether its a block device ?
-    if [ ! -b "$d" ]; then
-	# this should never happen
-	echo >&2 "Path '$d' does not point to a block device node!"
-	echo 0000
-	return;
-    fi
-
-    echo $[ $($STAT_CMD --format "0x%t*256 + 0x%T" $d) ]
-}
-
-
-function check_arch () {
-    # check for the current ppc subarch
-    unset COPY_BOOT_FILES
-    while read line; do
-	case "$line" in
-	  #		dont force copy on new macs until yaboot is fixed
-	  #		*MacRISC2*)	MACHINE="pmac" ; COPY_BOOT_FILES="true" ;;
-	  *MacRISC*)	MACHINE="pmac" ;;
-	  *CHRP*)	MACHINE="chrp" ;;
-	  *PReP*)	MACHINE="prep" ;;
-	  *iSeries*)	MACHINE="iseries" ;;
-	esac
-    done < /proc/cpuinfo
-    
-    if [ "$MACHINE" = "pmac" ] ; then
-	if [ -f /proc/device-tree/openprom*/model ] ; then
-	    echo `cat /proc/device-tree/openprom*/model` > $TEMP/openprom_model
-	    while read openfirmware ofversion; do
-		case "$openfirmware" in
-		  iMac,1|OpenFirmware)	MACHINE="pmac_new" ;;
-		  Open) 		MACHINE="pmac_old" ;;
-		esac
-	    done < $TEMP/openprom_model
-	fi
-    fi
-} #end function check_arch
 
 
 function parse_config_file () {
@@ -1140,7 +1161,7 @@ function check_config_file () {
 	#   intel-architecture blindness, some architectures can guess boot
 	#   drive :-)
 	if [[ "$MACHINE" != @(chrp|prep) ]]; then
-	    error "boot= is not specified!"
+	    error "boot=<partition> is not specified!"
 	fi
     else
 	if [ "$MACHINE" != "iseries" ]; then

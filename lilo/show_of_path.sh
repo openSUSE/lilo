@@ -182,7 +182,7 @@ if [ -f devspec ] ; then
     dbg_show file_of_hw_devtype
     if ! [ -f ${file_of_hw_devtype}/device_type ]; then
 	# check for scsi@$of_disk_scsi_chan/device_type else bail out ..
-	file_of_hw_devtype="${file_of_hw_devtype}/scsi@${of_disk_scsi_chan}"
+	file_of_hw_devtype=$(printf "%s/scsi@%x" $file_of_hw_devtype $of_disk_scsi_chan)
 	dbg_show file_of_hw_devtype
     fi
     if ! [ -f ${file_of_hw_devtype}/device_type ] ; then
