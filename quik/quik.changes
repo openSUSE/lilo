@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 27 19:56:38 CEST 2000 - olh@suse.de
+
+- remove %postinstall 
+
+-------------------------------------------------------------------
 Thu Mar 23 17:11:15 CET 2000 - olh@suse.de
 
 - load the kernel from the same partition as quik.conf

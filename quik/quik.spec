@@ -12,7 +12,7 @@
 Vendor:       SuSE GmbH, Nuernberg, Germany
 Distribution: SuSE Linux 6.4 (PPC)
 Name:         quik
-Release:      12
+Release:      13
 Packager:     feedback@suse.de
 
 Summary:      quik - bootloader for CHRP machines
@@ -45,47 +45,6 @@ make
 make install DESTDIR="$RPM_BUILD_ROOT"
 %{?suse_check}
 
-%post
-if [ ! -z "`grep CHRP /proc/cpuinfo 2>/dev/null`" ] ; then
-	echo CHRP system detected.
-#	PART=`fdisk -l | fgrep "PPC PReP"`
-	PART=`cfdisk -P s | fgrep "PPC PReP"`
-	if [ -z "$PART" ] ; then
-	    echo '*********************************************************'
-	    echo '* You must create a PPC PReP Boot partition (type 0x41) *'
-	    echo '* for the CHRP bootloader to be installed.              *'
-	    echo '*********************************************************'
-	    exit -1
-	fi
-	if [ `echo "$PART" | wc -l` != 1 ] ; then
-	    echo '**************************************************************'
-	    echo '* There are more than 1 PPC PReP Boot partitions (type 0x41) *'
-	    echo '* on this system.  Aborting install rather than picking one. *'
-	    echo '**************************************************************'
-	    exit -1
-	fi
-	if [ -z "`echo "$PART" | grep "Boot (80)"`" ] ; then
-	    echo '***************************************************************'
-	    echo '* The PPC PReP Boot partition (type 0x41) is not marked as    *'
-	    echo '* bootable.  You will need to mark this partition as bootable *'
-	    echo '* before Quik can be installed onto it.                       *'
-	    echo '**************************************************************'
-	    exit -1
-	fi
-	P=`echo "$PART" | awk '{print $1}'`
-	# assume /dev/sda!!!
-	if [ "${P}" != "1" ] ; then
-	    echo '***************************************************************'
-	    echo '* You do not have sda1 setup as the boot partition.  This     *'
-	    echo '* will work but Quik will not know where the configuration    *'
-	    echo '* file is.	                                                *'
-	    echo '***************************************************************'
-	fi
-	P=/dev/sda${P}
-	echo Installing onto $P
-	dd if=boot/second of=$P
-fi
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -98,6 +57,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/man/man?/*
 
 %changelog -n quik
+* Mon Mar 27 2000 - olh@suse.de
+- remove %postinstall
 * Thu Mar 23 2000 - olh@suse.de
 - load the kernel from the same partition as quik.conf
 * Thu Mar 16 2000 - olh@suse.de
