@@ -9,7 +9,7 @@
 #
 
 # neededforbuild  tetex
-# usedforbuild    aaa_base aaa_dir aaa_version autoconf automake base bash bindutil binutils bison bzip compress cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch perl ps rcs readline rpm rsh sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
+# usedforbuild    aaa_base aaa_dir aaa_version autoconf automake base bash bindutil binutils bison bzip compress cpio cpp cracklib cyrus-sasl db devs diffutils e2fsprogs file fileutils findutils flex gawk gcc gdbm gdbm-devel gettext glibc glibc-devel gpm gppshare grep groff gzip kbd less libtool libz m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch perl ps rcs readline rpm sendmail sh-utils shadow strace syslogd sysvinit te_ams te_latex tetex texinfo textutils timezone unzip util-linux vim
 
 Name:         lilo
 Group: 	System Environment/Base
@@ -18,13 +18,13 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      60
+Release:      67
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
 Source3:	lilo-21.tar.gz
-Source5:	yaboot-1.2.5.tar.gz
-Patch5:		yaboot-1.2.5.dif
+Source5:	yaboot-1.3.6.tar.gz
+Patch5:		yaboot-1.3.6.dif
 Buildroot:	/var/tmp/buildroot-lilo
 
 %description
@@ -52,18 +52,25 @@ SuSE series: a
 %prep
 %setup -q -T -c -a 0 -a 3 -a 5
 mv lilo-0.0.6	lilo.ppc
-mv yaboot-1.2.5 yaboot
+mv yaboot-1.3.6 yaboot
 cd yaboot
 %patch5
 cd ..
 
 %build
 cd yaboot
-make DEBUG=1 VERSION=1.2.5.SuSE
-mv yaboot yaboot.debug
-mv yaboot.chrp yaboot.chrp.debug
 make clean
-make DEBUG=0 VERSION=1.2.5.SuSE
+make DEBUG=1 VERSION=1.3.6.SuSE yaboot
+mv second/yaboot yaboot.debug
+make clean
+make DEBUG=0 VERSION=1.3.6.SuSE yaboot
+mv second/yaboot yaboot
+make clean
+make DEBUG=1 VERSION=1.3.6.SuSE yaboot.chrp
+mv second/yaboot.chrp yaboot.chrp.debug
+make clean
+make DEBUG=0 VERSION=1.3.6.SuSE yaboot.chrp
+mv second/yaboot.chrp yaboot.chrp
 cd ..
 cd lilo
 make activate
@@ -124,6 +131,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Dec 13 2001 - olh@suse.de
+- update to yaboot 1.3.6, remove some partition type braindamage
 * Tue Dec 04 2001 - olh@suse.de
 - add new PowerBook
 * Tue Dec 04 2001 - olh@suse.de

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec 13 19:05:28 CET 2001 - olh@suse.de
+
+- update to yaboot 1.3.6, remove some partition type braindamage
+
+-------------------------------------------------------------------
 Tue Dec  4 21:10:17 CET 2001 - olh@suse.de
 
 - add new PowerBook
