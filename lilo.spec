@@ -26,7 +26,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      22.22
+Release:      22.24
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch5:       yaboot-1.3.6.dif
@@ -150,6 +150,9 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Dec 16 2004 - jplack@suse.de
+- added work arounds for some problems and bugs of parted (#49317)
+  prepend root= option to append line (#48419)
 * Fri Dec 10 2004 - jplack@suse.de
 - added support for QLogic FC adapters on JS20, cleanup so that
   all FC adapters using fc_transport class should work (# 45565 -

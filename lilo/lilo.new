@@ -397,7 +397,10 @@ function running_on_chrp () {
 	echo "partition = ${yaboot_part##*:}"
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
-	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
+	if [ "$OPTION_ROOT" ]; then
+	    OPTION_APPEND="$OPTION_ROOT $OPTION_APPEND"
+	    unset OPTION_ROOT
+	fi
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 	test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
 
@@ -437,7 +440,7 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
 		    # is the boot image file on the same device/partition
 		    # from where yaboot.conf has been loaded?
 		    if [ "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
@@ -470,7 +473,7 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
 		    # is the boot initrd file on the same device/partition
 		    # from where yaboot.conf has been loaded?
 		    if [ "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
@@ -577,7 +580,7 @@ function running_on_chrp () {
 	    fi
 	    echo >&2 "Warning: Extending boot partition $OPTION_BOOT, using free disk space"
 	    local start=$(div1000 ${p_start[$partition]})
-	    local end=$(div1000 ${p_start[$((partition+1))]} )
+	    local end=$(div1000 $((${p_start[$((partition+1))]}-1)) )
 	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
 		$PARTED $device set $partition type 6; ) >& $TEMP/parted.log
 	      then
@@ -671,6 +674,7 @@ function running_on_chrp () {
 	    echo >&2 "Warning: Shrinking PReP boot partition $OPTION_BOOT, avoiding firmware confusion"
 	    local start=$(div1000 ${p_start[$partition]})
 	    local end=$(div1000 $(( p_start[partition] + $(fsize /lib/lilo/chrp/yaboot.chrp) )) ) 
+	    dd if=/dev/zero of=$OPTION_BOOT bs=4096 count=1
 	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
 		$PARTED $device set $partition type 0x41; ) >& $TEMP/parted.log
 	    then
@@ -703,7 +707,7 @@ function running_on_chrp () {
     fi
 
     if [ "$OPTION_ACTIVATE" = "yes" ] ; then
-	echo "prepending  '$NV_BOOT_PATH'" to open firmware variable boot-device
+	echo "Prepending  '$NV_BOOT_PATH'" to open firmware variable boot-device
 
 	local -a bootdevice=( $(nvsetenv boot-device) )
 	bootdevice[0]=${bootdevice[0]#boot-device=}
@@ -715,13 +719,13 @@ function running_on_chrp () {
 	nvsetenv boot-device "$NV_BOOT_PATH ${bootdevice[*]}"
 
 	if [ "$(nvsetenv boot-file)" != "boot-file=" ]; then
-	    echo "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
-	    nvsetenv boot-file
+	    echo >&2 "Warning: old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
+	    nvsetenv boot-file >&2
 	    nvsetenv boot-file ""
 	fi
     else
-	echo "boot path not set to boot linux as requested"
-	echo "please add '$NV_BOOT_PATH' somewhere to your boot path manually"
+	echo >&2 "Warning: boot path not set to boot linux as requested"
+	echo >&2 "Warning: please add '$NV_BOOT_PATH' somewhere to your boot path manually"
     fi
 }
 
