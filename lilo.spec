@@ -1,7 +1,7 @@
 #
 # spec file for package lilo (Version 0.0.8)
 # 
-# Copyright  (c)  2001  SuSE GmbH  Nuernberg, Germany.
+# Copyright  (c)  2002  SuSE GmbH  Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
 # 
@@ -18,7 +18,7 @@ Obsoletes:	yaboot activate quik
 Requires:	hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      67
+Release:      77
 Source0: 	lilo-0.0.6.tar.bz2
 Patch0:		lilo-0.0.6.dif
 Source1:        compatible_machines.txt
@@ -26,6 +26,9 @@ Source3:	lilo-21.tar.gz
 Source5:	yaboot-1.3.6.tar.gz
 Patch5:		yaboot-1.3.6.dif
 Buildroot:	/var/tmp/buildroot-lilo
+# get rid of /usr/lib/rpm/brp-strip-debug 
+# it kills the zImage.chrp-rs6k 
+%define __os_install_post %{nil}
 
 %description
 The LInux-LOader: LILO boots Linux from your hard drive.
@@ -41,9 +44,9 @@ Authors:
     John Coffman <JohnInSD@san.rr.com> 
     Werner Almesberger <Werner.Almesberger@epfl.ch> 
     PowerPC part: 
-    Paul Mackeras <paulus@linuxcare.com.au> 
+    Paul Mackeras <paulus@samba.org> 
     Cort Dougan <cort@fsmlabs.com> 
-    Benjamin Herrenschmidt <bh40@calva.net> 
+    Benjamin Herrenschmidt <benh@kernel.crashing.org> 
     Memtest86: 
     Chris Brady <crsbrady@earthlink.net>
 
@@ -131,6 +134,10 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Jan 08 2002 - olh@suse.de
+- run lilo on iSeries
+* Thu Dec 20 2001 - olh@suse.de
+- do not call rpm postinstall
 * Thu Dec 13 2001 - olh@suse.de
 - update to yaboot 1.3.6, remove some partition type braindamage
 * Tue Dec 04 2001 - olh@suse.de

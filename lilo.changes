@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Jan  8 04:22:56 CET 2002 - olh@suse.de
+
+- run lilo on iSeries
+
+-------------------------------------------------------------------
+Thu Dec 20 18:04:19 CET 2001 - olh@suse.de
+
+- do not call rpm postinstall
+
+-------------------------------------------------------------------
 Thu Dec 13 19:05:28 CET 2001 - olh@suse.de
 
 - update to yaboot 1.3.6, remove some partition type braindamage
