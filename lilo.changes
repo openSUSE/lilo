@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jan 13 00:24:20 CET 2005 - schwab@suse.de
+
+- show_of_path.sh: handle new targetN subdir in SCSI hosts.
+
+-------------------------------------------------------------------
 Thu Dec 16 16:05:01 CET 2004 - jplack@suse.de
 
 - added work arounds for some problems and bugs of parted (#49317)

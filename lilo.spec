@@ -1,7 +1,7 @@
 #
 # spec file for package lilo (Version 0.0.15)
 #
-# Copyright (c) 2004 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2005 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
 #
@@ -26,9 +26,10 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      44
+Release:      45
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
+Patch0:       show_of_path.diff
 Patch5:       yaboot-1.3.6.dif
 Patch6:       yaboot-1.3.11-fat.dif
 Patch7:       yaboot-hole_data-journal.diff
@@ -63,6 +64,7 @@ Authors:
 %setup -q -T -c -a 0 -a 1
 mv lilo-%{lilo_vers} lilo.ppc
 mv yaboot-%{yaboot_vers} yaboot
+%patch0
 cd yaboot
 %patch5
 %patch7 -p1
@@ -150,6 +152,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Jan 13 2005 - schwab@suse.de
+- show_of_path.sh: handle new targetN subdir in SCSI hosts.
 * Thu Dec 16 2004 - jplack@suse.de
 - added work arounds for some problems and bugs of parted (#49317)
   prepend root= option to append line (#48419)
