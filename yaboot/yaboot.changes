@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 21 17:04:25 CET 2000 - uli@suse.de
+
+- load images from same folder as yaboot.conf 
+  add asterisk for default config
+
+-------------------------------------------------------------------
 Mon Mar 20 19:18:56 CET 2000 - uli@suse.de
 
 - fix default defdevice

@@ -12,7 +12,7 @@
 Vendor:       SuSE GmbH, Nuernberg, Germany
 Distribution: SuSE Linux 6.4 (PPC)
 Name:         yaboot
-Release:      3
+Release:      4
 Packager:     feedback@suse.de
 
 Summary:      YaBoot - OF boot loader for PowerMac
@@ -53,6 +53,9 @@ cp -a $RPM_SOURCE_DIR/yaboot_0.5.gz .
 %doc COPYING yaboot yaboot.debug yaboot_0.5.gz
 
 %changelog -n yaboot
+* Tue Mar 21 2000 - uli@suse.de
+- load images from same folder as yaboot.conf
+  add asterisk for default config
 * Mon Mar 20 2000 - uli@suse.de
 - fix default defdevice
 * Fri Mar 10 2000 - olh@suse.de
