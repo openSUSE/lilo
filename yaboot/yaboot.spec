@@ -7,12 +7,12 @@
 #
 
 # neededforbuild  ext2fs_d
-# usedforbuild    aaa_base aaa_dir base bash bindutil binutils bison bzip compress cpio cracklib devs diff ext2fs ext2fs_d file fileutil find flex gawk gcc gdbm gettext gpm gppshare groff gzip kbd less libc libz lx_suse make mktemp modules ncurses net_tool netcfg nkita nkitb nssv1 pam patch perl pgp ps rcs rpm sendmail sh_utils shadow shlibs strace syslogd sysvinit texinfo textutil timezone unzip util vim xdevel xf86 xshared
+# usedforbuild    aaa_base aaa_dir autoconf automake base bash bindutil binutils bison bzip compress cpio cracklib devs diff ext2fs ext2fs_d file fileutil find flex gawk gcc gdbm gettext gpm gppshare groff gzip kbd less libc libtool libz lx_suse make mktemp modules ncurses net_tool netcfg nkita nkitb nssv1 pam patch perl pgp ps rcs rpm sendmail sh_utils shadow shlibs strace syslogd sysvinit texinfo textutil timezone unzip util vim xdevel xf86 xshared
 
 Vendor:       SuSE GmbH, Nuernberg, Germany
 Distribution: SuSE Linux 6.4 (PPC)
 Name:         yaboot
-Release:      8
+Release:      10
 Packager:     feedback@suse.de
 
 Summary:      YaBoot - OF boot loader for PowerMac
@@ -21,6 +21,7 @@ Copyright: GPL
 Group: Unsorted
 Source0: yaboot-0.5.tar.gz
 Source1: yaboot_0.5.gz
+Source2: os-chooser.txt
 Patch0: yaboot-0.5.dif
 
 %description
@@ -47,12 +48,17 @@ make -f Makefile.nodebug
 
 %install
 cp -a $RPM_SOURCE_DIR/yaboot_0.5.gz .
+mkdir -p /var/lib/yaboot/
+cp -a $RPM_SOURCE_DIR/os-chooser.txt /var/lib/yaboot/os-chooser
 %{?suse_check}
 
 %files
 %doc COPYING yaboot yaboot.debug yaboot_0.5.gz
+/var/lib/yaboot
 
 %changelog -n yaboot
+* Thu Apr 06 2000 - olh@suse.de
+- provide the os-chooser script for the MacOS side
 * Fri Mar 31 2000 - olh@suse.de
 - extended Welcome message
 * Wed Mar 22 2000 - uli@suse.de
