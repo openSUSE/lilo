@@ -28,102 +28,82 @@
 # 2000-01-30  first try with scsi hosts
 #
 
-if false; then    
-#if true; then    
-    function dbg_show() {
-	while [ "$1" ]; do
-	    echo $1 = ${!1}
-	    shift
-	done
-    }
-else
-    function dbg_show() {
-	:
-    }
-fi
-
 myversion=2004-01-30
 file=/
 
 if [ "$#" -gt 0 ] ; then
-    until  [ "$#" = 0 ] ; do
-	case "$1" in
-	  --version|-v) echo $myversion ; exit 0
-		;;
-	  --help|-h)
-		echo "show OpenFirmware device path for a file or a device node"
-		echo "usage: ${0##*/} [/]|[/boot/vmlinux]"
-		exit 0
-		;;
-	  *)
-	       	file=$1
-	       	break
-	       	;;
-	esac
-    done
+	until  [ "$#" = 0 ] ; do
+		case "$1" in
+			--version|-v) echo $myversion ; exit 0
+			;;
+			--help|-h)
+			echo "show OpenFirmware device path for a file or a device node"
+			echo "usage: ${0##*/} [/]|[/boot/vmlinux]"
+			exit 0
+			;;
+			*)
+			file=$1
+			break
+			;;
+		esac
+	done
 fi
 
 # check if we run on a NewWorld PowerMacintosh
 if [ -f /proc/device-tree/openprom/model ] ; then
-    while read openfirmware ofversion; do
-	case "$openfirmware" in
-	  iMac,1|OpenFirmware)	MACHINE="pmac_new" ;;
-	  Open)			MACHINE="pmac_old" ;;
-	esac
-    done < <(cat /proc/device-tree/openprom/model;echo)
+        while read openfirmware ofversion; do
+                case "$openfirmware" in
+                iMac,1|OpenFirmware)      MACHINE="pmac_new" ;;
+                Open)      MACHINE="pmac_old" ;;
+                esac
+        done < <(cat /proc/device-tree/openprom/model;echo)
 fi
 
-if [ "$MACHINE" = "pmac_old" ]; then
-    echo 1>&2 "ERROR: This machine is an Oldworld, no need for firmware pathnames"
-    exit 1
+test "$MACHINE" = "pmac_old" && {
+echo 1>&2 "ERROR: This machine is an Oldworld, no need for firmware pathnames"
+exit 1
+}
+
+mystat="`type -p stat`"
+if [ -z "$mystat" -o ! -x "$mystat" ] ; then
+echo 1>&2 "ERROR: GNU stat required"
+exit 1
 fi
 
 if [ -b $file ] ; then
-    read i i i i file_major file_minor i < <(ls -l "$file")
-    file_major="${file_major%%,*}"
-    file_minor="${file_minor##*,}"
-    file=/
+file_majorminor=`/bin/ls -l "$file" | awk '{ print $5""$6 }'`
+file_major="${file_majorminor%%,*}"
+file_minor="${file_majorminor##*,}"
+file=/
 else
-    mystat="`type -p stat`"
-    if [ -z "$mystat" -o ! -x "$mystat" ] ; then
-	echo 1>&2 "ERROR: GNU stat required"
-	exit 1
-    fi
-
-    file_majorminor=$($mystat --format="%d" "$file")
-    file_major="$[file_majorminor >> 8]"
-    file_minor="$[file_majorminor & 255]"
+file_majorminor=`"$mystat" --format="%d" "$file"`
+file_major="$[file_majorminor/256]"
+file_minor="$[file_majorminor - $file_major * 256]"
 fi
 file_majorminor=$file_major:$file_minor
-dbg_show file_majorminor
 
 file_sysfs_path=
-# assert that /sys is mounted, else try to mount, on fail complain
-if test -d /sys/block || mount -t sysfs sysfs /sys; then
-    for i in $(find /sys/block -name dev); do
-	: looking at $i
-	if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
-    done
-else
-    echo sysfs not mounted on /sys and attempt to mount failed
-    echo may be no kernel 2.6.x?
-fi
+for i in `find /sys/block -name dev`
+do
+: looking at $i
+if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
+done
 
 if [ -z "$file_sysfs_path" ] ; then
-    echo 1>&2 "ERROR: can not file major:minor $file_majorminor for $file"
-    exit 1
+echo 1>&2 "ERROR: can not file major:minor $file_majorminor for $file"
+exit 1
 fi
 
-dbg_show file_sysfs_path
+: found $file_sysfs_path
 
 file_sysfs_dir="${file_sysfs_path%/dev}"
-dbg_show file_sysfs_dir
+: $file_sysfs_dir
 if [ ! -L "$file_sysfs_dir/device" ] ; then
 	# maybe a partition
 	file_partition="${file_sysfs_dir##*[a-z]}"
-	dbg_show file_partition
+	: file_partition $file_partition
 	file_sysfs_dir="${file_sysfs_dir%/*}"
-	dbg_show file_sysfs_dir
+	: $file_sysfs_dir
 	if [ ! -L "$file_sysfs_dir/device" ] ; then
 		echo 1>&2 "ERROR: driver for sysfs path $file_sysfs_dir has no full sysfs support"
 		exit 1
@@ -134,86 +114,66 @@ file_full_sysfs_path="`/bin/pwd`"
 file_storage_type=
 cd "$file_full_sysfs_path"
 case "$file_full_sysfs_path" in
-    */ide[0-9]*/[0-9]*)
-      	file_storage_type=ide
-      	of_disk_ide_channel="${file_full_sysfs_path##*.}"
-      	cd ../..
-      	case "$of_disk_ide_channel" in
-      	    */*)
-      		of_disk_ide_channel="${of_disk_ide_channel%%/*}"
-      		cd ../..
-      		;;
-      	esac
-      	dbg_show of_disk_ide_channel
-      	;;
-    */host[0-9]*/[0-9]*:[0-9]*:[0-9]*:[0-9]*)
-      	file_storage_type=scsi
-	spec="${file_full_sysfs_path##*/host[0-9]*/}"
-	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
-	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
+	*/ide[0-9]*/[0-9]*)
+	file_storage_type=ide
+	of_disk_ide_channel="${file_full_sysfs_path##*.}"
+	cd ../..
+	case "$of_disk_ide_channel" in
+		*/*)
+		of_disk_ide_channel="${of_disk_ide_channel%%/*}"
+		cd ../..
+		;;
+	esac
+	: of_disk_ide_channel $of_disk_ide_channel
+	;;
+	*/host[0-9]*/[0-9]*:[0-9]*:[0-9]*:[0-9]*)
+	file_storage_type=scsi
+	of_disk_scsi_lun="${file_full_sysfs_path##*:}"
+	of_disk_scsi_id="${file_full_sysfs_path%:*}"
+	of_disk_scsi_id="${of_disk_scsi_id##*:}"
 	cd ../..
 	;;
 esac
 
 if [ -f devspec ] ; then
-    read file_of_hw_devtype < devspec
-    file_of_hw_devtype=/proc/device-tree${file_of_hw_devtype}
-    dbg_show file_of_hw_devtype
-    if ! [ -f ${file_of_hw_devtype}/device_type ]; then
-	# check for scsi@$of_disk_scsi_chan/device_type else bail out ..
-	file_of_hw_devtype="${file_of_hw_devtype}/scsi@${of_disk_scsi_chan}"
-	dbg_show file_of_hw_devtype
-    fi
-    if [ -f ${file_of_hw_devtype}/device_type ] ; then
-	case "$(< ${file_of_hw_devtype}/device_type)" in
-	    k2-sata-root)
-		: found k2-sata-root, guessing channel
-		counter=0
-		for i in host[0-9]*; do
-		    : working on virtual scsi host $i
-		    case "$file_full_sysfs_path" in
-		        */$i/*)
-			    : found $i $counter
-			    break
-			    ;;
-		        *) ;;
-		    esac
-		    (( counter++ ))
-		done
-		file_storage_type=sata
-		of_device_path=`grep -l block ${file_of_hw_devtype}/*@$counter/*/device_type`
-		of_device_path=${of_device_path%/device_type}
-		of_device_path=${of_device_path##/proc/device-tree}
-		;;
-	    scsi*)
-		
-		;;
-	    ide|ata)
-		;;
-	    pci-ide|pci-ata)
-		;;
-	    *)
-	        echo Unknown device type $(< ${file_of_hw_devtype}/device_type)
-		exit 1
+	read file_of_hw_devtype < devspec
+	: file_of_hw_devtype $file_of_hw_devtype
+	if [ -f /proc/device-tree${file_of_hw_devtype}/device_type ] ; then
+		case "$(< /proc/device-tree${file_of_hw_devtype}/device_type)" in
+			k2-sata-root)
+			: found k2-sata-root, guessing channel
+			counter=0
+			for i in host[0-9]*
+			do
+			: working on virtual scsi host $i
+				case "$file_full_sysfs_path" in
+				*/$i/*)
+					: found $i $counter
+					break
+					;;
+				*) ;;
+				esac
+				: $((counter++))
+			done
+			file_storage_type=sata
+			of_device_path=`grep -l block /proc/device-tree${file_of_hw_devtype}/*@$counter/*/device_type`
+			of_device_path=${of_device_path%/device_type}
+			of_device_path=${of_device_path##/proc/device-tree}
+		esac
+	fi
+	case "$file_storage_type" in
+	ide)
+	file_of_hw_path="$(< devspec)/disk@$of_disk_ide_channel"
+	;;
+	scsi)
+	file_of_hw_path=$(printf  "%s/sd@%x,%x"  "$(< devspec)" $of_disk_scsi_id $of_disk_scsi_lun)
+	;;
+	sata)
+	file_of_hw_path=$of_device_path
+	;;
 	esac
-    else
-	echo no device_type found in ${file_of_hw_devtype}
-	exit 1
-    fi
-
-    case "$file_storage_type" in
-        ide)
-	    file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}/disk@$of_disk_ide_channel"
-	    ;;
-        scsi)
-	    file_of_hw_path=$(printf  "%s/sd@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
-	    ;;
-        sata)
-	    file_of_hw_path=$of_device_path
-	    ;;
-    esac
-else # no 'devspec' found
-	dbg-show file_full_sysfs_path
+else
+	: file_full_sysfs_path $file_full_sysfs_path
 	# find the path via the device-tree
 	dev_vendor="$(< vendor)"
 	dev_device="$(< device)"
@@ -269,7 +229,7 @@ else # no 'devspec' found
 			of_device_list="$of_device_list ${i%/*}"
 		fi
 	done
-	dbg_show of_device_list
+	: of_device_list $of_device_list
 	case "$of_device_list" in
 		*\ *)
 		: more than one controler found, fun
@@ -306,7 +266,7 @@ else # no 'devspec' found
 				;;
 			*) ;;
 			esac
-			let counter++
+			: $((counter++))
 		done
 		file_storage_type=sata
 		of_device_path=`grep -l block $of_device_list/*@$counter/*/device_type`
@@ -319,39 +279,29 @@ else # no 'devspec' found
 
 	of_device_path=${of_device_path%/device_type}
 	case "$file_storage_type" in
-	    ide)
+		ide)
 		file_of_hw_path="${of_device_path##/proc/device-tree}@$of_disk_ide_channel"
 		;;
-	    scsi)
+		scsi)
 		file_of_hw_path=$(printf  "%s/sd@%x,%x"  "${of_device_path##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
+
 		;;
-	    sata)
+		sata)
 		file_of_hw_path="${of_device_path##/proc/device-tree}"
 		;;
 	esac
 
-	# no "devspec" available
+# no "devspec" available
 fi
 
 #
 # done
 #
-
 file_of_path="$file_of_hw_path"
 if [ ! -z "$file_partition" ] ; then
-    file_of_path="$file_of_hw_path:$file_partition"
+file_of_path="$file_of_hw_path:$file_partition"
 fi
 if [ "$file" != "/" ] ; then
-    file_of_path="$file_of_path,$file"
+file_of_path="$file_of_path,$file"
 fi
 echo $file_of_path
-
-
-#
-# Local variables:
-#     mode: ksh
-#     ksh-indent: 4
-#     ksh-multiline-offset: 2
-#     ksh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
-# End:
-#
