@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 29 11:43:32 CEST 2004 - jplack@suse.de
+
+- workaround an OF bug documented in #42517
+
+-------------------------------------------------------------------
 Wed Jun 23 11:17:55 CEST 2004 - jplack@suse.de
 
 - fixed blocker bug #41772 - LTC9179-SLES9: Installation of RAID 1 failed

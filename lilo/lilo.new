@@ -431,7 +431,7 @@ function running_on_chrp () {
 		error "Partition conversion failed for $OPTION_BOOT"
 	    fi
 	fi
-	mkfs.msdos $OPTION_BOOT || exit 2
+	mkfs.msdos -s 8 $OPTION_BOOT || exit 2
 	cd $TEMP
 	mkdir -p boot || exit 2
 	mount $OPTION_BOOT boot || exit 2
