@@ -390,6 +390,7 @@ echo running on pmac_new
 
 # build the pathnames, copy the files to bootfolder if / is not bootable
 for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
+test -z ${CONFIG_IMAGE_FILE[$i]} && continue
 unset FILE_PATH
 # check if the file is a real file
 test -f ${CONFIG_IMAGE_FILE[$i]} && FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_FILE[$i]}|grep -v /pci[0-9])

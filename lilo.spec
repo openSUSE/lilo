@@ -18,7 +18,7 @@ Obsoletes:    yaboot activate quik
 Requires:     hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      268
+Release:      271
 Source0:      lilo-0.0.6.tar.bz2
 Patch0:       lilo-0.0.6.dif
 Source1:      compatible_machines.txt
@@ -136,6 +136,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Sun Aug 11 2002 - olh@suse.de
+- check for empty image= line on newworld, avoids warning
 * Sat Aug 03 2002 - olh@suse.de
 - load system.map on new pmacs, for debugger
   unset boot-file on new pmacs, breaks yaboot

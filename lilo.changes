@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Aug 11 11:47:50 CEST 2002 - olh@suse.de
+
+- check for empty image= line on newworld, avoids warning
+
+-------------------------------------------------------------------
 Sat Aug  3 19:33:26 CEST 2002 - olh@suse.de
 
 - load system.map on new pmacs, for debugger
