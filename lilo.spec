@@ -14,8 +14,9 @@
 BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp cracklib cvs cyrus-sasl db devs diffutils e2fsprogs file filesystem fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip info insserv kbd less libacl libattr libgcc libselinux libstdc++ libxcrypt libzio m4 make man mktemp module-init-tools ncurses ncurses-devel net-tools netcfg openldap2-client openssl pam pam-modules patch permissions popt procinfo procps psmisc pwdutils rcs readline sed strace syslogd sysvinit tar tcpd texinfo timezone unzip util-linux vim zlib zlib-devel autoconf automake binutils gcc gdbm gettext libtool perl rpm
 
 Name:         lilo
-%define	bootheader 0.0.5
-%define lilo_vers  0.0.10
+#%%define     bootheader 0.0.5
+%define lilo_vers  0.1.1
+%define yaboot_vers 1.3.11
 Group:        System/Boot
 License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
@@ -25,13 +26,13 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      29
+Release:      30
 Source0:      lilo-%{lilo_vers}.tar.bz2
-Source2:      boot-header-%{bootheader}.tar.bz2
-Source3:      lilo-21.tar.gz
-Source5:      http://penguinppc.org/projects/yaboot/yaboot-1.3.11.tar.gz
-Source10:     lilo-addRamDisk.c
-Source11:     lilo-addSystemMap.c
+#Source2:      boot-header-%{bootheader}.tar.bz2
+#Source3:      lilo-21.tar.gz
+Source5:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
+#Source10:     lilo-addRamDisk.c
+#Source11:     lilo-addSystemMap.c
 Patch5:       yaboot-1.3.6.dif
 Patch6:       yaboot-1.3.11-fat.dif
 Patch7:       yaboot-hole_data-journal.diff
@@ -63,19 +64,20 @@ Authors:
     Benjamin Herrenschmidt <benh@kernel.crashing.org>
 
 %prep
-%setup -q -T -c -a 0 -a 2 -a 3 -a 5
+# %%setup -q -T -c -a 0 -a 2 -a 3 -a 5
+%setup -q -T -c -a 0 -a 5
 mv lilo-%{lilo_vers} lilo.ppc
-mv yaboot-1.3.11 yaboot
+mv yaboot-%{yaboot_vers} yaboot
 cd yaboot
 %patch5
 %patch7 -p1
 cp second/yaboot.c second/yaboot_fat.c
 %patch6 -p1
 cd ..
-find boot-header-%{bootheader}/lib/* -name "*.sh" | xargs chmod 755
-find boot-header-%{bootheader}/lib/* -name addnote | xargs chmod 755
-find boot-header-%{bootheader}/lib/* -name hack-coff | xargs chmod 755
-find boot-header-%{bootheader}/lib/* -name mkprep | xargs chmod 755
+find lilo.ppc/lib -name "*.sh" | xargs -r chmod 755
+find lilo.ppc/lib -name addnote | xargs -r chmod 755
+find lilo.ppc/lib -name hack-coff | xargs -r chmod 755
+find lilo.ppc/lib -name mkprep | xargs -r chmod 755
 
 %build
 cd yaboot
@@ -95,11 +97,12 @@ make clean
 make DEBUG=0 VERSION=1.3.11.SuSE yaboot.fat
 mv second/yaboot.fat yaboot.fat
 cd ..
-cd lilo
-make activate
-cd ..
-gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addRamDisk %{S:10}
-gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addSystemMap %{S:11}
+#cd lilo
+#make activate
+#cd ..
+cd lilo.ppc
+gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addRamDisk lilo-addRamDisk.c
+gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addSystemMap lilo-addSystemMap.c
 
 %install
 rm -rfv $RPM_BUILD_ROOT
@@ -109,9 +112,9 @@ mkdir -p $RPM_BUILD_ROOT/lib/lilo/pmac
 mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
-cp -a boot-header-%{bootheader}/lib/* $RPM_BUILD_ROOT/lib/lilo
-cp -a iseries-* $RPM_BUILD_ROOT/lib/lilo/iseries
 cd lilo.ppc
+cp -a iseries-* $RPM_BUILD_ROOT/lib/lilo/iseries
+cp -a lib/* $RPM_BUILD_ROOT/lib/lilo
 chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
 cp -av lilo.old $RPM_BUILD_ROOT/sbin/lilo.old
@@ -128,10 +131,10 @@ cd yaboot
 cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av yaboot.chrp* yaboot.fat $RPM_BUILD_ROOT/lib/lilo/chrp
 cd ..
-cd lilo
-install activate $RPM_BUILD_ROOT/sbin
-install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/lilo/activate
-install -m 644 CHANGES COPYING INCOMPAT README $RPM_BUILD_ROOT%{_docdir}/lilo/activate
+#cd lilo
+#install activate $RPM_BUILD_ROOT/sbin
+#install -d -m 755 $RPM_BUILD_ROOT%{_docdir}/lilo/activate
+#install -m 644 CHANGES COPYING INCOMPAT README $RPM_BUILD_ROOT%{_docdir}/lilo/activate
 #find $RPM_BUILD_ROOT/lib/lilo -type f -print0 | xargs -0 chmod a-x
 
 %triggerpostun  -- lilo < 0.0.10
@@ -144,18 +147,23 @@ exit 0
 %files
 %defattr (-,root,root)
 /lib/lilo
-/sbin/activate
+#/sbin/activate
 /sbin/lilo*
 /bin/show_of_path.sh
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Mon May 24 2004 - jplack@suse.de
+- fix yet another parser bug
+* Wed May 19 2004 - jplack@suse.de
+- merged lilo&bootheader tar balls, implemented smart PReP
+  partition handling including expansion/shrinking on the fly.
 * Thu May 13 2004 - jplack@suse.de
 - follow symlinks to get file size, umount boot on clean up, clear
   LANG and LC_CTYPE on startup
 * Wed May 12 2004 - jplack@suse.de
-- better error handling, work around YaST bugs (e.g. boot="" bug), some smaller
-  glitches
+- better error handling, work around YaST bugs (e.g. boot="" bug),
+  some smaller glitches
 * Mon May 10 2004 - jplack@suse.de
 - fixed typos for PowerMac G5s
 * Fri May 07 2004 - jplack@suse.de
@@ -169,22 +177,22 @@ exit 0
 * Mon May 03 2004 - jplack@suse.de
 - fixed various pmac bugs/cleanup of pmac handling
 * Mon May 03 2004 - jplack@suse.de
-- fixed typo in lilo triggering bash bug, implemented booting from non
-  standard file systems though a FAT boot file system (#34556) and
-  others.
+- fixed typo in lilo triggering bash bug, implemented booting from
+  non standard file systems though a FAT boot file system (#34556)
+  and others.
 * Mon Apr 26 2004 - jplack@suse.de
 - fixed show_of_path.sh: support for IPR controller and such #39033
   mounts /sys if needed, #39380
 * Fri Apr 02 2004 - jplack@suse.de
-- fixed show_of_path.sh: scsi_id and scsi_lun are given in hex instead
-  of decimal
+- fixed show_of_path.sh: scsi_id and scsi_lun are given in hex
+  instead of decimal
 * Wed Mar 31 2004 - jplack@suse.de
 - set OF variable boot-device to point to your boot device
 * Tue Mar 30 2004 - jplack@suse.de
 - fixes #37294: fixed command line handling, and #37291
 * Fri Mar 26 2004 - jplack@suse.de
-- workaround for possible bug in yaboot, avoid initrd option by using
-  addRamdisk.sh, use fullpath for fdisk (path not set with
+- workaround for possible bug in yaboot, avoid initrd option by
+  using addRamdisk.sh, use fullpath for fdisk (path not set with
   init=/bin/bash)
 * Wed Mar 24 2004 - jplack@suse.de
 - fixed type, bug with device detection, lots of clean ups

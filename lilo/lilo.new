@@ -38,8 +38,12 @@ TEMP="/tmp/ppc_lilo"
 
 shopt -s extglob
 
-STAT_CMD=/usr/bin/stat
+
+## requires    fdisk   parted  stat
+
 FDISK=/sbin/fdisk
+PARTED=/usr/sbin/parted
+STAT_CMD=/usr/bin/stat
 
 
 #
@@ -117,6 +121,13 @@ function get_of_path() {
     if (( errnum != 0 )); then
 	error "show_of_path.sh returned error $errnum while analysing path $1"
     fi
+}
+
+
+function div1000() {
+    local s=$1
+    while (( ${#s} < 4 )); do s="0$s"; done
+    echo ${s%???}.${s:$[${#s}-3]}
 }
 
 
@@ -344,30 +355,81 @@ function running_on_chrp () {
 	error "please specify the boot partition NUMBER in boot= $OPTION_BOOT"
     fi
 
+    # read specifications for primary partitions from boot device
+
+    # parse and output like the following
+    #
+    #	  parted /dev/sda print
+    #     Disk geometry for /dev/sda: 0.000-70006.835 megabytes
+    #	   ....
+    #	  Minor    Start       End     Type      Filesystem  Flags
+    #	  1          0.016     22.000  primary               type=41
+    #	  2         22.000   1048.000  primary   linux-swap  type=82
+    #	  3       1048.000   5146.000  primary   reiserfs    type=83
+    #	  4       6000.000  70006.000  extended              lba, type=0f
+    #	   ....
+    #
+    local -a p_start p_end p_type p_flags
+
+    while read; do
+	local minor start end type fs_n_flags
+
+	[[ "${REPLY:0:1}" == [1234D] ]] || continue
+	read  minor start end type fs_n_flags <<< "$REPLY"
+	case $minor in
+	    1|2|3|4)
+		p_start[$minor]=${start/.}
+		p_end[$minor]=${end/.}
+		p_type[$minor]=${type}
+		p_flags[$minor]=${fs_n_flags}
+		;;
+	    Disk)
+		REPLY=${REPLY#Disk geometry*-}
+		REPLY=${REPLY% megabytes*}
+		p_start[5]=${REPLY/.}
+		;;
+	    *)
+	        error "unparsable line on parted output: $REPLY"
+		;;
+	esac
+    done < <( $PARTED $device print )
+
     if (( vmlinux_nr + initrd_nr > 0 )); then
 	# copy all kernels and initrds from non supported file systems
 	# to one FAT partition
 
 	# check size of partition OPTION_BOOT, must fit at least the default kernel
-	s=$($FDISK -l $OPTION_BOOT 2>&1)
-	s=${s%%bytes*}; s=${s#*[GM]B,} 	# get partition size, ugly hack.
-	local -i bootsize=$[s/512-180]	# size in blocks minus overhead
-
-	# check if default image/initrd fits
-	local -i defaultsize=$(( $(fsize /lib/lilo/chrp/yaboot.fat) + $(fsize $TEMP/yaboot.conf) ));
+	local -i bootsize=$(( (p_end[partition]-p_start[partition])/500 ))	# size in blocks
+	
+	# check if default image/initrd fits, add overhead of 180 blocks approx.
+	local -i defaultsize=$(( 180 + $(fsize /lib/lilo/chrp/yaboot.fat) + $(fsize $TEMP/yaboot.conf) ));
 	(( defaultsize += (vmlinux_default==0) ? 0 : $(fsize ${vmlinux_copy[$vmlinux_default]}) ));
 	(( defaultsize += (initrd_default==0) ? 0 : $(fsize ${initrd_copy[$initrd_default]}) ));
 
 	if (( bootsize < defaultsize )); then
-	    echo 2>&1 "Error: Boot partition '$OPTION_BOOT' cannot hold $defaultsize blocks"
-	    exit 1
+	    # may be resize of the partition is possible and helps?
+	    if (( (p_start[partition+1]-p_start[partition])/500 < defaultsize )); then
+		error "Boot partition '$OPTION_BOOT' cannot hold $defaultsize blocks"
+	    fi
+	    echo >&2 "Warning: Extending boot partition $OPTION_BOOT, using free disk space"
+	    local start=$(div1000 ${p_start[$partition]})
+	    local end=$(div1000 ${p_start[$((partition+1))]} )
+	    if ! { $PARTED $device rm $partition &&
+		$PARTED $device mkpart primary $start $end &&
+		$PARTED $device set $partition type 6; } >& /dev/null
+	    then
+		error "Partition extension failed for $OPTION_BOOT"  
+	    fi
 	fi
+
+	# make it error friendly (tm) and try to unmount boot partition
+	[[ $(</proc/mounts) == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
 
 	# create the FAT partition and file system on $OPTION_BOOT
 	if [[ "${fat_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be FAT16
 	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to FAT16 type"
-	    if ! parted $device set $partition type 6; then
+	    if ! $PARTED $device set $partition type 6 >& /dev/null; then
 		error "Partition conversion failed for $OPTION_BOOT"
 	    fi
 	fi
@@ -422,16 +484,33 @@ function running_on_chrp () {
 	if [[ "${prep_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be PReP boot
 	    echo >&2 "Warning: Boot partition $OPTION_BOOT converted to PReP boot type"
-	    if ! parted $device set $partition type 0x41; then
+	    if ! $PARTED $device set $partition type 0x41 >& /dev/null; then
 		error "Partition conversion failed for $OPTION_BOOT"
 	    fi
 	fi
+
+	# shrink PReP boot partition if bigger than 4MB
+	if (( (p_end[partition]-p_start[partition]) > 4000 )); then
+	    echo >&2 "Warning: Shrinking PReP boot partition $OPTION_BOOT, avoiding firmware confusion"
+	    local start=$(div1000 ${p_start[$partition]})
+	    local end=$(div1000 $(( p_start[partition] + $(fsize /lib/lilo/chrp/yaboot.chrp) )) ) 
+	    if ! { $PARTED $device rm $partition &&
+		$PARTED $device mkpart primary $start $end &&
+		$PARTED $device set $partition type 0x41; } >& /dev/null
+	    then
+		error "Partition shrink failed for $OPTION_BOOT"  
+	    fi
+	fi
+
 	echo Installing /lib/lilo/chrp/yaboot.chrp onto $OPTION_BOOT
 	dd if=/lib/lilo/chrp/yaboot.chrp of=$OPTION_BOOT 2>/dev/null
 	cp $TEMP/yaboot.conf /etc/yaboot.conf || exit 2
 	echo "Converted /etc/lilo.conf to /etc/yaboot.conf"
     fi
-    /sbin/activate $device $partition
+    # TODO check whether this is neccessary
+    if [[ ${p_flags[$partition] != *boot* ]]; then
+	$PARTED $device set $partition boot on >& /dev/null
+    fi
 
     NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
     if (( vmlinux_nr + initrd_nr > 0 )); then
@@ -633,8 +712,8 @@ function running_on_iseries () {
 	    echo Installing "$ISERIES_BOOT_IMAGE" onto $P
 	    dd if="$ISERIES_BOOT_IMAGE" of=$P bs=4096 2>/dev/null
 		
-	    echo set active flag on partition ${P%%+([0-9])} ${P##+([^0-9])}
-	    /sbin/activate ${P%%+([0-9])} ${P##+([^0-9])}
+	    echo setting boot flag on partition ${P%%+([0-9])} ${P##+([^0-9])}
+	    $PARTED ${P%%+([0-9])} set ${P##+([^0-9])} boot on >& /dev/null
 	fi
     done  #  end of OPTION_BOOT loop
 
@@ -653,10 +732,7 @@ function running_on_iseries () {
 }
 
 
-
-
 function running_on_prep () {
-
     echo running on prep
     #only the device is given and dd to the raw device is a bad idea
     
@@ -978,8 +1054,8 @@ function check_config_file () {
     #  loop for multiple OPTION_BOOT entries
     #
     for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
-	OPTION_DEVICE[$i]="${OPTION_BOOT%%+([0-9])}"	 # split boot option to
-	OPTION_PARTITION[$i]="${OPTION_BOOT##+([^0-9])}" # dev & part for parted
+	OPTION_DEVICE[$i]="${OPTION_BOOT[$i]%%+([0-9])}"	 # split boot option to
+	OPTION_PARTITION[$i]="${OPTION_BOOT[$i]##+([^0-9])}"	 # dev & part for parted
     done
 } #end function check_config_file
 

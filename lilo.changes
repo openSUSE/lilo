@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Mon May 24 15:45:12 CEST 2004 - jplack@suse.de
+
+- fix yet another parser bug
+
+-------------------------------------------------------------------
+Wed May 19 16:31:58 CEST 2004 - jplack@suse.de
+
+- merged lilo&bootheader tar balls, implemented smart PReP
+  partition handling including expansion/shrinking on the fly.
+
+-------------------------------------------------------------------
 Thu May 13 15:34:08 CEST 2004 - jplack@suse.de
 
 - follow symlinks to get file size, umount boot on clean up, clear
@@ -7,8 +18,8 @@ Thu May 13 15:34:08 CEST 2004 - jplack@suse.de
 -------------------------------------------------------------------
 Wed May 12 17:30:09 CEST 2004 - jplack@suse.de
 
-- better error handling, work around YaST bugs (e.g. boot="" bug), some smaller
-  glitches
+- better error handling, work around YaST bugs (e.g. boot="" bug),
+  some smaller glitches
 
 -------------------------------------------------------------------
 Mon May 10 17:11:15 CEST 2004 - jplack@suse.de
@@ -40,9 +51,9 @@ Mon May  3 23:10:11 CEST 2004 - jplack@suse.de
 -------------------------------------------------------------------
 Mon May  3 11:03:01 CEST 2004 - jplack@suse.de
 
-- fixed typo in lilo triggering bash bug, implemented booting from non
-  standard file systems though a FAT boot file system (#34556) and
-  others.
+- fixed typo in lilo triggering bash bug, implemented booting from
+  non standard file systems though a FAT boot file system (#34556)
+  and others.
 
 -------------------------------------------------------------------
 Mon Apr 26 14:09:03 CEST 2004 - jplack@suse.de
@@ -53,8 +64,8 @@ Mon Apr 26 14:09:03 CEST 2004 - jplack@suse.de
 -------------------------------------------------------------------
 Fri Apr  2 14:54:33 CEST 2004 - jplack@suse.de
 
-- fixed show_of_path.sh: scsi_id and scsi_lun are given in hex instead
-  of decimal
+- fixed show_of_path.sh: scsi_id and scsi_lun are given in hex
+  instead of decimal
 
 -------------------------------------------------------------------
 Wed Mar 31 15:56:21 CEST 2004 - jplack@suse.de
@@ -69,8 +80,8 @@ Tue Mar 30 17:54:57 CEST 2004 - jplack@suse.de
 -------------------------------------------------------------------
 Fri Mar 26 15:28:34 CET 2004 - jplack@suse.de
 
-- workaround for possible bug in yaboot, avoid initrd option by using
-  addRamdisk.sh, use fullpath for fdisk (path not set with
+- workaround for possible bug in yaboot, avoid initrd option by
+  using addRamdisk.sh, use fullpath for fdisk (path not set with
   init=/bin/bash)
 
 -------------------------------------------------------------------
