@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Mon Oct 15 17:51:52 CEST 2001 - olh@suse.de
+
+- fix yaboot.conf creation, sysmap= was wrong
+
+-------------------------------------------------------------------
+Mon Oct 15 12:21:34 CEST 2001 - olh@suse.de
+
+- add patch from jeffm to fix image loading on chrp+reiserfs
+
+-------------------------------------------------------------------
 Mon Oct  8 23:11:15 CEST 2001 - olh@suse.de
 
 - do nothing on oldworld when called with --lilo-rootdrive

@@ -274,15 +274,15 @@ if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
 	else
 		CONFIG_IMAGE_INITRDPATH[$i]=$FILE_PATH
 	fi
-elif [ ! -z "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
+fi
+unset FILE_PATH
+if [ ! -z "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
 	FILE_PATH=$($SHOW_OF_PATH_SH ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
 	if [ "$FILE_PATH" = "" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
 		CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
 	else
 		CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
 	fi
-else
-	continue
 fi
 done
 
