@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar 30 17:54:57 CEST 2004 - jplack@suse.de
+
+- fixes #37294: fixed command line handling, and #37291
+
+-------------------------------------------------------------------
 Fri Mar 26 15:28:34 CET 2004 - jplack@suse.de
 
 - workaround for possible bug in yaboot, avoid initrd option by using

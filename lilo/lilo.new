@@ -34,20 +34,39 @@ DEFAULT_BOOTFOLDER=suseboot
 
 shopt -s extglob
 
-
-
 STAT_CMD=/usr/bin/stat
-
 FDISK=/sbin/fdisk
 
 
+#
+#  parse options
+#
 
-if [ "$1" = "--lilo-rootdrive" ] ; then
-    LILO_ROOTDRIVE=true
-    shift
-    SHOW_OF_PATH_SH="$SHOW_OF_PATH_SH --lilo-rootdrive $1"
-    shift
-fi
+function Usage() {
+    # TODO: print a usage message that makes sense ...
+    echo "Usage: lilo <currently no options supported>"
+}
+
+while [ "$1" ]; do case "$1" in
+    #--lilo-rootdrive)
+    #    if ! [ "$2" ]; then
+    #	    echo "lilo: no rootdrive given on command line"
+    #	    Usage;
+    #	    exit 1;
+    #	fi
+    #	
+    #   LILO_ROOTDRIVE=true
+    #   shift
+    #   SHOW_OF_PATH_SH="$SHOW_OF_PATH_SH --lilo-rootdrive $1"
+    #   shift
+    #   ;;
+    *)
+        echo "lilo: Option \"$1\" not supported"
+	Usage;
+        exit 1
+	;;
+esac; done
+
 
 function running_on_chrp () {
     echo running on chrp
@@ -72,7 +91,7 @@ function running_on_chrp () {
 	    echo "**************************************************************"
 	    exit -1
 	fi
-	read P dummy <<< $PART
+	read P dummy <<< "$PART"
     else
 	#we have the device, but better safe than sorry
 	echo install on $OPTION_DEVICE
@@ -149,6 +168,19 @@ function running_on_chrp () {
     } > /tmp/ppc_lilo/yaboot.conf
     cp -av /tmp/ppc_lilo/yaboot.conf /etc/yaboot.conf
     rm -f /tmp/ppc_lilo/yaboot.conf
+
+
+#if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+#  NV_BOOT_PATH=$($SHOW_OF_PATH_SH $OPTION_BOOT)
+#  echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
+#  nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
+#  if [ x"$(nvsetenv boot-file)" != "xboot-file=" ] ; then
+#    echo "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
+#    nvsetenv boot-file
+#    nvsetenv boot-file ""
+#  fi
+#fi
+
 }
 
 
@@ -280,7 +312,7 @@ function running_on_iseries () {
 	esac
 	
 	if [ "$ISERIES_TARGET" = "slot" -a -n "$ISERIES_BOOT_IMAGE" -a -f "$ISERIES_BOOT_IMAGE" ] ; then
-	    read size name <(ls -s --block-size=1024 $ISERIES_BOOT_IMAGE)
+	    read size name < <(ls -s --block-size=1024 $ISERIES_BOOT_IMAGE)
 	    echo "this will take a while... ($size kb)"
 	    echo "writing kernel $ISERIES_BOOT_IMAGE to /proc/iSeries/mf/$ISERIES_BOOT/vmlinux"
 	    dd if=$ISERIES_BOOT_IMAGE of=/proc/iSeries/mf/$ISERIES_BOOT/vmlinux bs=4096
@@ -338,6 +370,19 @@ function running_on_iseries () {
 	    /sbin/activate ${P%%+([0-9])} ${P##+([^0-9])}
 	fi
     done  #  end of OPTION_BOOT loop
+
+    if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+	echo "To activate your partition you have to change your NWSD manually"
+	# TODO print nice proposals for OS400 cmds
+	#
+	#  loop for multiple OPTION_BOOT entries
+	#
+	#for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
+
+	# echo "    CHGNWSD <nwsd-name> ......."
+
+	# done
+    fi
 }
 
 
@@ -368,7 +413,7 @@ function running_on_prep () {
 	    echo "**************************************************************"
 	    exit -1
 	fi
-	read P dummy <<< $PART
+	read P dummy <<< "$PART"
     else
 	#we have the device, but better safe than sorry
 	echo install on $OPTION_DEVICE
@@ -387,7 +432,7 @@ function running_on_prep () {
 	
     echo Installing /boot/zImage.prep onto $P
     dd if=/boot/zImage.prep of=$P
-    /sbin/activate  ${P%%+([0-9])} ${P##+([^0-9])}
+    /sbin/activate ${P%%+([0-9])} ${P##+([^0-9])}
 
     echo check the image files
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
@@ -452,10 +497,10 @@ function device_nr () {
 	return;
     fi
 
-    # test whether its a device ?
+    # test whether its a block device ?
     if [ ! -b "$d" ]; then
 	# this should never happen
-	echo >&2 "Path '$d' does not point to a device node!"
+	echo >&2 "Path '$d' does not point to a block device node!"
 	echo 0000
 	return;
     fi
@@ -473,8 +518,8 @@ function check_arch () {
 	  #		dont force copy on new macs until yaboot is fixed
 	  #		*MacRISC2*)	MACHINE="pmac" ; COPY_BOOT_FILES="true" ;;
 	  *MacRISC*)	MACHINE="pmac" ;;
-	  *CHRP*)		MACHINE="chrp" ;;
-	  *PReP*)		MACHINE="prep" ;;
+	  *CHRP*)	MACHINE="chrp" ;;
+	  *PReP*)	MACHINE="prep" ;;
 	  *iSeries*)	MACHINE="iseries" ;;
 	esac
     done < /proc/cpuinfo
@@ -484,8 +529,8 @@ function check_arch () {
 	    echo `cat /proc/device-tree/openprom*/model` > /tmp/ppc_lilo/openprom_model
 	    while read openfirmware ofversion; do
 		case "$openfirmware" in
-		  iMac,1|OpenFirmware)      MACHINE="pmac_new" ;;
-		  Open)      MACHINE="pmac_old" ;;
+		  iMac,1|OpenFirmware)	MACHINE="pmac_new" ;;
+		  Open) 		MACHINE="pmac_old" ;;
 		esac
 	    done < /tmp/ppc_lilo/openprom_model
 	fi
@@ -496,6 +541,7 @@ function check_arch () {
 function prepare_config_file () {
     # strip comments and empty lines
     
+    # TODO: clean that mess up ... 
     grep -v "#.*$" < $CONFIG_LILO_CONF | grep -v "\(^\W$\|^$\)" | sed 's/=/ & /' > /tmp/ppc_lilo/config_tmp
     
     #"

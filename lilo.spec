@@ -24,7 +24,7 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      14
+Release:      19
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source2:      boot-header-%{bootheader}.tar.bz2
 Source3:      lilo-21.tar.gz
@@ -142,6 +142,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Mar 30 2004 - jplack@suse.de
+- fixes #37294: fixed command line handling, and #37291
 * Fri Mar 26 2004 - jplack@suse.de
 - workaround for possible bug in yaboot, avoid initrd option by using
   addRamdisk.sh, use fullpath for fdisk (path not set with
