@@ -373,6 +373,7 @@ function running_on_chrp () {
 
 	[[ "${REPLY:0:1}" == [1234D] ]] || continue
 	read  minor start end type fs_n_flags <<< "$REPLY"
+	(( minor > 4 )) && continue
 	case $minor in
 	    1|2|3|4)
 		p_start[$minor]=${start/.}

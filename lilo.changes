@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun 17 11:55:20 CEST 2004 - jplack@suse.de
+
+- fixed #42148, lilo cannot handle more than 10 partitions
+
+-------------------------------------------------------------------
 Wed Jun 16 23:12:46 CEST 2004 - olh@suse.de
 
 - remove hardcoded /boot/System.map path on iseries (#42000)
