@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-  set -x
+# set -x
 
 obj_dir=.
 obj_dir=/lib/lilo/iseries

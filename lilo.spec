@@ -150,6 +150,11 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Jun 16 2004 - olh@suse.de
+- remove hardcoded /boot/System.map path on iseries (#42000)
+  use prep binary boot header from current kernel-source package
+  do not call /sbin/activate on prep anymore, its gone
+  disable debug output in makezimage.sh scripts
 * Thu Jun 03 2004 - jplack@suse.de
 - entries without initrd have been errornously ignored
 * Tue Jun 01 2004 - jplack@suse.de

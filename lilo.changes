@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Jun 16 23:12:46 CEST 2004 - olh@suse.de
+
+- remove hardcoded /boot/System.map path on iseries (#42000)
+  use prep binary boot header from current kernel-source package
+  do not call /sbin/activate on prep anymore, its gone
+  disable debug output in makezimage.sh scripts
+
+-------------------------------------------------------------------
 Thu Jun  3 16:46:02 CEST 2004 - jplack@suse.de
 
 - entries without initrd have been errornously ignored

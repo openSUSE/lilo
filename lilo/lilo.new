@@ -601,14 +601,13 @@ function running_on_iseries () {
 	if [ -n "$ISERIES_INITRD" ]; then
 	    echo "ISERIES_INITRD  " $ISERIES_INITRD
 	    echo
-	    echo generating $ISERIES_KERNEL_TMPFILE with /lib/lilo/iseries/iseries-addRamDisk
+	    echo generating $ISERIES_KERNEL_TMPFILE with /lib/lilo/iseries/make_zimage_iseries.sh
 	    echo
 	    unset ec
-	    /lib/lilo/iseries/iseries-addRamDisk \
-	      $ISERIES_INITRD \
-	      /boot/System.map-`get_kernel_version $ISERIES_IMAGE` \
-	      $ISERIES_IMAGE \
-	      $ISERIES_KERNEL_TMPFILE ; ec=$?
+	    /lib/lilo/iseries/make_zimage_iseries.sh \
+	      --initrd $ISERIES_INITRD \
+	      --vmlinux $ISERIES_IMAGE \
+	      --output $ISERIES_KERNEL_TMPFILE ; ec=$?
 	    echo
 	    if [ "$ec" != "0" ]; then
 		echo bootfile generation failed: ec $ec ;
@@ -755,26 +754,70 @@ function running_on_prep () {
 
 	P=$OPTION_BOOT
     fi
-	
-    echo Installing /boot/zImage.prep onto $P
-    dd if=/boot/zImage.prep of=$P 2>/dev/null
-    /sbin/activate ${P%%+([0-9])} ${P##+([^0-9])}
-
-    echo check the image files
-    for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-	local cif="${CONFIG_IMAGE_FILE[$i]}"
-
-	if [ -f $cif ]; then
-	    if [ $(device_of_file $cif) = $(device_nr $OPTION_DEVICE) ]; then
-		echo -n ${CONFIG_IMAGE_LABEL[$i]}
-		test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" && echo " *" || echo
-	    else
-		error "image $cif is not on bootdevice $OPTION_DEVICE"
+    PREP_IMAGE=
+    PREP_CMDLINE=
+    PREP_INITRD=
+    if [ ! -z "$OPTION_DEFAULT" ] ; then
+	# find the default= line
+	for ((i=1; i<=CONFIG_IMAGE_COUNT; i++)); do
+	    if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[$i]}" ] ; then
+		PREP_IMAGE="${CONFIG_IMAGE_FILE[$i]}" 
+		if [ -n "$OPTION_APPEND" ] ; then
+		    PREP_CMDLINE=$OPTION_APPEND
+		fi
+		if [ -n "${CONFIG_IMAGE_APPEND[$i]}" ] ; then
+		    PREP_CMDLINE=${CONFIG_IMAGE_APPEND[$i]}
+		fi
+		if [ -n "$OPTION_ROOT" ] ; then
+		    PREP_CMDLINE="root=$OPTION_ROOT $PREP_CMDLINE"
+		fi
+		if [ -n "${CONFIG_IMAGE_ROOT[$i]}" ] ; then
+		    PREP_CMDLINE="root=${CONFIG_IMAGE_ROOT[$i]} $PREP_CMDLINE"
+		fi
+		if [ -n "$OPTION_INITRD" ] ; then
+		    PREP_INITRD=$OPTION_INITRD
+		fi
+		if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
+		    PREP_INITRD="${CONFIG_IMAGE_INITRD[$i]}"
+		fi
 	    fi
-	else
-	    error "image $cif in ${CONFIG_IMAGE_LABEL[$i]} is missing"
+	done
+    else
+	# pick the first image= line
+	PREP_IMAGE="${CONFIG_IMAGE_FILE[1]}"
+	if [ -n "$OPTION_APPEND" ] ; then
+	    PREP_CMDLINE=$OPTION_APPEND
 	fi
-    done
+	if [ -n "${CONFIG_IMAGE_APPEND[1]}" ] ; then
+	    PREP_CMDLINE=${CONFIG_IMAGE_APPEND[1]}
+	fi
+	if [ -n "$OPTION_ROOT" ] ; then
+	    PREP_CMDLINE="root=$OPTION_ROOT $PREP_CMDLINE"
+	fi
+	if [ -n "${CONFIG_IMAGE_ROOT[1]}" ] ; then
+	    PREP_CMDLINE="root=${CONFIG_IMAGE_ROOT[1]} $PREP_CMDLINE"
+	fi
+	if [ -n "$OPTION_INITRD" ] ; then
+	    PREP_INITRD=$OPTION_INITRD
+	fi
+	if [ -n "${CONFIG_IMAGE_INITRD[1]}" ] ; then
+	    PREP_INITRD="${CONFIG_IMAGE_INITRD[1]}"
+	fi
+    fi
+    if [ ! -z "$PREP_INITRD" ] ; then
+	PREP_INITRD="--initrd $PREP_INITRD"
+    fi
+    /lib/lilo/prep/make_zimage_prep.sh \
+    --vmlinux "$PREP_IMAGE" \
+    $PREP_INITRD \
+    --tmp "$TEMP" \
+    --output "$TEMP/zImage.prep"
+    /lib/lilo/chrp/mkzimage_cmdline \
+    	-a 1 \
+	-s "$PREP_CMDLINE" \
+	"$TEMP/zImage.prep"
+    echo "Installing $TEMP/zImage.prep onto $P"
+    dd if="$TEMP/zImage.prep" of=$P 2>/dev/null
 }
 
 
