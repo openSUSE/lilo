@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu May 13 15:34:08 CEST 2004 - jplack@suse.de
+
+- follow symlinks to get file size, umount boot on clean up, clear
+  LANG and LC_CTYPE on startup
+
+-------------------------------------------------------------------
 Wed May 12 17:30:09 CEST 2004 - jplack@suse.de
 
 - better error handling, work around YaST bugs (e.g. boot="" bug), some smaller

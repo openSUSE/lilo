@@ -20,11 +20,12 @@ Group:        System/Boot
 License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
 Requires:     hfsutils
+Requires:     dosfstools
 Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      28
+Release:      29
 Source0:      lilo-%{lilo_vers}.tar.bz2
 Source2:      boot-header-%{bootheader}.tar.bz2
 Source3:      lilo-21.tar.gz
@@ -149,6 +150,9 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu May 13 2004 - jplack@suse.de
+- follow symlinks to get file size, umount boot on clean up, clear
+  LANG and LC_CTYPE on startup
 * Wed May 12 2004 - jplack@suse.de
 - better error handling, work around YaST bugs (e.g. boot="" bug), some smaller
   glitches

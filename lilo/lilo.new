@@ -26,6 +26,9 @@
 ##     append = "hwinfo=-cdrom 3 desktop"
 ##
 
+# Language kills all parsing effort
+unset LANG
+unset LC_CTYPE
 
 #CONFIG_LILO_CONF=~olh/ppc/lilo/lilo.conf
 CONFIG_LILO_CONF=/etc/lilo.conf
@@ -141,7 +144,7 @@ function running_on_chrp () {
     echo running on chrp
 
     # find all PReP boot and FAT partitions
-    local -a prep_part fat_part
+    local -a prep_part fat_part fat32_part
 
     while read; do
 	local device start end blocks id system
@@ -155,6 +158,9 @@ function running_on_chrp () {
 	      ;;
 	  6)  # FAT16 partition
 	      fat_part=(${fat_part[*]} $device)
+	      ;;
+	  c) # FAT32 partition
+	      fat32_part=(${fat32_part[*]} $device)
 	      ;;
 	esac
 	# please note: an empty boot= will cause a full disk scan of
@@ -185,20 +191,26 @@ function running_on_chrp () {
 	       	[ "$OPTION_BOOT" ] || OPTION_BOOT=$fat_part
 	       	;;
             0)
-	        error "in config file, boot = $OPTION_BOOT is not 41 PReP nor FAT"  1
+		# special case: YaST2 does not give the option for FAT16 but
+		# only for FAT32 so allow that as a special case
+		
+		if [ ${#fat32_part[*]} == 1 ]; then
+		    OPTION_BOOT=$fat32_part
+		else
+	            error "in config file, boot = $OPTION_BOOT is not 41 PReP nor FAT"  1
+		fi
 	       	;;
 	    *)
 	       	error "in config file, guessing of boot partition failed" 2
 	       	;;
  	esac
     else
-	#we have the device, but better safe than sorry
-	echo Boot target is $OPTION_DEVICE
-	if [[ "${prep_part[*]} ${fat_part[*]}" != *$OPTION_BOOT* ]]; then
+	# we have the device, but better safe than sorry
+	if [[ "${prep_part[*]} ${fat_part[*]} ${fat32_part[*]}" != *$OPTION_BOOT* ]]; then
 	    error "in config file, boot = $OPTION_BOOT is not 41 PReP nor FAT"  1
 	fi
     fi
-    
+    echo Boot target is ${OPTION_BOOT%%+([0-9])}
 
     # check all CONFIG_IMAGE_FILEs whether they are on ext2/ext2/fat/reiserfs
     # else they have to be copied to a fat partition
@@ -211,7 +223,6 @@ function running_on_chrp () {
     local -i vmlinux_nr=0 initrd_nr=0
     local -i vmlinux_default=0 initrd_default=0
     local path_boot=$(get_of_path $OPTION_BOOT)
-    local -i dev_nr_device=$(device_nr $OPTION_DEVICE)
 
     # starting the work and write the yaboot.conf
     {
@@ -235,7 +246,7 @@ function running_on_chrp () {
 	    #
 	    #  is no longer needed due to olh 9.3.2004
 	    # still needed, might be a bug in yaboot 26.3.2004
-	    if [ -n "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 ]; then
+	    if false && [ -n "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 ]; then
 		if ! bash /lib/lilo/chrp/chrp64/addRamdisk.sh $TEMP \
 		  ${CONFIG_IMAGE_FILE[$i]} \
 		  ${CONFIG_IMAGE_INITRD[$i]} \
@@ -276,6 +287,37 @@ function running_on_chrp () {
 		fi
 	    else
 		echo >&2 "Warning: image ${CONFIG_IMAGE_FILE[$i]} in ${CONFIG_IMAGE_LABEL[$i]} is missing"
+		echo >&2 "         Entry ignored"
+		continue
+	    fi
+
+	    if [ "${CONFIG_IMAGE_INITRD[$i]}" -a -f "${CONFIG_IMAGE_INITRD[$i]}" ]; then
+		local image="${CONFIG_IMAGE_INITRD[$i]}"
+		local path_image=$(get_of_path $image)
+		local devnr_image=$(device_of_file $image) 
+		
+		# check whether the image file lies on a file system that is
+		# readable by yaboot
+		if [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		    # Is boot image file on the same device from where yaboot started?
+		    if [ "${path_image:0:${#path_boot}}" = "$path_boot" ]; then
+			CONFIG_IMAGE_INITRD[$i]="$image"
+			# test "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" && echo " *" || echo
+		    else
+			CONFIG_IMAGE_INITRD[$i]="${path_image}"
+		    fi
+		else
+		    # image file needs to be copied to the boot device which has to
+		    # be a FAT file system and be large enough to hold all data
+		    let initrd_nr++
+		    if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ]; then
+			initrd_default=$initrd_nr
+		    fi
+		    initrd_copy[$initrd_nr]="$image"
+		    CONFIG_IMAGE_INITRD[$i]=$(printf "initrd.%03d\n" $initrd_nr)
+		fi
+	    else
+		echo >&2 "Warning: initrd ${CONFIG_IMAGE_INITRD[$i]} in ${CONFIG_IMAGE_LABEL[$i]} is missing"
 		echo >&2 "         Entry ignored"
 		continue
 	    fi
@@ -541,7 +583,7 @@ function running_on_iseries () {
 	if [ "$ISERIES_TARGET" = "slot" -a -n "$ISERIES_BOOT_IMAGE" -a -f "$ISERIES_BOOT_IMAGE" ] ; then
 	    local size name bs=1024 target=/proc/iSeries/mf/$ISERIES_BOOT/vmlinux
 
-	    read size name < <(ls -s --block-size=1024 $ISERIES_BOOT_IMAGE)
+	    read size name < <(ls -Ls --block-size=1024 $ISERIES_BOOT_IMAGE)
 	    echo "this will take a while... ($size kb)"
 	    echo "writing kernel $ISERIES_BOOT_IMAGE to $target"
 
@@ -947,7 +989,7 @@ function fsize() { # get file size in blocks
     if [ -z "$1" ]; then
 	echo 0
     else
-	read s f r < <(ls -s --block-size=512 $1)
+	read s f r < <(ls -Ls --block-size=512 $1)
 	echo $s
     fi
 }
@@ -961,6 +1003,7 @@ function prepare_environment () {
 
 
 function clean_environment () {
+    [[ $(</proc/mounts) == *$TEMP/boot\ * ]] && umount $TEMP/boot
     rm -rf $TEMP
 } #end function clean_environment
 
