@@ -226,7 +226,6 @@ function running_on_pmac_new () {
 	    fi
 	    # 1 is the timeout
 	    echo "\" \"(0C)\" fb8-write drop"
-	    echo "\" \"(0d 0a)\" fb8-write drop"
 	    echo "\"   press space to boot $SPACE_BAR_HINT ... \" fb8-write drop"
 	    echo "get-msecs d# 3 3E8 * +"
 	    echo "begin"
@@ -242,6 +241,7 @@ function running_on_pmac_new () {
 	    echo $MY_STRING_WITHOUT_SPACE_BAR
 	    echo
 	else
+	    echo "\" \"(0d 0a)\" fb8-write drop"
 	    echo -e "\n\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\\\yaboot\" eval"
 	fi
 	echo "</BOOT-SCRIPT>"

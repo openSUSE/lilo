@@ -26,13 +26,9 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      32
+Release:      34
 Source0:      lilo-%{lilo_vers}.tar.bz2
-#Source2:      boot-header-%{bootheader}.tar.bz2
-#Source3:      lilo-21.tar.gz
-Source5:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
-#Source10:     lilo-addRamDisk.c
-#Source11:     lilo-addSystemMap.c
+Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch5:       yaboot-1.3.6.dif
 Patch6:       yaboot-1.3.11-fat.dif
 Patch7:       yaboot-hole_data-journal.diff
@@ -64,8 +60,7 @@ Authors:
     Benjamin Herrenschmidt <benh@kernel.crashing.org>
 
 %prep
-# %%setup -q -T -c -a 0 -a 2 -a 3 -a 5
-%setup -q -T -c -a 0 -a 5
+%setup -q -T -c -a 0 -a 1
 mv lilo-%{lilo_vers} lilo.ppc
 mv yaboot-%{yaboot_vers} yaboot
 cd yaboot
@@ -103,6 +98,7 @@ cd ..
 cd lilo.ppc
 gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addRamDisk lilo-addRamDisk.c
 gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addSystemMap lilo-addSystemMap.c
+gcc -Wall $RPM_OPT_FLAGS -s -o mkzimage_cmdline mkzimage_cmdline.c
 
 %install
 rm -rfv $RPM_BUILD_ROOT
@@ -114,6 +110,7 @@ mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
 cd lilo.ppc
 cp -a iseries-* $RPM_BUILD_ROOT/lib/lilo/iseries
+cp -a mkzimage_cmdline $RPM_BUILD_ROOT/lib/lilo/chrp
 cp -a lib/* $RPM_BUILD_ROOT/lib/lilo
 chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
@@ -153,6 +150,12 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Jun 01 2004 - jplack@suse.de
+- fixed #41333, do of screen init
+* Fri May 28 2004 - jplack@suse.de
+- fixed #41331, parser error
+* Wed May 26 2004 - jplack@suse.de
+- prevent parted from going interactive
 * Tue May 25 2004 - jplack@suse.de
 - ugly typo fixed / lilo stopped execution
 * Tue May 25 2004 - jplack@suse.de

@@ -42,7 +42,7 @@ shopt -s extglob
 ## requires    fdisk   parted  stat
 
 FDISK=/sbin/fdisk
-PARTED=/usr/sbin/parted
+PARTED="/usr/sbin/parted -s"
 STAT_CMD=/usr/bin/stat
 
 
@@ -94,13 +94,13 @@ function error() {
 	       	echo '************************************************************'
 		;;
 	    6)
-	        echo "ERROR: config error, no label in image = $err_var1"
+	        echo "ERROR: config error, no label in section image/other = $err_var1"
 		;;
 	    7)
-	        echo "ERROR: config error, $option option must not be in an image section!"
+	        echo "ERROR: config error, $option option must not be in an image/other section!"
 		;;
 	    8)
-		echo "ERROR: config error, $option option must be in an image section!"
+		echo "ERROR: config error, $option option must be in an image/other section!"
 		;;
 	    *)  # plain custom string
 	        echo "ERROR: $1"
@@ -410,10 +410,6 @@ function running_on_chrp () {
 	if (( bootsize < defaultsize )); then
 	    # may be resize of the partition is possible and helps?
 	    if (( (p_start[partition+1]-p_start[partition])*2  < defaultsize )); then
-		echo $bootsize \< $defaultsize
-		echo ${p_start[$partition]}
-		echo ${p_start[$((partition+1))]}
-		bash
 		error "Boot partition '$OPTION_BOOT' cannot hold $defaultsize blocks"
 	    fi
 	    echo >&2 "Warning: Extending boot partition $OPTION_BOOT, using free disk space"
@@ -959,7 +955,7 @@ function parse_config_file () {
 	    image)
 		# check if previous image section has a label
 		if [ "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    err_var1="${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}"
+		    err_var1="${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]:-${CONFIG_IMAGE_OTHER[$CONFIG_IMAGE_COUNT]}}"
 		    if [ -z "$err_var1" ]; then	error 6; fi
 		fi
 		CONFIG_PARSE_HASIMAGE=true
@@ -969,7 +965,7 @@ function parse_config_file () {
 	    other)
 		# check if previous image section has a label
 		if [ "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    err_var1="${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]}"
+		    err_var1="${CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]:-${CONFIG_IMAGE_OTHER[$CONFIG_IMAGE_COUNT]}}"
 		    if [ -z "$err_var1" ]; then	error 6; fi
 		fi
 		CONFIG_PARSE_HASIMAGE=true

@@ -1,4 +1,19 @@
 -------------------------------------------------------------------
+Tue Jun  1 17:55:50 CEST 2004 - jplack@suse.de
+
+- fixed #41333, do of screen init
+
+-------------------------------------------------------------------
+Fri May 28 13:18:53 CEST 2004 - jplack@suse.de
+
+- fixed #41331, parser error
+
+-------------------------------------------------------------------
+Wed May 26 17:07:08 CEST 2004 - jplack@suse.de
+
+- prevent parted from going interactive
+
+-------------------------------------------------------------------
 Tue May 25 18:13:23 CEST 2004 - jplack@suse.de
 
 - ugly typo fixed / lilo stopped execution 
