@@ -125,6 +125,8 @@ cd ..
 
 %changelog -n lilo
 * Thu Nov 08 2001 - olh@suse.de
+- the last yaboot patch screwed the older changes, apply them again
+* Thu Nov 08 2001 - olh@suse.de
 - add patch to allow loading for zImage.initrd on ppc64
 * Mon Oct 15 2001 - olh@suse.de
 - fix yaboot.conf creation, sysmap= was wrong
