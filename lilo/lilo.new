@@ -97,6 +97,23 @@ test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
 
 for i in `seq 1 $CONFIG_IMAGE_COUNT` ; do
 test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+# hack to create a zImage.initrd for pseries
+# ugly ugly ...
+test ! -z "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 && {
+this_uts="$(get_kernel_version ${CONFIG_IMAGE_FILE[$i]})"
+test -z "$this_uts" && this_uts=$(uname -r)
+bash /boot/lib/chrp/$this_uts/addRamdisk.sh \
+	/tmp/ppc_lilo \
+	${CONFIG_IMAGE_FILE[$i]} \
+	${CONFIG_IMAGE_INITRD[$i]} \
+	${CONFIG_IMAGE_FILE[$i]}.initrd \
+	> /tmp/ppc_lilo/chrp_initrd_$i.log 2>&1 || {
+		cat /tmp/ppc_lilo/chrp_initrd_$i.log
+		exit 1
+	}
+CONFIG_IMAGE_FILE[$i]=${CONFIG_IMAGE_FILE[$i]}.initrd
+unset CONFIG_IMAGE_INITRD[$i]
+}
 	echo "image = ${CONFIG_IMAGE_FILE[$i]}"
 test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
@@ -1005,7 +1022,7 @@ OPTION_PARTITION=`echo "$OPTION_BOOT"|sed 's/[0-9]*$/ &/'|cut -d " " -f 2`
 
 function prepare_envoirement () {
 
-rm -f /tmp/ppc_lilo/*
+rm -f /tmp/ppc_lilo/* 2>/dev/null
 mkdir -p /tmp/ppc_lilo/
 
 } #end function prepare_envoirement

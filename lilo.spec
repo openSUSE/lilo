@@ -5,7 +5,7 @@
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
 #
-# please send bugfixes or comments to feedback@suse.de.
+# Please submit bugfixes or comments via http://www.suse.de/feedback/
 #
 
 # neededforbuild  tetex
@@ -18,7 +18,7 @@ Obsoletes:    yaboot activate quik
 Requires:     hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      321
+Release:      324
 Source0:      lilo-0.0.6.tar.bz2
 Patch0:       lilo-0.0.6.dif
 Source1:      compatible_machines.txt
@@ -136,6 +136,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Tue Nov 12 2002 - olh@suse.de
+- support initrd on pseries
 * Sat Nov 09 2002 - olh@suse.de
 - add yaboot-hole_data-journal.diff
   fix loading of files with holes on reiserfs
