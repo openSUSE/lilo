@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct 17 10:53:40 PDT 2002 - olh@suse.de
+
+- activate a kernel slot with the 'activate' config option
+  zero cmdline in kernel slot
+
+-------------------------------------------------------------------
 Tue Aug 27 18:41:17 CEST 2002 - olh@suse.de
 
 - remove some unwanted debug output on iSeries

@@ -226,6 +226,12 @@ if [ "$ISERIES_TARGET" = "slot" ] ; then
 echo "this will take a while... ($[$(ls -l $ISERIES_BOOT_IMAGE | awk '{ print $5 }') / 1024] kb)"
 echo "writing kernel $ISERIES_BOOT_IMAGE to /proc/iSeries/mf/$OPTION_BOOT/vmlinux"
 dd if=$ISERIES_BOOT_IMAGE of=/proc/iSeries/mf/$OPTION_BOOT/vmlinux bs=4096
+  if [ "$OPTION_ACTIVATE" = yes ] ; then
+        echo activate kernel slot $OPTION_BOOT in /proc/iSeries/mf/side
+        echo $OPTION_BOOT > /proc/iSeries/mf/side
+  fi
+# remove any old cmdline content, leads to newlines
+dd if=/dev/zero of=/proc/iSeries/mf/$OPTION_BOOT/cmdline count=1 bs=254
 echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/$OPTION_BOOT/cmdline
 fi
 

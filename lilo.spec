@@ -9,7 +9,7 @@
 #
 
 # neededforbuild  tetex
-# usedforbuild    aaa_base aaa_version acl attr bash bind9-utils bison cpio cpp cyrus-sasl db devs diffutils e2fsprogs file filesystem fileutils fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip kbd less libgcc libstdc++ libxcrypt m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch permissions ps rcs readline sed sendmail sh-utils shadow strace syslogd sysvinit tar texinfo textutils timezone unzip util-linux vim zlib-devel autoconf automake binutils bzip2 cracklib gcc gdbm gettext libtool perl rpm te_ams te_latex tetex zlib
+# usedforbuild    aaa_base acl attr bash bind9-utils bison cpio cpp cyrus-sasl db devs diffutils e2fsprogs file filesystem fileutils fillup findutils flex gawk gdbm-devel glibc glibc-devel glibc-locale gpm grep groff gzip kbd less libgcc libstdc++ libxcrypt m4 make man mktemp modutils ncurses ncurses-devel net-tools netcfg pam pam-devel pam-modules patch permissions ps rcs readline sed sendmail sh-utils shadow strace syslogd sysvinit tar texinfo textutils timezone unzip util-linux vim zlib-devel autoconf automake binutils bzip2 cracklib gcc gdbm gettext libtool perl rpm te_ams te_latex tetex zlib
 
 Name:         lilo
 Group:        System/Boot
@@ -18,7 +18,7 @@ Obsoletes:    yaboot activate quik
 Requires:     hfsutils
 Summary:      LInux LOader
 Version:      0.0.8
-Release:      284
+Release:      311
 Source0:      lilo-0.0.6.tar.bz2
 Patch0:       lilo-0.0.6.dif
 Source1:      compatible_machines.txt
@@ -50,8 +50,6 @@ Authors:
     Paul Mackeras <paulus@samba.org>
     Cort Dougan <cort@fsmlabs.com>
     Benjamin Herrenschmidt <benh@kernel.crashing.org>
-    Memtest86:
-    Chris Brady <crsbrady@earthlink.net>
 
 %prep
 %setup -q -T -c -a 0 -a 3 -a 5
@@ -136,6 +134,9 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Thu Oct 17 2002 - olh@suse.de
+- activate a kernel slot with the 'activate' config option
+  zero cmdline in kernel slot
 * Tue Aug 27 2002 - olh@suse.de
 - remove some unwanted debug output on iSeries
 * Tue Aug 27 2002 - olh@suse.de
