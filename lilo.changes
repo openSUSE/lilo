@@ -1,7 +1,12 @@
 -------------------------------------------------------------------
+Thu Jan 10 23:26:39 CET 2002 - olh@suse.de
+
+- do not write to slot C on iSeries
+
+-------------------------------------------------------------------
 Wed Jan  9 18:58:15 CET 2002 - olh@suse.de
 
-- do not write to slot A on iseries
+- do not write to slot A on iSeries
 
 -------------------------------------------------------------------
 Wed Jan  9 04:59:59 CET 2002 - olh@suse.de
