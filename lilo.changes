@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 24 15:53:34 CET 2004 - jplack@suse.de
+
+- fixed type, bug with device detection, lots of clean ups
+
+-------------------------------------------------------------------
 Tue Mar 23 19:13:56 CET 2004 - jplack@suse.de
 
 - update to bootheader-0.0.5, mac fix

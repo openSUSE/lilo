@@ -15,6 +15,7 @@ BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp 
 
 Name:         lilo
 %define	bootheader 0.0.5
+%define lilo_vers  0.0.9
 Group:        System/Boot
 License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
@@ -23,8 +24,8 @@ Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.15
-Release:      10
-Source0:      lilo-0.0.8.tar.bz2
+Release:      12
+Source0:      lilo-%{lilo_vers}.tar.bz2
 Source2:      boot-header-%{bootheader}.tar.bz2
 Source3:      lilo-21.tar.gz
 Source5:      http://penguinppc.org/projects/yaboot/yaboot-1.3.11.tar.gz
@@ -61,7 +62,7 @@ Authors:
 
 %prep
 %setup -q -T -c -a 0 -a 2 -a 3 -a 5
-mv lilo-0.0.8	lilo.ppc
+mv lilo-%{lilo_vers} lilo.ppc
 mv yaboot-1.3.11 yaboot
 cd yaboot
 %patch5
@@ -141,6 +142,8 @@ exit 0
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Mar 24 2004 - jplack@suse.de
+- fixed type, bug with device detection, lots of clean ups
 * Tue Mar 23 2004 - jplack@suse.de
 - update to bootheader-0.0.5, mac fix
 * Tue Mar 23 2004 - jplack@suse.de
