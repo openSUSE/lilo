@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Nov 13 12:35:41 CET 2002 - olh@suse.de
+
+- requires: binutils for linking the kernel on pseries
+
+-------------------------------------------------------------------
 Tue Nov 12 20:40:07 CET 2002 - olh@suse.de
 
 - support initrd on pseries

@@ -17,8 +17,9 @@ License:      BSD, Other License(s), see package
 Obsoletes:    yaboot activate quik 
 Requires:     hfsutils
 Summary:      LInux LOader
+Requires:     binutils
 Version:      0.0.8
-Release:      324
+Release:      326
 Source0:      lilo-0.0.6.tar.bz2
 Patch0:       lilo-0.0.6.dif
 Source1:      compatible_machines.txt
@@ -136,6 +137,8 @@ cd ..
 %doc %{_docdir}/lilo
 
 %changelog -n lilo
+* Wed Nov 13 2002 - olh@suse.de
+- requires: binutils for linking the kernel on pseries
 * Tue Nov 12 2002 - olh@suse.de
 - support initrd on pseries
 * Sat Nov 09 2002 - olh@suse.de
