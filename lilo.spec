@@ -69,8 +69,8 @@ cd yaboot
 %patch7 -p1
 cp second/yaboot.c second/yaboot_fat.c
 %patch6 -p1
-cd ..
 %patch8 -p1
+cd ..
 find lilo.ppc/lib -name "*.sh" | xargs -r chmod 755
 find lilo.ppc/lib -name addnote | xargs -r chmod 755
 find lilo.ppc/lib -name hack-coff | xargs -r chmod 755
