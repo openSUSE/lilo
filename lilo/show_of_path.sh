@@ -205,7 +205,7 @@ if [ -f devspec ] ; then
 		esac
 		(( counter++ ))
 	    done
-	    of_device_path=`grep -l block ${file_of_hw_devtype}/*@$counter/*/device_type`
+	    of_device_path=`grep -l block ${file_of_hw_devtype}/k2-sata*@$counter/*/device_type`
 	    of_device_path=${of_device_path%/device_type}
 	    of_device_path=${of_device_path##/proc/device-tree}
 	    file_storage_type=sata

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Apr 18 11:57:36 CEST 2005 - jplack@suse.de
+
+- added fix from #73635: show_of_path can not deal with more than
+  one G5 SATA drive
+
+-------------------------------------------------------------------
 Thu Apr  7 13:12:15 CEST 2005 - jplack@suse.de
 
 - fix build problem, bummer.
