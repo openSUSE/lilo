@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 19 22:45:40 CEST 2005 - jplack@suse.de
+
+- check for yaboot.conf on bad volume (#58521 - LTC10252)
+
+-------------------------------------------------------------------
 Mon Apr 18 11:57:36 CEST 2005 - jplack@suse.de
 
 - added fix from #73635: show_of_path can not deal with more than
