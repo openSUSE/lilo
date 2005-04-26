@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Apr 26 20:54:54 CEST 2005 - olh@suse.de
+
+- build the binaries in /lib/lilo/chrp/ from source
+  instead of keeping binaries in the source repository
+  move make_zimage_chrp64.sh from /lib/lilo/chrp/chrp64 one dir up,
+  keep compat symlink (part of #67026 - LTC14213)
+
+-------------------------------------------------------------------
 Mon Mar 21 11:30:41 CET 2005 - olh@suse.de
 
 - update chrp/chrp64/addRamdisk.sh to use make_zimage_chrp64.sh

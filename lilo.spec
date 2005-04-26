@@ -98,6 +98,8 @@ cd lilo.ppc
 gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addRamDisk lilo-addRamDisk.c
 gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addSystemMap lilo-addSystemMap.c
 gcc -Wall $RPM_OPT_FLAGS -s -o mkzimage_cmdline mkzimage_cmdline.c
+cd bootheader
+make
 
 %install
 # get rid of /usr/lib/rpm/brp-strip-debug 
@@ -125,6 +127,9 @@ cp -av System.bin $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av os-badge-icon $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av README* $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av COPYING $RPM_BUILD_ROOT%{_docdir}/lilo/
+cd bootheader
+make install DESTDIR=$RPM_BUILD_ROOT
+cd ..
 cd ..
 cd yaboot
 cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/lib/lilo/pmac
