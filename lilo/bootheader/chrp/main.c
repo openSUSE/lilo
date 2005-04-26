@@ -16,6 +16,7 @@
 
 extern void *finddevice(const char *);
 extern int getprop(void *, const char *, void *, int);
+extern int setprop(void *, const char *, void *, int);
 extern void printk(char *fmt, ...);
 extern void printf(const char *fmt, ...);
 extern int sprintf(char *buf, const char *fmt, ...);
@@ -44,8 +45,8 @@ extern char _vmlinux_start[];
 extern char _vmlinux_end[];
 extern char _initrd_start[];
 extern char _initrd_end[];
-extern unsigned long vmlinux_filesize;
-extern unsigned long vmlinux_memsize;
+void *_vmlinux_filesize;
+void *_vmlinux_memsize;
 
 struct addr_range {
 	unsigned long addr;
@@ -73,6 +74,22 @@ void *stderr;
 
 #undef DEBUG
 
+#define cmdline_start_string   "cmd_line_start"
+#define cmdline_end_string     "cmd_line_end"
+struct _builtin_cmd_line {
+	unsigned char prefer;
+	unsigned char cmdling_start_flag[sizeof(cmdline_start_string)-1]; /* without trailing zero */
+	unsigned char string[512]; /* COMMAND_LINE_SIZE */
+	unsigned char cmdline_end_flag[sizeof(cmdline_end_string)]; /* with trailing zero */
+} __attribute__ ((__packed__));
+
+struct _builtin_cmd_line  __attribute__ ((__section__ (".kernel:cmdline"))) _builtin_cmd_line = {
+	.prefer = '0',
+	.cmdling_start_flag = cmdline_start_string,
+	.string = "",
+	.cmdline_end_flag = cmdline_end_string,
+};
+
 static unsigned long claim_base = PROG_START;
 
 static unsigned long try_claim(unsigned long size)
@@ -96,6 +113,7 @@ static unsigned long try_claim(unsigned long size)
 void start(unsigned long a1, unsigned long a2, void *promptr)
 {
 	unsigned long i;
+	unsigned long vmlinux_memsize, vmlinux_filesize;
 	kernel_entry_t kernel_entry;
 	Elf64_Ehdr *elf64;
 	Elf64_Phdr *elf64ph;
@@ -110,7 +128,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	if (getprop(chosen_handle, "stdin", &stdin, sizeof(stdin)) != 4)
 		exit();
 
-	printf("zImage starting: loaded at 0x%x\n\r", (unsigned)_start);
+	printf("\n\rzImage starting: loaded at 0x%x (0x%lx/0x%lx/0x%p)\n\r", (unsigned)_start,a1,a2,promptr);
 
 	/*
 	 * Now we try to claim some memory for the kernel itself
@@ -120,6 +138,8 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	 * size... In practice we add 1Mb, that is enough, but we should really
 	 * consider fixing the Makefile to put a _raw_ kernel in there !
 	 */
+	vmlinux_memsize = (unsigned long) &_vmlinux_memsize;
+	vmlinux_filesize = (unsigned long) &_vmlinux_filesize;
 	vmlinux_memsize += 0x100000;
 	printf("Allocating 0x%lx bytes for kernel ...\n\r", vmlinux_memsize);
 	vmlinux.addr = try_claim(vmlinux_memsize);
@@ -168,6 +188,13 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		       (unsigned)(avail_high - begin_avail), heap_max);
 	} else {
 		memmove((void *)vmlinux.addr,(void *)vmlinuz.addr,vmlinuz.size);
+	}
+
+	if ( _builtin_cmd_line.prefer && _builtin_cmd_line.prefer != '0' ) {
+		int l = strlen (_builtin_cmd_line.string)+1;
+		printf("copy built-in cmdline(%d) %s\n\r",l,_builtin_cmd_line.string);
+		l = (int)setprop( chosen_handle, "bootargs", _builtin_cmd_line.string, l);
+		printf ("setprop bootargs: %d\n\r",l);
 	}
 
 	/* Skip over the ELF header */
