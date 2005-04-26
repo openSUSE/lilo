@@ -5,7 +5,7 @@ set -e
 export LANG=C
 export LC_ALL=C
 obj_dir=.
-obj_dir=/lib/lilo/chrp/chrp64
+obj_dir=/lib/lilo/chrp
 
 vmlinux=
 initrd=
@@ -99,17 +99,17 @@ esac
 #
 #
 strings $tmp/vmlinux | grep -E 'Linux version .* .gcc version' > $tmp/uts_string.txt
-cp $obj_dir/zImage.o $tmp/zImage.o
-objcopy $tmp/zImage.o \
+cp $obj_dir/empty.o $tmp/empty.o
+objcopy $tmp/empty.o \
 	--add-section=.kernel:uts_string=$tmp/uts_string.txt \
 	--set-section-flags=.kernel:uts_string=contents,alloc,load,readonly,data
 #
-objcopy $tmp/zImage.o \
+objcopy $tmp/empty.o \
 	--add-section=.kernel:vmlinux=$tmp/vmlinux.gz \
 	--set-section-flags=.kernel:vmlinux=contents,alloc,load,readonly,data
 #
 if [ ! -z "$initrd" ] ; then
-objcopy $tmp/zImage.o \
+objcopy $tmp/empty.o \
 	--add-section=.kernel:initrd=$initrd \
 	--set-section-flags=.kernel:initrd=contents,alloc,load,readonly,data
 fi
@@ -117,14 +117,14 @@ fi
 rm -f $tmp/output
 #
 ld -Ttext 0x00400000 -e _start \
-	-T $obj_dir/zImage.lds \
+	-T $obj_dir/ld.script.chrp64 \
 	-o $tmp/output \
 	$obj_dir/crt0.o \
 	$obj_dir/string.o \
 	$obj_dir/prom.o \
 	$obj_dir/main.o \
 	$obj_dir/div64.o \
-	$tmp/zImage.o \
+	$tmp/empty.o \
 	$obj_dir/zlib.o \
 	--defsym _vmlinux_memsize=$vmlinux_memsize \
 	--defsym _vmlinux_filesize=$vmlinux_filesize
