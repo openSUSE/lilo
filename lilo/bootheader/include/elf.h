@@ -1,8 +1,7 @@
-#ifndef _LINUX_ELF_H
-#define _LINUX_ELF_H
+#ifndef __ELF_H__
+#define __ELF_H__
 
-#include <linux/types.h>
-#include <asm/elf.h>
+#include <types.h>
 
 #ifndef elf_read_implies_exec
   /* Executables for which elf_read_implies_exec() returns TRUE will
@@ -446,4 +445,4 @@ extern Elf64_Dyn _DYNAMIC [];
 #endif
 
 
-#endif /* _LINUX_ELF_H */
+#endif /* __ELF_H__ */

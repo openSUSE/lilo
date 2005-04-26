@@ -1,5 +1,5 @@
-#ifndef _PPC64_TYPES_H
-#define _PPC64_TYPES_H
+#ifndef __PPC32_TYPES_H__
+#define __PPC32_TYPES_H__
 
 typedef __signed__ char __s8;
 typedef unsigned char __u8;
@@ -33,4 +33,14 @@ typedef struct {
 
 typedef __vector128 vector128;
 
-#endif /* _PPC64_TYPES_H */
+typedef unsigned long	size_t;
+typedef long		ssize_t;
+
+typedef		__u8		uint8_t;
+typedef		__u16		uint16_t;
+typedef		__u32		uint32_t;
+typedef		__u64		uint64_t;
+typedef		__u64		u_int64_t;
+typedef		__s64		int64_t;
+
+#endif /* __PPC32_TYPES_H__ */
