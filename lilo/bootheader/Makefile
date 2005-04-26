@@ -1,4 +1,4 @@
-SUBDIRS = chrp scripts
+SUBDIRS = chrp scripts utils
 SRCROOT = .
 
 all:
