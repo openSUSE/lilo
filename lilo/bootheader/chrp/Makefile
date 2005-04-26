@@ -18,7 +18,9 @@ install:
 	$(INSTALL_DIR) $(DESTDIR)$(INSTALLDIR)/chrp ; \
 	for i in $(OBJS); do \
 	$(INSTALL_DATA) $$i $(DESTDIR)$(INSTALLDIR)/chrp/$$i; \
-	done
+	done ; \
+	$(INSTALL_DATA) ld.script.chrp64 $(DESTDIR)$(INSTALLDIR)/chrp/
+
 clean:
 	$(RM) *.o .*.d
 
