@@ -7,15 +7,13 @@
 CROSS   = 
 
 # Location for installation
-prefix      = /usr
-bindir      = $(prefix)/bin
-libdir      = $(prefix)/lib
-mandir      = $(prefix)/man
-INSTALLDIR  = $(prefix)/lib/klibc
-INSTALLROOT =
+prefix      = /lib/lilo
+INSTALLDIR  = $(prefix)
+DESTDIR     =
 
 INSTALL_EXEC = install -m 755
 INSTALL_DATA = install -m 644
+INSTALL_DIR  = install -m 755 -d
 
 # Eventually support separate compilation, but we don't have it yet...
 OBJROOT = $(SRCROOT)

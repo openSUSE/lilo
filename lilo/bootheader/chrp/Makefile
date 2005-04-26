@@ -13,6 +13,12 @@ all:	$(OBJS)
 
 .SECONDARY: $(OBJS)
 
+install:
+	@set -ex; \
+	$(INSTALL_DIR) $(DESTDIR)$(INSTALLDIR)/chrp ; \
+	for i in $(OBJS); do \
+	$(INSTALL_DATA) $$i $(DESTDIR)$(INSTALLDIR)/chrp/$$i; \
+	done
 clean:
 	$(RM) *.o .*.d
 

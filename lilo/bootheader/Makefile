@@ -6,6 +6,8 @@ all:
 %: local-%
 	@set -e; for d in $(SUBDIRS); do $(MAKE) -C $$d $@; done
 
+local-install:
+
 local-all:
 
 local-clean:
