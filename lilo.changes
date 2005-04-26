@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Apr 26 21:55:45 CEST 2005 - olh@suse.de
+
+- rebuild /lib/lilo/chrp/chrp64/addnote from yaboot source to fix
+  the 'install' file on CD1 for netbooting without yaboot
+  (#67026 - LTC14213)
+
+-------------------------------------------------------------------
 Tue Apr 19 22:45:40 CEST 2005 - jplack@suse.de
 
 - check for yaboot.conf on bad volume (#58521 - LTC10252)

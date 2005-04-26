@@ -93,6 +93,8 @@ mv second/yaboot.chrp yaboot.chrp
 make clean
 make DEBUG=0 VERSION=1.3.11.SuSE yaboot.fat
 mv second/yaboot.fat yaboot.fat
+# :-)
+gcc -Wall $RPM_OPT_FLAGS -s -o ../lilo.ppc/lib/chrp/chrp64/addnote util/addnote.c
 cd ..
 #cd lilo
 #make activate
