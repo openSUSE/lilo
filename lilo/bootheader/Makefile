@@ -1,0 +1,17 @@
+SUBDIRS = chrp
+SRCROOT = .
+
+all:
+
+%: local-%
+	@set -e; for d in $(SUBDIRS); do $(MAKE) -C $$d $@; done
+
+local-all:
+
+local-clean:
+
+local-spotless: local-clean
+	rm -f *~ tags
+
+
+-include MCONFIG

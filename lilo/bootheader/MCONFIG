@@ -1,0 +1,47 @@
+# -*- makefile -*-
+#
+# Makefile configuration, without explicit rules
+#
+
+# CROSS is the prefix used for system tools like gcc, ld etc.
+CROSS   = 
+
+# Location for installation
+prefix      = /usr
+bindir      = $(prefix)/bin
+libdir      = $(prefix)/lib
+mandir      = $(prefix)/man
+INSTALLDIR  = $(prefix)/lib/klibc
+INSTALLROOT =
+
+INSTALL_EXEC = install -m 755
+INSTALL_DATA = install -m 644
+
+# Eventually support separate compilation, but we don't have it yet...
+OBJROOT = $(SRCROOT)
+
+ARCH    = $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ -e s/arm.*/arm/ -e s/sa110/arm/)
+CC	= $(CROSS)gcc
+LD      = $(CROSS)ld
+INCLUDE = -I$(SRCROOT)/include
+REQFLAGS = $(ARCHREQFLAGS) -nostdinc -iwithprefix include \
+           -fno-builtin -m32 -fomit-frame-pointer \
+	   -Wall -Wstrict-prototypes \
+	   --save-temps \
+	   $(INCLUDE)
+LDFLAGS =
+AR      = $(CROSS)ar
+RANLIB  = $(CROSS)ranlib
+NM	= $(CROSS)nm
+PERL    = perl
+OBJCOPY = $(CROSS)objcopy
+
+STRIP      = $(CROSS)strip
+STRIPFLAGS = --strip-all -R .comment -R .note
+STRIPCMD   = $(STRIP) $(STRIPFLAGS)
+
+HOST_CC      = gcc
+HOST_CFLAGS  = -g -O
+HOST_LDFLAGS = 
+HOST_LIBS    =
+
