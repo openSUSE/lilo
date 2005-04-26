@@ -7,9 +7,9 @@
  * 2 of the License, or (at your option) any later version.
  */
 #include <stdarg.h>
-#include <linux/types.h>
-#include <linux/string.h>
-#include <linux/ctype.h>
+#include <types.h>
+#include <string.h>
+#include <ctype.h>
 
 int (*prom)(void *);
 

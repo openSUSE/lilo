@@ -8,13 +8,11 @@
  * as published by the Free Software Foundation; either version
  * 2 of the License, or (at your option) any later version.
  */
-#include "ppc32-types.h"
+#include <types.h>
 #include "zlib.h"
-#include <linux/elf.h>
-#include <linux/string.h>
-#include <asm/processor.h>
-#include <asm/page.h>
-#include <asm/bootinfo.h>
+#include <elf.h>
+#include <string.h>
+#include <page.h>
 
 extern void *finddevice(const char *);
 extern int getprop(void *, const char *, void *, int);
