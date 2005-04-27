@@ -15,7 +15,6 @@ BuildRequires: aaa_base acl attr bash bind-utils bison bzip2 coreutils cpio cpp 
 
 Name:         lilo
 #%%define     bootheader 0.0.5
-%define lilo_vers  0.1.2
 %define yaboot_vers 1.3.11
 Group:        System/Boot
 License:      BSD, Other License(s), see package
@@ -27,7 +26,7 @@ Summary:      The LInux LOader, a boot menu
 Requires:     binutils
 Version:      0.0.16
 Release:      2
-Source0:      lilo-%{lilo_vers}.tar.bz2
+Source0:      lilo-%{version}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch0:       show_of_path.diff
 Patch5:       yaboot-1.3.6.dif
@@ -59,7 +58,7 @@ Authors:
 
 %prep
 %setup -q -T -c -a 0 -a 1
-mv lilo-%{lilo_vers} lilo.ppc
+mv lilo-%{version} lilo.ppc
 mv yaboot-%{yaboot_vers} yaboot
 %patch0
 cd yaboot
