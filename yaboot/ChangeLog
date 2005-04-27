@@ -2,6 +2,104 @@
 # arch-tag: automatic-ChangeLog--erbenson@alaska.net--public/yaboot--devel--1.3
 #
 
+2004-07-11 20:14:40 GMT	Ethan Benson <erbenson@alaska.net>	patch-75
+
+    Summary:
+      Prep 1.3.13 release
+    Revision:
+      yaboot--devel--1.3--patch-75
+
+    * Bump version numbers for 1.3.13 release.
+
+    modified files:
+     0arch-timestamps0 ChangeLog Makefile ybin/ofpath
+     ybin/yabootconfig ybin/ybin
+
+
+2004-07-11 20:02:24 GMT	Ethan Benson <erbenson@alaska.net>	patch-74
+
+    Summary:
+      Update changelog for 1.3.13
+    Revision:
+      yaboot--devel--1.3--patch-74
+
+    * changelog: Update for 1.3.13
+
+    modified files:
+     0arch-timestamps0 ChangeLog changelog
+
+
+2004-07-11 19:55:54 GMT	Ethan Benson <erbenson@alaska.net>	patch-73
+
+    Summary:
+      Increase tftp buffer to ~6MB
+    Revision:
+      yaboot--devel--1.3--patch-73
+
+    * second/fs_of.c: increase tftp buffer to 6MB.  This is as far as it
+      can go.
+
+    modified files:
+     0arch-timestamps0 ChangeLog second/fs_of.c
+
+
+2004-07-11 19:52:17 GMT	Ethan Benson <erbenson@alaska.net>	patch-72
+
+    Summary:
+      Add LABEL/UUID support to yabootconfig
+    Revision:
+      yaboot--devel--1.3--patch-72
+
+    * ybin/yabootconfig: Add support for LABEL= and UUID= in
+      /etc/fstab. (Colin Watson)
+
+    modified files:
+     0arch-timestamps0 ChangeLog ybin/yabootconfig
+
+
+2004-05-08 22:04:51 GMT	Ethan Benson <erbenson@alaska.net>	patch-71
+
+    Summary:
+      Add additional check on /dev/nvram to avoid misleading error message
+    Revision:
+      yaboot--devel--1.3--patch-71
+
+    * ybin/ybin: Add additional check on /dev/nvram, if we cannot read a
+      couple bytes report it as broken.  This avoids misleading
+      `Incompatible nvsetenv' message on kernels without /dev/nvram support.
+
+    modified files:
+     0arch-timestamps0 ChangeLog ybin/ybin
+
+
+2004-05-08 06:38:44 GMT	Ethan Benson <erbenson@alaska.net>	patch-70
+
+    Summary:
+      Fix several ofpath error messages going to stdout rather then stderr
+    Revision:
+      yaboot--devel--1.3--patch-70
+
+    * ybin/ofpath: Fix several error messages mistakenly written to stdout
+      rather then stderr. (Thanks to Colin Watson for noticing)
+
+    modified files:
+     0arch-timestamps0 ChangeLog ybin/ofpath
+
+
+2004-04-26 00:27:48 GMT	Ethan Benson <erbenson@alaska.net>	patch-69
+
+    Summary:
+      Add support for initrd detection to yabootconfig
+    Revision:
+      yaboot--devel--1.3--patch-69
+
+    * ybin/yabootconfig: If detected kernel appears to have a corresponding
+      initrd image then include an initrd= line in generated yaboot.conf.
+
+    modified files:
+     0arch-timestamps0 ChangeLog ybin/yabootconfig
+
+
 2004-04-18 00:27:59 GMT	Ethan Benson <erbenson@alaska.net>	patch-68
 
     Summary:

@@ -28,7 +28,7 @@ if [ -n "$PATH_PREFIX" ] ; then
 fi
 PRG="${0##*/}"
 SIGINT="$PRG: Interrupt caught ... exiting"
-VERSION=1.3.12
+VERSION=1.3.13
 DEBUG=0
 VERBOSE=0
 TMP="${TMPDIR:-/tmp}"
@@ -460,6 +460,10 @@ checkconf()
 		    nonvram=1
 		elif [ ! -w /dev/nvram -o ! -r /dev/nvram ] ; then
 		    echo 1>&2 "$PRG: /dev/nvram: Permission denied"
+		    echo 1>&2 "$PRG: Warning: nvram will not be updated"
+		    nonvram=1
+		elif ! (dd if=/dev/nvram of=/dev/null bs=1 count=10 > /dev/null 2>&1) ; then
+		    echo 1>&2 "$PRG: /dev/nvram: No such device"
 		    echo 1>&2 "$PRG: Warning: nvram will not be updated"
 		    nonvram=1
 		else
