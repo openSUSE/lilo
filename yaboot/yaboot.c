@@ -42,22 +42,20 @@
 #include "file.h"
 #include "cfg.h"
 #include "cmdline.h"
+#include "yaboot.h"
 #include "linux/elf.h"
+#include "bootinfo.h"
 
 #define CONFIG_FILE_NAME	"yaboot.conf"
 #define CONFIG_FILE_MAX		0x8000		/* 32k */
+#define SPLASH_SCREEN
 
-struct boot_param_t {
-	char*	kern_dev;
-	int	kern_part;
-	char*	kern_file;
+#ifdef SPLASH_SCREEN
+#include "gui.h"
+#endif
 
-	char*	rd_dev;
-	int	rd_part;
-	char*	rd_file;
-
-	char*	args;
-};
+/* align addr on a size boundry - adjust address up if needed -- Cort */
+#define _ALIGN(addr,size)	(((addr)+size-1)&(~(size-1)))
 
 /* Imported functions */
 extern unsigned long reloc_offset(void);
@@ -73,6 +71,10 @@ static int	yaboot_main(void);
 /* Locals & globals */
 
 int useconf = 0;
+char bootdevice[1024];
+char *bootpath;
+int bootpartition = -1;
+int _machine = _MACH_Pmac;
 
 #if DEBUG
 static int test_bss;
@@ -82,8 +84,6 @@ static int pause_after;
 static char *pause_message = "Type go<return> to continue.\n";
 static char given_bootargs[1024];
 static int given_bootargs_by_user = 0;
-static char bootdevice[1024];
-static int bootpartition = -1;
 
 extern unsigned char linux_logo_red[];
 extern unsigned char linux_logo_green[];
@@ -103,6 +103,7 @@ yaboot_start (int r3, int r4, int r5)
 {
 	int result;
 	void* malloc_base;
+	prom_handle root;
 	
  	/* OF seems to do it, but I'm not very confident */
   	memset(&__bss_start, 0, &_end - &__bss_start);
@@ -141,6 +142,25 @@ yaboot_start (int r3, int r4, int r5)
 	prom_printf("&test_bss    :  0x%08lx\n", &test_bss);
 	prom_printf("linked at    :  0x%08lx\n", TEXTADDR);
 #endif	
+	/* ask the OF info if we're a chrp or pmac */
+	/* we need to set _machine before calling finish_device_tree */
+	root = prom_finddevice("/");
+	if (root != 0) {
+		static char model[256];
+		if (prom_getprop(root, "device_type", model, 256 ) > 0 &&
+			!strncmp("chrp", model, 4))
+			_machine = _MACH_chrp;
+		else {
+			if (prom_getprop(root, "model", model, 256 ) > 0 &&
+				!strncmp(model, "IBM", 3))
+				_machine = _MACH_chrp;
+		}
+	}
+	
+#if DEBUG
+	prom_printf("Running on _machine = %d\n", _machine);
+#endif
+
 	/* Call out main */
 	result = yaboot_main();
 
@@ -171,6 +191,7 @@ load_config_file(char *device, char* path, int partition)
     struct boot_file_t file;
     int sz, opened = 0, result = 0;
     char conf_path[512];
+    struct boot_fspec_t fspec;
 
     /* Allocate a buffer for the config file */
     conf_file = malloc(CONFIG_FILE_MAX);
@@ -187,7 +208,10 @@ load_config_file(char *device, char* path, int partition)
     strcat(conf_path, CONFIG_FILE_NAME);
 
     /* Open it */
-    result = open_file(device, partition, conf_path, &file);
+    fspec.dev = device;
+    fspec.file = conf_path;
+    fspec.part = partition;
+    result = open_file(&fspec, &file);
     if (result != FILE_ERR_OK) {
     	prom_printf("Can't open config file, err: %d\n", result);
 	goto bail;
@@ -348,7 +372,7 @@ make_params(char *label, char *params)
 
 int get_params(struct boot_param_t* params)
 {
-    int defpart = -1;
+    int defpart;
     char *defdevice = 0;
     char *p, *q, *endp;
     int c, n;
@@ -359,12 +383,19 @@ int get_params(struct boot_param_t* params)
     static char bootargs[1024];
     static char imagepath[1024];
     static char initrdpath[1024];
+    static char sysmappath[1024];
+#ifdef SPLASH_SCREEN
+    static char splashpath[1024];
+#endif
 
     pause_after = 0;
     memset(params, 0, sizeof(*params));
     params->args = "";
-    params->kern_part = -1;
-    params->rd_part = -1;
+    params->kernel.part = -1;
+    params->rd.part = -1;
+    params->sysmap.part = -1;
+    params->splash.part = -1;
+    defpart = bootpartition;
     
     if (first) {
 	first = 0;
@@ -429,6 +460,7 @@ int get_params(struct boot_param_t* params)
 	    label = imagename;
 	    imagename = p;
 	    defdevice = cfg_get_strg(label, "device");
+	    if(!defdevice) defdevice=bootdevice;
 	    p = cfg_get_strg(label, "partition");
 	    if (p) {
 		n = strtol(p, &endp, 10);
@@ -452,25 +484,15 @@ int get_params(struct boot_param_t* params)
 	return 0;
     }
     strncpy(imagepath, imagename, 1024);
-    params->kern_dev = parse_device_path(imagepath, &params->kern_file,
-    	&params->kern_part);
-    /* if parse_device_path returns no kname and no part, then
-     * we assume it's a file specifier */
-    if (!params->kern_file) {
-    	params->kern_file = params->kern_dev;
-    	params->kern_dev = NULL;
-    }
-    if (params->kern_part == -1)
-    	params->kern_part = defpart;
-    if (!params->kern_dev)
-	params->kern_dev = defdevice;
-    if (!params->kern_file)
+    params->kernel.dev = parse_device_path(imagepath, &params->kernel.file,
+    	&params->kernel.part);
+    if (validate_fspec(&params->kernel, defdevice, defpart) != FILE_ERR_OK) {
 	prom_printf(
 "Enter the kernel image name as [device:][partno]/path, where partno is a\n"
 "number from 0 to 16.  Instead of /path you can type [mm-nn] to specify a\n"
 "range of disk blocks (512B)\n");
-    else if (params->kern_file[0] == ',')
-	params->kern_file++;
+	return 0;
+    }
 
     if (useconf) {
  	p = cfg_get_strg(label, "initrd");
@@ -479,22 +501,33 @@ int get_params(struct boot_param_t* params)
 	    prom_printf("parsing initrd path <%s>\n", p);
 #endif	    
 	    strncpy(initrdpath, p, 1024);
-	    params->rd_dev = parse_device_path(initrdpath,
-	    	&params->rd_file, &params->rd_part);
-	    /* if parse_device_path returns no kname and no part, then
-	     * we assume it's a file specifier */
-	    if (!params->rd_file) {
-	    	params->rd_file = params->rd_dev;
-	    	params->rd_dev = NULL;
-	    }
-	    if (params->rd_part == -1)
-	    	params->rd_part = defpart;
-	    if (!params->rd_dev)
-		params->rd_dev = defdevice;
-	    if (params->rd_file && params->rd_file[0] == ',')
-		params->rd_file++;
+	    params->rd.dev = parse_device_path(initrdpath,
+	    	&params->rd.file, &params->rd.part);
+	    validate_fspec(&params->rd, defdevice, defpart);
+	}
+ 	p = cfg_get_strg(label, "sysmap");
+	if (p && *p) {
+#if DEBUG
+	    prom_printf("parsing sysmap path <%s>\n", p);
+#endif	    
+	    strncpy(sysmappath, p, 1024);
+	    params->sysmap.dev = parse_device_path(sysmappath,
+	    	&params->sysmap.file, &params->sysmap.part);
+	    validate_fspec(&params->sysmap, defdevice, defpart);
+	}
+#ifdef SPLASH_SCREEN
+ 	p = cfg_get_strg(label, "splash");
+	if (p && *p) {
+#if DEBUG
+	    prom_printf("parsing splash path <%s>\n", p);
+#endif	    
+	    strncpy(splashpath, p, 1024);
+	    params->splash.dev = parse_device_path(splashpath,
+	    	&params->splash.file, &params->splash.part);
+	    validate_fspec(&params->splash, defdevice, defpart);
 	}
    }
+#endif /* SPLASH_SCREEN */
     
     return 0;
 }
@@ -507,7 +540,7 @@ int get_params(struct boot_param_t* params)
 void
 yaboot_text_ui(void)
 {
-#define MAX_HEADERS	16
+#define MAX_HEADERS	32
 
     struct boot_file_t	file;
     int			result;
@@ -515,22 +548,27 @@ yaboot_text_ui(void)
     Elf32_Ehdr		e;
     Elf32_Phdr		*p, *ph;
     static struct boot_param_t	params;
-    void*		initrd_base;
+    void		*initrd_base, *sysmap_base;
     unsigned int	memsize, filesize, offset, initrd_size, load_loc = 0;
+    unsigned int	sysmap_size;
     int 		i;
-
+    struct bi_record*	birec;
+    
     for (;;) {
     	initrd_size = 0;
     	initrd_base = 0;
     	
 	if (get_params(&params))
 	    return;
-	if (!params.kern_file)
+	if (!params.kernel.file)
 	    continue;
 	
+#ifdef SPLASH_SCREEN
+	if (params.splash.file)
+        	fxDisplaySplash(&params.splash);
+#endif
 	prom_printf("Loading kernel...\n");
-	result = open_file(params.kern_dev, params.kern_part,
-		params.kern_file, &file);
+	result = open_file(&params.kernel, &file);
 	if (result != FILE_ERR_OK) {
 	    prom_printf("\nImage not found.... try again\n");
 	    continue;
@@ -617,16 +655,16 @@ yaboot_text_ui(void)
 	    goto next;
 	}
 
-	// give the kernel 2MB room to grow before it maps itself away
-	memsize = (memsize + (1<<20) + 0xFFF) & ~0xFFF;
-	memsize += 0x100000;
+	/* leave some room (1Mb) for boot infos */
+	memsize = _ALIGN(memsize,(1<<20)) + 0x100000;
+	/* Claim OF memory */
 	base = prom_claim((void *)KERNELADDR, memsize, 0);
 	if (base == (void *)-1) {
 	    prom_printf("claim error, can't allocate kernel memory\n");
 	    goto next;
 	}	
 #if DEBUG
-	prom_printf("After ELF parsing, load base: 0x%08lx, mem_sz: 0x%08lx\n",
+	prom_printf("After ELF parsing, load base: 0x%08lx, mem_sz: 0x%08lx, birec: \n",
     		base, memsize);
 #endif    
 	/* Now, we skip to the image itself */
@@ -635,20 +673,55 @@ yaboot_text_ui(void)
 	    prom_release(base, memsize);
 	    goto next;
 	}
-	if (file.read(&file, filesize, base) != filesize) {
+#ifdef SPLASH_SCREEN
+        if (fxReadImage(&file, filesize, base) != filesize) {
+#else
+        if (file.read(&file, filesize, base) != filesize) {
+#endif
 	    prom_printf ("read failed\n");
 	    prom_release(base, memsize);
 	    goto next;
 	}
+#if 0	/* to make editor happy */
+	}
+#endif	
 	file.close(&file);
+
+	/* If sysmap, load it. 
+	 */
+	if (params.sysmap.file) {
+	    prom_printf("Loading System.map ...\n");
+	    result = open_file(&params.sysmap, &file);
+	    if (result != FILE_ERR_OK)
+		prom_printf("\nSystem.map file not found.\n");
+	    else {
+		sysmap_base = prom_claim(base+memsize, 0x100000, 0);
+		if (sysmap_base == (void *)0xffffffff) {
+		    prom_printf("claim failed for sysmap memory\n");
+		    sysmap_base = 0;
+		} else {
+	    	    sysmap_size = file.read(&file, 0x400000, sysmap_base);
+	    	    if (sysmap_size == 0)
+	    	        sysmap_base = 0;
+	    	}
+	    	file.close(&file);
+	    }
+	    if (sysmap_base) {
+	    	prom_printf("System.map loaded at 0x%08lx, size: %d bytes\n",
+	    		sysmap_base, sysmap_size);
+	    	memsize += _ALIGN(0x100000, 0x1000);
+	    } else {
+	    	prom_printf("System.map load failed !\n");
+	    	prom_pause();
+	    }
+	}
 
 	/* If ramdisk, load it. For now, we can't tell the size it will be
 	 * so we claim an arbitrary amount of 4Mb
 	 */
-	if (params.rd_file) {
+	if (params.rd.file) {
 	    prom_printf("Loading ramdisk...\n");
-	    result = open_file(params.rd_dev, params.rd_part,
-		params.rd_file, &file);
+	    result = open_file(&params.rd, &file);
 	    if (result != FILE_ERR_OK)
 		prom_printf("\nRamdisk image not found.\n");
 	    else {
@@ -671,8 +744,7 @@ yaboot_text_ui(void)
 	    	prom_pause();
 	    }
 	}
-		
-	// call the kernel with our stack.
+
 #if DEBUG
 	prom_printf("setting kernel args to: %s\n", params.args);
 #endif	
@@ -681,6 +753,52 @@ yaboot_text_ui(void)
 	prom_printf("flushing icache...\n");
 #endif	
 	flush_icache_range ((int)base, (int)base+memsize);
+
+	/* 
+	 * Fill mew boot infos
+	 *
+	 * The birec is low on memory, probably inside the malloc pool, so
+	 * we don't write it earlier. At this point, we should not use anything
+	 * coming from the malloc pool
+	 */
+	birec = (struct bi_record *)_ALIGN(filesize+(1<<20)-1,(1<<20));
+	/* We make sure it's mapped. We map only 64k for now, it's plenty enough
+	 * we don't claim since this precise memory range may already be claimed
+	 * by the malloc pool
+	 */
+	prom_map (birec, birec, 0x10000);
+#if DEBUG
+	prom_printf("birec at 0x%08lx\n", birec);
+	i = prom_getms();
+	while((prom_getms() - i) < 2000)
+		;
+#endif	
+
+	birec->tag = BI_FIRST;
+	birec->size = sizeof(struct bi_record);
+	birec = (struct bi_record *)((unsigned long)birec + birec->size);
+	
+	birec->tag = BI_BOOTLOADER_ID;
+	sprintf( (char *)birec->data, "yaboot");
+	birec->size = sizeof(struct bi_record) + strlen("yaboot") + 1;
+	birec = (struct bi_record *)((unsigned long)birec + birec->size);
+	
+	birec->tag = BI_MACHTYPE;
+	birec->data[0] = _machine;
+	birec->data[1] = 1;
+	birec->size = sizeof(struct bi_record) + sizeof(unsigned long);
+	birec = (struct bi_record *)((unsigned long)birec + birec->size);
+	
+	birec->tag = BI_SYSMAP;
+	birec->data[0] = (unsigned long)sysmap_base;
+	birec->data[1] = sysmap_size;
+	birec->size = sizeof(struct bi_record) + sizeof(unsigned long);
+	birec = (struct bi_record *)((unsigned long)birec + birec->size);
+	birec->tag = BI_LAST;
+	birec->size = sizeof(struct bi_record);
+	birec = (struct bi_record *)((unsigned long)birec + birec->size);
+
+	// call the kernel with our stack.
 #if DEBUG
 	prom_printf("entering kernel...\n");
 #endif	
@@ -721,7 +839,7 @@ setup_display(void)
 		prom_setcolor(i, default_colors[i*3],
 			default_colors[i*3+1], default_colors[i*3+2]);
 	}
-	prom_printf("\x1b[32m\x1b[40m");
+	prom_printf("\x1b[33m\x1b[40m");
 #if !DEBUG
 	prom_printf("\xc");
 #endif	
@@ -730,8 +848,6 @@ setup_display(void)
 int
 yaboot_main(void)
 {
-	char*	path;
-
 	setup_display();
 	
 	prom_printf("Welcome to yaboot version " VERSION "\n");
@@ -746,17 +862,17 @@ yaboot_main(void)
 	    prom_printf("Coundn't determine boot device\n");
 	    return -1;
     	}
-    	parse_device_path(bootdevice, &path, &bootpartition);
-  #if DEBUG
+    	parse_device_path(bootdevice, &bootpath, &bootpartition);
+#if DEBUG
 	prom_printf("after parse_device_path: device:%s, path: %s, partition: %d\n",
-		bootdevice, path ? path : NULL, bootpartition);
+		bootdevice, bootpath ? bootpath : NULL, bootpartition);
 #endif	
-  	if (path) {
-		if (!strncmp(path, "\\\\", 2))
-			path[2] = 0;
+  	if (bootpath) {
+		if (!strncmp(bootpath, "\\\\", 2))
+			bootpath[2] = 0;
 		else {
 			char *p, *last;
-			p = last = path;
+			p = last = bootpath;
 			while(*p) {
 			    if (*p == '\\')
 			    	last = p;
@@ -765,16 +881,16 @@ yaboot_main(void)
 			if (p)
 				*(last) = 0;
 			else
-				path = NULL;
-			if (path && strlen(path))
-				strcat(path, "\\");
+				bootpath = NULL;
+			if (bootpath && strlen(bootpath))
+				strcat(bootpath, "\\");
 		}
 	}
 #if DEBUG
 	prom_printf("after path fixup: device:%s, path: %s, partition: %d\n",
-		bootdevice, path ? path : NULL, bootpartition);
+		bootdevice, bootpath ? bootpath : NULL, bootpartition);
 #endif	
-	useconf = load_config_file(bootdevice, path, bootpartition);
+	useconf = load_config_file(bootdevice, bootpath, bootpartition);
 	yaboot_text_ui();
 	
 	prom_printf("Bye.\n");

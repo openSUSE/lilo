@@ -70,6 +70,27 @@ parse_device_path(char *of_device, char **file_spec, int *partition)
 
 }
 
+int
+validate_fspec(		struct boot_fspec_t*	spec,
+			char*			default_device,
+			int			default_part)
+{
+    if (!spec->file) {
+    	spec->file = spec->dev;
+    	spec->dev = NULL;
+    }
+    if (spec->part == -1)
+    	spec->part = default_part;
+    if (!spec->dev)
+	spec->dev = default_device;
+    if (!spec->file)
+	return FILE_BAD_PATH;
+    else if (spec->file[0] == ',')
+	spec->file++;
+
+    return FILE_ERR_OK;
+}
+
 static int
 file_block_open(	struct boot_file_t*	file,
 			const char*		dev_name,
@@ -113,11 +134,14 @@ file_block_open(	struct boot_file_t*	file,
 #endif						
 	}
 	
-	file->read = filesystems[fs]->read;
-	file->seek = filesystems[fs]->seek;
-	file->close = filesystems[fs]->close;
 	result = filesystems[fs]->open(file, dev_name, found, file_name);
+
 bail:
+	if (result == FILE_ERR_OK) {
+		file->read = filesystems[fs]->read;
+		file->seek = filesystems[fs]->seek;
+		file->close = filesystems[fs]->close;
+	}
 	if (parts)
 		partitions_free(parts);
 	return result;
@@ -161,10 +185,8 @@ default_close(	struct boot_file_t*	file)
 }
 
 
-int open_file(	const char*		of_device,
-		int			default_partition,
-		const char*		default_file_name,
-		struct boot_file_t*	file)
+int open_file(	const struct boot_fspec_t*	spec,
+		struct boot_file_t*		file)
 {
 	static char	temp[1024];
 	static char	temps[64];
@@ -180,16 +202,16 @@ int open_file(	const char*		of_device,
 	file->close	= default_close;
 
 	/* Lookup the OF device path */
-	strncpy(temp,of_device,1024);
+	strncpy(temp,spec->dev,1024);
 	dev_name = parse_device_path(temp, &file_name, &partition);
 	if (file_name == NULL)
-		file_name = (char *)default_file_name;
+		file_name = (char *)spec->file;
 	if (file_name == NULL) {
 		prom_printf("booting without a file name not yet supported !\n");
 		return FILE_ERR_NOTFOUND;
 	}
 	if (partition == -1)
-		partition = default_partition;
+		partition = spec->part;
 
 #if DEBUG
 	prom_printf("dev_path = %s\nfile_name = %s\npartition = %d\n",

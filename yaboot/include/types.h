@@ -27,8 +27,6 @@ typedef unsigned long long u64;
 
 #define BITS_PER_LONG 32
 
-typedef unsigned int size_t;
-
 /* bsd */
 typedef unsigned char		u_char;
 typedef unsigned short		u_short;

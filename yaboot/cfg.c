@@ -60,6 +60,7 @@ CONFIG cf_options[] =
     {cft_strg, "pause-message", NULL},
     {cft_strg, "init-code", NULL},
     {cft_strg, "init-message", NULL},
+    {cft_strg, "splash", NULL},
     {cft_end, NULL, NULL}};
 
 CONFIG cf_image[] =
@@ -81,6 +82,8 @@ CONFIG cf_image[] =
     {cft_flag, "pause-after", NULL},
     {cft_strg, "pause-message", NULL},
     {cft_flag, "novideo", NULL},
+    {cft_strg, "splash", NULL},
+    {cft_strg, "sysmap", NULL},
     {cft_end, NULL, NULL}};
 
 static char flag_set;
@@ -310,7 +313,7 @@ static int cfg_set (char *item, char *value)
     }
     if (walk->type != cft_end)
 	return 1;
-    cfg_return (item, value);
+//    cfg_return (item, value);
     return 0;
 }
 
@@ -328,8 +331,9 @@ int cfg_parse (char *cfg_file, char *buff, int len)
 	if (!cfg_next (&item, &value))
 	    return 0;
 	if (!cfg_set (item, value)) {
+#if DEBUG
 	    prom_printf("Can't set item %s to value %s\n", item, value);
-	    return -1;
+#endif	    
 	}
 	free (item);
     }
@@ -378,13 +382,13 @@ int cfg_get_flag (char *image, char *item)
 }
 
 static int printl_count = 0;
-static void printlabel (char *label)
+static void printlabel (char *label, int defflag)
 {
     int len = strlen (label);
 
     if (!printl_count)
 	prom_printf ("\n");
-    prom_printf ("%s", label);
+    prom_printf ("%s %s",defflag?"*":" ", label);
     while (len++ < 25)
 	prom_putchar (' ');
     printl_count++;
@@ -397,6 +401,9 @@ void cfg_print_images (void)
     struct IMAGES *p;
     char *label, *alias;
 
+    char *ret = cfg_get_strg_i (cf_options, "default");
+    int defflag=0;
+
     printl_count = 0;
     for (p = images; p; p = p->next) {
 	label = cfg_get_strg_i (p->table, "label");
@@ -406,10 +413,14 @@ void cfg_print_images (void)
 	    if (alias)
 		label = alias + 1;
 	}
+	if(!strcmp(ret,label))
+		defflag=1;
+	else
+		defflag=0;
 	alias = cfg_get_strg_i (p->table, "alias");
-	printlabel (label);
+	printlabel (label, defflag);
 	if (alias)
-	    printlabel (alias);
+	    printlabel (alias, 0);
     }
     prom_printf ("\nYou can also type in custom image locations, in the form\n"
 	    "{prom_path;}partno/path_to_image or {prom_path;}{partno}[start-end]\n");

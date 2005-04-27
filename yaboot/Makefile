@@ -1,6 +1,6 @@
 ## Configuration section
 
-VERSION = 0.5
+VERSION = 0.6
 # Debug mode (verbose)
 DEBUG = 0 
 
@@ -22,7 +22,7 @@ CROSS =
 
 # The flags for the target compiler.
 #
-CFLAGS = -O2 -g -nostdinc -Wall
+CFLAGS = -O0 -g -nostdinc -Wall -isystem `gcc -print-file-name=include`
 CFLAGS += -DVERSION=\"${VERSION}\"	#"
 CFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG)
 CFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
@@ -47,6 +47,7 @@ HOSTCFLAGS = $(CFLAGS)
 
 OBJS = crt0.o yaboot.o cache.o prom.o file.o partition.o fs.o cfg.o \
 	setjmp.o cmdline.o fs_of.o fs_ext2.o fs_iso.o iso_util.o \
+	gui/effects.o gui/colormap.o gui/video.o gui/pcx.o \
 	lib/nosys.o lib/string.o lib/strtol.o \
 	lib/vsprintf.o lib/ctype.o lib/malloc.o
 
@@ -64,7 +65,7 @@ lgcc = `$(CC) -print-libgcc-file-name`
 
 yaboot: $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o yaboot
-	strip yaboot
+#	strip yaboot
 
 #yaboot.b: yaboot
 #	./util/elfextract yaboot yaboot.b

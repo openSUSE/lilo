@@ -47,7 +47,7 @@ struct prom_args {
 	void *args[10];
 };
 
-static void *
+void *
 call_prom (const char *service, int nargs, int nret, ...)
 {
   va_list list;

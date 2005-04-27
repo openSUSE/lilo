@@ -34,7 +34,7 @@ typedef void *phandle;
 struct prom_args;
 typedef void (*prom_entry)(struct prom_args *);
 
-void prom_init (prom_entry pe);
+extern void prom_init (prom_entry pe);
 
 extern prom_entry prom;
 
@@ -95,5 +95,7 @@ int prom_get_options (char *name, void *mem, int len);
 
 extern int prom_getms(void);
 extern void prom_pause(void);
+
+extern void *call_prom (const char *service, int nargs, int nret, ...);
 
 #endif
