@@ -352,6 +352,7 @@ make_params(char *label, char *params)
     if (cfg_get_flag(label, "novideo")) {
 	strcpy (q, "video=ofonly");
 	q = strchr (q, 0);
+	*q++ = ' ';
     }
     p = cfg_get_strg (label, "append");
     if (p) {

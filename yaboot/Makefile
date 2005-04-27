@@ -1,8 +1,8 @@
 ## Configuration section
 
-VERSION = 0.6
+VERSION = 0.7
 # Debug mode (verbose)
-DEBUG = 0 
+DEBUG = 0
 
 # We use fixed addresses to avoid overlap when relocating
 # and other trouble with initrd
@@ -22,7 +22,7 @@ CROSS =
 
 # The flags for the target compiler.
 #
-CFLAGS = -O0 -g -nostdinc -Wall -isystem `gcc -print-file-name=include`
+CFLAGS = -Os -g -nostdinc -Wall -isystem `gcc -print-file-name=include`
 CFLAGS += -DVERSION=\"${VERSION}\"	#"
 CFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG)
 CFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)

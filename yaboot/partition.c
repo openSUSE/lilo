@@ -98,7 +98,12 @@ partition_mac_lookup(prom_handle disk, unsigned int blksize,
 			kind = -1;
 		else if (!strcmp(part->type, "apple_unix_svr2"))
 			kind = (strcmp(part->name, "swap") == 0) ? -1 : partition_ext2;
-		else if (!strcmp(part->type, "apple_hfs"))
+		else if (!strncmp(part->type, "linux", 5)) {
+			if (!strcmp(part->type, "linux_swap") || !strcmp(part->name, "swap"))
+				kind = -1;
+			else
+				kind = partition_ext2;
+		} else if (!strcmp(part->type, "apple_hfs"))
 			kind = partition_machfs;
 		else if (!strcmp(part->type, "apple_boot"))
 			kind = partition_macboot;
