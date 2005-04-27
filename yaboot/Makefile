@@ -103,9 +103,11 @@ lgcc = `$(CC) -print-libgcc-file-name`
 
 all: yaboot addnote mkofboot
 
-yaboot: $(OBJS)
+yaboot: $(OBJS) addnote
 	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o second/$@
-	chmod -x second/yaboot
+	chmod -x second/$@
+	cp -p second/$@ second/$@.chrp
+	util/addnote second/$@.chrp
 
 addnote:
 	$(CC) $(UCFLAGS) -o util/addnote util/addnote.c
@@ -148,6 +150,7 @@ bindist: all
 
 clean:
 	rm -f second/yaboot util/addnote util/elfextract $(OBJS)
+	rm -f second/yaboot.chrp
 	find . -not -path './\{arch\}*' -name '#*' | xargs rm -f
 	find . -not -path './\{arch\}*' -name '.#*' | xargs rm -f
 	find . -not -path './\{arch\}*' -name '*~' | xargs rm -f
