@@ -32,7 +32,7 @@ typedef void *phandle;
 #define PROM_INVALID_HANDLE	((prom_handle)-1UL)
 
 struct prom_args;
-typedef void (*prom_entry)(struct prom_args *);
+typedef int (*prom_entry)(struct prom_args *);
 
 extern void prom_init (prom_entry pe);
 
@@ -66,7 +66,7 @@ void prom_vprintf (char *fmt, va_list ap);
 void prom_fprintf (prom_handle dev, char *fmt, ...);
 void prom_printf (char *fmt, ...);
 void prom_readline (char *prompt, char *line, int len);
-int prom_setcolor (int color, int r, int g, int b);
+int prom_set_color(prom_handle device, int color, int r, int g, int b);
 
 /* memory */
 
@@ -97,5 +97,6 @@ extern int prom_getms(void);
 extern void prom_pause(void);
 
 extern void *call_prom (const char *service, int nargs, int nret, ...);
+extern void *call_prom_return (const char *service, int nargs, int nret, ...);
 
 #endif

@@ -65,6 +65,7 @@ typedef __u64	Elf64_Word;
 #define EM_SPARC32PLUS 18	/* Sun's "v8plus" */
 
 #define EM_PPC	       20	/* PowerPC */
+#define EM_PPC64       21	/* PowerPC 64-bit */
 
 #define EM_SPARCV9     43	/* SPARC v9 64-bit */
 
@@ -394,6 +395,15 @@ typedef struct elf64_sym {
 
 
 #define EI_NIDENT	16
+
+/* Minimum amount of the header we need to determine whether
+ * we have an executable PPC32/PPC64 Elf file or not.
+ */
+typedef struct elf_ident_t {
+  unsigned char e_ident[EI_NIDENT];
+  __u16	        e_type;
+  __u16	        e_machine;
+} Elf_Ident;
 
 typedef struct elf32_hdr{
   unsigned char	e_ident[EI_NIDENT];

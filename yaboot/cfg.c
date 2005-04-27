@@ -61,6 +61,8 @@ CONFIG cf_options[] =
     {cft_strg, "init-code", NULL},
     {cft_strg, "init-message", NULL},
     {cft_strg, "splash", NULL},
+    {cft_strg, "fgcolor", NULL},
+    {cft_strg, "bgcolor", NULL},
     {cft_end, NULL, NULL}};
 
 CONFIG cf_image[] =
@@ -163,7 +165,7 @@ static char *cfg_get_token (void)
 	while (ch = next (), ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
 	    if (ch == '\n' || ch == '\r')
 		line_num++;
-	if (ch == EOF)
+	if (ch == EOF || ch == (int)NULL)
 	    return NULL;
 	if (ch != '#')
 	    break;
@@ -270,11 +272,15 @@ static int cfg_next (char **item, char **value)
     return 1;
 }
 
+#if 0
+// The one and only call to this procedure is commented out
+// below, so we don't need this unless we decide to use it again.
 static void cfg_return (char *item, char *value)
 {
     last_item = item;
     last_value = value;
 }
+#endif
 
 static int cfg_set (char *item, char *value)
 {

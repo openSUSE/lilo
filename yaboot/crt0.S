@@ -5,6 +5,24 @@
  * Main entry point. should add code to clear BSS and more ...
  */
 _GLOBAL(_start)
+#ifdef CONFIG_PPC64BRIDGE
+	/* Force the 64b machine into 32b mode. */
+	mfmsr   r20
+  	clrldi  r20,r20,3
+	sync
+	.long   (0x7c000164 + ((r20) << 21))
+	isync
+#endif /* CONFIG_PPC64BRIDGE */
+	lis	r10,edata@h
+	ori	r10,r10,edata@l
+	lis	r11,end@h
+	ori	r11,r11,end@l
+	subi	r10,r10,4
+	subi	r11,r11,4
+	li	r0, 0
+1:	stwu	r0,4(r10)
+	cmp	0,r10,r11
+	bne	1b
 	b	yaboot_start
 
 /*

@@ -12,14 +12,14 @@ static int rowbytes;
 static int zoom;
 static unsigned char *address;
 
-int scrSetColorMap( unsigned char color, unsigned char r, unsigned char g, unsigned char b );
+static int scrSetColorMap( unsigned char color,
+	unsigned char r, unsigned char g, unsigned char b );
 
 
 int scrOpen()
 {
   int result = 0;
-  int start_time;
-
+ 
   videodev = (prom_handle)call_prom( "open", 1, 1, "screen" );
   if( videodev == PROM_INVALID_HANDLE )
      return(-1);

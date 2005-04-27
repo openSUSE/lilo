@@ -70,6 +70,36 @@ call_prom (const char *service, int nargs, int nret, ...)
     return 0;
 }
 
+void *
+call_prom_return (const char *service, int nargs, int nret, ...)
+{
+  va_list list;
+  int i;
+  void* result;
+  struct prom_args prom_args;
+  
+  prom_args.service = service;
+  prom_args.nargs = nargs;
+  prom_args.nret = nret;
+  va_start (list, nret);
+  for (i = 0; i < nargs; ++i)
+    prom_args.args[i] = va_arg(list, void *);
+  for (i = 0; i < nret; ++i)
+    prom_args.args[i + nargs] = 0;
+  if (prom (&prom_args) != 0)
+  	return PROM_INVALID_HANDLE;
+  if (nret > 0) {
+    result = prom_args.args[nargs];
+    for (i=1; i<nret; i++) {
+    	void** rp = va_arg(list, void**);
+    	*rp = prom_args.args[i+nargs];
+    }
+  } else
+    result = 0;
+  va_end(list);
+  return result;
+}
+
 static void *
 call_method_1 (char *method, prom_handle h, int nargs, ...)
 {
@@ -272,7 +302,7 @@ prom_readblocks (prom_handle dev, int blockNum, int blockCount, void *buffer)
   if (blksize <= 1)
   	blksize = 512;
   status = prom_seek(dev, blockNum * blksize);
-  if (status < 0) {
+  if (status != 1) {
   	return 0;
   	prom_printf("Can't seek to 0x%x\n", blockNum * blksize);
   }
@@ -419,11 +449,12 @@ prom_readline (char *prompt, char *buf, int len)
   buf[i] = 0;
 }
 
-int
-prom_setcolor (int color, int r, int g, int b)
+#ifdef CONFIG_SET_COLORMAP
+int prom_set_color(prom_handle device, int color, int r, int g, int b)
 {
-  return (int)call_method_1 ("color!", prom_stdout, 4, color, b, g, r);
+  return (int)call_prom( "call-method", 6, 1, "color!", device, color, b, g, r );
 }
+#endif /* CONFIG_SET_COLORMAP */
 
 void
 prom_exit ()
@@ -452,7 +483,7 @@ prom_release(void *virt, unsigned int size)
 {
 //  call_prom ("release", 2, 1, virt, size);
   /* release in not enough, it needs also an unmap call. This bit of forth
-   * code comes from Darwin's bootloader but could be replaced by direct
+   * code inspired from Darwin's bootloader but could be replaced by direct
    * calls to the MMU package if needed
    */
   call_prom ("interpret", 3, 1,

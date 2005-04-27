@@ -11,6 +11,13 @@
 
 unsigned char bar_grad[] = { 228, 237, 246, 254, 207, 254, 246, 237, 228, 206 };
 
+int scrOpen(void);
+void scrSetEntireColorMap(unsigned char *);
+void scrClear(unsigned char);
+void pcxDisplay(unsigned char *, unsigned int);
+void scrFadeColorMap(unsigned char *, unsigned char *, int);
+unsigned char *pcxColormap(unsigned char *, int);
+void scrPutPixel(int, int, unsigned char);
 
 void fxDisplaySplash(struct boot_fspec_t *filespec)
 {

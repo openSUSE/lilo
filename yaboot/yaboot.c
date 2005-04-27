@@ -48,14 +48,32 @@
 
 #define CONFIG_FILE_NAME	"yaboot.conf"
 #define CONFIG_FILE_MAX		0x8000		/* 32k */
-#define SPLASH_SCREEN
 
-#ifdef SPLASH_SCREEN
+#ifdef CONFIG_SPLASH_SCREEN
 #include "gui.h"
-#endif
+#endif /* CONFIG_SPLASH_SCREEN */
 
 /* align addr on a size boundry - adjust address up if needed -- Cort */
 #define _ALIGN(addr,size)	(((addr)+size-1)&(~(size-1)))
+
+typedef struct {
+    union {
+        Elf32_Ehdr  elf32hdr;
+        Elf64_Ehdr  elf64hdr;
+    } elf;
+    void*	    base;
+    unsigned long   memsize;
+    unsigned long   filesize;
+    unsigned long   offset;
+    unsigned long   load_loc;
+    unsigned long   entry;
+} loadinfo_t;
+
+typedef void (*kernel_entry_t)( void *,
+                                unsigned long,
+                                prom_entry,
+                                unsigned long,
+                                unsigned long );
 
 /* Imported functions */
 extern unsigned long reloc_offset(void);
@@ -63,10 +81,15 @@ extern int strtol(const char *nptr, char **endptr, int base);
 extern long flush_icache_range(unsigned long start, unsigned long stop);
 
 /* Exported functions */
-int		yaboot_start(int r3, int r4, int r5);
+int	yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5);
 
 /* Local functions */
 static int	yaboot_main(void);
+static int	is_elf32(loadinfo_t *loadinfo);
+static int	is_elf64(loadinfo_t *loadinfo);
+static int      load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo);
+static int      load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo);
+static void     setup_display(void);
 
 /* Locals & globals */
 
@@ -75,6 +98,38 @@ char bootdevice[1024];
 char *bootpath;
 int bootpartition = -1;
 int _machine = _MACH_Pmac;
+
+#ifdef CONFIG_COLOR_TEXT
+
+/* Color values for text ui */
+static struct ansi_color_t {
+	char*	name;
+	int	index;
+	int	value;
+} ansi_color_table[] = {
+	{ "black",		2, 30 },
+	{ "blue",		0, 31 },
+	{ "green",		0, 32 },
+	{ "cyan",		0, 33 },
+	{ "red",		0, 34 },
+	{ "purple",		0, 35 },
+	{ "brown",		0, 36 },
+	{ "light-gray", 	0, 37 },
+	{ "dark-gray",		1, 30 },
+	{ "light-blue",		1, 31 },
+	{ "light-green",	1, 32 },
+	{ "light-cyan",		1, 33 },
+	{ "light-red",		1, 34 },
+	{ "light-purple",	1, 35 },
+	{ "yellow",		1, 36 },
+	{ "white",		1, 37 },
+	{ NULL,			0, 0 },
+};
+
+/* Default colors for text ui */
+int fgcolor = 15;
+int bgcolor = 0;
+#endif /* CONFIG_COLOR_TEXT */
 
 #if DEBUG
 static int test_bss;
@@ -99,7 +154,7 @@ extern char* _end;
 static struct first_info *quik_fip = NULL;
 
 int
-yaboot_start (int r3, int r4, int r5)
+yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
 {
 	int result;
 	void* malloc_base;
@@ -180,6 +235,23 @@ yaboot_start (int r3, int r4, int r5)
 	
 }
 
+#ifdef CONFIG_COLOR_TEXT
+/*
+ * Validify color for text ui
+ */
+static int
+check_color_text_ui(char *color)
+{
+	int i = 0;
+	while(ansi_color_table[i].name) {
+		if (!strcmp(color, ansi_color_table[i].name))
+			return i;
+		i++;
+	}
+	return -1;
+}      
+#endif /* CONFIG_COLOR_TEXT */
+
 /* Currently, the config file must be at the root of the filesystem.
  * todo: recognize the full path to myself and use it to load the
  * config file. Handle the "\\" (blessed system folder)
@@ -203,6 +275,8 @@ load_config_file(char *device, char* path, int partition)
     /* Build the path to the file */
     if (path)
     	strcpy(conf_path, path);
+    else if ( _machine == _MACH_chrp )
+    	strcpy(conf_path, "/etc/");
     else
     	conf_path[0] = 0;
     strcat(conf_path, CONFIG_FILE_NAME);
@@ -245,6 +319,41 @@ load_config_file(char *device, char* path, int partition)
     p = cfg_get_strg(0, "init-code");
     if (p)
 	prom_interpret(p);
+	
+#ifdef CONFIG_COLOR_TEXT
+    p = cfg_get_strg(0, "fgcolor");
+    if (p) {
+#if DEBUG       
+       prom_printf("fgcolor=%s\n", p);
+#endif
+       fgcolor = check_color_text_ui(p);
+       if (fgcolor == -1) {
+	  prom_printf("Invalid fgcolor: \"%s\".\n", p);
+       }
+    }
+    p = cfg_get_strg(0, "bgcolor");
+    if (p) {
+#if DEBUG      
+       prom_printf("bgcolor=%s\n", p);
+#endif
+       bgcolor = check_color_text_ui(p);
+       if (bgcolor == -1) {
+	  prom_printf("Invalid bgcolor: \"%s\".\n", p);
+       }
+    }
+    if (fgcolor >= 0)
+    	prom_printf("\x1b[%d;%dm", ansi_color_table[fgcolor].index,
+    		ansi_color_table[fgcolor].value);
+    if (bgcolor >= 0) {
+    	prom_printf("\x1b[%d;%dm", ansi_color_table[bgcolor].index,
+  		ansi_color_table[bgcolor].value+10);
+#if !DEBUG
+	prom_printf("\xc");
+#endif	
+    }
+
+#endif /* CONFIG_COLOR_TEXT */
+   
     p = cfg_get_strg(0, "init-message");
     if (p)
 	prom_printf("%s\n", p);
@@ -312,7 +421,7 @@ make_params(char *label, char *params)
     if (p) {
 	strcpy(q, p);
 	q = strchr(q, 0);
-	if (*params) {
+	if (params) {
 	    if (*p)
 		*q++ = ' ';
 	    strcpy(q, params);
@@ -365,7 +474,7 @@ make_params(char *label, char *params)
     p = cfg_get_strg(label, "pause-message");
     if (p)
 	pause_message = p;
-    if (*params)
+    if (params)
 	strcpy(q, params);
 
     return buffer;
@@ -385,9 +494,9 @@ int get_params(struct boot_param_t* params)
     static char imagepath[1024];
     static char initrdpath[1024];
     static char sysmappath[1024];
-#ifdef SPLASH_SCREEN
+#ifdef CONFIG_SPLASH_SCREEN
     static char splashpath[1024];
-#endif
+#endif /* CONFIG_SPLASH_SCREEN */
 
     pause_after = 0;
     memset(params, 0, sizeof(*params));
@@ -423,7 +532,8 @@ int get_params(struct boot_param_t* params)
     }
 
     if (c == '\n') {
-	prom_printf("%s", imagename);
+    	if (imagename)
+		prom_printf("%s", imagename);
 	if (params->args)
 	    prom_printf(" %s", params->args);
 	prom_printf("\n");
@@ -439,7 +549,7 @@ int get_params(struct boot_param_t* params)
     }
 
     /* chrp gets this wrong, force it -- Cort */
-    if ( useconf && ((imagename[0] == 0) /*|| is_chrp*/) )
+    if ( useconf && (!imagename || imagename[0] == 0 ))
 	imagename = cfg_get_default();
 
     label = 0;
@@ -516,7 +626,7 @@ int get_params(struct boot_param_t* params)
 	    	&params->sysmap.file, &params->sysmap.part);
 	    validate_fspec(&params->sysmap, defdevice, defpart);
 	}
-#ifdef SPLASH_SCREEN
+#ifdef CONFIG_SPLASH_SCREEN
  	p = cfg_get_strg(label, "splash");
 	if (p && *p) {
 #if DEBUG
@@ -527,8 +637,8 @@ int get_params(struct boot_param_t* params)
 	    	&params->splash.file, &params->splash.part);
 	    validate_fspec(&params->splash, defdevice, defpart);
 	}
+#endif /* CONFIG_SPLASH_SCREEN */
    }
-#endif /* SPLASH_SCREEN */
     
     return 0;
 }
@@ -545,16 +655,17 @@ yaboot_text_ui(void)
 
     struct boot_file_t	file;
     int			result;
-    void*		base;
-    Elf32_Ehdr		e;
-    Elf32_Phdr		*p, *ph;
     static struct boot_param_t	params;
-    void		*initrd_base, *sysmap_base;
-    unsigned int	memsize, filesize, offset, initrd_size, load_loc = 0;
-    unsigned int	sysmap_size;
-    int 		i;
+    void		*initrd_base;
+    unsigned long	initrd_size;
+    void                *sysmap_base;
+    unsigned long	sysmap_size;
+    kernel_entry_t      kernel_entry;
     struct bi_record*	birec;
+    loadinfo_t          loadinfo;
     
+    loadinfo.load_loc = 0;
+
     for (;;) {
     	initrd_size = 0;
     	initrd_base = 0;
@@ -564,129 +675,38 @@ yaboot_text_ui(void)
 	if (!params.kernel.file)
 	    continue;
 	
-#ifdef SPLASH_SCREEN
+#ifdef CONFIG_SPLASH_SCREEN
 	if (params.splash.file)
         	fxDisplaySplash(&params.splash);
-#endif
+#endif /* CONFIG_SPLASH_SCREEN */
 	prom_printf("Loading kernel...\n");
-	result = open_file(&params.kernel, &file);
-	if (result != FILE_ERR_OK) {
+
+        result = open_file(&params.kernel, &file);
+        if (result != FILE_ERR_OK) {
 	    prom_printf("\nImage not found.... try again\n");
-	    continue;
-	}	
-    	if (file.read(&file, sizeof(Elf32_Ehdr), &e) < sizeof(e)) {
-	    prom_printf("\nCan't read image header\n");
-	    goto next;
-	}
-	/* By this point the first sector is loaded,
-	 * we check if it is an executable elf binary. */
-	if (e.e_ident[EI_MAG0] != ELFMAG0
-	      || e.e_ident[EI_MAG1] != ELFMAG1
-	      || e.e_ident[EI_MAG2] != ELFMAG2
-	      || e.e_ident[EI_MAG3] != ELFMAG3
-	      || e.e_ident[EI_CLASS] != ELFCLASS32
-	      || e.e_ident[EI_DATA] != ELFDATA2MSB
-	      || e.e_type != ET_EXEC
-	      || e.e_machine != EM_PPC) {
-	    prom_printf ("not a valid ELF image\n");
 	    goto next;
 	}
 
-#if DEBUG
-	prom_printf("elf header:\n");
-	prom_printf(" e.e_type      = %d\n", (int)e.e_type);
-	prom_printf(" e.e_type      = %d\n", (int)e.e_type);
-	prom_printf(" e.e_machine   = %d\n", (int)e.e_machine);
-	prom_printf(" e.e_version   = %d\n", (int)e.e_version);
-	prom_printf(" e.e_entry     = 0x%08x\n", (int)e.e_entry);
-	prom_printf(" e.e_phoff     = 0x%08x\n", (int)e.e_phoff);
-	prom_printf(" e.e_shoff     = 0x%08x\n", (int)e.e_shoff);
-	prom_printf(" e.e_flags     = %d\n", (int)e.e_flags);
-	prom_printf(" e.e_ehsize    = 0x%08x\n", (int)e.e_ehsize);
-	prom_printf(" e.e_phentsize = 0x%08x\n", (int)e.e_phentsize);
-	prom_printf(" e.e_phnum     = %d\n", (int)e.e_phnum);
-#endif	    
-
-	if (e.e_phnum > MAX_HEADERS) {
-	    prom_printf ("can only load kernels with one program header\n");
-	    goto next;
-	}
-	
-	ph = (Elf32_Phdr *)malloc(sizeof(Elf32_Phdr) * e.e_phnum);
-	if (!ph) {
-	    prom_printf ("malloc error\n");
-	    goto next;
-	}
-		
-	/* Now, we read the section header */
-	if (file.seek(&file, e.e_phoff) != FILE_ERR_OK) {
-	    prom_printf ("seek error\n");
-	    goto next;
-	}
-	if (file.read(&file, sizeof(Elf32_Phdr) * e.e_phnum, ph) !=
-		sizeof(Elf32_Phdr) * e.e_phnum) {
-	    prom_printf ("read error\n");
-	    goto next;
-	}
-
-	/* Scan through the program header
-	 * HACK:  We must return the _memory size of the kernel image, not the
-	 *        file size (because we have to leave room before other boot
-	 *	  infos. This code works as a side effect of the fact that
-	 *	  we have one section and vaddr == p_paddr
+	/* Read the Elf e_ident, e_type and e_machine fields to
+	 * determine Elf file type
 	 */
-	memsize = filesize = offset = 0;
-	p = ph;
-	for (i = 0; i < e.e_phnum; ++i, ++p) {
-	    if (p->p_type != PT_LOAD || p->p_offset == 0)
-		continue;
-	    if (memsize == 0) {
-		offset = p->p_offset;
-		memsize = p->p_memsz;
-		filesize = p->p_filesz;
-		load_loc = p->p_vaddr;
-	    } else {
-		memsize = p->p_offset + p->p_memsz - offset; /* XXX Bogus */
-		filesize = p->p_offset + p->p_filesz - offset;
-	    }
-	}
-	free(ph);
-	if (memsize == 0) {
-	    prom_printf("Can't find a loadable segment !\n");
+        if (file.read(&file, sizeof(Elf_Ident), &loadinfo.elf) < sizeof(Elf_Ident)) {
+	    prom_printf("\nCan't read Elf e_ident/e_type/e_machine info\n");
 	    goto next;
 	}
 
-	/* leave some room (1Mb) for boot infos */
-	memsize = _ALIGN(memsize,(1<<20)) + 0x100000;
-	/* Claim OF memory */
-	base = prom_claim((void *)KERNELADDR, memsize, 0);
-	if (base == (void *)-1) {
-	    prom_printf("claim error, can't allocate kernel memory\n");
-	    goto next;
-	}	
-#if DEBUG
-	prom_printf("After ELF parsing, load base: 0x%08lx, mem_sz: 0x%08lx, birec: \n",
-    		base, memsize);
-#endif    
-	/* Now, we skip to the image itself */
-	if (file.seek(&file, offset) != FILE_ERR_OK) {
-	    prom_printf ("seek error\n");
-	    prom_release(base, memsize);
-	    goto next;
+	if ( is_elf32(&loadinfo) ) {
+            if ( !load_elf32(&file, &loadinfo) )
+                goto next;
+            prom_printf("   Elf32 kernel loaded...\n");
+	} else if ( is_elf64(&loadinfo) ) {
+            if ( !load_elf64(&file, &loadinfo) )
+                goto next;
+            prom_printf("   Elf64 kernel loaded...\n");
+	} else {
+            prom_printf ("Not a valid ELF image\n");
+            goto next;
 	}
-#ifdef SPLASH_SCREEN
-        if (fxReadImage(&file, filesize, base) != filesize) {
-#else
-        if (file.read(&file, filesize, base) != filesize) {
-#endif
-	    prom_printf ("read failed\n");
-	    prom_release(base, memsize);
-	    goto next;
-	}
-#if 0	/* to make editor happy */
-	}
-#endif	
-	file.close(&file);
 
 	/* If sysmap, load it. 
 	 */
@@ -696,8 +716,8 @@ yaboot_text_ui(void)
 	    if (result != FILE_ERR_OK)
 		prom_printf("\nSystem.map file not found.\n");
 	    else {
-		sysmap_base = prom_claim(base+memsize, 0x100000, 0);
-		if (sysmap_base == (void *)0xffffffff) {
+		sysmap_base = prom_claim(loadinfo.base+loadinfo.memsize, 0x100000, 0);
+		if (sysmap_base == (void *)-1) {
 		    prom_printf("claim failed for sysmap memory\n");
 		    sysmap_base = 0;
 		} else {
@@ -710,7 +730,7 @@ yaboot_text_ui(void)
 	    if (sysmap_base) {
 	    	prom_printf("System.map loaded at 0x%08lx, size: %d bytes\n",
 	    		sysmap_base, sysmap_size);
-	    	memsize += _ALIGN(0x100000, 0x1000);
+	    	loadinfo.memsize += _ALIGN(0x100000, 0x1000);
 	    } else {
 	    	prom_printf("System.map load failed !\n");
 	    	prom_pause();
@@ -726,8 +746,8 @@ yaboot_text_ui(void)
 	    if (result != FILE_ERR_OK)
 		prom_printf("\nRamdisk image not found.\n");
 	    else {
-		initrd_base = prom_claim(base+memsize, 0x400000, 0);
-		if (initrd_base == (void *)0xffffffff) {
+		initrd_base = prom_claim(loadinfo.base+loadinfo.memsize, 0x400000, 0);
+		if (initrd_base == (void *)-1) {
 		    prom_printf("claim failed for initrd memory\n");
 		    initrd_base = 0;
 		} else {
@@ -753,7 +773,7 @@ yaboot_text_ui(void)
 #if DEBUG
 	prom_printf("flushing icache...\n");
 #endif	
-	flush_icache_range ((int)base, (int)base+memsize);
+	flush_icache_range ((long)loadinfo.base, (long)loadinfo.base+loadinfo.memsize);
 
 	/* 
 	 * Fill mew boot infos
@@ -762,7 +782,8 @@ yaboot_text_ui(void)
 	 * we don't write it earlier. At this point, we should not use anything
 	 * coming from the malloc pool
 	 */
-	birec = (struct bi_record *)_ALIGN(filesize+(1<<20)-1,(1<<20));
+	birec = (struct bi_record *)_ALIGN(loadinfo.filesize+(1<<20)-1,(1<<20));
+
 	/* We make sure it's mapped. We map only 64k for now, it's plenty enough
 	 * we don't claim since this precise memory range may already be claimed
 	 * by the malloc pool
@@ -770,9 +791,11 @@ yaboot_text_ui(void)
 	prom_map (birec, birec, 0x10000);
 #if DEBUG
 	prom_printf("birec at 0x%08lx\n", birec);
-	i = prom_getms();
-	while((prom_getms() - i) < 2000)
+	{
+	    int i = prom_getms();
+	    while((prom_getms() - i) < 2000)
 		;
+	}
 #endif	
 
 	birec->tag = BI_FIRST;
@@ -799,23 +822,335 @@ yaboot_text_ui(void)
 	birec->size = sizeof(struct bi_record);
 	birec = (struct bi_record *)((unsigned long)birec + birec->size);
 
-	// call the kernel with our stack.
+	// compute the kernel's entry point.
+	kernel_entry = loadinfo.base + loadinfo.entry - loadinfo.load_loc;
+
+#if DEBUG
+	prom_printf("Kernel entry point = 0x%08lx\n", kernel_entry);
+        prom_printf("kernel: arg1 = 0x%08lx,\n"
+                    "        arg2 = 0x%08lx,\n"
+                    "        prom = 0x%08lx,\n"
+                    "        arg4 = 0x%08lx,\n"
+                    "        arg5 = 0x%08lx\n\n",
+                initrd_base + loadinfo.load_loc, initrd_size, prom, 0, 0);
+
+#endif	
+
 #if DEBUG
 	prom_printf("entering kernel...\n");
-#endif	
-	((void (*)())(base + e.e_entry - load_loc + 0xC)) (
-		initrd_base + load_loc, 
-		initrd_size,
-		prom, 0, 0);
-	continue;
+#endif
+        // call the kernel with our stack.
+        kernel_entry(initrd_base + loadinfo.load_loc, initrd_size, prom, 0, 0);
+        continue;
 next:
 	file.close(&file);    
     }
 }
 
+static int
+load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
+{
+    int			i;
+    Elf32_Ehdr		*e = &(loadinfo->elf.elf32hdr);
+    Elf32_Phdr		*p, *ph;
+    int			size = sizeof(Elf32_Ehdr) - sizeof(Elf_Ident);
+
+    // Read the rest of the Elf header...
+    if ((*(file->read))(file, size, &e->e_version) < size) {
+	prom_printf("\nCan't read Elf32 image header\n");
+	return 0;
+    }
+
+#if DEBUG
+    prom_printf("Elf32 header:\n");
+    prom_printf(" e.e_type      = %d\n", (int)e->e_type);
+    prom_printf(" e.e_machine   = %d\n", (int)e->e_machine);
+    prom_printf(" e.e_version   = %d\n", (int)e->e_version);
+    prom_printf(" e.e_entry     = 0x%08x\n", (int)e->e_entry);
+    prom_printf(" e.e_phoff     = 0x%08x\n", (int)e->e_phoff);
+    prom_printf(" e.e_shoff     = 0x%08x\n", (int)e->e_shoff);
+    prom_printf(" e.e_flags     = %d\n", (int)e->e_flags);
+    prom_printf(" e.e_ehsize    = 0x%08x\n", (int)e->e_ehsize);
+    prom_printf(" e.e_phentsize = 0x%08x\n", (int)e->e_phentsize);
+    prom_printf(" e.e_phnum     = %d\n", (int)e->e_phnum);
+#endif	    
+
+    loadinfo->entry = e->e_entry;
+
+    if (e->e_phnum > MAX_HEADERS) {
+	prom_printf ("can only load kernels with one program header\n");
+	return 0;
+    }
+
+    ph = (Elf32_Phdr *)malloc(sizeof(Elf32_Phdr) * e->e_phnum);
+    if (!ph) {
+	prom_printf ("malloc error\n");
+	return 0;
+    }
+
+    /* Now, we read the section header */
+    if ((*(file->seek))(file, e->e_phoff) != FILE_ERR_OK) {
+	prom_printf ("seek error\n");
+	return 0;
+    }
+    if ((*(file->read))(file, sizeof(Elf32_Phdr) * e->e_phnum, ph) !=
+	    sizeof(Elf32_Phdr) * e->e_phnum) {
+	prom_printf ("read error\n");
+	return 0;
+    }
+
+    /* Scan through the program header
+     * HACK:  We must return the _memory size of the kernel image, not the
+     *        file size (because we have to leave room before other boot
+     *	  infos. This code works as a side effect of the fact that
+     *	  we have one section and vaddr == p_paddr
+     */
+    loadinfo->memsize = loadinfo->filesize = loadinfo->offset = 0;
+    p = ph;
+    for (i = 0; i < e->e_phnum; ++i, ++p) {
+	if (p->p_type != PT_LOAD || p->p_offset == 0)
+	    continue;
+	if (loadinfo->memsize == 0) {
+	    loadinfo->offset = p->p_offset;
+	    loadinfo->memsize = p->p_memsz;
+	    loadinfo->filesize = p->p_filesz;
+	    loadinfo->load_loc = p->p_vaddr;
+	} else {
+	    loadinfo->memsize = p->p_offset + p->p_memsz - loadinfo->offset; /* XXX Bogus */
+	    loadinfo->filesize = p->p_offset + p->p_filesz - loadinfo->offset;
+	}
+    }
+
+    if (loadinfo->memsize == 0) {
+	prom_printf("Can't find a loadable segment !\n");
+	return 0;
+    }
+
+    /* leave some room (1Mb) for boot infos */
+    loadinfo->memsize = _ALIGN(loadinfo->memsize,(1<<20)) + 0x100000;
+    /* Claim OF memory */
+#if DEBUG
+    prom_printf("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
+#endif    
+
+    loadinfo->base = prom_claim((void *)KERNELADDR, loadinfo->memsize, 0);
+    if (loadinfo->base == (void *)-1) {
+	prom_printf("claim error, can't allocate kernel memory\n");
+	return 0;
+    }	
+
+#if DEBUG
+    prom_printf("After ELF parsing, load base: 0x%08lx, mem_sz: 0x%08lx, birec: \n",
+    	    loadinfo->base, loadinfo->memsize);
+    prom_printf("    wanted load base: 0x%08lx, mem_sz: 0x%08lx\n",
+    	    KERNELADDR, loadinfo->memsize);
+#endif    
+
+    /* Load the program segments... */
+    p = ph;
+    for (i = 0; i < e->e_phnum; ++i, ++p) {
+	    unsigned long offset;
+	    if (p->p_type != PT_LOAD || p->p_offset == 0)
+		    continue;
+
+	    /* Now, we skip to the image itself */
+	    if ((*(file->seek))(file, p->p_offset) != FILE_ERR_OK) {
+		    prom_printf ("seek error\n");
+		    prom_release(loadinfo->base, loadinfo->memsize);
+		    return 0;
+	    }
+	    offset = p->p_vaddr - loadinfo->load_loc;
+#ifdef CONFIG_SPLASH_SCREEN
+	    if (fxReadImage(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
+#else /* CONFIG_SPLASH_SCREEN */
+	    if ((*(file->read))(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
+#endif /* CONFIG_SPLASH_SCREEN */
+		    prom_printf ("read failed\n");
+		    prom_release(loadinfo->base, loadinfo->memsize);
+		    return 0;
+	    }
+    }
+
+#if 0	/* to make editor happy */
+    }
+#endif	
+    (*(file->close))(file);
+
+    free(ph);
+    
+    // Return success at loading the Elf32 kernel
+    return 1;
+}
+
+static int
+load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
+{
+    int			i;
+    Elf64_Ehdr		*e = &(loadinfo->elf.elf64hdr);
+    Elf64_Phdr		*p, *ph;
+    int			size = sizeof(Elf64_Ehdr) - sizeof(Elf_Ident);
+
+    // Read the rest of the Elf header...
+    if ((*(file->read))(file, size, &e->e_version) < size) {
+	prom_printf("\nCan't read Elf64 image header\n");
+	return 0;
+    }
+
+#if DEBUG
+    prom_printf("Elf64 header:\n");
+    prom_printf(" e.e_type      = %d\n", (int)e->e_type);
+    prom_printf(" e.e_machine   = %d\n", (int)e->e_machine);
+    prom_printf(" e.e_version   = %d\n", (int)e->e_version);
+    prom_printf(" e.e_entry     = 0x%016lx\n", (long)e->e_entry);
+    prom_printf(" e.e_phoff     = 0x%016lx\n", (long)e->e_phoff);
+    prom_printf(" e.e_shoff     = 0x%016lx\n", (long)e->e_shoff);
+    prom_printf(" e.e_flags     = %d\n", (int)e->e_flags);
+    prom_printf(" e.e_ehsize    = 0x%08x\n", (int)e->e_ehsize);
+    prom_printf(" e.e_phentsize = 0x%08x\n", (int)e->e_phentsize);
+    prom_printf(" e.e_phnum     = %d\n", (int)e->e_phnum);
+#endif	    
+
+    loadinfo->entry = e->e_entry;
+
+    if (e->e_phnum > MAX_HEADERS) {
+	prom_printf ("can only load kernels with one program header\n");
+	return 0;
+    }
+
+    ph = (Elf64_Phdr *)malloc(sizeof(Elf64_Phdr) * e->e_phnum);
+    if (!ph) {
+	prom_printf ("malloc error\n");
+	return 0;
+    }
+
+    /* Now, we read the section header */
+    if ((*(file->seek))(file, e->e_phoff) != FILE_ERR_OK) {
+	prom_printf ("seek error\n");
+	return 0;
+    }
+    if ((*(file->read))(file, sizeof(Elf64_Phdr) * e->e_phnum, ph) !=
+	    sizeof(Elf64_Phdr) * e->e_phnum) {
+	prom_printf ("read error\n");
+	return 0;
+    }
+
+    /* Scan through the program header
+     * HACK:  We must return the _memory size of the kernel image, not the
+     *        file size (because we have to leave room before other boot
+     *	  infos. This code works as a side effect of the fact that
+     *	  we have one section and vaddr == p_paddr
+     */
+    loadinfo->memsize = loadinfo->filesize = loadinfo->offset = 0;
+    p = ph;
+    for (i = 0; i < e->e_phnum; ++i, ++p) {
+	if (p->p_type != PT_LOAD || p->p_offset == 0)
+	    continue;
+	if (loadinfo->memsize == 0) {
+	    loadinfo->offset = p->p_offset;
+	    loadinfo->memsize = p->p_memsz;
+	    loadinfo->filesize = p->p_filesz;
+	    loadinfo->load_loc = p->p_vaddr;
+	} else {
+	    loadinfo->memsize = p->p_offset + p->p_memsz - loadinfo->offset; /* XXX Bogus */
+	    loadinfo->filesize = p->p_offset + p->p_filesz - loadinfo->offset;
+	}
+    }
+
+    if (loadinfo->memsize == 0) {
+	prom_printf("Can't find a loadable segment !\n");
+	return 0;
+    }
+
+    /* leave some room (1Mb) for boot infos */
+    loadinfo->memsize = _ALIGN(loadinfo->memsize,(1<<20)) + 0x100000;
+    /* Claim OF memory */
+#if DEBUG
+    prom_printf("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
+#endif    
+
+    loadinfo->base = prom_claim((void *)KERNELADDR, loadinfo->memsize, 0);
+    if (loadinfo->base == (void *)-1) {
+	prom_printf("claim error, can't allocate kernel memory\n");
+	return 0;
+    }	
+
+#if DEBUG
+    prom_printf("After ELF parsing, load base: 0x%08lx, mem_sz: 0x%08lx, birec: \n",
+    	    loadinfo->base, loadinfo->memsize);
+    prom_printf("    wanted load base: 0x%08lx, mem_sz: 0x%08lx\n",
+    	    KERNELADDR, loadinfo->memsize);
+#endif    
+
+    /* Load the program segments... */
+    p = ph;
+    for (i = 0; i < e->e_phnum; ++i, ++p) {
+	    unsigned long offset;
+	    if (p->p_type != PT_LOAD || p->p_offset == 0)
+		    continue;
+
+	    /* Now, we skip to the image itself */
+	    if ((*(file->seek))(file, p->p_offset) != FILE_ERR_OK) {
+		    prom_printf ("seek error\n");
+		    prom_release(loadinfo->base, loadinfo->memsize);
+		    return 0;
+	    }
+	    offset = p->p_vaddr - loadinfo->load_loc;
+#ifdef CONFIG_SPLASH_SCREEN
+	    if (fxReadImage(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
+#else /* CONFIG_SPLASH_SCREEN */
+	    if ((*(file->read))(file, p->p_filesz, loadinfo->base+offset) != p->p_filesz) {
+#endif /* CONFIG_SPLASH_SCREEN */
+		    prom_printf ("read failed\n");
+		    prom_release(loadinfo->base, loadinfo->memsize);
+		    return 0;
+	    }
+    }
+
+#if 0	/* to make editor happy */
+    }
+#endif	
+    (*(file->close))(file);
+
+    free(ph);
+    
+    // Return success at loading the Elf64 kernel
+    return 1;
+}
+
+static int
+is_elf32(loadinfo_t *loadinfo)
+{
+	Elf32_Ehdr *e = &(loadinfo->elf.elf32hdr);
+
+	return (e->e_ident[EI_MAG0]  == ELFMAG0	    &&
+		e->e_ident[EI_MAG1]  == ELFMAG1	    &&
+		e->e_ident[EI_MAG2]  == ELFMAG2	    &&
+		e->e_ident[EI_MAG3]  == ELFMAG3	    &&
+		e->e_ident[EI_CLASS] == ELFCLASS32  &&
+		e->e_ident[EI_DATA]  == ELFDATA2MSB &&
+		e->e_type            == ET_EXEC	    &&
+		e->e_machine         == EM_PPC);
+}
+
+static int
+is_elf64(loadinfo_t *loadinfo)
+{
+	Elf64_Ehdr *e = &(loadinfo->elf.elf64hdr);
+
+	return (e->e_ident[EI_MAG0]  == ELFMAG0	    &&
+		e->e_ident[EI_MAG1]  == ELFMAG1	    &&
+		e->e_ident[EI_MAG2]  == ELFMAG2	    &&
+		e->e_ident[EI_MAG3]  == ELFMAG3	    &&
+		e->e_ident[EI_CLASS] == ELFCLASS64  &&
+		e->e_ident[EI_DATA]  == ELFDATA2MSB &&
+		e->e_type            == ET_EXEC	    &&
+		e->e_machine         == EM_PPC64);
+}
+
 static void
 setup_display(void)
 {
+#ifdef CONFIG_SET_COLORMAP
 	static unsigned char default_colors[] = {
 		0x00, 0x00, 0x00,
 		0x00, 0x00, 0xaa,
@@ -823,7 +1158,7 @@ setup_display(void)
 		0x00, 0xaa, 0xaa,
 		0xaa, 0x00, 0x00,
 		0xaa, 0x00, 0xaa,
-		0xaa, 0xaa, 0x00,
+		0xaa, 0x55, 0x00,
 		0xaa, 0xaa, 0xaa,
 		0x55, 0x55, 0x55,
 		0x55, 0x55, 0xff,
@@ -834,24 +1169,70 @@ setup_display(void)
 		0xff, 0xff, 0x55,
 		0xff, 0xff, 0xff
 	};
-	int i;
+	int i, result;
+	prom_handle scrn = PROM_INVALID_HANDLE;
 
-	for(i=0;i<32;i++) {
-		prom_setcolor(i, default_colors[i*3],
+	/* Try Apple's mac-boot screen ihandle */
+  	result = (int)call_prom_return("interpret", 1, 2,
+  		"\" _screen-ihandle\" $find if execute else 0 then", &scrn);
+#if DEBUG
+  	prom_printf("trying to get screen ihandle, result: 0x%x, scrn: 0x%x\n", result, scrn);
+#endif  	
+  	if (scrn == 0 || scrn == PROM_INVALID_HANDLE) {
+  		char type[32];
+  		/* Hrm... check to see if stdout is a display */
+  		scrn = call_prom ("instance-to-package", 1, 1, prom_stdout);
+#if DEBUG
+	  	prom_printf("instance-to-package of stdout is: 0x%x\n", scrn);
+#endif  	
+  		if (prom_getprop(scrn, "device_type", type, 32) > 0 && !strncmp(type, "display", 7)) {
+#if DEBUG
+		  	prom_printf("got it ! stdout is a screen\n");
+#endif  	
+  			scrn = prom_stdout;
+  		} else {
+	  		/* Else, we try to open the package */
+			scrn = (prom_handle)call_prom( "open", 1, 1, "screen" );
+#if DEBUG
+		  	prom_printf("Open screen result: 0x%x\n", scrn);
+#endif  	
+		}
+  	}
+  	
+	if (scrn == PROM_INVALID_HANDLE) {
+		prom_printf("no screen device found !/n");
+		return;
+	}
+	for(i=0;i<16;i++) {
+		prom_set_color(scrn, i, default_colors[i*3],
 			default_colors[i*3+1], default_colors[i*3+2]);
 	}
-	prom_printf("\x1b[33m\x1b[40m");
+	prom_printf("\x1b[1;37m\x1b[2;40m");	
+#ifdef COLOR_TEST
+	for (i=0;i<16; i++) {
+		prom_printf("\x1b[%d;%dm\x1b[1;47m%s \x1b[2;40m %s\n",
+			ansi_color_table[i].index,
+			ansi_color_table[i].value,
+			ansi_color_table[i].name,
+			ansi_color_table[i].name);
+		prom_printf("\x1b[%d;%dm\x1b[1;37m%s \x1b[2;30m %s\n",
+			ansi_color_table[i].index,
+			ansi_color_table[i].value+10,
+			ansi_color_table[i].name,
+			ansi_color_table[i].name);
+	}
+	prom_printf("\x1b[1;37m\x1b[2;40m");	
+#endif
 #if !DEBUG
 	prom_printf("\xc");
 #endif	
+#endif /* CONFIG_SET_COLORMAP */
 }
 
 int
 yaboot_main(void)
 {
 	setup_display();
-	
-	prom_printf("Welcome to yaboot version " VERSION "\n");
 	
 	prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
 #if DEBUG
@@ -892,6 +1273,9 @@ yaboot_main(void)
 		bootdevice, bootpath ? bootpath : NULL, bootpartition);
 #endif	
 	useconf = load_config_file(bootdevice, bootpath, bootpartition);
+
+	prom_printf("Welcome to yaboot version " VERSION "\n");
+	
 	yaboot_text_ui();
 	
 	prom_printf("Bye.\n");

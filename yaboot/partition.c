@@ -24,10 +24,14 @@
 #include "stddef.h"
 #include "stdlib.h"
 #include "mac-part.h"
+#include "fdisk-part.h"
 #include "partition.h"
 #include "prom.h"
 #include "string.h"
 #include "linux/iso_fs.h"
+
+/* Local functions */
+static unsigned long swab32(unsigned long value);
 
 #define MAX_BLOCK_SIZE	2048
 static char block_buffer[MAX_BLOCK_SIZE];
@@ -133,6 +137,42 @@ partition_mac_lookup(prom_handle disk, unsigned int blksize,
 	}
 }
 
+/* 
+ * Same function as partition_mac_lookup(), except for fdisk
+ * partitioned disks.
+ */
+static void
+partition_fdisk_lookup(prom_handle disk, unsigned int blksize,
+	struct partition_t** list)
+{
+	int partition, kind;
+
+	/* fdisk partition tables start at offset 0x1be
+	 * from byte 0 of the boot drive.
+	 */
+	struct fdisk_partition* part = 
+	  (struct fdisk_partition *) (block_buffer + 0x1be);
+
+	for (partition=1; partition <= 4 ;partition++, part++) {
+		kind = (part->sys_ind == LINUX_NATIVE) ? partition_ext2 : -1;
+
+		if (kind > 0) {
+#if DEBUG
+			prom_printf("  ->add_partition: %d\n", partition);
+#endif
+			add_partition(  list,
+					kind,
+					partition,
+					"RS/6000 ext2",
+					/* start_block + data_start */
+                                        swab32(*(unsigned int *)(part->start4)),
+					/* # blocks */
+                                        swab32(*(unsigned int *)(part->size4)),
+					512 /*blksize*/ );
+		}
+	}
+}
+
 /* I don't know if it's possible to handle multisession and other multitrack
  * stuffs with the current OF disklabel package. This can still be implemented
  * with direct calls to atapi stuffs.
@@ -200,9 +240,13 @@ partitions_lookup(const char *device)
 		prom_printf("Can't read boot blocs\n");
 		goto bail;
 	}	
-	if (desc->signature == MAC_DRIVER_MAGIC)
+	if (desc->signature == MAC_DRIVER_MAGIC) {
+		/* pdisk partition format */
 		partition_mac_lookup(disk, blksize, &list);
-	else if (blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
+	} else if ((block_buffer[510] == 0x55) && (block_buffer[511] == 0xaa)) {
+		/* fdisk partition format */
+		partition_fdisk_lookup(disk, blksize, &list);
+	} else if (blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
 		add_partition(	&list,
 				partition_iso,
 				0,
@@ -234,3 +278,17 @@ partitions_free(struct partition_t* list)
 		list = next;
 	}
 }
+unsigned long
+swab32(unsigned long value)
+{
+	__u32 result;
+
+	__asm__("rlwimi %0,%1,24,16,23\n\t"
+	    "rlwimi %0,%1,8,8,15\n\t"
+	    "rlwimi %0,%1,24,0,7"
+	    : "=r" (result)
+	    : "r" (value), "0" (value >> 24));
+	return result;
+}
+
+

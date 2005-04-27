@@ -88,7 +88,7 @@ static io_manager linux_io_manager = &struct_linux_manager;
 /* Currently, we have a mess between what is in the file structure
  * and what is stored globally here. I'll clean this up later
  */
-static int opened;		/* We can't open twice ! */
+static int opened = 0;		/* We can't open twice ! */
 static unsigned int bs;		/* Blocksize */
 static unsigned long long doff;	/* Byte offset where partition starts */
 static ino_t root,cwd;

@@ -135,7 +135,10 @@ file_block_open(	struct boot_file_t*	file,
 			prom_printf(" (match)\n");
 #endif						
 	}
-	
+
+	/* Note: we don't skip when found is NULL since we can, in some
+	 * cases, let OF figure out a default partition.
+	 */
 	result = filesystems[fs]->open(file, dev_name, found, file_name);
 
 bail:
@@ -208,7 +211,7 @@ int open_file(	const struct boot_fspec_t*	spec,
 	 * if not, we hope that the user wants a kernel on the same
 	 * drive and partition as yaboot itself */
 	if (!spec->dev)
-		strcpy(spec->dev, &bootdevice);
+		strcpy(spec->dev, bootdevice);
 	strncpy(temp,spec->dev,1024);
 	dev_name = parse_device_path(temp, &file_name, &partition);
 	if (file_name == NULL)

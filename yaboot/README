@@ -1,0 +1,27 @@
+Yaboot  -- Linux/PPC OpenFirmware bootloader
+--------------------------------------------
+
+Please read the "COPYING" file for licence informations.
+
+   Copyright (C) 2000 Benjamin Herrenschmidt
+
+   portions based on poof
+
+   Copyright (C) 1999 Marius Vollmer
+
+   portions based on quik
+   
+   Copyright (C) 1996 Paul Mackerras.
+
+   PPC64 support & Misc fixes by Peter Bergner, David Engebretsen
+   
+
+--------------------------------------------
+
+Yaboot is an OpenFirmware bootloader for Open Firmware based
+machines. It is known to work on "NewWorld" class powermacs
+(iMac and all machines released after it), RS/6000, and possibly
+other OF based CHRP machines.
+"OldWorld" PowerMacs (with the old MacOS ROM buit-in) are not
+supported.
+
