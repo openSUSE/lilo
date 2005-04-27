@@ -1,0 +1,236 @@
+/* File related stuff
+   
+   Copyright (C) 1999 Benjamin Herrenschmidt
+   
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#include "ctype.h"
+#include "types.h"
+#include "stddef.h"
+#include "stdlib.h"
+#include "file.h"
+#include "prom.h"
+#include "string.h"
+#include "partition.h"
+#include "fs.h"
+
+/* Imported functions */
+extern int strtol(const char *nptr, char **endptr, int base);
+
+/* This function follows the device path in the devtree and separates
+   the device name, partition number, and other datas (mostly file name)
+   the string passed in parameters is changed since 0 are put in place
+   of some separators to terminate the various strings
+ */
+char *
+parse_device_path(char *of_device, char **file_spec, int *partition)
+{
+	char *p, *last;
+
+	if (file_spec)
+		*file_spec = NULL;
+	if (partition)
+		*partition = -1;
+
+	p = strchr(of_device, ':');
+	if (p)
+		*p = 0;
+	else
+		return of_device;
+	
+	last = ++p;
+	while(*p && *p != ',') {
+		if (*p < '0' || *p > '9') {
+			p = last;
+			break;
+		}
+		++p;
+	}
+	if (p != last) {
+		*(p++) = 0;
+		if (partition)
+			*partition = strtol(last, NULL, 0);
+	}
+	if (*p && file_spec)
+		*file_spec = p;
+		
+	return of_device;
+
+}
+
+static int
+file_block_open(	struct boot_file_t*	file,
+			const char*		dev_name,
+			const char*		file_name,
+			int			partition)
+{
+	struct partition_t*	parts;
+	struct partition_t*	p;
+	struct partition_t*	found;
+	int result = FILE_ERR_NOTFOUND;
+	int fs = fs_of;
+	
+	parts = partitions_lookup(dev_name);
+	found = NULL;
+			
+#if DEBUG
+	if (parts)
+		prom_printf("partitions:\n");
+	else
+		prom_printf("no partitions found.\n");
+#endif
+	for (p = parts; p && !found; p=p->next) {
+#if DEBUG
+		prom_printf("number: %02d type: %02d, start: 0x%08lx, length: 0x%08lx => %s\n",
+			p->part_number, p->kind, p->part_start, p->part_size, p->part_name);
+#endif
+		if (p->kind == -1)
+			continue;
+			
+		fs = part_2_fs_map[p->kind];
+		if (partition == -1) {
+			result = filesystems[fs]->open(file, dev_name, p, file_name);
+			if (result == FILE_ERR_OK)
+				goto bail;
+		}
+		if ((partition >= 0) && (partition == p->part_number))
+			found = p;
+#if DEBUG
+		if (found)
+			prom_printf(" (match)\n");
+#endif						
+	}
+	
+	file->read = filesystems[fs]->read;
+	file->seek = filesystems[fs]->seek;
+	file->close = filesystems[fs]->close;
+	result = filesystems[fs]->open(file, dev_name, found, file_name);
+bail:
+	if (parts)
+		partitions_free(parts);
+	return result;
+}
+
+static int
+file_net_open(	struct boot_file_t*	file,
+		const char*		dev_name,
+		const char*		file_name)
+{
+	int fs = fs_ofnet;
+	
+	file->read = filesystems[fs]->read;
+	file->seek = filesystems[fs]->seek;
+	file->close = filesystems[fs]->close;
+	return filesystems[fs]->open(file, dev_name, NULL, file_name);
+}
+
+static int
+default_read(	struct boot_file_t*	file,
+		unsigned int		size,
+		void*			buffer)
+{
+	prom_printf("WARNING ! default_read called !\n");
+	return FILE_ERR_EOF;
+}
+
+static int
+default_seek(	struct boot_file_t*	file,
+		unsigned int		newpos)
+{
+	prom_printf("WARNING ! default_seek called !\n");
+	return FILE_ERR_EOF;
+}
+
+static int
+default_close(	struct boot_file_t*	file)
+{
+	prom_printf("WARNING ! default_close called !\n");
+	return FILE_ERR_OK;
+}
+
+
+int open_file(	const char*		of_device,
+		int			default_partition,
+		const char*		default_file_name,
+		struct boot_file_t*	file)
+{
+	static char	temp[1024];
+	static char	temps[64];
+	char		*dev_name;
+	char		*file_name;
+	phandle		dev;
+	int		result;
+	int		partition;
+	
+	memset(file, 0, sizeof(struct boot_file_t*));
+	file->read	= default_read;
+	file->seek	= default_seek;
+	file->close	= default_close;
+
+	/* Lookup the OF device path */
+	strncpy(temp,of_device,1024);
+	dev_name = parse_device_path(temp, &file_name, &partition);
+	if (file_name == NULL)
+		file_name = (char *)default_file_name;
+	if (file_name == NULL) {
+		prom_printf("booting without a file name not yet supported !\n");
+		return FILE_ERR_NOTFOUND;
+	}
+	if (partition == -1)
+		partition = default_partition;
+
+#if DEBUG
+	prom_printf("dev_path = %s\nfile_name = %s\npartition = %d\n",
+		dev_name, file_name, partition);
+#endif	
+	/* Find OF device phandle */
+	dev = prom_finddevice(dev_name);
+	if (dev == PROM_INVALID_HANDLE) {
+		prom_printf("device not found !\n");
+		return FILE_ERR_NOTFOUND;
+	}
+#if DEBUG
+	prom_printf("dev_phandle = %08lx\n", dev);
+#endif	
+	/* Check the kind of device */
+	result = prom_getprop(dev, "device_type", temps, 63);
+	if (result == -1) {
+		prom_printf("can't get <device_type> for device\n");
+		return FILE_ERR_NOTFOUND;
+	}
+	temps[result] = 0;
+	if (!strcmp(temps, "block"))
+		file->device_kind = FILE_DEVICE_BLOCK;
+	else if (!strcmp(temps, "network"))
+		file->device_kind = FILE_DEVICE_NET;
+	else {
+		prom_printf("Unkown device type <%s>\n", temps);
+		return FILE_ERR_NOTFOUND;
+	}
+	
+	switch(file->device_kind) {
+	    case FILE_DEVICE_BLOCK:
+#if DEBUG
+		prom_printf("device is a block device\n");
+#endif
+	  	return file_block_open(file, dev_name, file_name, partition);
+	    case FILE_DEVICE_NET:
+#if DEBUG
+		prom_printf("device is a network device\n");
+#endif
+	  	return file_net_open(file, dev_name, file_name);
+	}
+	return 0;
+}
