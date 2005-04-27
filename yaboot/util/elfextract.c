@@ -25,6 +25,7 @@ rd(void *buf, int len)
     exit(1);
 }
 
+int
 main(int ac, char **av)
 {
     unsigned nb, len, i;
@@ -32,7 +33,7 @@ main(int ac, char **av)
     Elf32_Phdr ph;
     unsigned long phoffset, phsize, prevaddr;
 
-    if (ac > 3 || ac > 1 && av[1][0] == '-') {
+    if (ac > 3 || (ac > 1 && av[1][0] == '-')) {
 	fprintf(stderr, "Usage: %s [elf-file [image-file]]\n", av[0]);
 	exit(0);
     }

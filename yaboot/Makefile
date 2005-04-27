@@ -1,8 +1,9 @@
 ## Configuration section
 
-VERSION = 1.0
+VERSION = 1.1
 # Debug mode (verbose)
 DEBUG = 0 
+PREFIX = /usr/local
 
 #---------------------------------------------------------------------------
 # PPC64 Bridge Mode:
@@ -101,27 +102,27 @@ ifeq ($(CONFIG_PPC64BRIDGE),y)
 	./util/addnote $@
 endif
 
-#yaboot.b: yaboot
-#	./util/elfextract yaboot yaboot.b
+yaboot.b: yaboot elfextract
+	./util/elfextract yaboot yaboot.b
 
 clean:
-	rm -f yaboot util/addnote $(OBJS)
-	rm -f *.gcse *.c~ *.h~ *.S~ Makefile~
-	rm -f include/*.gcse include/*.c~ include/*.h~ include/*.S~
-	rm -f include/asm/*.gcse include/asm/*.c~ include/asm/*.h~ include/asm/*.S~
-	rm -f include/et/*.gcse include/et/*.c~ include/et/*.h~ include/et/*.S~
-	rm -f include/linux/*.gcse include/linux/*.c~ include/linux/*.h~ include/linux/*.S~
-	rm -f include/ext2fs/*.gcse include/ext2fs/*.c~ include/ext2fs/*.h~ include/ext2fs/*.S~
-	rm -f lib/*.gcse lib/*.c~ lib/*.h~ lib/*.S~
-	rm -rf .AppleDouble lib/.AppleDouble include/.AppleDouble
-	rm -rf include/asm/.AppleDouble include/et/.AppleDouble
-	rm -rf include/linux/.AppleDouble include/ext2fs/.AppleDouble
+	rm -f yaboot util/addnote utils/elfextract $(OBJS)
+	find . -name '*~' | xargs rm -f
+	find . -name '#*' | xargs rm -f
+	find . -name .AppleDouble | xargs rm -rf
 
 addnote: util/addnote.c
 	$(HOSTCC) $(HOSTCFLAGS) -o util/addnote util/addnote.c
 
+elfextract: util/elfextract.c
+	$(HOSTCC) $(HOSTCFLAGS) -o util/elfextract util/elfextract.c
+	
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 %.o: %.S
 	$(CC) $(CFLAGS) -D__ASSEMBLY__  -c -o $@ $<
+
+install:
+	install -o root -g root -m 0755 -d $(PREFIX)/lib/yaboot
+	install -o root -g root -m 0644 yaboot $(PREFIX)/lib/yaboot

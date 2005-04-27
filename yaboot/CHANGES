@@ -1,0 +1,6 @@
+Feb 18. 2001 - 1.1
+
+ - Added a few Makefile cleanup & fixes (Ethan Benson, Peter Bergner)
+ - Some image path fixes (Peter Bergner)
+ - Don't call setup_display on CHRP
+ - Fix color stuff

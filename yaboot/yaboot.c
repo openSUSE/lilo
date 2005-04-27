@@ -287,7 +287,7 @@ load_config_file(char *device, char* path, int partition)
     fspec.part = partition;
     result = open_file(&fspec, &file);
     if (result != FILE_ERR_OK) {
-    	prom_printf("Can't open config file, err: %d\n", result);
+    	prom_printf("Can't open config file '%s', err: %d\n", conf_path, result);
 	goto bail;
     }
     opened = 1;
@@ -337,21 +337,22 @@ load_config_file(char *device, char* path, int partition)
        prom_printf("bgcolor=%s\n", p);
 #endif
        bgcolor = check_color_text_ui(p);
-       if (bgcolor == -1) {
+       if (bgcolor == -1)
 	  prom_printf("Invalid bgcolor: \"%s\".\n", p);
-       }
     }
-    if (fgcolor >= 0)
-    	prom_printf("\x1b[%d;%dm", ansi_color_table[fgcolor].index,
-    		ansi_color_table[fgcolor].value);
     if (bgcolor >= 0) {
-    	prom_printf("\x1b[%d;%dm", ansi_color_table[bgcolor].index,
-  		ansi_color_table[bgcolor].value+10);
+       	char temp[64];
+       	sprintf(temp, "h#%x to background-color", bgcolor); 
+	prom_interpret(temp); 
 #if !DEBUG
 	prom_printf("\xc");
 #endif	
     }
-
+    if (fgcolor >= 0) {
+       	char temp[64];
+       	sprintf(temp, "h#%x to foreground-color", fgcolor); 
+	prom_interpret(temp); 
+    }
 #endif /* CONFIG_COLOR_TEXT */
    
     p = cfg_get_strg(0, "init-message");
@@ -1232,7 +1233,8 @@ setup_display(void)
 int
 yaboot_main(void)
 {
-	setup_display();
+	if (_machine == _MACH_Pmac)
+		setup_display();
 	
 	prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
 #if DEBUG
@@ -1241,7 +1243,7 @@ yaboot_main(void)
 	if (bootdevice[0] == 0)
 		prom_get_options("boot-device", bootdevice, sizeof(bootdevice));
 	if (bootdevice[0] == 0) {
-	    prom_printf("Coundn't determine boot device\n");
+	    prom_printf("Couldn't determine boot device\n");
 	    return -1;
     	}
     	parse_device_path(bootdevice, &bootpath, &bootpartition);

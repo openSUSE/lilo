@@ -196,7 +196,7 @@ int open_file(	const struct boot_fspec_t*	spec,
 	static char	temp[1024];
 	static char	temps[64];
 	char		*dev_name;
-	char		*file_name;
+	char		*file_name = NULL;
 	phandle		dev;
 	int		result;
 	int		partition;

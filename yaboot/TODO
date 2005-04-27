@@ -1,0 +1,4 @@
+- Figure out all the crap with CHRP netbooting, probably have to remove
+  hard-coding of ":0" after a net devuce path
+- Support for compressed images
+- Still some color issues to iron out
