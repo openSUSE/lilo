@@ -903,14 +903,15 @@ yaboot_text_ui(void)
 	
 	birec->tag = BI_MACHTYPE;
 	birec->data[0] = _machine;
-	birec->data[1] = 1;
 	birec->size = sizeof(struct bi_record) + sizeof(unsigned long);
 	birec = (struct bi_record *)((unsigned long)birec + birec->size);
-	
-	birec->tag = BI_SYSMAP;
-	birec->data[0] = (unsigned long)sysmap_base;
-	birec->data[1] = sysmap_size;
-	birec->size = sizeof(struct bi_record) + sizeof(unsigned long);
+
+	if (sysmap_base) {
+		birec->tag = BI_SYSMAP;
+		birec->data[0] = (unsigned long)sysmap_base;
+		birec->data[1] = sysmap_size;
+		birec->size = sizeof(struct bi_record) + sizeof(unsigned long)*2;
+	}
 	birec = (struct bi_record *)((unsigned long)birec + birec->size);
 	birec->tag = BI_LAST;
 	birec->size = sizeof(struct bi_record);
