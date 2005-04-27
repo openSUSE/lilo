@@ -1493,22 +1493,7 @@ yaboot_main(void)
      prom_printf("Welcome to yaboot version " VERSION "\n");
      prom_printf("Enter \"help\" to get some basic usage information\n");
 
-     /* I am fed up with lusers using the wrong partition type and
-	mailing me *when* it breaks */
-
-     if (_machine == _MACH_Pmac) {
-	  char *entry = cfg_get_strg(0, "ptypewarning");
-	  int warn = 1;
-	  if (entry)
-	       warn = strcmp(entry,
-			     "I_know_the_partition_type_is_wrong_and_will_NOT_send_mail_when_booting_breaks");
-	  if (warn) {
-	       ptype = get_part_type(boot.dev, boot.part);
-	       if ((ptype != NULL) && (strcmp(ptype, "Apple_Bootstrap")))
-		    prom_printf("\nWARNING: Bootstrap partition type is wrong: \"%s\"\n"
-				"         type should be: \"Apple_Bootstrap\"\n\n", ptype);
-	  }
-     }
+     /* brain damage. censored. */
 
      yaboot_text_ui();
 	
