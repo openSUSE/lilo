@@ -212,14 +212,17 @@ block_read( __u32 blockNr, __u32 start, __u32 len, char *buffer )
 	  if ( *journal_table != 0xffffffff )
 	  {
 	       /* Search for the blockNr in cached journal */
-	       j_len = le32_to_cpu(*journal_table++);
+	       j_len = le32_to_cpu(*journal_table);
+	       *journal_table++;
 	       while ( i++ < j_len )
 	       {
-		    if ( le32_to_cpu(*journal_table++) == blockNr )
+		    if ( le32_to_cpu(*journal_table) == blockNr )
 		    {
+			 *journal_table++;
 			 journal_table += j_len - i;
 			 goto found;
 		    }
+		    *journal_table++;
 	       }
 	  }
 	  else
@@ -612,7 +615,8 @@ next_key( void )
 	       cache = CACHE( depth );
 	  else
 	  {
-	       cache = read_tree_node( INFO->blocks[depth], --depth );
+	       depth--;
+	       cache = read_tree_node( INFO->blocks[depth], depth );
 	       if ( !cache )
 		    return 0;
 	  }
