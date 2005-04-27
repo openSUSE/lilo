@@ -32,7 +32,7 @@ CROSS =
 
 # The flags for the yaboot binary.
 #
-YBCFLAGS = -Os $(CFLAGS) -nostdinc -Wall -isystem `gcc -print-file-name=include` -fsigned-char
+YBCFLAGS = -Os $(CFLAGS) -nostdinc -Wall -isystem `gcc -print-file-name=include`
 YBCFLAGS += -DVERSION=\"${VERSION}\"	#"
 YBCFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG) -DYABOOT_FAT=$(YABOOT_FAT)
 YBCFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
