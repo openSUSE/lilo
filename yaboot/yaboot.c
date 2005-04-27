@@ -663,11 +663,13 @@ int get_params(struct boot_param_t* params)
 	      check_password ("P");
 	 prom_interpret(imagename+1);
 	 return 0;
-	return 0;
     }
     
     strncpy(imagepath, imagename, 1024);
     
+    if (!label && password)
+	 check_password ("To boot a custom image you must enter the p");
+
     params->kernel.dev = parse_device_path(imagepath, &params->kernel.file,
     	&params->kernel.part);
     if (validate_fspec(&params->kernel, defdevice, defpart) != FILE_ERR_OK) {
