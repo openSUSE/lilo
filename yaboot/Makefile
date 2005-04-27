@@ -1,6 +1,6 @@
 ## Configuration section
 
-VERSION = 1.1
+VERSION = 1.1.1
 # Debug mode (verbose)
 DEBUG = 0 
 PREFIX = /usr/local

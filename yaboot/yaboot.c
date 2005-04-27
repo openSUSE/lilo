@@ -342,7 +342,7 @@ load_config_file(char *device, char* path, int partition)
     }
     if (bgcolor >= 0) {
        	char temp[64];
-       	sprintf(temp, "h#%x to background-color", bgcolor); 
+       	sprintf(temp, "%x to background-color", bgcolor); 
 	prom_interpret(temp); 
 #if !DEBUG
 	prom_printf("\xc");
@@ -350,7 +350,7 @@ load_config_file(char *device, char* path, int partition)
     }
     if (fgcolor >= 0) {
        	char temp[64];
-       	sprintf(temp, "h#%x to foreground-color", fgcolor); 
+       	sprintf(temp, "%x to foreground-color", fgcolor); 
 	prom_interpret(temp); 
     }
 #endif /* CONFIG_COLOR_TEXT */
