@@ -28,6 +28,7 @@
 #include "stdarg.h"
 #include "stddef.h"
 #include "stdlib.h"
+#include "string.h"
 #include "types.h"
 #include "ctype.h"
 #include "asm/processor.h"
