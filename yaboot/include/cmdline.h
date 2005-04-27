@@ -24,8 +24,8 @@
 #include "types.h"
 
 extern void	cmdinit();
-extern void	cmdedit(void (*tabfunc)(char* cbuff), int c);
-extern void	cmdfill(const char *d);
+extern void	cmdedit(void (*tabfunc) (void), int password);
 
-extern char	cmd_buffer[];
+extern char	cbuff[];
+extern char	passwdbuff[];
 #endif

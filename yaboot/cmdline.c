@@ -21,50 +21,62 @@
 #include "stdarg.h"
 #include "prom.h"
 #include "string.h"
-
-/* Imported functions */
-extern void prom_puts (prom_handle file, char *s);
+#include "cfg.h"
 
 #define CMD_LENG	512
-char cmd_buffer[CMD_LENG];
+char cbuff[CMD_LENG];
+char passwdbuff[CMD_LENG];
+extern int useconf;
 
 void cmdinit()
 {
-    cmd_buffer[0] = 0;
+    cbuff[0] = 0;
+    passwdbuff[0] = 0;
 }
 
-void cmdedit(void (*tabfunc)(char* cmd_buffer), int c)
+void cmdedit (void (*tabfunc) (void), int password)
 {
-    int x;
-
-    for (x = 0; x < CMD_LENG - 1 && cmd_buffer[x] != 0; x++)
-	;
-    prom_puts(prom_stdout, cmd_buffer);
-
-    if (c == -1)
-	c = prom_getchar();
-    while (c != -1 && c != '\n' && c != '\r') {
-	if (c == '\t' && tabfunc)
-	    (*tabfunc)(cmd_buffer);
-	if (c == '\b' || c == 0x7F) {
-	    if (x > 0) {
-		--x;
-		prom_printf("\b \b");
-	    }
-	} else if (c >= ' ' && x < CMD_LENG - 1) {
-	    cmd_buffer[x] = c;
-	    prom_putchar(c);
-	    ++x;
-	}
-	c = prom_getchar();
-    }
-
-    cmd_buffer[x] = 0;
-    return;
-}
-
-void cmdfill(const char *d)
-{
-    strncpy(cmd_buffer, d, CMD_LENG);
-    cmd_buffer[CMD_LENG - 1] = 0;
+     int x, c;
+     char *buff = password ? passwdbuff : cbuff;
+     for (x = 0; x < CMD_LENG - 1; x++) {
+	  if (buff[x] == 0)
+	       break;
+	  else if (password)
+	       prom_printf("*");
+     }
+     if (!password)
+	  prom_printf(buff, x);
+     
+     for (;;) {
+	  c = prom_getchar ();
+	  if (c == -1)
+	       break;
+	  if (c == '\n' || c == '\r') {
+	       break;
+	  }
+	  if (c == '\t' && !x && tabfunc)
+	       (*tabfunc) ();
+	  if (c == '\b' || c == 0x7F) {
+	       if (x > 0) {
+		    --x;
+		    buff[x] = 0;
+		    prom_printf("\b \b");
+	       }
+	  } else if ((c & 0xE0) != 0) {
+	       if (x < CMD_LENG - 1) {
+		    buff[x] = c;
+		    buff[x + 1] = 0;
+		    if (password)
+			 prom_printf("*");
+		    else
+			 prom_printf(buff + x);
+		    x++;
+	       }
+	       if (x == 1 && !password && useconf) {
+		    if (cfg_get_flag (cbuff, "single-key"))
+			 break;
+	       }
+	  }
+     }
+     buff[x] = 0;
 }

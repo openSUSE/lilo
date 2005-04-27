@@ -96,6 +96,7 @@ static void     setup_display(void);
 int useconf = 0;
 char bootdevice[1024];
 char *bootpath;
+char *password = 0;
 int bootpartition = -1;
 int _machine = _MACH_Pmac;
 
@@ -319,6 +320,8 @@ load_config_file(char *device, char* path, int partition)
     p = cfg_get_strg(0, "init-code");
     if (p)
 	prom_interpret(p);
+
+    password = cfg_get_strg(0, "password");
 	
 #ifdef CONFIG_COLOR_TEXT
     p = cfg_get_strg(0, "fgcolor");
@@ -377,7 +380,7 @@ bail:
     return result;
 }
 
-void maintabfunc (char *cbuff)
+void maintabfunc (void)
 {
     if (useconf) {
 	cfg_print_images();
@@ -481,6 +484,26 @@ make_params(char *label, char *params)
     return buffer;
 }
 
+void check_password(char *str)
+{
+    int i, end;
+
+    for (i = 0; i < 3; i++) {
+	 prom_printf ("\n%sassword: ", str);
+	 passwdbuff[0] = 0;
+	 cmdedit ((void (*)(void)) 0, 1);
+	 prom_printf ("\n");
+	 if (!strcmp (password, passwdbuff))
+	    return;
+	 if (i < 2)
+	    prom_printf ("Password incorrect. Please try again...");
+    }
+    prom_printf ("Seems like you don't know the access password.  Go away!\n");
+    end = (prom_getms() + 3000);
+    while (prom_getms() <= end);
+    prom_interpret("reset-all");
+}
+
 int get_params(struct boot_param_t* params)
 {
     int defpart;
@@ -490,6 +513,8 @@ int get_params(struct boot_param_t* params)
     char *imagename = 0, *label;
     int timeout = -1;
     int beg = 0, end;
+    int singlekey = 0;
+    int restricted = 0;
     static int first = 1;
     static char bootargs[1024];
     static char imagepath[1024];
@@ -508,12 +533,21 @@ int get_params(struct boot_param_t* params)
     params->splash.part = -1;
     defpart = bootpartition;
     
+    cmdinit();
+
     if (first) {
 	first = 0;
 	prom_get_chosen("bootargs", bootargs, sizeof(bootargs));
 	imagename = bootargs;
 	word_split(&imagename, &params->args);
 	timeout = DEFAULT_TIMEOUT;
+	if (imagename) {
+	     prom_printf("Default supplied on the command line: ");
+	     prom_printf("%s ", imagename);
+	     if (params->args)
+		  prom_printf("%s", params->args);
+	     prom_printf("\n");
+	}
 	if (useconf && (q = cfg_get_strg(0, "timeout")) != 0 && *q != 0)
 	    timeout = strtol(q, NULL, 0);
     }
@@ -521,32 +555,48 @@ int get_params(struct boot_param_t* params)
     prom_printf("boot: ");
     c = -1;
     if (timeout != -1) {
-	beg = prom_getms();
-	if (timeout > 0) {
-	    end = beg + 100 * timeout;
-	    do {
-		c = prom_nbgetchar();
-	    } while (c == -1 && prom_getms() <= end);
-	}
-	if (c == -1)
-	    c = '\n';
+	 beg = prom_getms();
+	 if (timeout > 0) {
+	      end = beg + 100 * timeout;
+	      do {
+		   c = prom_nbgetchar();
+	      } while (c == -1 && prom_getms() <= end);
+	 }
+	 if (c == -1)
+	      c = '\n';
+	 else if (c != '\n' && c != '\t' && c != '\r' && c != '\b' ) {
+	      cbuff[0] = c;
+	      cbuff[1] = 0;
+	 }
     }
 
-    if (c == '\n') {
-    	if (imagename)
-		prom_printf("%s", imagename);
-	if (params->args)
-	    prom_printf(" %s", params->args);
-	prom_printf("\n");
+    if (c != -1 && c != '\n' && c != '\r') {
+	 if (c == '\t') {
+	      maintabfunc ();
+	 }  else if (c >= ' ') {
+	      cbuff[0] = c;
+	      cbuff[1] = 0;
+	      if ((cfg_get_flag (cbuff, "single-key")) && useconf) {
+		   imagename = cbuff;
+		   singlekey = 1;
+		   prom_printf("%s\n", cbuff);
+	      }
+	 }
+    }
 
-    } else {
-	cmdinit();
-	cmdedit(maintabfunc, c);
-	prom_printf("\n");
-	strcpy(given_bootargs, cmd_buffer);
-	given_bootargs_by_user = 1;
-	imagename = cmd_buffer;
-	word_split(&imagename, &params->args);
+    if (c == '\n' || c == '\r') {
+	 if (imagename)
+	      prom_printf("%s", imagename);
+	 if (params->args)
+	      prom_printf(" %s", params->args);
+	 prom_printf("\n");
+    } else if (!singlekey) {
+	 cmdedit(maintabfunc, 0);
+	 prom_printf("\n");
+	 strcpy(given_bootargs, cbuff);
+	 given_bootargs_by_user = 1;
+	 imagename = cbuff;
+	 word_split(&imagename, &params->args);
     }
 
     /* chrp gets this wrong, force it -- Cort */
@@ -567,6 +617,8 @@ int get_params(struct boot_param_t* params)
 	p = cfg_get_strg(0, "pause-message");
 	if (p)
 	    pause_message = p;
+	if (cfg_get_flag(0, "restricted"))
+	    restricted = 1;
 	p = cfg_get_strg(imagename, "image");
 	if (p && *p) {
 	    label = imagename;
@@ -579,30 +631,51 @@ int get_params(struct boot_param_t* params)
 		if (endp != p && *endp == 0)
 		    defpart = n;
 	    }
+	    if (cfg_get_flag(label, "restricted"))
+		 restricted = 1;
+	    if (label) {
+		 if (params->args && password && restricted)
+		      check_password ("To specify image arguments you must enter the p");
+		 else if (password && !restricted)
+		      check_password ("P");
+	    }
 	    params->args = make_params(label, params->args);
 	}
     }
 
     if (!strcmp (imagename, "halt")) {
-	prom_pause();
-	return 0;
+	 if (password)
+	      check_password ("P");
+	 prom_pause();
+	 return 0;
     }
-    if (!strcmp (imagename, "bye"))
-    	return 1; 
+    if (!strcmp (imagename, "bye")) {
+	 if (password) {
+	      check_password ("P");
+	      return 1;
+	 }
+	 return 1; 
+    }
 
     if (imagename[0] == '$') {
 	/* forth command string */
-	prom_interpret(imagename+1);
+	 if (password)
+	      check_password ("P");
+	 prom_interpret(imagename+1);
+	 return 0;
 	return 0;
     }
+    
     strncpy(imagepath, imagename, 1024);
+    
     params->kernel.dev = parse_device_path(imagepath, &params->kernel.file,
     	&params->kernel.part);
     if (validate_fspec(&params->kernel, defdevice, defpart) != FILE_ERR_OK) {
 	prom_printf(
 "Enter the kernel image name as [device:][partno]/path, where partno is a\n"
 "number from 0 to 16.  Instead of /path you can type [mm-nn] to specify a\n"
-"range of disk blocks (512B)\n");
+"range of disk blocks (512B)\n"
+"Example: hd:3,/vmlinux\n");
 	return 0;
     }
 
@@ -664,6 +737,8 @@ yaboot_text_ui(void)
     kernel_entry_t      kernel_entry;
     struct bi_record*	birec;
     loadinfo_t          loadinfo;
+    void                *initrd_more,*initrd_want;
+    unsigned long       initrd_read;
     
     loadinfo.load_loc = 0;
 
@@ -722,15 +797,15 @@ yaboot_text_ui(void)
 		    prom_printf("claim failed for sysmap memory\n");
 		    sysmap_base = 0;
 		} else {
-	    	    sysmap_size = file.read(&file, 0x400000, sysmap_base);
+	    	    sysmap_size = file.read(&file, 0x100000, sysmap_base);
 	    	    if (sysmap_size == 0)
 	    	        sysmap_base = 0;
 	    	}
 	    	file.close(&file);
 	    }
 	    if (sysmap_base) {
-	    	prom_printf("System.map loaded at 0x%08lx, size: %d bytes\n",
-	    		sysmap_base, sysmap_size);
+	    	prom_printf("System.map loaded at 0x%08lx, size: %d Kbytes\n",
+	    		sysmap_base, sysmap_size >> 10);
 	    	loadinfo.memsize += _ALIGN(0x100000, 0x1000);
 	    } else {
 	    	prom_printf("System.map load failed !\n");
@@ -747,20 +822,36 @@ yaboot_text_ui(void)
 	    if (result != FILE_ERR_OK)
 		prom_printf("\nRamdisk image not found.\n");
 	    else {
-		initrd_base = prom_claim(loadinfo.base+loadinfo.memsize, 0x400000, 0);
+#define INITRD_CHUNKSIZE 0x400000
+		initrd_base = prom_claim(loadinfo.base+loadinfo.memsize, INITRD_CHUNKSIZE, 0);
 		if (initrd_base == (void *)-1) {
 		    prom_printf("claim failed for initrd memory\n");
 		    initrd_base = 0;
 		} else {
-	    	    initrd_size = file.read(&file, 0x400000, initrd_base);
+	    	    initrd_size = file.read(&file, INITRD_CHUNKSIZE, initrd_base);
 	    	    if (initrd_size == 0)
 	    	        initrd_base = 0;
+                    initrd_read = initrd_size;
+		    initrd_more = initrd_base;
+                    while (initrd_read == INITRD_CHUNKSIZE ) { /* need to read more? */
+		      initrd_want = (void *)((unsigned long)initrd_more+INITRD_CHUNKSIZE);
+		      initrd_more = prom_claim(initrd_want, INITRD_CHUNKSIZE, 0);
+		      if (initrd_more != initrd_want) {
+			prom_printf("claim failed for initrd memory at %x rc=%x\n",initrd_want,initrd_more);
+			break;
+		      }
+	    	    initrd_read = file.read(&file, INITRD_CHUNKSIZE, initrd_more);
+#if DEBUG
+		    prom_printf("  block at %x rc=%x\n",initrd_more,initrd_read);
+#endif
+		    initrd_size += initrd_read;
+		    }
 	    	}
 	    	file.close(&file);
 	    }
 	    if (initrd_base)
-	    	prom_printf("ramdisk loaded at 0x%08lx, size: %d bytes\n",
-	    		initrd_base, initrd_size);
+	    	prom_printf("ramdisk loaded at 0x%08lx, size: %d Kbytes\n",
+	    		initrd_base, initrd_size >> 10);
 	    else {
 	    	prom_printf("ramdisk load failed !\n");
 	    	prom_pause();

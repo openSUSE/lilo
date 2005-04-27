@@ -47,6 +47,8 @@ CONFIG cf_options[] =
     {cft_strg, "partition", NULL},
     {cft_strg, "default", NULL},
     {cft_strg, "timeout", NULL},
+    {cft_strg, "password", NULL},
+    {cft_flag, "restricted", NULL},
     {cft_strg, "message", NULL},
     {cft_strg, "root", NULL},
     {cft_strg, "ramdisk", NULL},
@@ -70,6 +72,8 @@ CONFIG cf_image[] =
     {cft_strg, "image", NULL},
     {cft_strg, "label", NULL},
     {cft_strg, "alias", NULL},
+    {cft_flag, "single-key", NULL},
+    {cft_flag, "restricted", NULL},
     {cft_strg, "device", NULL},
     {cft_strg, "partition", NULL},
     {cft_strg, "root", NULL},
@@ -428,8 +432,9 @@ void cfg_print_images (void)
 	if (alias)
 	    printlabel (alias, 0);
     }
-    prom_printf ("\nYou can also type in custom image locations, in the form\n"
-	    "{prom_path;}partno/path_to_image or {prom_path;}{partno}[start-end]\n");
+    prom_printf ("\n\nYou can also type in custom image locations, in the form\n"
+	    "{prom_path;}partno/path_to_image or {prom_path;}{partno}[start-end]\n"
+	    "Example: hd:3,/vmlinux\n\n");
 }
 
 char *cfg_get_default (void)
