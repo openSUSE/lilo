@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr 27 20:02:59 CEST 2005 - olh@suse.de
+
+- addnote.c: Patch from Paul Mackerras to add second .note
+  required by more recent pSeries hardware. (#67026 - LTC14213)
+
+-------------------------------------------------------------------
 Wed Apr 27 19:38:53 CEST 2005 - olh@suse.de
 
 - update yaboot to 1.3.13
