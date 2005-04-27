@@ -797,10 +797,17 @@ reiserfs_read_data( char *buf, __u32 len )
 		    if ( to_read > len )
 			 to_read = len;
 
-		    /* Journal is only for meta data.
-		       Data blocks can be read directly without using block_read */
-		    read_disk_block( INFO->file, blocknr, blk_offset, to_read,
-				     buf );
+                    /* The journal used to only be for metadata.. but since we
+                       have data logging patches now, we should probably peek
+                       in the journal for every block read */
+                    if (blocknr) {
+                        block_read (blocknr, blk_offset, to_read, buf);
+                    } else {
+                        /* This is a hole.. Clear the buffer */
+                        DEBUG_F( "Indirect block 0 found: Filling hole of %u bytes\n", to_read); 
+                        memset (buf, 0, to_read);
+                    }
+
 
 	       update_buf_len:
 		    len -= to_read;
