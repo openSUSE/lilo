@@ -38,6 +38,10 @@ find lilo.ppc/lib -name mkprep | xargs -r chmod 755
 cd yaboot
 #
 make clean
+make DEBUG=0 VERSION=%{yaboot_vers}.FAT.SuSE YABOOT_FAT=1 yaboot
+mv second/yaboot.chrp yaboot.fat
+#
+make clean
 make DEBUG=1 VERSION=%{yaboot_vers}.SuSE yaboot
 mv second/yaboot yaboot.debug
 mv second/yaboot.chrp yaboot.chrp.debug
@@ -46,10 +50,6 @@ make clean
 make DEBUG=0 VERSION=%{yaboot_vers}.SuSE yaboot
 mv second/yaboot yaboot
 mv second/yaboot.chrp yaboot.chrp
-#
-make clean
-make DEBUG=0 VERSION=%{yaboot_vers}.FAT.SuSE YABOOT_FAT=1 yaboot
-mv second/yaboot.chrp yaboot.fat
 #
 cd ..
 #
