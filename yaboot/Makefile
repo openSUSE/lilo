@@ -96,9 +96,9 @@ OBJS += second/fs_reiserfs.o
 endif
 
 # compilation
-CC		:= $(CROSS)gcc
-LD		:= $(CROSS)ld
-AS		:= $(CROSS)as
+CC		:= $(CROSS)gcc -m32
+LD		:= $(CROSS)ld -m elf32ppc
+AS		:= $(CROSS)as -a32
 OBJCOPY		:= $(CROSS)objcopy
 
 lgcc = `$(CC) -print-libgcc-file-name`
@@ -112,7 +112,7 @@ yaboot: $(OBJS) addnote
 	util/addnote second/$@.chrp
 
 addnote:
-	$(CC) $(UCFLAGS) -o util/addnote util/addnote.c
+	$(HOSTCC) $(HOSTCFLAGS) -o util/addnote util/addnote.c
 
 elfextract:
 	$(CC) $(UCFLAGS) -o util/elfextract util/elfextract.c

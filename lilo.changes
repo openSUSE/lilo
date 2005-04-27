@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr 27 22:55:37 CEST 2005 - olh@suse.de
+
+- pass -m32 to gcc, ld and as to fix yaboot built on native ppc64
+  build addnote with hostcc
+
+-------------------------------------------------------------------
 Wed Apr 27 20:11:43 CEST 2005 - olh@suse.de
 
 - update mkzimage_cmdline, use mmap, put it into /bin
