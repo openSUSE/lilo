@@ -29,6 +29,8 @@
 /* Imported functions */
 extern int strtol(const char *nptr, char **endptr, int base);
 
+extern char bootdevice[1024];
+
 /* This function follows the device path in the devtree and separates
    the device name, partition number, and other datas (mostly file name)
    the string passed in parameters is changed since 0 are put in place
@@ -202,6 +204,11 @@ int open_file(	const struct boot_fspec_t*	spec,
 	file->close	= default_close;
 
 	/* Lookup the OF device path */
+	/* First, see if a device was specified for the kernel
+	 * if not, we hope that the user wants a kernel on the same
+	 * drive and partition as yaboot itself */
+	if (!spec->dev)
+		strcpy(spec->dev, &bootdevice);
 	strncpy(temp,spec->dev,1024);
 	dev_name = parse_device_path(temp, &file_name, &partition);
 	if (file_name == NULL)

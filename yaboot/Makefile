@@ -1,8 +1,8 @@
 ## Configuration section
 
-VERSION = 0.7
+VERSION = 0.8
 # Debug mode (verbose)
-DEBUG = 0
+DEBUG = 0 
 
 # We use fixed addresses to avoid overlap when relocating
 # and other trouble with initrd
@@ -22,7 +22,7 @@ CROSS =
 
 # The flags for the target compiler.
 #
-CFLAGS = -Os -g -nostdinc -Wall -isystem `gcc -print-file-name=include`
+CFLAGS = -O0 -g -nostdinc -Wall -isystem `gcc -print-file-name=include`
 CFLAGS += -DVERSION=\"${VERSION}\"	#"
 CFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG)
 CFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
@@ -65,7 +65,7 @@ lgcc = `$(CC) -print-libgcc-file-name`
 
 yaboot: $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o yaboot
-#	strip yaboot
+	strip yaboot
 
 #yaboot.b: yaboot
 #	./util/elfextract yaboot yaboot.b
