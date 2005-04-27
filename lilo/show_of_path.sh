@@ -169,6 +169,11 @@ case "$file_full_sysfs_path" in
 
 	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
+	case $file_full_sysfs_path in
+	    */host[0-9]*/target*/[0-9]*:[0-9]*:[0-9]*:[0-9]*)
+		cd ..
+		;;
+	esac
 	cd ../..
 	;;
     *)
