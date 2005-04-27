@@ -28,6 +28,7 @@
 #include "stdlib.h"
 #include "types.h"
 #include "ctype.h"
+#include "asm/processor.h"
 
 #define READ_BLOCKS_USE_READ	1
 
@@ -503,13 +504,21 @@ prom_release(void *virt, unsigned int size)
 void
 prom_map (void *phys, void *virt, int size)
 {
-  call_method_1 ("map", prom_mmu, 4, -1, size, virt, phys);
+  unsigned long msr = mfmsr();
+
+  /* Only create a mapping if we're running with relocation enabled. */
+  if ( (msr & MSR_IR) && (msr & MSR_DR) )
+    call_method_1 ("map", prom_mmu, 4, -1, size, virt, phys);
 }
 
 void
 prom_unmap (void *phys, void *virt, int size)
 {
-  call_method_1 ("map", prom_mmu, 4, -1, size, virt, phys);
+  unsigned long msr = mfmsr();
+
+  /* Only unmap if we're running with relocation enabled. */
+  if ( (msr & MSR_IR) && (msr & MSR_DR) )
+    call_method_1 ("map", prom_mmu, 4, -1, size, virt, phys);
 }
 
 char *

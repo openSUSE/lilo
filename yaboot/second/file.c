@@ -145,6 +145,7 @@ file_net_open(	struct boot_file_t*	file,
 		const char*		dev_name,
 		const char*		file_name)
 {
+    file->fs = fs_of_netboot;
     return fs_of_netboot->open(file, dev_name, NULL, file_name);
 }
 

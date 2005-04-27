@@ -60,6 +60,15 @@ sys
 /* align addr on a size boundry - adjust address up if needed -- Cort */
 #define _ALIGN(addr,size)	(((addr)+size-1)&(~(size-1)))
 
+/* Addresses where the PPC32 and PPC64 vmlinux kernels are linked at.
+ * These are used to determine whether we are booting a vmlinux, in
+ * which case, it will be loaded at KERNELADDR.  Otherwise (eg zImage),
+ * we load the binary where it was linked at (ie, e_entry field in
+ * the ELF header).
+ */
+#define KERNEL_LINK_ADDR_PPC32	0xC0000000UL
+#define KERNEL_LINK_ADDR_PPC64	0xC000000000000000ULL
+
 typedef struct {
     union {
         Elf32_Ehdr  elf32hdr;
@@ -977,7 +986,7 @@ yaboot_text_ui(void)
 	birec->size = sizeof(struct bi_record);
 	birec = (struct bi_record *)((unsigned long)birec + birec->size);
 
-	// compute the kernel's entry point.
+	/* compute the kernel's entry point. */
 	kernel_entry = loadinfo.base + loadinfo.entry - loadinfo.load_loc;
 
 #if DEBUG
@@ -994,7 +1003,7 @@ yaboot_text_ui(void)
 #if DEBUG
 	prom_printf("entering kernel...\n");
 #endif
-        // call the kernel with our stack.
+        /* call the kernel with our stack. */
         kernel_entry(initrd_base + loadinfo.load_loc, initrd_size, prom, 0, 0);
         continue;
 next:
@@ -1010,9 +1019,9 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
     Elf32_Ehdr		*e = &(loadinfo->elf.elf32hdr);
     Elf32_Phdr		*p, *ph;
     int			size = sizeof(Elf32_Ehdr) - sizeof(Elf_Ident);
-    unsigned long	addr;
+    unsigned long	addr, loadaddr;
 
-    // Read the rest of the Elf header...
+    /* Read the rest of the Elf header... */
     if ((*(file->fs->read))(file, size, &e->e_version) < size) {
 	prom_printf("\nCan't read Elf32 image header\n");
 	return 0;
@@ -1090,11 +1099,11 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
     prom_printf("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
 #endif    
 
-    loadinfo->base = prom_claim((void *)KERNELADDR, loadinfo->memsize, 0);
-    /* On some systems, KERNELADDR is already claimed, so try some
+    /* On some systems, loadaddr may already be claimed, so try some
      * other nearby addresses before giving up.
      */
-    for(addr=KERNELADDR; addr <= KERNELADDR * 8 ;addr+=0x100000) {
+    loadaddr = (e->e_entry == KERNEL_LINK_ADDR_PPC32) ? KERNELADDR : e->e_entry;
+    for(addr=loadaddr; addr <= loadaddr * 8 ;addr+=0x100000) {
 	loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
 	if (loadinfo->base != (void *)-1) break;
     }
@@ -1104,10 +1113,10 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
     }	
 
 #if DEBUG
-    prom_printf("After ELF parsing, load base: 0x%08lx, mem_sz: 0x%08lx, birec: \n",
+    prom_printf("After ELF parsing, load base: 0x%08lx, mem_sz: 0x%08lx\n",
     	    loadinfo->base, loadinfo->memsize);
     prom_printf("    wanted load base: 0x%08lx, mem_sz: 0x%08lx\n",
-    	    KERNELADDR, loadinfo->memsize);
+    	    loadaddr, loadinfo->memsize);
 #endif    
 
     /* Load the program segments... */
@@ -1142,7 +1151,7 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
 
     free(ph);
     
-    // Return success at loading the Elf32 kernel
+    /* Return success at loading the Elf32 kernel */
     return 1;
 }
 
@@ -1153,9 +1162,9 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
     Elf64_Ehdr		*e = &(loadinfo->elf.elf64hdr);
     Elf64_Phdr		*p, *ph;
     int			size = sizeof(Elf64_Ehdr) - sizeof(Elf_Ident);
-    unsigned long	addr;
+    unsigned long	addr, loadaddr;
 
-    // Read the rest of the Elf header...
+    /* Read the rest of the Elf header... */
     if ((*(file->fs->read))(file, size, &e->e_version) < size) {
 	prom_printf("\nCan't read Elf64 image header\n");
 	return 0;
@@ -1233,11 +1242,11 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
     prom_printf("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
 #endif    
 
-    loadinfo->base = prom_claim((void *)KERNELADDR, loadinfo->memsize, 0);
-    /* On some systems, KERNELADDR is already claimed, so try some
+    /* On some systems, loadaddr may already be claimed, so try some
      * other nearby addresses before giving up.
      */
-    for(addr=KERNELADDR; addr <= KERNELADDR * 8 ;addr+=0x100000) {
+    loadaddr = (e->e_entry == KERNEL_LINK_ADDR_PPC64) ? KERNELADDR : e->e_entry;
+    for(addr=loadaddr; addr <= loadaddr * 8 ;addr+=0x100000) {
 	loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
 	if (loadinfo->base != (void *)-1) break;
     }
@@ -1247,10 +1256,10 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
     }	
 
 #if DEBUG
-    prom_printf("After ELF parsing, load base: 0x%08lx, mem_sz: 0x%08lx, birec: \n",
+    prom_printf("After ELF parsing, load base: 0x%08lx, mem_sz: 0x%08lx\n",
     	    loadinfo->base, loadinfo->memsize);
     prom_printf("    wanted load base: 0x%08lx, mem_sz: 0x%08lx\n",
-    	    KERNELADDR, loadinfo->memsize);
+    	    loadaddr, loadinfo->memsize);
 #endif    
 
     /* Load the program segments... */
@@ -1285,7 +1294,7 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
 
     free(ph);
     
-    // Return success at loading the Elf64 kernel
+    /* Return success at loading the Elf64 kernel */
     return 1;
 }
 

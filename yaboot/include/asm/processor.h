@@ -129,5 +129,14 @@ n:
 #define SR13	13
 #define SR14	14
 #define SR15	15
+
+#ifndef __ASSEMBLY__
+static __inline__ unsigned long mfmsr(void)
+{
+	unsigned long msr;
+	__asm__ __volatile__("mfmsr %0" : "=r" (msr));
+	return msr;
+}
+#endif
   
 #endif /* __ASM_PPC_PROCESSOR_H */

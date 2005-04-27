@@ -155,13 +155,15 @@ partition_fdisk_lookup( const char *dev_name, prom_handle disk,
 	  (struct fdisk_partition *) (block_buffer + 0x1be);
 
 	for (partition=1; partition <= 4 ;partition++, part++) {
-            add_new_partition( list,
-					partition,
-                                        swab32(*(unsigned int *)(part->start4)),
-                                        swab32(*(unsigned int *)(part->size4)),
-					512 /*blksize*/ );
-		}
+	    if (part->sys_ind == LINUX_NATIVE) {
+            	add_new_partition(  list,
+				    partition,
+                                    swab32(*(unsigned int *)(part->start4)),
+                                    swab32(*(unsigned int *)(part->size4)),
+				    512 /*blksize*/ );
+	    }
 	}
+}
 
 /* I don't know if it's possible to handle multisession and other multitrack
  * stuffs with the current OF disklabel package. This can still be implemented
