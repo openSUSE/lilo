@@ -2,7 +2,7 @@
 
 include Config
 
-VERSION = 1.3.4
+VERSION = 1.3.5
 # Debug mode (spam/verbose)
 DEBUG = 0
 # make install vars
@@ -93,10 +93,11 @@ ifeq ($(CONFIG_FS_REISERFS),y)
 OBJS += second/fs_reiserfs.o
 endif
 
-CC = $(CROSS)gcc
-LD = $(CROSS)ld
-AS = $(CROSS)as
-OBJCOPY = $(CROSS)objcopy
+# compilation
+CC		:= $(CROSS)gcc
+LD		:= $(CROSS)ld
+AS		:= $(CROSS)as
+OBJCOPY		:= $(CROSS)objcopy
 
 lgcc = `$(CC) -print-libgcc-file-name`
 
@@ -114,6 +115,10 @@ elfextract:
 
 mkofboot:
 	ln -sf ybin ybin/mkofboot
+	@if [ $$(grep '^VERSION=' ybin/ybin | cut -f2 -d=) != ${VERSION} ] ; then	\
+		echo "ybin/ybin: warning: VERSION  mismatch"; 				\
+		false; 									\
+	fi
 
 %.o: %.c
 	$(CC) $(YBCFLAGS) -c -o $@ $<
@@ -124,15 +129,20 @@ mkofboot:
 dep:
 	makedepend -Iinclude *.c lib/*.c util/*.c gui/*.c
 
+docs:
+	make -C doc all
+
 bindist: all
 	mkdir ../yaboot-binary-${VERSION}
-	${GETROOT} make ROOT=../yaboot-binary-${VERSION} install
+	$(GETROOT) make ROOT=../yaboot-binary-${VERSION} install
 	mkdir -p -m 755 ../yaboot-binary-${VERSION}/usr/local/share/doc/yaboot
 	cp -a COPYING ../yaboot-binary-${VERSION}/usr/local/share/doc/yaboot/COPYING
 	cp -a README ../yaboot-binary-${VERSION}/usr/local/share/doc/yaboot/README
-	mv ../yaboot-binary-${VERSION}/etc/yaboot.conf ../yaboot-binary-${VERSION}/usr/local/share/doc/
+	cp -a doc/yaboot-howto.html ../yaboot-binary-${VERSION}/usr/local/share/doc/yaboot/yaboot-howto.html
+	cp -a doc/yaboot-howto.sgml ../yaboot-binary-${VERSION}/usr/local/share/doc/yaboot/yaboot-howto.sgml
+	mv ../yaboot-binary-${VERSION}/etc/yaboot.conf ../yaboot-binary-${VERSION}/usr/local/share/doc/yaboot/
 	rmdir ../yaboot-binary-${VERSION}/etc
-	${GETROOT} tar -C ../yaboot-binary-${VERSION} -zcvpf ../yaboot-binary-${VERSION}.tar.gz .
+	$(GETROOT) tar -C ../yaboot-binary-${VERSION} -zcvpf ../yaboot-binary-${VERSION}.tar.gz .
 	rm -rf ../yaboot-binary-${VERSION}
 
 clean:
@@ -140,11 +150,19 @@ clean:
 	find . -name '#*' | xargs rm -f
 	find . -name '.#*' | xargs rm -f
 	find . -name '*~' | xargs rm -f
+	find . -name '*.swp' | xargs rm -f
 	-gunzip man/*.gz
 	rm -rf man.deb
 	chmod 755 ybin/ybin ybin/ofpath ybin/yabootconfig
 	chmod -R u+rwX,go=rX .
 	chmod a-w COPYING
+
+cleandocs:
+	make -C doc clean
+
+maintclean: clean cleandocs
+
+release: docs bindist clean
 
 strip: all
 	strip second/yaboot
