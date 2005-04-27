@@ -1,5 +1,6 @@
 #ifndef __DIV64_H__
 #define __DIV64_H__
+/*  $Id$ */
 /*
  * Copyright (C) 2003 Bernardo Innocenti <bernie@develer.com>
  * Based on former asm-ppc/div64.h and asm-m68knommu/div64.h

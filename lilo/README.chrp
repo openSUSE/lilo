@@ -1,3 +1,4 @@
+# $Id$
 The lilo for chrp write the file /boot/second onto a partiton "41 PReP
 boot partition". If there is no such partition lilo will exit. 
 If you specify the global option "activate" the boot partition will be

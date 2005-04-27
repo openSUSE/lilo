@@ -1,5 +1,6 @@
 #ifndef __LINUX_STRINGIFY_H
 #define __LINUX_STRINGIFY_H
+/*  $Id$ */
 
 /* Indirect stringification.  Doing two levels allows the parameter to be a
  * macro itself.  For example, compile with -DFOO=bar, __stringify(FOO)

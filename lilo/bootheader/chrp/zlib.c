@@ -1,3 +1,4 @@
+/*  $Id$ */
 /*
  * This file is derived from various .h and .c files from the zlib-0.95
  * distribution by Jean-loup Gailly and Mark Adler, with some additions

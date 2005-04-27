@@ -1,3 +1,4 @@
+/*  $Id$ */
 /*
  * Divide a 64-bit unsigned number by a 32-bit unsigned number.
  * This routine assumes that the top 32 bits of the dividend are

@@ -1,3 +1,4 @@
+/*  $Id$ */
 /*
  * arch/ppc64/kernel/ppc_asm.h
  *

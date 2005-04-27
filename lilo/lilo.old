@@ -1,4 +1,5 @@
 #!/bin/bash
+# $Id$
 #
 # a simple lilo to store the boot loader and the kernel images 
 # in bash2 ... Think different [tm]

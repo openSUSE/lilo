@@ -1,4 +1,5 @@
 #!/bin/bash
+# $Id$
 set -e
 # set -x
 

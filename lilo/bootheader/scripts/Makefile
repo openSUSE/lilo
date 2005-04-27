@@ -1,3 +1,4 @@
+# $Id$
 SRCROOT  = ..
 include ../MCONFIG
 include ../MRULES

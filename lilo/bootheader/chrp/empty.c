@@ -1,1 +1,2 @@
 /* empty object file */
+/*  $Id$ */

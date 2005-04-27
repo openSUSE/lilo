@@ -1,5 +1,6 @@
 #ifndef __PAGE_H__
 #define __PAGE_H__
+/*  $Id$ */
 
 /*
  * Copyright (C) 2001 PPC64 Team, IBM Corp

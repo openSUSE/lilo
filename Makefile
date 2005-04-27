@@ -1,3 +1,4 @@
+# $Id$
 all export:
 	set -e ; \
 	tmpdir=`mktemp -d /tmp/temp.XXXXXX`/lilo ; \

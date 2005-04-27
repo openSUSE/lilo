@@ -18,6 +18,7 @@ Source0:      lilo-%{version}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch10:       yaboot-%{yaboot_vers}.patch
 
+# $Id$
 %description
 lilo for ppc
 

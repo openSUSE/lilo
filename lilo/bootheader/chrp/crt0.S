@@ -1,3 +1,4 @@
+/*  $Id$ */
 /*
  * Copyright (C) Paul Mackerras 1997.
  *

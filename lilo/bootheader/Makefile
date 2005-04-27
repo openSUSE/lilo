@@ -1,3 +1,4 @@
+# $Id$
 SUBDIRS = chrp scripts utils
 SRCROOT = .
 

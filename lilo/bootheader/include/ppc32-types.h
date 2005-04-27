@@ -1,5 +1,6 @@
 #ifndef __PPC32_TYPES_H__
 #define __PPC32_TYPES_H__
+/*  $Id$ */
 
 typedef __signed__ char __s8;
 typedef unsigned char __u8;
