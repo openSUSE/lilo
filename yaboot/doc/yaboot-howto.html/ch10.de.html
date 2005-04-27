@@ -72,6 +72,16 @@ MacOS-Zeilenumbrücke (nur Wagenrückläufe) verwenden, kann <code>yaboot</code>
 die Datei nicht lesen.
 
 <p>
+Sie müssen eine Partition auswählen, welche entweder als HFS oder als HFS+
+formatiert ist.  Wenn Sie Mac OS X auf einer UFS Partition installiert haben
+(dies können sie mit dem OS X &quot;Disk Utility&quot; überprüfen), werden sie
+eine andere Partition verwenden müssen.  Falls sie Mac OS X auf einer UFS
+Partition installiert haben, haben Sie wahrscheinlich eine oder zwei
+Partitionen des Typs &quot;Apple_Boot&quot;.  Diese Partitionen sind HFS
+formatiert.  Wählen Sie eine, mounten Sie diese unter Mac OS X und speichern
+sie die Dateien dort.
+
+<p>
 Booten Sie OpenFirmware und geben Sie am Prompt ein:
 
 <pre>
@@ -106,7 +116,7 @@ Prompt geben Sie <em>install</em> gefolgt von Enter ein.
 Wie man mit Yaboot auf PowerPC bootet
 
 <address>
-Version 1.03, 14. September 2002<br>
+Version 1.04, 22. February 2004<br>
 Chris Tillman
 </address>
 
