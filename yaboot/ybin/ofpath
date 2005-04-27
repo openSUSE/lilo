@@ -27,7 +27,7 @@
 
 PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 PRG="${0##*/}"
-VERSION=1.0.2
+VERSION=1.0.3
 DEBUG=0
 export LC_COLLATE=C
 
@@ -142,6 +142,22 @@ lgrep()
     done
     return 0
 }
+
+## if readlink is missing use a kludge
+if (command -v readlink > /dev/null 2>&1) ; then
+    true
+else
+    readlink()
+    {
+        local SYMTARGET="$(v=`ls -l "$1" 2>/dev/null` ; echo ${v##*> })"
+        if [ -n "$SYMTARGET" ] ; then
+            echo "$SYMTARGET"
+            return 0
+        else
+            return 1
+        fi
+    }
+fi
 
 ## a function to print relevant scsi host path when there is more then
 ## one.  this function also takes care of stripping off the trailing
@@ -278,6 +294,93 @@ scsi_ofpath()
     return 0
 }
 
+ide_ofpath()
+{
+    if [ ! -L "/proc/ide/$DEVNODE" ] ; then
+	echo 2>&1 "$PRG: /dev/$DEVNODE: Device not configured"
+	return 1
+    fi
+
+    local IDEBUS="$(v=`readlink /proc/ide/$DEVNODE` ; echo ${v%%/*} )"
+    if [ -z "$IDEBUS" ] ; then
+	echo 1>&2 "$PRG: BUG: IDEBUS == NULL"
+	return 1
+    fi
+    local OF1275IDE="/proc/ide/$IDEBUS/devspec"
+
+    if [ ! -f "$OF1275IDE" ] ; then
+	case "$(cat /proc/device-tree/model)" in
+	    "PowerMac3,6")
+		local CDROM="$(grep "^drive name:" /proc/sys/dev/cdrom/info 2> /dev/null | grep $DEVNODE)"
+		if [ -z "$CDROM" ] ; then
+		    echo 1>&2 "$PRG: WARNING: Your kernel is too old for proper support, device may be innaccurate."
+		    echo "ultra2:$PARTITION"
+		else
+		    echo "cd:$PARTITION"
+		fi
+		;;
+	    *)
+		local CDROM="$(grep "^drive name:" /proc/sys/dev/cdrom/info 2> /dev/null | grep $DEVNODE)"
+		if [ -z "$CDROM" ] ; then
+		    if [ "$DEVNODE" = hda ] ; then
+			echo "hd:$PARTITION"
+		    else
+			echo "ultra1:$PARTITION"
+		    fi
+		else
+		    echo "cd:$PARTITION"
+		fi
+		;;
+	esac
+    else
+	local DEVSPEC="$(cat $OF1275IDE)"
+	[ "$DEBUG" = 1 ] && echo 1>&2 "$PRG: DEBUG: DEVSPEC=$DEVSPEC"
+	if [ -z "$DEVSPEC" ] ; then
+	    echo 1>&2 "$PRG: KERNEL BUG: $OF1275IDE exists, but is empty"
+	    return 1
+	fi
+
+	if [ ! -f "/proc/ide/${IDEBUS}/channel" ] ; then
+	    echo 1>&2 "$PRG: KERNEL BUG: /proc/ide/${IDEBUS}/channel does not exist"
+	    return 1
+	fi
+
+	case "$(cat /proc/device-tree${DEVSPEC}/device_type 2> /dev/null)" in
+	    ata)
+		local MASTER="/disk@0"
+		local SLAVE="/disk@1"
+		;;
+	    pci-ide|pci-ata)
+		local MASTER="/@$(cat /proc/ide/${IDEBUS}/channel)/disk@0"
+		local SLAVE="/@$(cat /proc/ide/${IDEBUS}/channel)/disk@1"
+		;;
+	    scsi) ## some lame controllers pretend they are scsi, hopefully all kludges are created equal.
+		local MASTER="/$(($(cat /proc/ide/${IDEBUS}/channel) * 2 + 0)),0"
+		local SLAVE="/$(($(cat /proc/ide/${IDEBUS}/channel) * 2 + 1)),0"
+		;;
+	    *)
+		echo 2>&1 "$PRG: Unsupported IDE device type: \"$(cat /proc/device-tree${DEVSPEC}/device_type 2> /dev/null)\""
+		return 1
+		;;
+	esac
+
+	case "$DEVNODE" in
+	    hda|hdc|hde|hdg|hdi|hdk|hdm|hdo)
+		echo "${DEVSPEC}${MASTER}:$PARTITION"
+		return 0
+		;;
+	    hdb|hdd|hdf|hdh|hdj|hdl|hdn|hdp)
+		echo "${DEVSPEC}${SLAVE}:$PARTITION"
+		return 0
+		;;
+	    *)
+		echo 1>&2 "$PRG: /dev/$DEVNODE is not supported"
+		return 1
+		;;
+	esac
+    fi
+}
+
 ## figure out the OpenFirmware device path for newworld macs.
 ## sd* scsi disks , hd* ide disks.
 newworld()
@@ -288,7 +391,7 @@ newworld()
 		true
 	    else
 		echo 1>&2 "$PRG: /proc/device-tree is broken.  Do not use BootX to boot, use yaboot."
-		echo 1>&2 "$PRG: The yaboot FAQ can be found here: http://www.alaska.net/~erbenson/doc"
+		echo 1>&2 "$PRG: The yaboot HOWTO can be found here: http://www.alaska.net/~erbenson/doc"
 		return 1
 	    fi
 
@@ -299,30 +402,8 @@ newworld()
 	    ## find the actual OF path.	
 	    scsi_ofpath || return 1
 	    ;;
-	hda*)
-	    local CDROM="$(grep "^drive name:" /proc/sys/dev/cdrom/info 2> /dev/null | grep hda)"
-	    if [ -z "$CDROM" ] ; then
-		echo "hd:$PARTITION"
-	    else
-		echo "cd:$PARTITION"
-	    fi
-	    ;;
-	hdb*)
-	    local CDROM="$(grep "^drive name:" /proc/sys/dev/cdrom/info 2> /dev/null | grep hdb)"
-	    if [ -z "$CDROM" ] ; then
-		echo "ultra1:$PARTITION"
-	    else
-		echo "cd:$PARTITION"
-	    fi
-	    ;;
 	hd*)
-	    local CDROM="$(grep "^drive name:" /proc/sys/dev/cdrom/info 2> /dev/null | grep $DEVNODE)"
-	    if [ -z "$CDROM" ] ; then
-		echo 1>&2 "$PRG: Device: /dev/$DEVNODE is not supported"
-		return 1
-	    else
-		echo "cd:$PARTITION"
-	    fi
+	    ide_ofpath || return 1
 	    ;;
 	*)
 	    echo 1>&2 "$PRG: Device: /dev/$DEVNODE is not supported"
