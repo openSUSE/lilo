@@ -409,6 +409,7 @@ _INLINE_ __u32 ext2fs_swab32(__u32 val)
 
 #endif /* !_EXT2_HAVE_ASM_SWAB */
 
+#if 0
 #if !defined(_EXT2_HAVE_ASM_FINDBIT_)
 _INLINE_ int ext2fs_find_first_bit_set(void * addr, unsigned size)
 {
@@ -454,6 +455,7 @@ _INLINE_ int ext2fs_find_next_bit_set (void * addr, int size, int offset)
 
 	return (res + d0 - 1);
 }
+#endif	
 #endif	
 
 /* These two routines moved to gen_bitmap.c */
