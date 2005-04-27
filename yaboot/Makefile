@@ -2,7 +2,7 @@
 
 include Config
 
-VERSION = 1.3.6
+VERSION = 1.3.7
 # Debug mode (spam/verbose)
 DEBUG = 0
 # make install vars
@@ -111,7 +111,7 @@ addnote:
 	$(CC) $(UCFLAGS) -o util/addnote util/addnote.c
 
 elfextract:
-	$(HOSTCC) $(HOSTCFLAGS) -o util/elfextract util/elfextract.c
+	$(CC) $(UCFLAGS) -o util/elfextract util/elfextract.c
 
 mkofboot:
 	ln -sf ybin ybin/mkofboot
@@ -148,18 +148,24 @@ bindist: all
 
 clean:
 	rm -f second/yaboot util/addnote util/elfextract $(OBJS)
-	find . -name '#*' | xargs rm -f
-	find . -name '.#*' | xargs rm -f
-	find . -name '*~' | xargs rm -f
-	find . -name '*.swp' | xargs rm -f
+	find . -not -path './\{arch\}*' -name '#*' | xargs rm -f
+	find . -not -path './\{arch\}*' -name '.#*' | xargs rm -f
+	find . -not -path './\{arch\}*' -name '*~' | xargs rm -f
+	find . -not -path './\{arch\}*' -name '*.swp' | xargs rm -f
+	find . -not -path './\{arch\}*' -name ',,*' | xargs rm -rf
 	-gunzip man/*.gz
 	rm -rf man.deb
-	chmod 755 ybin/ybin ybin/ofpath ybin/yabootconfig
-	chmod -R u+rwX,go=rX .
-	chmod a-w COPYING
 
 cleandocs:
 	make -C doc clean
+
+## removes arch revision control crap, only to be called for making
+## release tarballs.  arch should have a export command like cvs...
+
+archclean:
+	rm -rf '{arch}'
+	find . -type d -name .arch-ids | xargs rm -rf
+	rm -f 0arch-timestamps0
 
 maintclean: clean cleandocs
 
@@ -204,7 +210,7 @@ install: all strip
 	@echo
 	@echo "Installation successful."
 	@echo
-	@echo "An example /etc/yaboot.conf has been installed (unless /etc/yaboot.conf already existed"
+	@echo "An example /etc/yaboot.conf has been installed (unless /etc/yaboot.conf already existed)"
 	@echo "You may either alter that file to match your system, or alternatively run yabootconfig"
 	@echo "yabootconfig will generate a simple and valid /etc/yaboot.conf for your system"
 	@echo

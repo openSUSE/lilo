@@ -1,4 +1,4 @@
-<!doctype html public "-//W3C//DTD HTML 4.0//EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
 
 <html>
 
@@ -12,33 +12,43 @@
 
 <body>
 
+<a name="ch9"></a>
 <hr>
 
 [ <a href="ch8.en.html">previous</a> ]
-[ <a href="index.en.html#abstract">Abstract</a> ]
-[ <a href="index.en.html#copyright">Copyright Notice</a> ]
 [ <a href="index.en.html#contents">Contents</a> ]
+[ <a href="ch1.en.html">1</a> ]
+[ <a href="ch2.en.html">2</a> ]
+[ <a href="ch3.en.html">3</a> ]
+[ <a href="ch4.en.html">4</a> ]
+[ <a href="ch5.en.html">5</a> ]
+[ <a href="ch6.en.html">6</a> ]
+[ <a href="ch7.en.html">7</a> ]
+[ <a href="ch8.en.html">8</a> ]
+[ 9 ]
+[ <a href="ch10.en.html">10</a> ]
+[ <a href="ch11.en.html">11</a> ]
 [ <a href="ch10.en.html">next</a> ]
 
 <hr>
 
 <h1>
-HOWTO-Booting with Yaboot on PowerPC<br>
-Chapter 9 Recovering From Misconfiguration
+HOWTO-Booting with Yaboot on PowerPC
+<br>Chapter 9 - Recovering From Misconfiguration
 </h1>
 
+
 <hr>
+
 
 <p>
 If you have a problem booting, don't panic.  Yaboot can boot any installed
 Linux kernel and system from the boot: prompt.
-</p>
 
 <hr>
 
-<h2>
-<a name="s9.1">9.1 Resetting the NVRAM</a>
-</h2>
+<a name="s9.1"></a>
+<h2>9.1 Resetting the NVRAM</h2>
 
 <p>
 Hold the Command-Option-p-r keys all together at startup to reset all nvram
@@ -48,13 +58,11 @@ chime two or three times.  If the setup recommendations were followed, the
 OpenFirmware will boot it automatically.  It should be noted that MacOS
 settings such as virtual memory, startup disk, and screen resolution will also
 be reset to their defaults.
-</p>
 
 <hr>
 
-<h2>
-<a name="s9.2">9.2 Loading Yaboot</a>
-</h2>
+<a name="s9.2"></a>
+<h2>9.2 Loading Yaboot</h2>
 
 <p>
 If a <samp>boot:</samp> prompt isn't presented, then <code>yaboot</code> isn't
@@ -113,13 +121,11 @@ file on the boot partition.
 Hit return, and <code>yaboot</code> should be loaded and display its
 <code>boot:</code> prompt.  If you don't know the partition number, just start
 at 2 and work your way up until you hit it.
-</p>
 
 <hr>
 
-<h2>
-<a name="s9.3">9.3 Manually Loading a Kernel Image</a>
-</h2>
+<a name="s9.3"></a>
+<h2>9.3 Manually Loading a Kernel Image</h2>
 
 <p>
 Once you have the boot: prompt, you can enter a label defined in your
@@ -139,24 +145,35 @@ example;
 <pre>
          boot: hd:3,/vmlinux root=/dev/hda3 ro
 </pre>
-</p>
 
 <hr>
 
 [ <a href="ch8.en.html">previous</a> ]
-[ <a href="index.en.html#abstract">Abstract</a> ]
-[ <a href="index.en.html#copyright">Copyright Notice</a> ]
 [ <a href="index.en.html#contents">Contents</a> ]
+[ <a href="ch1.en.html">1</a> ]
+[ <a href="ch2.en.html">2</a> ]
+[ <a href="ch3.en.html">3</a> ]
+[ <a href="ch4.en.html">4</a> ]
+[ <a href="ch5.en.html">5</a> ]
+[ <a href="ch6.en.html">6</a> ]
+[ <a href="ch7.en.html">7</a> ]
+[ <a href="ch8.en.html">8</a> ]
+[ 9 ]
+[ <a href="ch10.en.html">10</a> ]
+[ <a href="ch11.en.html">11</a> ]
 [ <a href="ch10.en.html">next</a> ]
 
 <hr>
 
-HOWTO-Booting with Yaboot on PowerPC<br>
+<p>
+HOWTO-Booting with Yaboot on PowerPC
 
 <address>
-Version 1.00, Oct 28 2001<br>
+Version 1.03, Sep 14 2002<br>
 Chris Tillman
 </address>
+
+<hr>
 
 </body>
 
