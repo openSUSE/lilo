@@ -55,7 +55,11 @@
 #include "bootinfo.h"
 #include "debug.h"
 
+#ifdef YABOOT_FAT
+#define CONFIG_FILE_NAME	"yaboot.cnf"
+#else
 #define CONFIG_FILE_NAME	"yaboot.conf"
+#endif
 #define CONFIG_FILE_MAX		0x8000		/* 32k */
 
 #ifdef USE_MD5_PASSWORDS
@@ -340,7 +344,7 @@ load_config_file(char *device, char* path, int partition)
      }
 
      /* Build the path to the file */
-     if (_machine == _MACH_chrp)
+     if (!(YABOOT_FAT) && _machine == _MACH_chrp) /* have a flat file system for FAT */
 	  strcpy(conf_path, "/etc/");
      else if (path && *path)
 	  strcpy(conf_path, path);

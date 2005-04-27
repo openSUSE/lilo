@@ -29,9 +29,7 @@ Release:      2
 Source0:      lilo-%{version}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
 Patch0:       show_of_path.diff
-Patch5:       yaboot-1.3.6.dif
-Patch6:       yaboot-1.3.11-fat.dif
-Patch7:       yaboot-hole_data-journal.diff
+Patch10:       yaboot-%{yaboot_vers}.patch
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 
 %description
@@ -62,10 +60,7 @@ mv lilo-%{version} lilo.ppc
 mv yaboot-%{yaboot_vers} yaboot
 %patch0
 cd yaboot
-%patch5
-%patch7 -p1
-cp second/yaboot.c second/yaboot_fat.c
-%patch6 -p1
+%patch10 -p1
 cd ..
 find lilo.ppc/lib -name "*.sh" | xargs -r chmod 755
 find lilo.ppc/lib -name addnote | xargs -r chmod 755
@@ -74,21 +69,21 @@ find lilo.ppc/lib -name mkprep | xargs -r chmod 755
 
 %build
 cd yaboot
+#
 make clean
-make DEBUG=1 VERSION=1.3.11.SuSE yaboot
+make DEBUG=1 VERSION=%{yaboot_vers}.SuSE yaboot
 mv second/yaboot yaboot.debug
-make clean
-make DEBUG=0 VERSION=1.3.11.SuSE yaboot
-mv second/yaboot yaboot
-make clean
-make DEBUG=1 VERSION=1.3.11.SuSE yaboot.chrp
 mv second/yaboot.chrp yaboot.chrp.debug
+#
 make clean
-make DEBUG=0 VERSION=1.3.11.SuSE yaboot.chrp
+make DEBUG=0 VERSION=%{yaboot_vers}.SuSE yaboot
+mv second/yaboot yaboot
 mv second/yaboot.chrp yaboot.chrp
+#
 make clean
-make DEBUG=0 VERSION=1.3.11.SuSE yaboot.fat
-mv second/yaboot.fat yaboot.fat
+make DEBUG=0 VERSION=%{yaboot_vers}.FAT.SuSE YABOOT_FAT=1 yaboot
+mv second/yaboot.chrp yaboot.fat
+#
 cd ..
 #cd lilo
 #make activate
