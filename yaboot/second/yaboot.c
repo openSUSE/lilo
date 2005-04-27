@@ -1443,8 +1443,6 @@ setup_display(void)
 int
 yaboot_main(void)
 {
-     char *ptype;
-
      if (_machine == _MACH_Pmac)
 	  setup_display();
 	
