@@ -26,6 +26,9 @@
 #include "stddef.h"
 #include "prom.h"
 
+struct boot_file_t;
+#include "fs.h"
+
 #define FILE_MAX_PATH		1024
 
 /* Simple error codes */
@@ -35,6 +38,10 @@
 #define FILE_CANT_SEEK		-3
 #define FILE_IOERR		-4
 #define FILE_BAD_PATH		-5
+#define FILE_ERR_BAD_TYPE       -6
+#define FILE_ERR_BAD_FSYS       -7
+#define FILE_ERR_SYMLINK_LOOP   -8
+#define FILE_ERR_LENGTH         -9
 
 /* Device kind */
 #define FILE_DEVICE_BLOCK	1
@@ -49,15 +56,7 @@ struct boot_fspec_t {
 struct boot_file_t {
 
 	/* File access methods */
-
-	int		(*read)(	struct boot_file_t*	file,
-					unsigned int		size,
-					void*			buffer);
-				
-	int		(*seek)(	struct boot_file_t*	file,
-					unsigned int		newpos);
-					
-	int		(*close)(	struct boot_file_t*	file);
+        const struct fs_t *fs;
 
 	/* Filesystem private (to be broken once we have a
 	 * better malloc'ator)
@@ -66,9 +65,9 @@ struct boot_file_t {
 	int		device_kind;
 	ihandle		of_device;
 	ino_t		inode;
-	unsigned int	pos;
+	__u64           pos;
 	unsigned char*	buffer;
-	unsigned long	len;
+	__u64   	len;
 //	unsigned int	dev_blk_size;
 //	unsigned int	part_start;
 //	unsigned int	part_count;

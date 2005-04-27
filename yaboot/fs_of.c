@@ -91,10 +91,9 @@ of_open(	struct boot_file_t*	file,
 {
 	static char	buffer[1024];
 	
-#if DEBUG
-	prom_printf("of_open(dev:%s, part: 0x%08lx, name:%s\n",
-		dev_name, part, file_name);
-#endif
+        DEBUG_ENTER;
+        DEBUG_OPEN;
+
 	strncpy(buffer, dev_name, 1000);
 	strcat(buffer, ":");
 	if (part) {
@@ -108,18 +107,21 @@ of_open(	struct boot_file_t*	file,
 		strcat(buffer, file_name);
 	}
 			
-#if DEBUG
-	prom_printf(" -> prom_open<%s>...\n", buffer);
-#endif
+	DEBUG_F("<%s>\n", buffer);
+
 	file->of_device = prom_open(buffer);
-#if DEBUG
-	prom_printf(" -> %08lx\n", file->of_device);
-#endif
+
+	DEBUG_F("file->of_device = %08lx\n", file->of_device);
+
 	file->pos = 0;
 	file->buffer = NULL;
 	if ((file->of_device == PROM_INVALID_HANDLE) || (file->of_device == 0))
+        {
+		DEBUG_LEAVE(FILE_ERR_NOTFOUND);
 		return FILE_ERR_NOTFOUND;
+        }
 	
+	DEBUG_LEAVE(FILE_ERR_OK);
 	return FILE_ERR_OK;
 }
 
@@ -131,10 +133,9 @@ of_net_open(	struct boot_file_t*	file,
 {
 	static char	buffer[1024];
 	
-#if DEBUG
-	prom_printf("of_net_open(dev:%s, part: 0x%08lx, name:%s\n",
-		dev_name, part, file_name);
-#endif
+        DEBUG_ENTER;
+        DEBUG_OPEN;
+
 	strncpy(buffer, dev_name, 1000);
 	strcat(buffer, ":0");
 	if (file_name && strlen(file_name)) {
@@ -142,32 +143,36 @@ of_net_open(	struct boot_file_t*	file,
 		strcat(buffer, file_name);
 	}
 			
-#if DEBUG
-	prom_printf(" -> prom_open<%s>...\n", buffer);
-#endif
+	DEBUG_F("<%s>\n", buffer);
+
 	file->of_device = prom_open(buffer);
-#if DEBUG
-	prom_printf(" -> %08lx\n", file->of_device);
-#endif
+
+	DEBUG_F("file->of_device = %08lx\n", file->of_device);
+
 	file->pos = 0;
 	if ((file->of_device == PROM_INVALID_HANDLE) || (file->of_device == 0))
+        {
+                DEBUG_LEAVE(FILE_ERR_NOTFOUND);
 		return FILE_ERR_NOTFOUND;
+        }
 	
 	file->buffer = prom_claim((void *)LOAD_BUFFER_POS, LOAD_BUFFER_SIZE, 0);
 	if (file->buffer == (void *)-1) {
 		prom_printf("Can't claim memory for TFTP download\n");
 		prom_close(file->of_device);
+		DEBUG_LEAVE(FILE_ERR_NOTFOUND);
 		return FILE_ERR_NOTFOUND;
 	}
 	memset(file->buffer, 0, LOAD_BUFFER_SIZE);
-#if DEBUG
-	prom_printf("TFP...\n");
-#endif
+
+	DEBUG_F("TFP...\n");
+
 	file->len = prom_loadmethod(file->of_device, file->buffer);
-#if DEBUG
-	prom_printf("result: %d\n", file->len);
-#endif
 	
+	DEBUG_F("result: %d\n", file->len);
+
+	
+        DEBUG_LEAVE(FILE_ERR_OK);
 	return FILE_ERR_OK;
 }
 
@@ -220,13 +225,16 @@ of_net_seek(	struct boot_file_t*	file,
 static int
 of_close(	struct boot_file_t*	file)
 {
-#if DEBUG
-	prom_printf("of_close<@0x%08lx>...\n", file->of_device);
-#endif
+
+        DEBUG_ENTER;
+	DEBUG_F("<@0x%08lx>n", file->of_device);
+
 	if (file->buffer) {
 		prom_release(file->buffer, LOAD_BUFFER_SIZE);
 	}
 	prom_close(file->of_device);
+
+        DEBUG_LEAVE(0);
 	
 	return 0;
 }

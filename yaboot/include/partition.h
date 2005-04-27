@@ -21,6 +21,8 @@
 #ifndef PARTITION_H
 #define PARTITION_H
 
+struct partition_t;
+
 #include "types.h"
 #include "stddef.h"
 #include "prom.h"
@@ -28,23 +30,13 @@
 #define MAX_PARTITIONS	32
 #define MAX_PART_NAME	32
 
-enum {
-	partition_unknown,	/* Try with OF */
-	partition_machfs,	/* Apple_HFS */
-	partition_ext2,		/* Apple_UNIX_SVR2 */
-	partition_macboot,	/* HFS bootstrap */
-	partition_iso,		/* ISO9660 (CD ?) */
-	partition_ufs		/* UFS (NetBSD) */
-};
-
 struct partition_t {
 	struct partition_t*	next;
-	int			kind;
 	int			part_number;
 	char			part_name[MAX_PART_NAME];
-	unsigned int		part_start;
-	unsigned int		part_size;
-	unsigned int		blksize;
+	unsigned long  		part_start; /* In blocks */
+	unsigned long  		part_size; /* In blocks */
+	unsigned short		blocksize;
 };
 
 extern struct partition_t*	partitions_lookup(const char *device);

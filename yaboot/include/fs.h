@@ -21,23 +21,8 @@
 #ifndef FS_H
 #define FS_H
 
-#include "types.h"
-#include "stddef.h"
-#include "prom.h"
 #include "partition.h"
 #include "file.h"
-
-enum {
-	fs_of,
-	fs_ofnet,
-	fs_hfs,
-	fs_ext2,
-	fs_iso,
-	fs_ufs,
-	fs_udf,
-	
-	fs_count
-};
 
 struct fs_t {
 	const char* name;
@@ -57,7 +42,29 @@ struct fs_t {
 	int (*close)(	struct boot_file_t*	file);
 };
 
-extern const struct fs_t* filesystems[];
-extern const int part_2_fs_map[];
+extern const struct fs_t *fs_of;
+extern const struct fs_t *fs_of_netboot;
+
+const struct fs_t *fs_open( struct boot_file_t *file, const char *dev_name,
+                            struct partition_t *part, const char *file_name );
+
+#if DEBUG
+# define DEBUG_ENTER prom_printf( "--> %s\n", __PRETTY_FUNCTION__ );
+# define DEBUG_LEAVE(str) \
+    prom_printf( "<-- %s - %s\n", __PRETTY_FUNCTION__, #str );
+# define DEBUG_F(fmt, args...)\
+{\
+    prom_printf( "    %s - ", __PRETTY_FUNCTION__ );\
+    prom_printf( fmt, ## args );\
+}
+# define DEBUG_OPEN DEBUG_F( "dev=%s, part=0x%08lx (%d), file_name=%s\n",\
+                             dev_name, part, part ? part->part_number : -1,\
+                             file_name);
+#else
+#define DEBUG_ENTER
+#define DEBUG_LEAVE(x)
+#define DEBUG_F(fmt, args...)
+#define DEBUG_OPEN
+#endif
 
 #endif

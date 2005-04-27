@@ -96,9 +96,9 @@ static char flag_set;
 static char *last_token = NULL, *last_item = NULL, *last_value = NULL;
 static int line_num;
 static int back = 0;		/* can go back by one char */
-static char *currp;
-static char *endp;
-static char *file_name;
+static char *currp = NULL;
+static char *endp = NULL;
+static char *file_name = NULL;
 static CONFIG *curr_table = cf_options;
 static jmp_buf env;
 

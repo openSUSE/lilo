@@ -1,3 +1,16 @@
+August 6. 2001 - 1.2.3
+
+ - Fix again system.map loading. That also fix an old pending
+   bug we had where yaboot could pass random values for system.map,
+   causing the kernel to mark random pages reserved.
+ - MD5 passwords (Ethan Benson)
+ - Fix F80 & remove obsolete ppc64 stuff (Peter Bergner)
+ - Add reiserfs support (Jeff Mahoney)
+
+July 28. 2001 - 1.2.2
+
+ - Fix to system.map loading
+
 May 05. 2001 - 1.2
 
  - Add support for large ramdisks (Edward Swarthout)

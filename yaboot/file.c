@@ -26,9 +26,6 @@
 #include "partition.h"
 #include "fs.h"
 
-/* Imported functions */
-extern int strtol(const char *nptr, char **endptr, int base);
-
 extern char bootdevice[1024];
 
 /* This function follows the device path in the devtree and separates
@@ -54,7 +51,7 @@ parse_device_path(char *of_device, char **file_spec, int *partition)
 	
 	last = ++p;
 	while(*p && *p != ',') {
-		if (*p < '0' || *p > '9') {
+        if (!isdigit (*p)) {
 			p = last;
 			break;
 		}
@@ -63,7 +60,7 @@ parse_device_path(char *of_device, char **file_spec, int *partition)
 	if (p != last) {
 		*(p++) = 0;
 		if (partition)
-			*partition = strtol(last, NULL, 0);
+            *partition = simple_strtol(last, NULL, 10);
 	}
 	if (*p && file_spec)
 		*file_spec = p;
@@ -102,8 +99,6 @@ file_block_open(	struct boot_file_t*	file,
 	struct partition_t*	parts;
 	struct partition_t*	p;
 	struct partition_t*	found;
-	int result = FILE_ERR_NOTFOUND;
-	int fs = fs_of;
 	
 	parts = partitions_lookup(dev_name);
 	found = NULL;
@@ -116,16 +111,12 @@ file_block_open(	struct boot_file_t*	file,
 #endif
 	for (p = parts; p && !found; p=p->next) {
 #if DEBUG
-		prom_printf("number: %02d type: %02d, start: 0x%08lx, length: 0x%08lx => %s\n",
-			p->part_number, p->kind, p->part_start, p->part_size, p->part_name);
+		prom_printf("number: %02d, start: 0x%08lx, length: 0x%08lx\n",
+			p->part_number, p->part_start, p->part_size );
 #endif
-		if (p->kind == -1)
-			continue;
-			
-		fs = part_2_fs_map[p->kind];
 		if (partition == -1) {
-			result = filesystems[fs]->open(file, dev_name, p, file_name);
-			if (result == FILE_ERR_OK)
+                        file->fs = fs_open( file, dev_name, p, file_name );
+			if (file->fs != NULL)
 				goto bail;
 		}
 		if ((partition >= 0) && (partition == p->part_number))
@@ -139,17 +130,14 @@ file_block_open(	struct boot_file_t*	file,
 	/* Note: we don't skip when found is NULL since we can, in some
 	 * cases, let OF figure out a default partition.
 	 */
-	result = filesystems[fs]->open(file, dev_name, found, file_name);
+        DEBUG_F( "Using OF defaults.. (found = 0x%x)\n", found );
+        file->fs = fs_open( file, dev_name, found, file_name );
 
 bail:
-	if (result == FILE_ERR_OK) {
-		file->read = filesystems[fs]->read;
-		file->seek = filesystems[fs]->seek;
-		file->close = filesystems[fs]->close;
-	}
 	if (parts)
 		partitions_free(parts);
-	return result;
+
+	return file->fs ? FILE_ERR_OK : FILE_ERR_NOTFOUND;
 }
 
 static int
@@ -157,12 +145,7 @@ file_net_open(	struct boot_file_t*	file,
 		const char*		dev_name,
 		const char*		file_name)
 {
-	int fs = fs_ofnet;
-	
-	file->read = filesystems[fs]->read;
-	file->seek = filesystems[fs]->seek;
-	file->close = filesystems[fs]->close;
-	return filesystems[fs]->open(file, dev_name, NULL, file_name);
+    return fs_of_netboot->open(file, dev_name, NULL, file_name);
 }
 
 static int
@@ -189,6 +172,15 @@ default_close(	struct boot_file_t*	file)
 	return FILE_ERR_OK;
 }
 
+static struct fs_t fs_default =
+{
+    "defaults",
+    NULL,
+    default_read,
+    default_seek,
+    default_close
+};
+
 
 int open_file(	const struct boot_fspec_t*	spec,
 		struct boot_file_t*		file)
@@ -202,9 +194,7 @@ int open_file(	const struct boot_fspec_t*	spec,
 	int		partition;
 	
 	memset(file, 0, sizeof(struct boot_file_t*));
-	file->read	= default_read;
-	file->seek	= default_seek;
-	file->close	= default_close;
+        file->fs        = &fs_default;
 
 	/* Lookup the OF device path */
 	/* First, see if a device was specified for the kernel

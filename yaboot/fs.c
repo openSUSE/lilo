@@ -18,34 +18,34 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "types.h"
-#include "stddef.h"
-#include "prom.h"
-#include "partition.h"
+#include "stdlib.h"
 #include "fs.h"
 
 extern const struct fs_t	of_filesystem;
 extern const struct fs_t	of_net_filesystem;
 extern const struct fs_t	ext2_filesystem;
+extern const struct fs_t        reiserfs_filesystem;
 //extern const struct fs_t	iso_filesystem;
 
-const struct fs_t* filesystems[fs_count] = {
-	&of_filesystem,		/* OF */
-	&of_net_filesystem,	/* OF (network - no seek) */
-	&of_filesystem,		/* HFS/HFS+ */
-	&ext2_filesystem,	/* ext2 */
-	&of_filesystem,		/* ISO9660 */
-	&of_filesystem,		/* UFS */
-	&of_filesystem		/* UDF */
+/* Filesystem handlers yaboot knows about */
+static const struct fs_t *block_filesystems[] = {
+	&ext2_filesystem,		/* ext2 */
+	&reiserfs_filesystem,		/* reiserfs */
+	&of_filesystem,			/* HFS/HFS+, ISO9660, UDF, UFS */
+	NULL
 };
 
-const int part_2_fs_map[] = 
+const struct fs_t *fs_of = &of_filesystem;              /* needed by ISO9660 */
+const struct fs_t *fs_of_netboot = &of_net_filesystem;  /* needed by file.c */
+
+const struct fs_t *
+fs_open( struct boot_file_t *file, const char *dev_name,
+         struct partition_t *part, const char *file_name)
 {
-	fs_of,		// partition_unknown
-	fs_hfs,		// partition_machfs
-	fs_ext2,	// partition_ext2
-	fs_hfs,		// partition_macboot
-	fs_iso,		// partition_iso
-	fs_ufs		// partition_ufs
-};
+    const struct fs_t **fs;
+    for( fs = block_filesystems; *fs; fs++ )
+        if( (*fs)->open( file, dev_name, part, file_name ) == FILE_ERR_OK )
+            break;
 
+    return *fs;
+}

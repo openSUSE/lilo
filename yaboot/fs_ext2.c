@@ -127,10 +127,9 @@ ext2_open(	struct boot_file_t*	file,
 	static char buffer[1024];
 	int ofopened = 0;
 	
-#if DEBUG
-	prom_printf("ext2_open(dev:%s, part: 0x%08lx, name:%s\n",
-		dev_name, part, file_name);
-#endif
+        DEBUG_ENTER;
+        DEBUG_OPEN;
+
 	if (opened) {
 		prom_printf("ext2_open() : fs busy\n");
 		return FILE_ERR_NOTFOUND;
@@ -149,26 +148,26 @@ ext2_open(	struct boot_file_t*	file,
 	bs = 1024;
 	doff = 0;
 	if (part)
-	    doff = (unsigned long long)(part->part_start) * part->blksize;
+	    doff = (unsigned long long)(part->part_start) * part->blocksize;
 	cur_file = file;
 
-#if DEBUG
-	prom_printf("partition offset: %d\b", doff);
-#endif	
+
+	DEBUG_F("partition offset: %d\n", doff);
+
 	/* Open the OF device for the entire disk */
 	strncpy(buffer, dev_name, 1020);
 	strcat(buffer, ":0");
-#if DEBUG
-	prom_printf(" -> prom_open<%s>...\n", buffer);
-#endif
+
+	DEBUG_F("<%s>\n", buffer);
+
 	file->of_device = prom_open(buffer);
-#if DEBUG
-	prom_printf(" -> %08lx\n", file->of_device);
-#endif
+
+	DEBUG_F("file->of_device = %08lx\n", file->of_device);
+
 	if (file->of_device == PROM_INVALID_HANDLE) {
-#if DEBUG
-		prom_printf("Can't open device %s\n", file->of_device);
-#endif
+
+		DEBUG_F("Can't open device %s\n", file->of_device);
+
 		return FILE_ERR_NOTFOUND;
 	}
 	ofopened = 1;
@@ -176,18 +175,27 @@ ext2_open(	struct boot_file_t*	file,
 	/* Open the ext2 filesystem */
 	result = ext2fs_open (buffer, EXT2_FLAG_RW, 0, 0, linux_io_manager, &fs);
 	if (result) {
-#if DEBUG
-	    prom_printf("ext2fs_open error #%d while loading file %s\n", result, file_name);
-#endif
+
+            if(result == EXT2_ET_BAD_MAGIC)
+            {
+                DEBUG_F( "ext2fs_open returned bad magic loading file %s\n",
+                         file );
+            }
+            else
+            {
+                DEBUG_F( "ext2fs_open error #%d while loading file %s\n",
+                         result, file_name);
+            }
+
 	    goto bail;
 	}
 
 	/* Allocate the block buffer */
 	block_buffer = malloc(fs->blocksize * 2);
 	if (!block_buffer) {
-#if DEBUG
-	    prom_printf("ext2fs: can't alloc block buffer (%d bytes)\n", fs->blocksize * 2);
-#endif
+
+	    DEBUG_F("ext2fs: can't alloc block buffer (%d bytes)\n", fs->blocksize * 2);
+
 	    goto bail;
 	}
 	
@@ -195,18 +203,17 @@ ext2_open(	struct boot_file_t*	file,
     	root = cwd = EXT2_ROOT_INO;
     	result = ext2fs_namei_follow(fs, root, cwd, file_name, &file->inode);
 	if (result) {
-#if DEBUG
-	    prom_printf("ext2fs_namei error #%d while loading file %s\n", result, file_name);
-#endif
+
+	    DEBUG_F("ext2fs_namei error #%d while loading file %s\n", result, file_name);
 	    goto bail;
 	}
 
 #if 0
 	result = ext2fs_follow_link(fs, root, cwd,  file->inode, &file->inode);
 	if (result) {
-#if DEBUG
-	    prom_printf("ext2fs_follow_link error #%d while loading file %s\n", result, file_name);
-#endif
+
+	    DEBUG_F("ext2fs_follow_link error #%d while loading file %s\n", result, file_name);
+
 	    goto bail;
 	}
 #endif	
@@ -214,9 +221,9 @@ ext2_open(	struct boot_file_t*	file,
 #ifndef FAST_VERSION
 	result = ext2fs_read_inode(fs, file->inode, &cur_inode);
 	if (result) {
-#if DEBUG
-	    prom_printf("ext2fs_read_inode error #%d while loading file %s\n", result, file_name);
-#endif
+
+	    DEBUG_F("ext2fs_read_inode error #%d while loading file %s\n", result, file_name);
+
 	    goto bail;
 	}
 #endif /* FAST_VERSION */
@@ -235,9 +242,11 @@ bail:
 	    block_buffer = NULL;
 	    cur_file = NULL;
 	    
+            DEBUG_LEAVE(FILE_ERR_NOTFOUND);
 	    return FILE_ERR_NOTFOUND;
 	}
 
+	DEBUG_LEAVE(FILE_ERR_OK);
 	return FILE_ERR_OK;
 }
 
@@ -250,7 +259,7 @@ read_dump_range(void)
 	int size;
 
 #ifdef VERBOSE_DEBUG
-	prom_printf("   dumping range: start: 0x%x count: 0x%x\n",
+	DEBUG_F("   dumping range: start: 0x%x count: 0x%x\n",
     		read_range_count, read_range_start);
 #endif
 	/* Check if we need to handle a special case for the last block */
@@ -288,12 +297,12 @@ static int
 read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
 {
 #ifdef VERBOSE_DEBUG
-    prom_printf("read_it: p_bloc: 0x%x, l_bloc: 0x%x, f_pos: 0x%x, rng_pos: 0x%x   ",
+    DEBUG_F("read_it: p_bloc: 0x%x, l_bloc: 0x%x, f_pos: 0x%x, rng_pos: 0x%x   ",
     	*blocknr, lg_block, read_cur_file->pos, read_last_logical);
 #endif
     if (lg_block < 0) {
 #ifdef VERBOSE_DEBUG
-    	prom_printf(" <skip lg>\n");
+    	DEBUG_F(" <skip lg>\n");
 #endif
 	return 0;
     }
@@ -301,7 +310,7 @@ read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
     /* If we have not reached the start block yet, we skip */
     if (lg_block < read_cur_file->pos / bs) {
 #ifdef VERBOSE_DEBUG
-    	prom_printf(" <skip pos>\n");
+    	DEBUG_F(" <skip pos>\n");
 #endif
 	return 0;
     }
@@ -313,7 +322,7 @@ read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
     	&& (*blocknr == read_range_start + read_range_count)
     	&& (lg_block == read_last_logical + read_range_count)) {
 #ifdef VERBOSE_DEBUG
-	prom_printf(" block in range\n");
+	DEBUG_F(" block in range\n");
 #endif
   	++read_range_count;
    	return ((read_range_count * bs) >= read_max) ? BLOCK_ABORT : 0;
@@ -322,7 +331,7 @@ read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
     /* Range doesn't match. Dump existing range */
     if (read_range_start) {
 #ifdef VERBOSE_DEBUG
-	prom_printf(" calling dump range \n");
+	DEBUG_F(" calling dump range \n");
 #endif
     	if (read_dump_range())
     		return BLOCK_ABORT;
@@ -332,7 +341,7 @@ read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
     if (lg_block && lg_block != read_last_logical) {
     	unsigned long nzero;
 #ifdef VERBOSE_DEBUG
-	prom_printf(" hole from lg_bloc 0x%x\n", read_last_logical);
+	DEBUG_F(" hole from lg_bloc 0x%x\n", read_last_logical);
 #endif
     	if (read_cur_file->pos % bs) {
     		int offset = read_cur_file->pos % bs;
@@ -368,7 +377,7 @@ read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
     	int offset = read_cur_file->pos % bs;
     	int size = bs - offset;
 #ifdef VERBOSE_DEBUG
-	prom_printf(" handle unaligned start\n");
+	DEBUG_F(" handle unaligned start\n");
 #endif
 	read_result = io_channel_read_blk(fs->io, *blocknr, 1, block_buffer);
 	if (read_result)
@@ -387,7 +396,7 @@ read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
    /* If there is still a physical block to add, then create a new range */
     if (*blocknr) {
 #ifdef VERBOSE_DEBUG
-	prom_printf(" new range\n");
+	DEBUG_F(" new range\n");
 #endif
    	 read_range_start = *blocknr;
    	 read_range_count = 1;
@@ -395,7 +404,7 @@ read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
     }
     
 #ifdef VERBOSE_DEBUG
-	prom_printf("\n");
+	DEBUG_F("\n");
 #endif
     return 0;
 }
@@ -413,9 +422,9 @@ ext2_read(	struct boot_file_t*	file,
 	if (!opened)
 	    return FILE_ERR_NOTFOUND;
 
-#if DEBUG
-	prom_printf("ext_read() from pos 0x%x, size: 0x%x\n", file->pos, size);
-#endif	
+
+	DEBUG_F("ext_read() from pos 0x%x, size: 0x%x\n", file->pos, size);
+
 
 	read_cur_file = file;
 	read_range_start = 0;
@@ -431,7 +440,7 @@ ext2_read(	struct boot_file_t*	file,
 		retval = read_result;
 	if (!retval && read_range_start) {
 #ifdef VERBOSE_DEBUG
-		prom_printf("on exit: range_start is 0x%x, calling dump...\n",
+		DEBUG_F("on exit: range_start is 0x%x, calling dump...\n",
 			read_range_start);
 #endif
 		read_dump_range();
@@ -449,9 +458,9 @@ ext2_read(	struct boot_file_t*	file,
 	if (!opened)
 	    return FILE_ERR_NOTFOUND;
 
-#if DEBUG
-	prom_printf("ext_read() from pos 0x%x, size: 0x%x\n", file->pos, size);
-#endif	
+
+	DEBUG_F("ext_read() from pos 0x%x, size: 0x%x\n", file->pos, size);
+
 
 	while(size) {	
 	    blk_t fblock = file->pos / bs;
@@ -462,9 +471,8 @@ ext2_read(	struct boot_file_t*	file,
 	    status = ext2fs_bmap(fs, file->inode, &cur_inode,
 			block_buffer, 0, fblock, &pblock);
 	    if (status) {
-#if DEBUG
-		prom_printf("ext2fs_bmap(fblock:%d) return: %d\n", fblock, status);
-#endif
+
+		DEBUG_F("ext2fs_bmap(fblock:%d) return: %d\n", fblock, status);
 		return read;
 	    }
 	    blkorig = fblock * bs;

@@ -5,14 +5,6 @@
  * Main entry point. should add code to clear BSS and more ...
  */
 _GLOBAL(_start)
-#ifdef CONFIG_PPC64BRIDGE
-	/* Force the 64b machine into 32b mode. */
-	mfmsr   r20
-  	clrldi  r20,r20,3
-	sync
-	.long   (0x7c000164 + ((r20) << 21))
-	isync
-#endif /* CONFIG_PPC64BRIDGE */
 	lis	r10,edata@h
 	ori	r10,r10,edata@l
 	lis	r11,end@h

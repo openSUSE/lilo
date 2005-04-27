@@ -1,17 +1,9 @@
 ## Configuration section
 
-VERSION = 1.2.2
+VERSION = 1.2.3
 # Debug mode (verbose)
 DEBUG = 0
 PREFIX = /usr/local
-
-#---------------------------------------------------------------------------
-# PPC64 Bridge Mode:
-#    * Choose "n" if you are on a 32b machine.
-#    * Choose "y" so yaboot can boot on 64b PPC machines in 32b mode.
-#---------------------------------------------------------------------------
-CONFIG_PPC64BRIDGE = n
-# CONFIG_PPC64BRIDGE = y
 
 # Enable text colors
 CONFIG_COLOR_TEXT = y
@@ -19,6 +11,8 @@ CONFIG_COLOR_TEXT = y
 CONFIG_SET_COLORMAP = y
 # Enable splash screen
 CONFIG_SPLASH_SCREEN = y
+# Enable md5 passwords
+USE_MD5_PASSWORDS = y
 
 # We use fixed addresses to avoid overlap when relocating
 # and other trouble with initrd
@@ -38,16 +32,12 @@ CROSS =
 
 # The flags for the target compiler.
 #
-CFLAGS = -O0 -g -nostdinc -Wall -isystem `gcc -print-file-name=include`
+CFLAGS = -O0 -g -nostdinc -Wall -isystem `gcc -print-file-name=include` -fsigned-char
 CFLAGS += -DVERSION=\"${VERSION}\"	#"
 CFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG)
 CFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
 CFLAGS += -DKERNELADDR=$(KERNELADDR)
 CFLAGS += -I ./include
-
-ifeq ($(CONFIG_PPC64BRIDGE),y)
-CFLAGS += -Wa,-mppc64bridge -DCONFIG_PPC64BRIDGE
-endif
 
 ifeq ($(CONFIG_COLOR_TEXT),y)
 CFLAGS += -DCONFIG_COLOR_TEXT
@@ -59,6 +49,10 @@ endif
 
 ifeq ($(CONFIG_SPLASH_SCREEN),y)
 CFLAGS += -DCONFIG_SPLASH_SCREEN
+endif
+
+ifeq ($(USE_MD5_PASSWORDS),y)
+CFLAGS += -DUSE_MD5_PASSWORDS
 endif
 
 # Link flags
@@ -78,12 +72,16 @@ HOSTCFLAGS = -I/usr/include $(CFLAGS) $(CFLAGS)
 ## End of configuration section
 
 OBJS = crt0.o yaboot.o cache.o prom.o file.o partition.o fs.o cfg.o \
-	setjmp.o cmdline.o fs_of.o fs_ext2.o fs_iso.o iso_util.o \
+	setjmp.o cmdline.o fs_of.o fs_ext2.o fs_reiserfs.o fs_iso.o iso_util.o \
 	lib/nosys.o lib/string.o lib/strtol.o \
-	lib/vsprintf.o lib/ctype.o lib/malloc.o
+	lib/vsprintf.o lib/ctype.o lib/malloc.o lib/strstr.o
 
 ifeq ($(CONFIG_SPLASH_SCREEN),y)
 OBJS += gui/effects.o gui/colormap.o gui/video.o gui/pcx.o
+endif
+
+ifeq ($(USE_MD5_PASSWORDS),y)
+OBJS += md5.o
 endif
 
 CC = $(CROSS)gcc
@@ -98,15 +96,14 @@ lgcc = `$(CC) -print-libgcc-file-name`
 yaboot: $(OBJS) addnote
 	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o $@
 	strip $@
-ifeq ($(CONFIG_PPC64BRIDGE),y)
-	./util/addnote $@
-endif
+	cp -v $@ $@.chrp
+	./util/addnote $@.chrp
 
 yaboot.b: yaboot elfextract
 	./util/elfextract yaboot yaboot.b
 
 clean:
-	rm -f yaboot util/addnote utils/elfextract $(OBJS)
+	rm -f yaboot yaboot.chrp util/addnote util/elfextract $(OBJS)
 	find . -name '*~' | xargs rm -f
 	find . -name '#*' | xargs rm -f
 	find . -name .AppleDouble | xargs rm -rf
@@ -116,7 +113,7 @@ addnote: util/addnote.c
 
 elfextract: util/elfextract.c
 	$(HOSTCC) $(HOSTCFLAGS) -o util/elfextract util/elfextract.c
-	
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -126,3 +123,6 @@ elfextract: util/elfextract.c
 install:
 	install -o root -g root -m 0755 -d $(PREFIX)/lib/yaboot
 	install -o root -g root -m 0644 yaboot $(PREFIX)/lib/yaboot
+
+dep:
+	makedepend -Iinclude *.c lib/*.c util/*.c gui/*.c

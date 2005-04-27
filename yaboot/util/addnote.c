@@ -158,6 +158,6 @@ main(int ac, char **av)
 
  nospace:
 	fprintf(stderr, "sorry, I can't find space in %s to put the note\n",
-		av[0]);
+		av[1]);
 	exit(1);
 }

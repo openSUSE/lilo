@@ -48,8 +48,8 @@ void fxDisplaySplash(struct boot_fspec_t *filespec)
         return;
      }
 
-     gfx_len = file.read(&file, 1024 * 512 - 765, gfx_file);
-     file.close(&file);
+     gfx_len = file.fs->read(&file, 1024 * 512 - 765, gfx_file);
+     file.fs->close(&file);
      grey_map = gfx_file + gfx_len;
      memset(grey_map, 0/*128*/, 765);
   }
@@ -86,7 +86,7 @@ int fxReadImage(struct boot_file_t *file, unsigned int filesize, void *base)
   for(count = 0; count < filesize; count += result)
   {
      result = ((filesize - count) < BLOCK_INDEX) ? (filesize - count) : BLOCK_INDEX;
-     if ((result = file->read(file, result, base + count)) != BLOCK_INDEX)
+     if ((result = file->fs->read(file, result, base + count)) != BLOCK_INDEX)
      	break;
      fxUpdateSB(count + result, filesize);
   }
