@@ -1,38 +1,45 @@
-/* Yaboot - secondary boot loader for Linux on ppc.
-
-   Copyright (C) 1999 Benjamin Herrenschmidt
-
-   portions based on poof
-
-   Copyright (C) 1999 Marius Vollmer
-
-   portions based on quik
-   
-   Copyright (C) 1996 Paul Mackerras.
-
-   Because this program is derived from the corresponding file in the
-   silo-0.64 distribution, it is also
-
-   Copyright (C) 1996 Pete A. Zaitcev
-   		 1996 Maurizio Plaza
-   		 1996 David S. Miller
-   		 1996 Miguel de Icaza
-   		 1996 Jakub Jelinek
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+/*
+ *  Yaboot - secondary boot loader for Linux on PowerPC. 
+ *
+ *  Copyright (C) 2001 Ethan Benson
+ *
+ *  Copyright (C) 1999, 2000, 2001 Benjamin Herrenschmidt
+ *  
+ *  IBM CHRP support
+ *  
+ *  Copyright (C) 2001 Peter Bergner
+ *
+ *  portions based on poof
+ *  
+ *  Copyright (C) 1999 Marius Vollmer
+ *  
+ *  portions based on quik
+ *  
+ *  Copyright (C) 1996 Paul Mackerras.
+ *  
+ *  Because this program is derived from the corresponding file in the
+ *  silo-0.64 distribution, it is also
+ *  
+ *  Copyright (C) 1996 Pete A. Zaitcev
+ *                1996 Maurizio Plaza
+ *                1996 David S. Miller
+ *                1996 Miguel de Icaza
+ *                1996 Jakub Jelinek
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
 
 #include "stdarg.h"
 #include "string.h"
@@ -108,6 +115,7 @@ char bootdevice[1024];
 char *password = NULL;
 struct boot_fspec_t boot;
 int _machine = _MACH_Pmac;
+int flat_vmlinux;
 
 #ifdef CONFIG_COLOR_TEXT
 
@@ -332,10 +340,10 @@ load_config_file(char *device, char* path, int partition)
      }
 
      /* Build the path to the file */
-     if (path)
-	  strcpy(conf_path, path);
-     else if ( _machine == _MACH_chrp )
+     if (_machine == _MACH_chrp)
 	  strcpy(conf_path, "/etc/");
+     else if (path && *path)
+	  strcpy(conf_path, path);
      else
 	  conf_path[0] = 0;
      strcat(conf_path, CONFIG_FILE_NAME);
@@ -541,8 +549,9 @@ void check_password(char *str)
 {
      int i;
 
+     prom_printf("\n%s", str);
      for (i = 0; i < 3; i++) {
-	  prom_printf ("\n%sassword: ", str);
+	  prom_printf ("\nPassword: ");
 	  passwdbuff[0] = 0;
 	  cmdedit ((void (*)(void)) 0, 1);
 	  prom_printf ("\n");
@@ -557,11 +566,15 @@ void check_password(char *str)
 	  if (!strcmp (password, passwdbuff))
 	       return;
 #endif /* USE_MD5_PASSWORDS */
-	  if (i < 2)
-	       prom_printf ("Password incorrect. Please try again...");
+	  if (i < 2) {
+	       prom_sleep(1);
+	       prom_printf ("Incorrect password.  Try again.");
+	  }
      }
-     prom_printf ("Seems like you don't know the access password.  Go away!\n");
-     prom_sleep(3);
+     prom_printf(" ___________________\n< Permission denied >\n -------------------\n"
+		 "        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n"
+		 "                ||----w |\n                ||     ||\n");
+     prom_sleep(4);
      prom_interpret("reset-all");
 }
 
@@ -693,15 +706,18 @@ int get_params(struct boot_param_t* params)
 		    restricted = 1;
 	       if (label) {
 		    if (params->args && password && restricted)
-			 check_password ("To specify image arguments you must enter the p");
+			 check_password ("To specify arguments for this image "
+					 "you must enter the password.");
 		    else if (password && !restricted)
-			 check_password ("P");
+			 check_password ("This image is restricted.");
 	       }
 	       params->args = make_params(label, params->args);
 	  }
      }
 
      if (!strcmp (imagename, "help")) {
+          /* FIXME: defdevice shouldn't need to be reset all over the place */
+	  if(!defdevice) defdevice = boot.dev;
 	  prom_printf(
 	       "\nPress the tab key for a list of defined images.\n"
 	       "The label marked with a \"*\" is is the default image, "
@@ -722,13 +738,13 @@ int get_params(struct boot_param_t* params)
 
      if (!strcmp (imagename, "halt")) {
 	  if (password)
-	       check_password ("P");
+	       check_password ("Restricted command.");
 	  prom_pause();
 	  return 0;
      }
      if (!strcmp (imagename, "bye")) {
 	  if (password) {
-	       check_password ("P");
+	       check_password ("Restricted command.");
 	       return 1;
 	  }
 	  return 1; 
@@ -737,7 +753,7 @@ int get_params(struct boot_param_t* params)
      if (imagename[0] == '$') {
 	  /* forth command string */
 	  if (password)
-	       check_password ("P");
+	       check_password ("OpenFirmware commands are restricted.");
 	  prom_interpret(imagename+1);
 	  return 0;
      }
@@ -745,7 +761,7 @@ int get_params(struct boot_param_t* params)
      strncpy(imagepath, imagename, 1024);
 
      if (!label && password)
-	  check_password ("To boot a custom image you must enter the p");
+	  check_password ("To boot a custom image you must enter the password.");
 
      if (!parse_device_path(imagepath, defdevice, defpart,
 			    "/vmlinux", &params->kernel)) {
@@ -873,9 +889,9 @@ yaboot_text_ui(void)
 	  file.fs->close(&file);
 	  memset(&file, 0, sizeof(file));
 
-	  /* If sysmap, load it. 
+	  /* If sysmap, load it (only if booting a vmlinux).
 	   */
-	  if (params.sysmap.file) {
+	  if (flat_vmlinux && params.sysmap.file) {
 	       prom_printf("Loading System.map ...\n");
 	       if(strlen(boot.file) && !strcmp(boot.file,"\\\\") && params.sysmap.file[0] != '/'
 		  && params.sysmap.file[0] != '\\') {
@@ -921,10 +937,11 @@ yaboot_text_ui(void)
 	       }
 	  }
 
-	  /* If ramdisk, load it. For now, we can't tell the size it will be
-	   * so we claim an arbitrary amount of 4Mb
+	  /* If ramdisk, load it (only if booting a vmlinux).  For now, we
+	   * can't tell the size it will be so we claim an arbitrary amount
+	   * of 4Mb.
 	   */
-	  if (params.rd.file) {
+	  if (flat_vmlinux && params.rd.file) {
 	       if(strlen(boot.file) && !strcmp(boot.file,"\\\\") && params.rd.file[0] != '/'
 		  && params.kernel.file[0] != '\\')
 	       {
@@ -987,47 +1004,49 @@ yaboot_text_ui(void)
 	  flush_icache_range ((long)loadinfo.base, (long)loadinfo.base+loadinfo.memsize);
 	  DEBUG_F(" done\n");
 
-/* 
- * Fill mew boot infos
- *
- * The birec is low on memory, probably inside the malloc pool, so
- * we don't write it earlier. At this point, we should not use anything
- * coming from the malloc pool
- */
-	  birec = (struct bi_record *)_ALIGN(loadinfo.filesize+(1<<20)-1,(1<<20));
+	  if (flat_vmlinux) {
+	       /* 
+	        * Fill new boot infos (only if booting a vmlinux).
+	        *
+	        * The birec is low on memory, probably inside the malloc pool,
+	        * so we don't write it earlier. At this point, we should not
+	        * use anything coming from the malloc pool.
+	        */
+	       birec = (struct bi_record *)_ALIGN(loadinfo.filesize+(1<<20)-1,(1<<20));
 
-/* We make sure it's mapped. We map only 64k for now, it's plenty enough
- * we don't claim since this precise memory range may already be claimed
- * by the malloc pool
- */
-	  prom_map (birec, birec, 0x10000);
-	  DEBUG_F("birec at %p\n", birec);
-	  DEBUG_SLEEP;
+	       /* We make sure it's mapped. We map only 64k for now, it's
+	        * plenty enough we don't claim since this precise memory
+	        * range may already be claimed by the malloc pool.
+	        */
+	       prom_map (birec, birec, 0x10000);
+	       DEBUG_F("birec at %p\n", birec);
+	       DEBUG_SLEEP;
 
-	  birec->tag = BI_FIRST;
-	  birec->size = sizeof(struct bi_record);
-	  birec = (struct bi_record *)((unsigned long)birec + birec->size);
+	       birec->tag = BI_FIRST;
+	       birec->size = sizeof(struct bi_record);
+	       birec = (struct bi_record *)((ulong)birec + birec->size);
 	
-	  birec->tag = BI_BOOTLOADER_ID;
-	  sprintf( (char *)birec->data, "yaboot");
-	  birec->size = sizeof(struct bi_record) + strlen("yaboot") + 1;
-	  birec = (struct bi_record *)((unsigned long)birec + birec->size);
+	       birec->tag = BI_BOOTLOADER_ID;
+	       sprintf( (char *)birec->data, "yaboot");
+	       birec->size = sizeof(struct bi_record) + strlen("yaboot") + 1;
+	       birec = (struct bi_record *)((ulong)birec + birec->size);
 	
-	  birec->tag = BI_MACHTYPE;
-	  birec->data[0] = _machine;
-	  birec->size = sizeof(struct bi_record) + sizeof(unsigned long);
-	  birec = (struct bi_record *)((unsigned long)birec + birec->size);
+	       birec->tag = BI_MACHTYPE;
+	       birec->data[0] = _machine;
+	       birec->size = sizeof(struct bi_record) + sizeof(ulong);
+	       birec = (struct bi_record *)((ulong)birec + birec->size);
 
-	  if (sysmap_base) {
-	       birec->tag = BI_SYSMAP;
-	       birec->data[0] = (unsigned long)sysmap_base;
-	       birec->data[1] = sysmap_size;
-	       birec->size = sizeof(struct bi_record) + sizeof(unsigned long)*2;
-	       birec = (struct bi_record *)((unsigned long)birec + birec->size);
-	  }
-	  birec->tag = BI_LAST;
-	  birec->size = sizeof(struct bi_record);
-	  birec = (struct bi_record *)((unsigned long)birec + birec->size);
+	       if (sysmap_base) {
+	            birec->tag = BI_SYSMAP;
+	            birec->data[0] = (ulong)sysmap_base;
+	            birec->data[1] = sysmap_size;
+	            birec->size = sizeof(struct bi_record) + sizeof(ulong)*2;
+	            birec = (struct bi_record *)((ulong)birec + birec->size);
+	       }
+	       birec->tag = BI_LAST;
+	       birec->size = sizeof(struct bi_record);
+	       birec = (struct bi_record *)((ulong)birec + birec->size);
+          }
 
           /* compute the kernel's entry point. */
 	  kernel_entry = loadinfo.base + loadinfo.entry - loadinfo.load_loc;
@@ -1133,11 +1152,21 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
      /* Claim OF memory */
      DEBUG_F("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
 
+     /* Determine whether we are trying to boot a vmlinux or some
+      * other binary image (eg, zImage).  We load vmlinux's at
+      * KERNELADDR and all other binaries at their e_entry value.
+      */
+     if (e->e_entry == KERNEL_LINK_ADDR_PPC32) {
+          flat_vmlinux = 1;
+          loadaddr = KERNELADDR;
+     } else {
+          flat_vmlinux = 0;
+          loadaddr = e->e_entry;
+     }
+
      /* On some systems, loadaddr may already be claimed, so try some
       * other nearby addresses before giving up.
       */
-     loadaddr = (e->e_entry == KERNEL_LINK_ADDR_PPC32 ||
-		 e->e_entry == 0) ? KERNELADDR : e->e_entry;
      for(addr=loadaddr; addr <= loadaddr * 8 ;addr+=0x100000) {
 	  loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
 	  if (loadinfo->base != (void *)-1) break;
@@ -1262,10 +1291,21 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
      /* Claim OF memory */
      DEBUG_F("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
 
+     /* Determine whether we are trying to boot a vmlinux or some
+      * other binary image (eg, zImage).  We load vmlinux's at
+      * KERNELADDR and all other binaries at their e_entry value.
+      */
+     if (e->e_entry == KERNEL_LINK_ADDR_PPC64) {
+          flat_vmlinux = 1;
+          loadaddr = KERNELADDR;
+     } else {
+          flat_vmlinux = 0;
+          loadaddr = e->e_entry;
+     }
+
      /* On some systems, loadaddr may already be claimed, so try some
       * other nearby addresses before giving up.
       */
-     loadaddr = (e->e_entry == KERNEL_LINK_ADDR_PPC64) ? KERNELADDR : e->e_entry;
      for(addr=loadaddr; addr <= loadaddr * 8 ;addr+=0x100000) {
 	  loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
 	  if (loadinfo->base != (void *)-1) break;
@@ -1424,15 +1464,16 @@ yaboot_main(void)
 	
      prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
      DEBUG_F("/chosen/bootpath = %s\n", bootdevice);
-     if (bootdevice[0] == 0)
+     if (bootdevice[0] == 0) {
 	  prom_get_options("boot-device", bootdevice, sizeof(bootdevice));
+	  DEBUG_F("boot-device = %s\n", bootdevice);
+     }
      if (bootdevice[0] == 0) {
 	  prom_printf("Couldn't determine boot device\n");
 	  return -1;
      }
 
-     if (!parse_device_path(bootdevice, (_machine == _MACH_Pmac) ? "hd" : "disc",
-			    -1, "", &boot)) {
+     if (!parse_device_path(bootdevice, NULL, -1, "", &boot)) {
 	  prom_printf("%s: Unable to parse\n", bootdevice);
 	  return -1;
      }
@@ -1458,7 +1499,7 @@ yaboot_main(void)
 		    strcat(boot.file, "\\");
 	  }
      }
-     DEBUG_F("After path fixup: dev=%s, part=%d, file=%s\n",
+     DEBUG_F("After pmac path kludgeup: dev=%s, part=%d, file=%s\n",
 	     boot.dev, boot.part, boot.file);
 
      useconf = load_config_file(boot.dev, boot.file, boot.part);
