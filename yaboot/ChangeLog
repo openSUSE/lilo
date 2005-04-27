@@ -2,6 +2,54 @@
 # tag: automatic-ChangeLog--erbenson@alaska.net--public/yaboot--devel--1.3
 #
 
+2003-02-12 08:55:45 GMT	Ethan Benson <erbenson@alaska.net>	patch-49
+
+    Summary:
+      Prep 1.3.9 release
+    Revision:
+      yaboot--devel--1.3--patch-49
+
+    * Prep 1.3.9 release:
+      - Set version numbers to 1.3.9.
+      - Finalize changelog.
+
+    modified files:
+     0arch-timestamps0 ChangeLog Makefile changelog ybin/mkofboot
+     ybin/ybin
+
+
+2003-02-10 09:55:05 GMT	Ethan Benson <erbenson@alaska.net>	patch-48
+
+    Summary:
+      Fix botched IBM patch (multiple partition handling on rs6k)
+    Revision:
+      yaboot--devel--1.3--patch-48
+
+    * IBM file.c patch is broken, fix file.c so yaboot finds its config on
+      systems with more then one primary GNU/Linux filesystem partition.
+
+    modified files:
+     0arch-timestamps0 ChangeLog second/file.c ybin/mkofboot
+
+
+2003-02-09 05:28:41 GMT	Ethan Benson <erbenson@alaska.net>	patch-47
+
+    Summary:
+      Update first stage to be compatible with new Macs
+    Revision:
+      yaboot--devel--1.3--patch-47
+
+    * Mark first stage loader compatible with new MacOS9-free PowerMacs so
+      it will be accepted by OpenFirmware.
+    * Update copyrights to include 2003.
+    * Version 1.3.9-UNRELEASED.
+
+    modified files:
+     0arch-timestamps0 ChangeLog Makefile README TODO changelog
+     doc/examples/dualboot.chrp doc/examples/simpleboot.chrp
+     first/ofboot ybin/ofpath ybin/yabootconfig ybin/ybin
+
+
 2002-12-10 08:14:21 GMT	Ethan Benson <erbenson@alaska.net>	patch-46
 
     Summary:
