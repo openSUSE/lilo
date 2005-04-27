@@ -25,6 +25,8 @@
 #include "string.h"
 #include "partition.h"
 #include "fs.h"
+#include "errors.h"
+#include "debug.h"
 
 extern char bootdevice[1024];
 
@@ -33,62 +35,63 @@ extern char bootdevice[1024];
    the string passed in parameters is changed since 0 are put in place
    of some separators to terminate the various strings
  */
-char *
-parse_device_path(char *of_device, char **file_spec, int *partition)
-{
-	char *p, *last;
-
-	if (file_spec)
-		*file_spec = NULL;
-	if (partition)
-		*partition = -1;
-
-	p = strchr(of_device, ':');
-	if (p)
-		*p = 0;
-	else
-		return of_device;
-	
-	last = ++p;
-	while(*p && *p != ',') {
-        if (!isdigit (*p)) {
-			p = last;
-			break;
-		}
-		++p;
-	}
-	if (p != last) {
-		*(p++) = 0;
-		if (partition)
-            *partition = simple_strtol(last, NULL, 10);
-	}
-	if (*p && file_spec)
-		*file_spec = p;
-		
-	return of_device;
-
-}
 
 int
-validate_fspec(		struct boot_fspec_t*	spec,
-			char*			default_device,
-			int			default_part)
+parse_device_path(char *imagepath, char *defdevice, int defpart,
+		  char *deffile, struct boot_fspec_t *result)
 {
-    if (!spec->file) {
-    	spec->file = spec->dev;
-    	spec->dev = NULL;
-    }
-    if (spec->part == -1)
-    	spec->part = default_part;
-    if (!spec->dev)
-	spec->dev = default_device;
-    if (!spec->file)
-	return FILE_BAD_PATH;
-    else if (spec->file[0] == ',')
-	spec->file++;
+     char *ptr;
+     char *ipath = strdup(imagepath);
+     char *defdev = strdup(defdevice);
 
-    return FILE_ERR_OK;
+     result->dev = NULL;
+     result->part = -1;
+     result->file = NULL;
+
+     if (!strstr(defdev, "ethernet") && !strstr(defdev, "enet")) {
+	  if ((ptr = strrchr(defdev, ':')) != NULL)
+	       *ptr = 0; /* remove trailing : from defdevice if necessary */
+     }
+
+     if (!imagepath)
+	  goto punt;
+
+     if ((ptr = strrchr(ipath, ',')) != NULL) {
+	  result->file = strdup(ptr+1);
+	  /* Trim the filename off */
+	  *ptr = 0;
+     }
+
+     if (strstr(ipath, "ethernet") || strstr(ipath, "enet"))
+	  if ((ptr = strstr(ipath, "bootp")) != NULL) { /* `n' key booting boots enet:bootp */
+	       *ptr = 0;
+	       result->dev = strdup(ipath);
+	  } else
+	       result->dev = strdup(ipath);
+     else if ((ptr = strchr(ipath, ':')) != NULL) {
+	  *ptr = 0;
+	  result->dev = strdup(ipath);
+	  if (*(ptr+1))
+	       result->part = simple_strtol(ptr+1, NULL, 10);
+     } else if (strlen(ipath)) {
+          result->file = strdup(ipath);
+     } else {
+	  return 0;
+     }
+     
+punt:
+     if (!result->dev)
+	  result->dev = strdup(defdev);
+     
+     if (result->part < 0)
+	  result->part = defpart;
+     
+     if (!result->file)
+	  result->file = strdup(deffile);
+     free(ipath);
+     return 1;
 }
+
 
 static int
 file_block_open(	struct boot_file_t*	file,
@@ -96,48 +99,46 @@ file_block_open(	struct boot_file_t*	file,
 			const char*		file_name,
 			int			partition)
 {
-	struct partition_t*	parts;
-	struct partition_t*	p;
-	struct partition_t*	found;
+     struct partition_t*	parts;
+     struct partition_t*	p;
+     struct partition_t*	found;
 	
-	parts = partitions_lookup(dev_name);
-	found = NULL;
+     parts = partitions_lookup(dev_name);
+     found = NULL;
 			
 #if DEBUG
-	if (parts)
-		prom_printf("partitions:\n");
-	else
-		prom_printf("no partitions found.\n");
+     if (parts)
+	  prom_printf("partitions:\n");
+     else
+	  prom_printf("no partitions found.\n");
 #endif
-	for (p = parts; p && !found; p=p->next) {
+     for (p = parts; p && !found; p=p->next) {
+	  DEBUG_F("number: %02d, start: 0x%08lx, length: 0x%08lx\n",
+		  p->part_number, p->part_start, p->part_size );
+	  if (partition == -1) {
+	       file->fs = fs_open( file, dev_name, p, file_name );
+	       if (file->fs != NULL)
+		    goto bail;
+	  }
+	  if ((partition >= 0) && (partition == p->part_number))
+	       found = p;
 #if DEBUG
-		prom_printf("number: %02d, start: 0x%08lx, length: 0x%08lx\n",
-			p->part_number, p->part_start, p->part_size );
-#endif
-		if (partition == -1) {
-                        file->fs = fs_open( file, dev_name, p, file_name );
-			if (file->fs != NULL)
-				goto bail;
-		}
-		if ((partition >= 0) && (partition == p->part_number))
-			found = p;
-#if DEBUG
-		if (found)
-			prom_printf(" (match)\n");
+	  if (found)
+	       prom_printf(" (match)\n");
 #endif						
-	}
+     }
 
-	/* Note: we don't skip when found is NULL since we can, in some
-	 * cases, let OF figure out a default partition.
-	 */
-        DEBUG_F( "Using OF defaults.. (found = 0x%x)\n", found );
-        file->fs = fs_open( file, dev_name, found, file_name );
+     /* Note: we don't skip when found is NULL since we can, in some
+      * cases, let OF figure out a default partition.
+      */
+     DEBUG_F( "Using OF defaults.. (found = %p)\n", found );
+     file->fs = fs_open( file, dev_name, found, file_name );
 
 bail:
-	if (parts)
-		partitions_free(parts);
+     if (parts)
+	  partitions_free(parts);
 
-	return file->fs ? FILE_ERR_OK : FILE_ERR_NOTFOUND;
+     return fserrorno;
 }
 
 static int
@@ -145,8 +146,8 @@ file_net_open(	struct boot_file_t*	file,
 		const char*		dev_name,
 		const char*		file_name)
 {
-    file->fs = fs_of_netboot;
-    return fs_of_netboot->open(file, dev_name, NULL, file_name);
+     file->fs = fs_of_netboot;
+     return fs_of_netboot->open(file, dev_name, NULL, file_name);
 }
 
 static int
@@ -154,106 +155,65 @@ default_read(	struct boot_file_t*	file,
 		unsigned int		size,
 		void*			buffer)
 {
-	prom_printf("WARNING ! default_read called !\n");
-	return FILE_ERR_EOF;
+     prom_printf("WARNING ! default_read called !\n");
+     return FILE_ERR_EOF;
 }
 
 static int
 default_seek(	struct boot_file_t*	file,
 		unsigned int		newpos)
 {
-	prom_printf("WARNING ! default_seek called !\n");
-	return FILE_ERR_EOF;
+     prom_printf("WARNING ! default_seek called !\n");
+     return FILE_ERR_EOF;
 }
 
 static int
 default_close(	struct boot_file_t*	file)
 {
-	prom_printf("WARNING ! default_close called !\n");
-	return FILE_ERR_OK;
+     prom_printf("WARNING ! default_close called !\n");
+     return FILE_ERR_OK;
 }
 
 static struct fs_t fs_default =
 {
-    "defaults",
-    NULL,
-    default_read,
-    default_seek,
-    default_close
+     "defaults",
+     NULL,
+     default_read,
+     default_seek,
+     default_close
 };
 
 
-int open_file(	const struct boot_fspec_t*	spec,
-		struct boot_file_t*		file)
+int open_file(const struct boot_fspec_t* spec, struct boot_file_t* file)
 {
-	static char	temp[1024];
-	static char	temps[64];
-	char		*dev_name;
-	char		*file_name = NULL;
-	phandle		dev;
-	int		result;
-	int		partition;
+     int result;
 	
-	memset(file, 0, sizeof(struct boot_file_t*));
-        file->fs        = &fs_default;
+     memset(file, 0, sizeof(struct boot_file_t*));
+     file->fs        = &fs_default;
 
-	/* Lookup the OF device path */
-	/* First, see if a device was specified for the kernel
-	 * if not, we hope that the user wants a kernel on the same
-	 * drive and partition as yaboot itself */
-	if (!spec->dev)
-		strcpy(spec->dev, bootdevice);
-	strncpy(temp,spec->dev,1024);
-	dev_name = parse_device_path(temp, &file_name, &partition);
-	if (file_name == NULL)
-		file_name = (char *)spec->file;
-	if (file_name == NULL) {
-		prom_printf("booting without a file name not yet supported !\n");
-		return FILE_ERR_NOTFOUND;
-	}
-	if (partition == -1)
-		partition = spec->part;
+     DEBUG_F("dev_path = %s\nfile_name = %s\npartition = %d\n",
+	     spec->dev, spec->file, spec->part);
 
-#if DEBUG
-	prom_printf("dev_path = %s\nfile_name = %s\npartition = %d\n",
-		dev_name, file_name, partition);
-#endif	
-	/* Find OF device phandle */
-	dev = prom_finddevice(dev_name);
-	if (dev == PROM_INVALID_HANDLE) {
-		prom_printf("device not found !\n");
-		return FILE_ERR_NOTFOUND;
-	}
-#if DEBUG
-	prom_printf("dev_phandle = %08lx\n", dev);
-#endif	
-	/* Check the kind of device */
-	result = prom_getprop(dev, "device_type", temps, 63);
-	if (result == -1) {
-		prom_printf("can't get <device_type> for device\n");
-		return FILE_ERR_NOTFOUND;
-	}
-	temps[result] = 0;
-	if (!strcmp(temps, "block"))
-		file->device_kind = FILE_DEVICE_BLOCK;
-	else if (!strcmp(temps, "network"))
-		file->device_kind = FILE_DEVICE_NET;
-	else {
-		prom_printf("Unkown device type <%s>\n", temps);
-		return FILE_ERR_NOTFOUND;
-	}
+     result = prom_get_devtype(spec->dev);
+     if (result > 0)
+	  file->device_kind = result;
+     else
+	  return result;
 	
-	switch(file->device_kind) {
-	    case FILE_DEVICE_BLOCK:
-#if DEBUG
-		prom_printf("device is a block device\n");
-#endif
-	  	return file_block_open(file, dev_name, file_name, partition);
-	    case FILE_DEVICE_NET:
-#if DEBUG
-		prom_printf("device is a network device\n");
-#endif
-	  	return file_net_open(file, dev_name, file_name);
-	}
-	return 0;
+     switch(file->device_kind) {
+     case FILE_DEVICE_BLOCK:
+	  DEBUG_F("device is a block device\n");
+	  return file_block_open(file, spec->dev, spec->file, spec->part);
+     case FILE_DEVICE_NET:
+	  DEBUG_F("device is a network device\n");
+	  return file_net_open(file, spec->dev, spec->file);
+     }
+     return 0;
 }
+
+/* 
+ * Local variables:
+ * c-file-style: "K&R"
+ * c-basic-offset: 5
+ * End:
+ */

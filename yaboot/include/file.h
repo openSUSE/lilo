@@ -31,22 +31,6 @@ struct boot_file_t;
 
 #define FILE_MAX_PATH		1024
 
-/* Simple error codes */
-#define FILE_ERR_OK		0
-#define FILE_ERR_EOF		-1
-#define FILE_ERR_NOTFOUND	-2
-#define FILE_CANT_SEEK		-3
-#define FILE_IOERR		-4
-#define FILE_BAD_PATH		-5
-#define FILE_ERR_BAD_TYPE       -6
-#define FILE_ERR_BAD_FSYS       -7
-#define FILE_ERR_SYMLINK_LOOP   -8
-#define FILE_ERR_LENGTH         -9
-
-/* Device kind */
-#define FILE_DEVICE_BLOCK	1
-#define FILE_DEVICE_NET		2
-
 struct boot_fspec_t {
 	char*	dev;		/* OF device path */
 	int	part;		/* Partition number or -1 */
@@ -73,18 +57,13 @@ struct boot_file_t {
 //	unsigned int	part_count;
 };
 
-extern int open_file(	const struct boot_fspec_t*	spec,
-			struct boot_file_t*		file);
+extern int
+open_file(const struct boot_fspec_t*	spec,
+	  struct boot_file_t*		file);
 
-extern int validate_fspec(
-			struct boot_fspec_t*	spec,
-			char*			default_device,
-			int			default_part);
-extern char *parse_device_path(
-			char*			of_device,
-			char**			file_spec,
-			int*			partition);
-
+extern int
+parse_device_path(char *imagepath, char *defdevice, int defpart,
+		  char *deffile, struct boot_fspec_t *result);
 
 
 #endif
