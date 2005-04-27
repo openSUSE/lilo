@@ -589,8 +589,6 @@ int get_params(struct boot_param_t* params)
      int beg = 0, end;
      int singlekey = 0;
      int restricted = 0;
-     static int first = 1;
-     static char bootargs[1024];
      static char imagepath[1024];
      static char initrdpath[1024];
      static char sysmappath[1024];
@@ -605,21 +603,9 @@ int get_params(struct boot_param_t* params)
     
      cmdinit();
 
-     if (first) {
-	  first = 0;
-	  prom_get_chosen("bootargs", bootargs, sizeof(bootargs));
-	  imagename = bootargs;
-	  word_split(&imagename, &params->args);
 	  timeout = DEFAULT_TIMEOUT;
-	  if (imagename) {
-	       prom_printf("Default supplied on the command line: %s ", imagename);
-	       if (params->args)
-		    prom_printf("%s", params->args);
-	       prom_printf("\n");
-	  }
 	  if (useconf && (q = cfg_get_strg(0, "timeout")) != 0 && *q != 0)
 	       timeout = simple_strtol(q, NULL, 0);
-     }
 
      prom_printf("boot: ");
      c = -1;
