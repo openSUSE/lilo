@@ -71,10 +71,12 @@ mkdir -p $RPM_BUILD_ROOT/lib/lilo/iseries
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/pmac
 mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
+mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
 cd lilo.ppc
 cp -a iseries-* $RPM_BUILD_ROOT/lib/lilo/iseries
-cp -a mkzimage_cmdline $RPM_BUILD_ROOT/lib/lilo/chrp
+cp -a mkzimage_cmdline $RPM_BUILD_ROOT/bin/
+ln -sv /bin/mkzimage_cmdline $RPM_BUILD_ROOT/lib/lilo/chrp/mkzimage_cmdline
 cp -a lib/* $RPM_BUILD_ROOT/lib/lilo
 chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
@@ -107,6 +109,7 @@ exit 0
 %defattr (-,root,root)
 #
 /lib/lilo
-%attr(755,root,root) /sbin/lilo*
+%attr(755,root,root) /sbin/*
+%attr(755,root,root) /bin/*
 %attr(755,root,root) /bin/show_of_path.sh
 %doc %{_docdir}/lilo

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr 27 20:11:43 CEST 2005 - olh@suse.de
+
+- update mkzimage_cmdline, use mmap, put it into /bin
+
+-------------------------------------------------------------------
 Wed Apr 27 20:02:59 CEST 2005 - olh@suse.de
 
 - addnote.c: Patch from Paul Mackerras to add second .note
