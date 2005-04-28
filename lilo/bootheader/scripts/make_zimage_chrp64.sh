@@ -12,12 +12,17 @@ vmlinux=
 initrd=
 tmp=
 outputfile=
+no_addnote=false
 until [ "$#" = "0" ] ; do
 	case "$1" in
 		--help|-h|--version)
 		echo "create a 'zImage' for new pSeries"
-		echo "Usage: ${0##*/} --vmlinux <ELF binary> --initrd <ramdisk.image.gz> --output <zImage> [--tmp <tempdir>]"
+		echo "Usage: ${0##*/} --vmlinux <ELF binary> --initrd <ramdisk.image.gz> --output <zImage> [--tmp <tempdir>] [--no-addnote]"
 		exit 1
+		;;
+		--no-addnote)
+		no_addnote=true
+		shift
 		;;
 		--vmlinux)
 		shift
@@ -130,7 +135,10 @@ ld -Ttext 0x00400000 -e _start \
 	--defsym _vmlinux_memsize=$vmlinux_memsize \
 	--defsym _vmlinux_filesize=$vmlinux_filesize
 #
+if [ "$no_addnote" = "false" ] ; then
+echo add note section for RS6K
 $obj_dir/addnote $tmp/output
+fi
 #
 rm -f "$output"
 cp "$tmp/output" "$output"

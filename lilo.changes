@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 28 11:29:53 CEST 2005 - olh@suse.de
+
+- add option --no-addnote to make_zimage_chrp64.sh for pmac64
+
+-------------------------------------------------------------------
 Wed Apr 27 22:55:37 CEST 2005 - olh@suse.de
 
 - pass -m32 to gcc, ld and as to fix yaboot built on native ppc64
