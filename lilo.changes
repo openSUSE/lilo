@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Apr 28 14:48:34 CEST 2005 - jplack@suse.de
+
+- avoid empty partition line in yaboot.conf
+  fixes #65759 - lilo produces unparsable yaboot.conf for FAT case
+- moved the problem detection for unknown OF path earlier in the
+  process flow to have less irritation in case of unknown
+  hardware (#48446)
+
+-------------------------------------------------------------------
 Thu Apr 28 14:13:32 CEST 2005 - olh@suse.de
 
 - add /bin/mkzimage as wrapper around the make_zimage_${board}.sh

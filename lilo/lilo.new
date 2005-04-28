@@ -293,7 +293,7 @@ function running_on_chrp () {
     while read; do
 	local device start end blocks id system
 	[ "${REPLY:0:1}" = "/" ] || continue
-	REPLY="${REPLY/\\*}"  # remove all 'bootable' markers
+	REPLY="${REPLY/[*]}"  # remove all 'bootable' markers
 	read device start end blocks id system <<< "$REPLY"
 
 	case $id in
@@ -371,6 +371,10 @@ function running_on_chrp () {
 
     if [ "$OPTION_FORCEFAT" = "yes" ]; then force_fat=1; fi
 
+    if [ -z "$boot_path" ]; then
+	error "Internal problem: Could not determine open firmware path to '$OPTION_BOOT'" 
+    fi
+
     # on CHRP the boot partition has to be on a primary partition
     if ! is_on_primary $boot_path; then
 	error "in config file, boot = $OPTION_BOOT is not a primary partition"
@@ -395,7 +399,7 @@ function running_on_chrp () {
     # starting the work and write the yaboot.conf
     {
 	echo "# header section"
-	echo "partition = ${yaboot_part##*:}"
+	if [ "${yaboot_part##*:}" ]; then echo "partition = ${yaboot_part##*:}" ; fi
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
 	if [ "$OPTION_ROOT" ]; then
@@ -694,30 +698,26 @@ function running_on_chrp () {
 	$PARTED $device set $partition boot on >& $TEMP/parted.log || error 11
     fi
 
-    NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
-    if [ -z "$NV_BOOT_PATH" ]; then
-	error "Internal problem: Could not determine open firmware path to '$OPTION_BOOT'" 
-    fi
     if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
-        nvsetenv bootinfo-linux "${NV_BOOT_PATH},\ppc\bootinfo.txt"
-        NV_BOOT_PATH=${NV_BOOT_PATH},yaboot
+        nvsetenv bootinfo-linux "${boot_path},\ppc\bootinfo.txt"
+        boot_path=${boot_path},yaboot
     elif [[ "${p_flags[*]}" != *type=41*type=41* ]]; then
         # open firmware is confused about more than one PReP partition, in that
         # case keep full OF path
-        NV_BOOT_PATH=${NV_BOOT_PATH%:+([0-9])}
+        boot_path=${boot_path%:+([0-9])}
     fi
 
     if [ "$OPTION_ACTIVATE" = "yes" ] ; then
-	echo "Prepending  '$NV_BOOT_PATH'" to open firmware variable boot-device
+	echo "Prepending  '$boot_path'" to open firmware variable boot-device
 
 	local -a bootdevice=( $(nvsetenv boot-device) )
 	bootdevice[0]=${bootdevice[0]#boot-device=}
 	for (( i=${#bootdevice[*]}; i-- >0; )); do
-	    if [[ "${bootdevice[$i]}" == ${NV_BOOT_PATH}* ]]; then
+	    if [[ "${bootdevice[$i]}" == ${boot_path}* ]]; then
 		unset bootdevice[$i];
 	    fi
 	done
-	nvsetenv boot-device "$NV_BOOT_PATH ${bootdevice[*]}"
+	nvsetenv boot-device "$boot_path ${bootdevice[*]}"
 
 	if [ "$(nvsetenv boot-file)" != "boot-file=" ]; then
 	    echo >&2 "Warning: old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
@@ -726,7 +726,7 @@ function running_on_chrp () {
 	fi
     else
 	echo >&2 "Warning: boot path not set to boot linux as requested"
-	echo >&2 "Warning: please add '$NV_BOOT_PATH' somewhere to your boot path manually"
+	echo >&2 "Warning: please add '$boot_path' somewhere to your boot path manually"
     fi
 }
 
