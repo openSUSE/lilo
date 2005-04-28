@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Thu Apr 28 14:13:32 CEST 2005 - olh@suse.de
 
-- add /bin/mk_zimage as wrapper around the make_zimage_${board}.sh
+- add /bin/mkzimage as wrapper around the make_zimage_${board}.sh
   scripts below /lib/lilo (#50570)
 
 -------------------------------------------------------------------
