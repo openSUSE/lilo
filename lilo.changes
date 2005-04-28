@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Apr 28 14:13:32 CEST 2005 - olh@suse.de
+
+- add /bin/mk_zimage as wrapper around the make_zimage_${board}.sh
+  scripts below /lib/lilo (#50570)
+
+-------------------------------------------------------------------
 Thu Apr 28 11:29:53 CEST 2005 - olh@suse.de
 
 - add option --no-addnote to make_zimage_chrp64.sh for pmac64
