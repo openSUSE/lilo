@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Apr 28 14:54:47 CEST 2005 - jplack@suse.de
+
+- check for yaboot.conf on bad volume (#58521 - LTC10252)
+
+-------------------------------------------------------------------
 Thu Apr 28 14:48:34 CEST 2005 - jplack@suse.de
 
 - avoid empty partition line in yaboot.conf
