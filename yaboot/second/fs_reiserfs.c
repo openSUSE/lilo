@@ -213,16 +213,16 @@ block_read( __u32 blockNr, __u32 start, __u32 len, char *buffer )
 	  {
 	       /* Search for the blockNr in cached journal */
 	       j_len = le32_to_cpu(*journal_table);
-	       *journal_table++;
+	       journal_table++;
 	       while ( i++ < j_len )
 	       {
 		    if ( le32_to_cpu(*journal_table) == blockNr )
 		    {
-			 *journal_table++;
+			 journal_table++;
 			 journal_table += j_len - i;
 			 goto found;
 		    }
-		    *journal_table++;
+		    journal_table++;
 	       }
 	  }
 	  else
