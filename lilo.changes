@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May  2 11:03:33 CEST 2005 - olh@suse.de
+
+- fix #define for yaboot.cnf
+
+-------------------------------------------------------------------
 Thu Apr 28 14:54:47 CEST 2005 - jplack@suse.de
 
 - check for yaboot.conf on bad volume (#58521 - LTC10252)

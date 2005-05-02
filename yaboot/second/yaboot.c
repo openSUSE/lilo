@@ -55,7 +55,7 @@
 #include "bootinfo.h"
 #include "debug.h"
 
-#ifdef YABOOT_FAT
+#if YABOOT_FAT
 #define CONFIG_FILE_NAME	"yaboot.cnf"
 #else
 #define CONFIG_FILE_NAME	"yaboot.conf"
