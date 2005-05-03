@@ -165,7 +165,7 @@ case "$kernel_type" in
 	;;
 esac
 #
-echo board_type $board_type kernel_type $kernel_type zimage_sh $zimage_sh
+#echo board_type $board_type kernel_type $kernel_type zimage_sh $zimage_sh
 
 #
 #
