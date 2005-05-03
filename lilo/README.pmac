@@ -97,8 +97,9 @@ make menuconfig dep clean zImage modules modules_install
 
 you will finally find some usable kernel files in /usr/src/linux:
 ./vmlinx   plain kernel, can be booted with BootX,miboot and yaboot
-./arch/ppc/coffboot/miboot.image  compressed image for miboot 
-./arch/ppc/coffboot/vmlinux.elf   compressed image for yaboot, broken
-./arch/ppc/coffboot/vmlinux.gz    gzipped kernel for BootX
+./arch/ppc/images/miboot.image  compressed image for miboot, broken in 2.6 
+./arch/ppc/images/vmlinux.elf   compressed image, ONLY for netboot via openfirmware
+./arch/ppc/images/vmlinux.coff  compressed image for netboot on oldworld macs
+./arch/ppc/images/vmlinux.gz    gzipped kernel for BootX
 
 
