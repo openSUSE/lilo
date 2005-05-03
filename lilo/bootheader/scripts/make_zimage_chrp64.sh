@@ -84,15 +84,15 @@ fi
 #
 case "$(file -Lb $vmlinux)" in
 	ELF\ 64-bit*)
-		cp -vp $vmlinux $tmp/vmlinux
+		cp -p $vmlinux $tmp/vmlinux
 		vmlinux_memsize=0x`nm -n $tmp/vmlinux | sed '$s/^........\([^ ]*\).*/\1/p;d'`
 		vmlinux_filesize=0x`ls -l $tmp/vmlinux | awk '{ printf "%x\n", $5 }'`
 		strip -s $tmp/vmlinux
-		gzip -cv9 $tmp/vmlinux > $tmp/vmlinux.gz
+		gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
 		;;
 	ELF\ 32-bit*)
 		objcopy -j .kernel:vmlinux -O binary $vmlinux $tmp/vmlinux.gz
-		gzip -dfcv9 $tmp/vmlinux.gz > $tmp/vmlinux
+		gzip -dfc9 $tmp/vmlinux.gz > $tmp/vmlinux
 		vmlinux_memsize=0x`nm -n $tmp/vmlinux | sed '$s/^........\([^ ]*\).*/\1/p;d'`
 		vmlinux_filesize=0x`ls -l $tmp/vmlinux | awk '{ printf "%x\n", $5 }'`
 		;;

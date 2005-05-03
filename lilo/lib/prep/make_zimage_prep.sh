@@ -76,7 +76,7 @@ fi
 #
 
 objcopy  -O binary $vmlinux "$tmp/vmlinux.bin"
-gzip -v9 "$tmp/vmlinux.bin"
+gzip -9 "$tmp/vmlinux.bin"
 
 
 if [ -z "$initrd" ] ; then

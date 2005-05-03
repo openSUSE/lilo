@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May  3 16:00:08 CEST 2005 - olh@suse.de
+
+- be less verbose in make_zimage*.sh scripts
+
+-------------------------------------------------------------------
 Mon May  2 11:03:33 CEST 2005 - olh@suse.de
 
 - fix #define for yaboot.cnf
