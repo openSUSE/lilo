@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun May  8 18:42:46 CEST 2005 - olh@suse.de
+
+- remove unneeded div64.o from bootheader package
+
+-------------------------------------------------------------------
 Tue May  3 16:00:08 CEST 2005 - olh@suse.de
 
 - be less verbose in make_zimage*.sh scripts
