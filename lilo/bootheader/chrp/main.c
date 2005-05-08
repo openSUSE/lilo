@@ -9,37 +9,28 @@
  * as published by the Free Software Foundation; either version
  * 2 of the License, or (at your option) any later version.
  */
-#include <types.h>
-#include "zlib.h"
+#include <stdarg.h>
+#include <stddef.h>
 #include <elf.h>
-#include <string.h>
 #include <page.h>
+#include <string.h>
+#include <stdio.h>
+#include <prom.h>
+#include "zlib.h"
 
-extern void *finddevice(const char *);
-extern int getprop(void *, const char *, void *, int);
-extern int setprop(void *, const char *, void *, int);
-extern void printk(char *fmt, ...);
-extern void printf(const char *fmt, ...);
-extern int sprintf(char *buf, const char *fmt, ...);
-void gunzip(void *, int, unsigned char *, int *);
-void *claim(unsigned int, unsigned int, unsigned int);
-void flush_cache(void *, unsigned long);
-void pause(void);
-extern void exit(void);
+static void gunzip(void *, int, unsigned char *, int *);
+extern void flush_cache(void *, unsigned long);
 
-unsigned long strlen(const char *s);
-void *memmove(void *dest, const void *src, unsigned long n);
-void *memcpy(void *dest, const void *src, unsigned long n);
 
 /* Value picked to match that used by yaboot */
 #define PROG_START	0x01400000
 #define RAM_END		(256<<20) // Fixme: use OF */
 
-char *avail_ram;
-char *begin_avail, *end_avail;
-char *avail_high;
-unsigned int heap_use;
-unsigned int heap_max;
+static char *avail_ram;
+static char *begin_avail, *end_avail;
+static char *avail_high;
+static unsigned int heap_use;
+static unsigned int heap_max;
 
 extern char _start[];
 extern char _vmlinux_start[];
@@ -54,9 +45,9 @@ struct addr_range {
 	unsigned long size;
 	unsigned long memsize;
 };
-struct addr_range vmlinux = {0, 0, 0};
-struct addr_range vmlinuz = {0, 0, 0};
-struct addr_range initrd  = {0, 0, 0};
+static struct addr_range vmlinux = {0, 0, 0};
+static struct addr_range vmlinuz = {0, 0, 0};
+static struct addr_range initrd  = {0, 0, 0};
 
 static char scratch[128<<10];	/* 128kB of scratch space for gunzip */
 
@@ -65,13 +56,6 @@ typedef void (*kernel_entry_t)( unsigned long,
                                 void *,
 				void *);
 
-
-int (*prom)(void *);
-
-void *chosen_handle;
-void *stdin;
-void *stdout;
-void *stderr;
 
 #undef DEBUG
 
@@ -167,10 +151,10 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		}
 		a1 = initrd.addr;
 		a2 = initrd.size;
-		printf("initial ramdisk moving 0x%lx <- 0x%lx (%lx bytes)\n\r",
+		printf("initial ramdisk moving 0x%lx <- 0x%lx (0x%lx bytes)\n\r",
 		       initrd.addr, (unsigned long)_initrd_start, initrd.size);
 		memmove((void *)initrd.addr, (void *)_initrd_start, initrd.size);
-		printf("initrd head: 0x%lx\n\r", *((u32 *)initrd.addr));
+		printf("initrd head: 0x%lx\n\r", *((unsigned long *)initrd.addr));
 	}
 
 	/* Eventually gunzip the kernel */
@@ -227,9 +211,6 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	vmlinux.size -= (unsigned long)elf64ph->p_offset;
 
 	flush_cache((void *)vmlinux.addr, vmlinux.size);
-
-	if (a1)
-		printf("initrd head: 0x%lx\n\r", *((u32 *)initrd.addr));
 
 	kernel_entry = (kernel_entry_t)vmlinux.addr;
 #ifdef DEBUG
@@ -308,7 +289,7 @@ void zfree(void *x, void *addr, unsigned nb)
 
 #define DEFLATED	8
 
-void gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
+static void gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 {
 	z_stream s;
 	int r, i, flags;

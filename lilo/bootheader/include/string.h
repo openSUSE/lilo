@@ -1,7 +1,21 @@
-#ifndef __STRING_H__
-#define __STRING_H__
-/*  $Id$ */
+#ifndef _PPC_BOOT_STRING_H_
+#define _PPC_BOOT_STRING_H_
+/* $Id$ */
 
-extern size_t strlen(const char *);
+extern char *strcpy(char *dest, const char *src);
+extern char *strncpy(char *dest, const char *src, size_t n);
+extern char *strcat(char *dest, const char *src);
+extern int strcmp(const char *s1, const char *s2);
+extern size_t strlen(const char *s);
+extern size_t strnlen(const char *s, size_t count);
 
-#endif /* __STRING_H__ */
+extern unsigned long simple_strtoul(const char *cp, char **endp,
+				    unsigned int base);
+extern long simple_strtol(const char *cp, char **endp, unsigned int base);
+
+extern void *memset(void *s, int c, size_t n);
+extern void *memmove(void *dest, const void *src, unsigned long n);
+extern void *memcpy(void *dest, const void *src, unsigned long n);
+extern int memcmp(const void *s1, const void *s2, size_t n);
+
+#endif				/* _PPC_BOOT_STRING_H_ */

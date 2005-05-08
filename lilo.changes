@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun May  8 19:24:24 CEST 2005 - olh@suse.de
+
+- move declarations in bootheader package to header files,
+  remove unused header files
+
+-------------------------------------------------------------------
 Sun May  8 18:42:46 CEST 2005 - olh@suse.de
 
 - remove unneeded div64.o from bootheader package

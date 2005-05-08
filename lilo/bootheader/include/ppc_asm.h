@@ -1,6 +1,7 @@
-/*  $Id$ */
+#ifndef _PPC64_PPC_ASM_H
+#define _PPC64_PPC_ASM_H
+/* $Id$ */
 /*
- * arch/ppc64/kernel/ppc_asm.h
  *
  * Definitions used by various bits of low-level assembly code on PowerPC.
  *
@@ -12,8 +13,6 @@
  *  2 of the License, or (at your option) any later version.
  */
 
-#ifndef _PPC64_PPC_ASM_H
-#define _PPC64_PPC_ASM_H
 /*
  * Macros for storing registers into and loading registers from
  * exception frames.
@@ -74,7 +73,7 @@
 
 #define CLR_TOP32(r)	rlwinm	(r),(r),0,0,31	/* clear top 32 bits */
 
-/* 
+/*
  * LOADADDR( rn, name )
  *   loads the address of 'name' into 'rn'
  *
@@ -110,19 +109,6 @@
 	oris    reg,reg,(label)@h;                      \
 	ori     reg,reg,(label)@l;
 
-
-/* PPPBBB - DRENG  If KERNELBASE is always 0xC0...,
- * Then we can easily do this with one asm insn. -Peter
- */
-#define tophys(rd,rs)                           \
-        lis     rd,((KERNELBASE>>48)&0xFFFF);   \
-        rldicr  rd,rd,32,31;                    \
-        sub     rd,rs,rd
-
-#define tovirt(rd,rs)                           \
-        lis     rd,((KERNELBASE>>48)&0xFFFF);   \
-        rldicr  rd,rd,32,31;                    \
-        add     rd,rs,rd
 
 /* Condition Register Bit Fields */
 

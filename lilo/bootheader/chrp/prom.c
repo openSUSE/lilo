@@ -8,9 +8,11 @@
  * 2 of the License, or (at your option) any later version.
  */
 #include <stdarg.h>
-#include <types.h>
-#include <string.h>
+#include <stddef.h>
 #include <ctype.h>
+#include <string.h>
+#include <stdio.h>
+#include <prom.h>
 
 int (*prom)(void *);
 
@@ -19,16 +21,6 @@ void *stdin;
 void *stdout;
 void *stderr;
 
-void exit(void);
-void *finddevice(const char *name);
-int getprop(void *phandle, const char *name, void *buf, int buflen);
-int setprop(void *phandle, const char *name, void *buf, int buflen);
-void chrpboot(int a1, int a2, void *prom);	/* in main.c */
-
-void printk(char *fmt, ...);
-
-/* there is no convenient header to get this from...  -- paulus */
-extern unsigned long strlen(const char *);
 
 int
 write(void *handle, void *ptr, int nb)
@@ -221,7 +213,7 @@ fputs(char *str, void *f)
 	return write(f, str, n) == n? 0: -1;
 }
 
-int
+static int
 readchar(void)
 {
 	char ch;
@@ -231,7 +223,7 @@ readchar(void)
 		case 1:
 			return ch;
 		case -1:
-			printk("read(stdin) returned -1\r\n");
+			printf("read(stdin) returned -1\r\n");
 			return -1;
 		}
 	}
@@ -448,9 +440,6 @@ static char * number(char * str, long num, int base, int size, int precision, in
 	return str;
 }
 
-/* Forward decl. needed for IP address printing stuff... */
-int sprintf(char * buf, const char *fmt, ...);
-
 int vsprintf(char *buf, const char *fmt, va_list args)
 {
 	int len;
@@ -639,20 +628,8 @@ int sprintf(char * buf, const char *fmt, ...)
 
 static char sprint_buf[1024];
 
-void
-printk(char *fmt, ...)
-{
-	va_list args;
-	int n;
-
-	va_start(args, fmt);
-	n = vsprintf(sprint_buf, fmt, args);
-	va_end(args);
-	write(stdout, sprint_buf, n);
-}
-
 int
-printf(char *fmt, ...)
+printf(const char *fmt, ...)
 {
 	va_list args;
 	int n;

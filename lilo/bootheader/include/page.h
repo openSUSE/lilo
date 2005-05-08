@@ -1,7 +1,6 @@
-#ifndef __PAGE_H__
-#define __PAGE_H__
-/*  $Id$ */
-
+#ifndef _PPC_BOOT_PAGE_H
+#define _PPC_BOOT_PAGE_H
+/* $Id$ */
 /*
  * Copyright (C) 2001 PPC64 Team, IBM Corp
  *
@@ -12,17 +11,16 @@
  */
 
 #ifdef __ASSEMBLY__
-  #define ASM_CONST(x) x
+#define ASM_CONST(x) x
 #else
-  #define __ASM_CONST(x) x##UL
-  #define ASM_CONST(x) __ASM_CONST(x)
+#define __ASM_CONST(x) x##UL
+#define ASM_CONST(x) __ASM_CONST(x)
 #endif
 
 /* PAGE_SHIFT determines the page size */
 #define PAGE_SHIFT	12
 #define PAGE_SIZE	(ASM_CONST(1) << PAGE_SHIFT)
 #define PAGE_MASK	(~(PAGE_SIZE-1))
-#define PAGE_OFFSET_MASK (PAGE_SIZE-1)
 
 /* align addr on a size boundary - adjust address up/down if needed */
 #define _ALIGN_UP(addr,size)	(((addr)+((size)-1))&(~((size)-1)))
@@ -31,10 +29,7 @@
 /* align addr on a size boundary - adjust address up if needed */
 #define _ALIGN(addr,size)     _ALIGN_UP(addr,size)
 
-/* to align the pointer to the (next) double word boundary */
-#define DOUBLEWORD_ALIGN(addr)	_ALIGN(addr,sizeof(unsigned long))
-
 /* to align the pointer to the (next) page boundary */
 #define PAGE_ALIGN(addr)	_ALIGN(addr, PAGE_SIZE)
 
-#endif /* __PAGE_H__ */
+#endif				/* _PPC_BOOT_PAGE_H */
