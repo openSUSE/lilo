@@ -403,7 +403,7 @@ function running_on_chrp () {
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
 	if [ "$OPTION_ROOT" ]; then
-	    OPTION_APPEND="$OPTION_ROOT $OPTION_APPEND"
+	    OPTION_APPEND="root=$OPTION_ROOT $OPTION_APPEND"
 	    unset OPTION_ROOT
 	fi
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
@@ -500,6 +500,10 @@ function running_on_chrp () {
 
 	    echo "image = ${CONFIG_IMAGE_FILE[$i]}"
 	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
+	    if [ "${CONFIG_IMAGE_ROOT[$i]}" ]; then
+	        CONFIG_IMAGE_APPEND[$i]="root=${CONFIG_IMAGE_ROOT[$i]} ${CONFIG_IMAGE_APPEND[$i]}"
+	        unset CONFIG_IMAGE_ROOT[$i]
+	    fi
 	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
 	    test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
 	    test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAP[$i]}"

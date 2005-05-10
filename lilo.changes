@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May 10 15:41:29 CEST 2005 - jplack@suse.de
+
+- fix: lilo produces append= line without root= (#81278)
+
+-------------------------------------------------------------------
 Sun May  8 19:24:24 CEST 2005 - olh@suse.de
 
 - move declarations in bootheader package to header files,
