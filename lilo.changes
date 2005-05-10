@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May 10 15:44:37 CEST 2005 - jplack@suse.de
+
+- fix: lilo produces append= line without root= (#81278)
+
+-------------------------------------------------------------------
 Tue Apr 26 21:55:45 CEST 2005 - olh@suse.de
 
 - rebuild /lib/lilo/chrp/chrp64/addnote from yaboot source to fix
