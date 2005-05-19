@@ -1,6 +1,7 @@
 # $Id$
 all export:
 	set -e ; \
+	export LANG=C ; export LC_ALL=C ; export TZ=UTC ; \
 	tmpdir=`mktemp -d /tmp/temp.XXXXXX`/lilo ; \
 	lv=`cat version` ; \
 	yv=`cat yabootversion` ; \
