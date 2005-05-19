@@ -585,10 +585,10 @@ void check_password(char *str)
 int get_params(struct boot_param_t* params)
 {
      int defpart;
-     char *defdevice = 0;
+     char *defdevice = NULL;
      char *p, *q, *endp;
      int c, n;
-     char *imagename = 0, *label;
+     char *imagename = NULL, *label;
      int timeout = -1;
      int beg = 0, end;
      int singlekey = 0;
@@ -814,8 +814,8 @@ yaboot_text_ui(void)
 
      for (;;) {
 	  initrd_size = 0;
-	  initrd_base = 0;
-	  sysmap_base = 0;
+	  initrd_base = NULL;
+	  sysmap_base = NULL;
 	  sysmap_size = 0;
     	
 	  if (get_params(&params))
@@ -906,11 +906,11 @@ yaboot_text_ui(void)
 		    sysmap_base = prom_claim(loadinfo.base+loadinfo.memsize, 0x100000, 0);
 		    if (sysmap_base == (void *)-1) {
 			 prom_printf("Claim failed for sysmap memory\n");
-			 sysmap_base = 0;
+			 sysmap_base = NULL;
 		    } else {
 			 sysmap_size = file.fs->read(&file, 0xfffff, sysmap_base);
 			 if (sysmap_size == 0)
-			      sysmap_base = 0;
+			      sysmap_base = NULL;
 			 else
 			      ((char *)sysmap_base)[sysmap_size++] = 0;
 		    }
@@ -957,11 +957,11 @@ yaboot_text_ui(void)
 		    initrd_base = prom_claim(loadinfo.base+loadinfo.memsize, INITRD_CHUNKSIZE, 0);
 		    if (initrd_base == (void *)-1) {
 			 prom_printf("Claim failed for initrd memory\n");
-			 initrd_base = 0;
+			 initrd_base = NULL;
 		    } else {
 			 initrd_size = file.fs->read(&file, INITRD_CHUNKSIZE, initrd_base);
 			 if (initrd_size == 0)
-			      initrd_base = 0;
+			      initrd_base = NULL;
 			 initrd_read = initrd_size;
 			 initrd_more = initrd_base;
 			 while (initrd_read == INITRD_CHUNKSIZE ) { /* need to read more? */

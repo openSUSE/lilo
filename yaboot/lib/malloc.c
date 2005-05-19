@@ -26,9 +26,9 @@
 /* Imported functions */
 extern void prom_printf (char *fmt, ...);
 
-static char *malloc_ptr = 0;
-static char *malloc_top = 0;
-static char *last_alloc = 0;
+static char *malloc_ptr = NULL;
+static char *malloc_top = NULL;
+static char *last_alloc = NULL;
 
 void malloc_init(void *bottom, unsigned long size)
 {
@@ -38,8 +38,8 @@ void malloc_init(void *bottom, unsigned long size)
 
 void malloc_dispose(void)
 {
-	malloc_ptr = 0;
-	last_alloc = 0;
+	malloc_ptr = NULL;
+	last_alloc = NULL;
 }
 
 void *malloc (unsigned int size)

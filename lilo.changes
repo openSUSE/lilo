@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu May 19 16:39:04 CEST 2005 - olh@suse.de
+
+- fix some pointer 0/NULL confusion in yaboot
+
+-------------------------------------------------------------------
 Thu May 19 13:17:54 CEST 2005 - olh@suse.de
 
 - add makefile dependencies to yaboot
