@@ -243,3 +243,5 @@ deinstall:
 	@echo "${ROOT}/etc/yaboot.conf has not been removed, you may remove it yourself if you wish."
 
 uninstall: deinstall
+
+include yaboot.deps

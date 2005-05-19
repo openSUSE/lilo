@@ -1,0 +1,215 @@
+# vim: syntax=make
+
+lib/ctype.o: \
+	lib/ctype.c \
+	include/string.h \
+	include/types.h \
+	include/ctype.h
+
+lib/malloc.o: \
+	lib/malloc.c \
+	include/types.h \
+	include/string.h
+
+lib/nosys.o: \
+	lib/nosys.c
+
+lib/string.o: \
+	lib/string.S \
+	include/asm/processor.h \
+	include/asm/ppc_asm.tmpl
+
+lib/strstr.o: \
+	lib/strstr.c \
+	include/string.h \
+	include/types.h 
+
+lib/strtol.o: \
+	lib/strtol.c \
+	include/ctype.h
+
+lib/vsprintf.o: \
+	lib/vsprintf.c \
+	include/types.h \
+	include/string.h \
+	include/ctype.h
+
+second/cache.o: \
+	second/cache.S \
+	include/asm/ppc_asm.tmpl \
+	include/asm/processor.h
+
+second/cfg.o: \
+	second/cfg.c \
+	include/setjmp.h \
+	include/stdlib.h \
+	include/string.h \
+	include/types.h \
+	include/prom.h
+
+second/cmdline.o: \
+	second/cmdline.c \
+	include/types.h \
+	include/prom.h \
+	include/string.h \
+	include/cfg.h
+
+second/crt0.o: \
+	second/crt0.S \
+	include/asm/ppc_asm.tmpl \
+	include/asm/processor.h
+
+second/file.o: \
+	second/file.c \
+	include/ctype.h \
+	include/types.h \
+	include/stdlib.h \
+	include/file.h \
+	include/prom.h \
+	include/fs.h \
+	include/partition.h \
+	include/string.h \
+	include/errors.h \
+	include/debug.h
+
+second/fs.o: \
+	second/fs.c \
+	include/stdlib.h \
+	include/fs.h \
+	include/partition.h \
+	include/types.h \
+	include/prom.h \
+	include/file.h \
+	include/errors.h
+
+second/fs_ext2.o: \
+	second/fs_ext2.c \
+	include/ctype.h \
+	include/types.h \
+	include/file.h \
+	include/prom.h \
+	include/fs.h \
+	include/partition.h \
+	include/string.h \
+	include/errors.h \
+	include/debug.h \
+	include/linux/ext2_fs.h \
+	include/linux/types.h \
+	include/ext2fs/ext2fs.h \
+	include/stdlib.h \
+	include/et/com_err.h \
+	include/ext2fs/ext2_io.h \
+	include/ext2fs/ext2_err.h \
+	include/ext2fs/bitops.h
+
+second/fs_iso.o: \
+	second/fs_iso.c \
+	include/ctype.h \
+	include/types.h \
+	include/file.h \
+	include/prom.h \
+	include/fs.h \
+	include/partition.h \
+	include/string.h \
+	include/errors.h
+
+second/fs_of.o: \
+	second/fs_of.c \
+	include/ctype.h \
+	include/types.h \
+	include/stdlib.h \
+	include/file.h \
+	include/prom.h \
+	include/fs.h \
+	include/partition.h \
+	include/string.h \
+	include/errors.h \
+	include/debug.h
+
+second/fs_reiserfs.o: \
+	second/fs_reiserfs.c \
+	include/types.h \
+	include/ctype.h \
+	include/string.h \
+	include/stdlib.h \
+	include/fs.h \
+	include/partition.h \
+	include/prom.h \
+	include/file.h \
+	include/errors.h \
+	include/debug.h \
+	include/reiserfs/reiserfs.h \
+	include/byteorder.h \
+	include/swab.h
+
+second/fs_xfs.o: \
+	second/fs_xfs.c \
+	include/types.h \
+	include/ctype.h \
+	include/string.h \
+	include/stdlib.h \
+	include/fs.h \
+	include/partition.h \
+	include/prom.h \
+	include/file.h \
+	include/xfs/xfs.h \
+	include/errors.h \
+	include/debug.h
+
+second/iso_util.o: \
+	second/iso_util.c
+
+second/md5.o: \
+	second/md5.c \
+	include/string.h \
+	include/types.h \
+	include/md5.h
+
+second/partition.o: \
+	second/partition.c \
+	include/ctype.h \
+	include/types.h \
+	include/stdlib.h \
+	include/mac-part.h \
+	include/fdisk-part.h \
+	include/partition.h \
+	include/prom.h \
+	include/string.h \
+	include/linux/iso_fs.h \
+	include/linux/types.h \
+	include/debug.h \
+	include/errors.h
+
+second/prom.o: \
+	second/prom.c \
+	include/prom.h \
+	include/stdlib.h \
+	include/string.h \
+	include/types.h \
+	include/ctype.h \
+	include/asm/processor.h \
+	include/errors.h \
+	include/debug.h
+
+second/setjmp.o: \
+	second/setjmp.S
+
+second/yaboot.o: \
+	second/yaboot.c \
+	include/string.h \
+	include/types.h \
+	include/ctype.h \
+	include/stdlib.h \
+	include/prom.h \
+	include/file.h \
+	include/fs.h \
+	include/partition.h \
+	include/errors.h \
+	include/cfg.h \
+	include/cmdline.h \
+	include/yaboot.h \
+	include/linux/elf.h \
+	include/asm/elf.h \
+	include/bootinfo.h \
+	include/debug.h \
+	include/md5.h
