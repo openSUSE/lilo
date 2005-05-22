@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun May 22 15:07:09 CEST 2005 - olh@suse.de
+
+- readd div64 to bootheader package, required for negative numbers
+  in vsprintf
+
+-------------------------------------------------------------------
 Thu May 19 16:39:04 CEST 2005 - olh@suse.de
 
 - fix some pointer 0/NULL confusion in yaboot

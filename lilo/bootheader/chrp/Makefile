@@ -6,7 +6,7 @@ include ../MRULES
 MAKEDEPS     = -Wp,-MD,.$(subst /,-,$*).d
 CFLAGS       = $(MAKEDEPS) $(OPTFLAGS) $(REQFLAGS)
 PROGS       := empty main prom zlib \
-		crt0 string
+		crt0 div64 string
 
 OBJS        := $(patsubst %,%.o,$(PROGS))
 
