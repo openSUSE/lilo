@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun May 22 22:46:45 CEST 2005 - olh@suse.de
+
+- update prep binary objects in bootheader to 2.6.12-rc4,
+  including the mkzimage_cmdline part
+
+-------------------------------------------------------------------
 Sun May 22 15:07:09 CEST 2005 - olh@suse.de
 
 - readd div64 to bootheader package, required for negative numbers

@@ -102,7 +102,7 @@ ld \
 	-o "$tmp/arch_ppc_boot_prep_zImage.bin" \
 	"$obj_dir/arch_ppc_boot_simple_head.o"  \
 	"$obj_dir/arch_ppc_boot_simple_relocate.o"  \
-	"$obj_dir/arch_ppc_boot_simple_legacy.o"  \
+	"$obj_dir/arch_ppc_boot_simple_prepmap.o"  \
 	"$obj_dir/arch_ppc_boot_simple_misc.o"  \
 	"$obj_dir/arch_ppc_boot_simple_misc-prep.o"  \
 	"$obj_dir/arch_ppc_boot_simple_mpc10x_memory.o"  \
