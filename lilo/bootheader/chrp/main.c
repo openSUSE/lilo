@@ -26,12 +26,6 @@ extern void flush_cache(void *, unsigned long);
 #define PROG_START	0x01400000
 #define RAM_END		(256<<20) // Fixme: use OF */
 
-static char *avail_ram;
-static char *begin_avail, *end_avail;
-static char *avail_high;
-static unsigned int heap_use;
-static unsigned int heap_max;
-
 extern char _start[];
 extern char _vmlinux_start[];
 extern char _vmlinux_end[];
@@ -142,17 +136,11 @@ static void gunzip(unsigned long dest, int destlen,
 		   unsigned long src, int srclen, const char *what)
 {
 	int len;
-	avail_ram = scratch;
-	begin_avail = avail_high = avail_ram;
-	end_avail = scratch + sizeof(scratch);
 	printf("gunzipping %s (0x%lx:0x%lx <- 0x%lx:0x%0lx) using 0x%p:%0xl...",
 	       what, dest, destlen, src, srclen, scratch, sizeof(scratch));
 	len = srclen;
-	heap_use = heap_max = 0;
 	do_gunzip((void *)dest, destlen, (unsigned char *)src, &len);
 	printf("done 0x%lx bytes\n\r", len);
-	printf("0x%x bytes of heap consumed, max in use 0x%x\n\r",
-	       (unsigned)(avail_high - begin_avail), heap_max);
 }
 
 
@@ -272,40 +260,6 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	exit();
 }
 
-struct memchunk {
-	unsigned int size;
-	unsigned int pad;
-	struct memchunk *next;
-};
-
-static struct memchunk *freechunks;
-
-static void *zalloc(unsigned int size)
-{
-	void *p;
-	struct memchunk **mpp, *mp;
-
-	size = _ALIGN(size, sizeof(struct memchunk));
-	heap_use += size;
-	if (heap_use > heap_max)
-		heap_max = heap_use;
-	for (mpp = &freechunks; (mp = *mpp) != 0; mpp = &mp->next) {
-		if (mp->size == size) {
-			*mpp = mp->next;
-			return mp;
-		}
-	}
-	p = avail_ram;
-	avail_ram += size;
-	if (avail_ram > avail_high)
-		avail_high = avail_ram;
-	if (avail_ram > end_avail) {
-		printf("oops... out of memory\n\r");
-		pause();
-	}
-	return p;
-}
-
 #define HEAD_CRC	2
 #define EXTRA_FIELD	4
 #define ORIG_NAME	8
@@ -339,8 +293,12 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 		exit();
 	}
 
+	if (zlib_inflate_workspacesize() > sizeof(scratch)) {
+		printf("zlib needs more mem\n\r");
+		exit();
+	}
 	memset(&s, 0, sizeof(s));
-	s.workspace = zalloc(zlib_inflate_workspacesize());
+	s.workspace = scratch;
 	r = zlib_inflateInit2(&s, -MAX_WBITS);
 	if (r != Z_OK) {
 		printf("inflateInit2 returned %d\n\r", r);

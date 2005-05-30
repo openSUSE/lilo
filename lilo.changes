@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 19:48:25 CEST 2005 - olh@suse.de
+
+- remove unneeded zalloc function in bootheader
+
+-------------------------------------------------------------------
 Mon May 30 19:44:35 CEST 2005 - olh@suse.de
 
 - use zlib_inflate from 2.6.12-rc5
