@@ -1,3 +1,4 @@
+/* $Id$ */
 /* IBM RS/6000 "XCOFF" file definitions for BFD.
    Copyright (C) 1990, 1991 Free Software Foundation, Inc.
    FIXME: Can someone provide a transliteration of this name into ASCII?

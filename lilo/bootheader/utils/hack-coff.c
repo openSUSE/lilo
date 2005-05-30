@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * hack-coff.c - hack the header of an xcoff file to fill in
  * a few fields needed by the Open Firmware xcoff loader on

@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  *  addnote.c - Program to hack in a PT_NOTE program header entry in an ELF file.
  *             This is needed for OF on RS/6000s to load an image correctly.
