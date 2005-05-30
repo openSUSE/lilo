@@ -21,6 +21,7 @@ void *chosen_handle;
 void *stdin;
 void *stdout;
 void *stderr;
+void *bootcpu;
 
 
 int
@@ -112,6 +113,26 @@ finddevice(const char *name)
 	args.devspec = name;
 	args.phandle = (void *) -1;
 	(*prom)(&args);
+	return args.phandle;
+}
+
+void *
+instance_to_package(const void *ihandle)
+{
+	struct prom_args {
+		char *service;
+		int nargs;
+		int nret;
+		const void *ihandle;
+		void *phandle;
+	} args;
+
+	args.service = "instance-to-package";
+	args.nargs = 1;
+	args.nret = 1;
+	args.ihandle = ihandle;
+	args.phandle = (void *)-1;
+	(*prom) (&args);
 	return args.phandle;
 }
 

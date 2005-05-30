@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 15:44:49 CEST 2005 - olh@suse.de
+
+- add instance-to-package call to bootheader to get the cpu type
+
+-------------------------------------------------------------------
 Mon May 30 14:39:48 CEST 2005 - olh@suse.de
 
 - build bootheader with LANG=C

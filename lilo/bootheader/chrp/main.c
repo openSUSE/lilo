@@ -97,9 +97,11 @@ static unsigned long try_claim(unsigned long size)
 
 void start(unsigned long a1, unsigned long a2, void *promptr)
 {
+	void *bootcpu_phandle;
 	unsigned long i;
 	unsigned long vmlinux_memsize, vmlinux_filesize;
 	kernel_entry_t kernel_entry;
+	int cputype;
 	Elf64_Ehdr *elf64;
 	Elf64_Phdr *elf64ph;
 
@@ -115,6 +117,17 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	printf("\n\rzImage starting: loaded at 0x%x (0x%lx/0x%lx/0x%p)\n\r", (unsigned)_start,a1,a2,promptr);
 
+	if (getprop(chosen_handle, "cpu", &bootcpu, sizeof(bootcpu)) == 4) {
+		bootcpu_phandle = instance_to_package(bootcpu);
+		if (bootcpu_phandle == (void *)-1)
+			exit();
+
+		if (getprop(bootcpu_phandle, "64-bit", NULL, 0) != -1)
+			cputype = 64;
+		else
+			cputype = 32;
+	} else
+		cputype = 0;
 	/*
 	 * Now we try to claim some memory for the kernel itself
 	 * our "vmlinux_memsize" is the memory footprint in RAM, _HOWEVER_, what
