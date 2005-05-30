@@ -22,7 +22,7 @@ $(LIB): $(OBJS)
 install:
 	@set -ex; \
 	$(INSTALL_DIR) $(DESTDIR)$(INSTALLDIR)/common ; \
-	for i in $(OBJS); do \
+	for i in $(LIB); do \
 	$(INSTALL_DATA) $$i $(DESTDIR)$(INSTALLDIR)/common/$$i; \
 	done ; \
 
