@@ -44,6 +44,7 @@ struct addr_range {
 	unsigned long addr;
 	unsigned long size;
 	unsigned long memsize;
+	unsigned long offset;
 };
 static struct addr_range vmlinux = {0, 0, 0};
 static struct addr_range vmlinuz = {0, 0, 0};
@@ -74,6 +75,48 @@ struct _builtin_cmd_line  __attribute__ ((__section__ (".kernel:cmdline"))) _bui
 	.string = "",
 	.cmdline_end_flag = cmdline_end_string,
 };
+
+static int check_elf64(void *p)
+{
+	Elf64_Ehdr *elf64 = p;
+	Elf64_Phdr *elf64ph;
+	int i;
+
+	if (elf64->e_ident[EI_MAG0] != ELFMAG0 ||
+	    elf64->e_ident[EI_MAG1] != ELFMAG1 ||
+	    elf64->e_ident[EI_MAG2] != ELFMAG2 ||
+	    elf64->e_ident[EI_MAG3] != ELFMAG3 ||
+	    elf64->e_ident[EI_CLASS] != ELFCLASS64 ||
+	    elf64->e_ident[EI_DATA] != ELFDATA2MSB ||
+	    elf64->e_type != ET_EXEC || elf64->e_machine != EM_PPC64)
+		return 0;
+
+	elf64ph = (Elf64_Phdr *) ((unsigned long)elf64 +
+				  (unsigned long)elf64->e_phoff);
+
+	for (i = 0; i < (unsigned int)elf64->e_phnum; i++, elf64ph++)
+		if (elf64ph->p_type == PT_LOAD && elf64ph->p_offset != 0)
+			break;
+
+	vmlinux.memsize = (unsigned long)elf64ph->p_memsz;
+	vmlinux.offset = (unsigned long)elf64ph->p_offset;
+
+#ifdef DEBUG
+	printf("PPC64 ELF file, ph %d\n\r", i);
+	printf("p_type   0x%08x\n\r", elf64ph->p_type);
+	printf("p_flags  0x%08x\n\r", elf64ph->p_flags);
+	printf("p_offset 0x%08Lx\n\r", elf64ph->p_offset);
+	printf("p_vaddr  0x%08Lx\n\r", elf64ph->p_vaddr);
+	printf("p_paddr  0x%08Lx\n\r", elf64ph->p_paddr);
+	printf("p_filesz 0x%08Lx\n\r", elf64ph->p_filesz);
+	printf("p_memsz  0x%08Lx\n\r", elf64ph->p_memsz);
+	printf("p_align  0x%08Lx\n\r", elf64ph->p_align);
+	printf("... skipping 0x%lx bytes of ELF header\n\r",
+	       (unsigned long)elf64ph->p_offset);
+#endif
+
+	return 64;
+}
 
 static unsigned long claim_base = PROG_START;
 
@@ -116,12 +159,9 @@ static void gunzip(unsigned long dest, int destlen,
 void start(unsigned long a1, unsigned long a2, void *promptr)
 {
 	void *bootcpu_phandle;
-	unsigned long i;
 	unsigned long vmlinux_memsize, vmlinux_filesize;
 	kernel_entry_t kernel_entry;
 	int cputype;
-	Elf64_Ehdr *elf64;
-	Elf64_Phdr *elf64ph;
 
 	prom = (int (*)(void *)) promptr;
 	chosen_handle = finddevice("/chosen");
@@ -206,37 +246,14 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		printf ("setprop bootargs: %d\n\r",l);
 	}
 
-	/* Skip over the ELF header */
-	elf64 = (Elf64_Ehdr *)vmlinux.addr;
-	if ( elf64->e_ident[EI_MAG0]  != ELFMAG0	||
-	     elf64->e_ident[EI_MAG1]  != ELFMAG1	||
-	     elf64->e_ident[EI_MAG2]  != ELFMAG2	||
-	     elf64->e_ident[EI_MAG3]  != ELFMAG3	||
-	     elf64->e_ident[EI_CLASS] != ELFCLASS64	||
-	     elf64->e_ident[EI_DATA]  != ELFDATA2MSB	||
-	     elf64->e_type            != ET_EXEC	||
-	     elf64->e_machine         != EM_PPC64 )
-	{
+	if (!check_elf64((void *)vmlinux.addr)) {
 		printf("Error: not a valid PPC64 ELF file!\n\r");
 		exit();
 	}
 
-	elf64ph = (Elf64_Phdr *)((unsigned long)elf64 +
-				(unsigned long)elf64->e_phoff);
-	for(i=0; i < (unsigned int)elf64->e_phnum ;i++,elf64ph++) {
-		if (elf64ph->p_type == PT_LOAD && elf64ph->p_offset != 0)
-			break;
-	}
-#ifdef DEBUG
-	printf("... skipping 0x%lx bytes of ELF header\n\r",
-			(unsigned long)elf64ph->p_offset);
-#endif
-	vmlinux.addr += (unsigned long)elf64ph->p_offset;
-	vmlinux.size -= (unsigned long)elf64ph->p_offset;
-
 	flush_cache((void *)vmlinux.addr, vmlinux.size);
 
-	kernel_entry = (kernel_entry_t)vmlinux.addr;
+	kernel_entry = (kernel_entry_t)(vmlinux.addr + vmlinux.offset);
 #ifdef DEBUG
 	printf( "kernel:\n\r"
 		"        entry addr = 0x%lx\n\r"

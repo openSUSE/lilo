@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 18:11:37 CEST 2005 - olh@suse.de
+
+- split check_elf64 function in bootheader
+
+-------------------------------------------------------------------
 Mon May 30 17:39:45 CEST 2005 - olh@suse.de
 
 - split gunzip function in bootheader
