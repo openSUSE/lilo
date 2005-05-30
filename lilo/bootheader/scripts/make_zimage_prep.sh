@@ -2,8 +2,7 @@
 set -e
 # set -x
 
-obj_dir=.
-obj_dir=/lib/lilo/prep
+obj_dir=/lib/lilo
 
 vmlinux=
 initrd=
@@ -14,6 +13,7 @@ until [ "$#" = "0" ] ; do
 		--help|-h|--version)
 		echo "create a 'zImage' for new PReP"
 		echo "Usage: ${0##*/} --vmlinux <ELF binary> --initrd <ramdisk.image.gz> --output <zImage> [--tmp <tempdir>]"
+		echo "additional options: [--objdir <dir>]"
 		exit 1
 		;;
 		--vmlinux)
@@ -41,6 +41,15 @@ until [ "$#" = "0" ] ; do
 			exit 1
 		fi
 		output=$1
+		shift
+		;;
+		--objdir)
+		shift
+		if [ "$#" = "0" -o "$1" = ""  ] ; then
+			echo "option --objdir requires a diretory"
+			exit 1
+		fi
+		obj_dir=$1
 		shift
 		;;
 		--tmp)
@@ -83,7 +92,7 @@ if [ -z "$initrd" ] ; then
 objcopy -O elf32-powerpc \
 	--add-section=.image="$tmp/vmlinux.bin.gz" \
 	--set-section-flags=.image=contents,alloc,load,readonly,data \
-	"$obj_dir/arch_ppc_boot_simple_dummy.o" \
+	"$obj_dir/prep/arch_ppc_boot_simple_dummy.o" \
 	"$tmp/arch_ppc_boot_simple_image.o"
 else
 objcopy -O elf32-powerpc \
@@ -91,25 +100,25 @@ objcopy -O elf32-powerpc \
 	--set-section-flags=.ramdisk=contents,alloc,load,readonly,data \
 	--add-section=.image="$tmp/vmlinux.bin.gz" \
 	--set-section-flags=.image=contents,alloc,load,readonly,data \
-	"$obj_dir/arch_ppc_boot_simple_dummy.o" \
+	"$obj_dir/prep/arch_ppc_boot_simple_dummy.o" \
 	"$tmp/arch_ppc_boot_simple_image.o"
 fi
 
 ld \
-	-T "$obj_dir/arch_ppc_boot_ld.script" \
+	-T "$obj_dir/prep/arch_ppc_boot_ld.script" \
 	-Ttext 0x00800000 \
 	-Bstatic \
 	-o "$tmp/arch_ppc_boot_prep_zImage.bin" \
-	"$obj_dir/arch_ppc_boot_simple_head.o"  \
-	"$obj_dir/arch_ppc_boot_simple_relocate.o"  \
-	"$obj_dir/arch_ppc_boot_simple_prepmap.o"  \
-	"$obj_dir/arch_ppc_boot_simple_misc.o"  \
-	"$obj_dir/arch_ppc_boot_simple_misc-prep.o"  \
-	"$obj_dir/arch_ppc_boot_simple_mpc10x_memory.o"  \
+	"$obj_dir/prep/arch_ppc_boot_simple_head.o"  \
+	"$obj_dir/prep/arch_ppc_boot_simple_relocate.o"  \
+	"$obj_dir/prep/arch_ppc_boot_simple_prepmap.o"  \
+	"$obj_dir/prep/arch_ppc_boot_simple_misc.o"  \
+	"$obj_dir/prep/arch_ppc_boot_simple_misc-prep.o"  \
+	"$obj_dir/prep/arch_ppc_boot_simple_mpc10x_memory.o"  \
 	"$tmp/arch_ppc_boot_simple_image.o"  \
-	"$obj_dir/arch_ppc_boot_common_lib.a"  \
-	"$obj_dir/arch_ppc_boot_lib_lib.a" \
-	"$obj_dir/arch_ppc_boot_of1275_lib.a"
+	"$obj_dir/prep/arch_ppc_boot_common_lib.a"  \
+	"$obj_dir/prep/arch_ppc_boot_lib_lib.a" \
+	"$obj_dir/prep/arch_ppc_boot_of1275_lib.a"
 
 objcopy \
 	-O elf32-powerpc \
@@ -119,7 +128,7 @@ objcopy \
 	"$tmp/arch_ppc_boot_prep_zImage.bin" \
 	"$tmp/arch_ppc_boot_prep_zImage"
 
-"$obj_dir/mkprep" \
+"$obj_dir/prep/mkprep" \
 	-pbp \
 	"$tmp/arch_ppc_boot_prep_zImage" \
 	"$tmp/output"

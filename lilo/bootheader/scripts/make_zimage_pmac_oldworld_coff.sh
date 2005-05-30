@@ -2,8 +2,7 @@
 set -e
 # set -x
 
-obj_dir=.
-obj_dir=/lib/lilo/pmac/oldworld_coff
+obj_dir=/lib/lilo
 
 vmlinux=
 initrd=
@@ -14,6 +13,7 @@ until [ "$#" = "0" ] ; do
 		--help|-h|--version)
 		echo "create a 'zImage' in COFF format for old PowerMacs"
 		echo "Usage: ${0##*/} --vmlinux <ELF binary> --initrd <ramdisk.image.gz> --output <zImage> [--tmp <tempdir>]"
+		echo "additional options: [--objdir <dir>]"
 		exit 1
 		;;
 		--vmlinux)
@@ -41,6 +41,15 @@ until [ "$#" = "0" ] ; do
 			exit 1
 		fi
 		output=$1
+		shift
+		;;
+		--objdir)
+		shift
+		if [ "$#" = "0" -o "$1" = ""  ] ; then
+			echo "option --objdir requires a diretory"
+			exit 1
+		fi
+		obj_dir=$1
 		shift
 		;;
 		--tmp)
@@ -81,7 +90,7 @@ objcopy \
 	-R .comment \
 	--add-section=.image="$tmp/vmlinux.bin.gz" \
 	--set-section-flags=.image=contents,alloc,load,readonly,data \
-	"$obj_dir/arch_ppc_boot_openfirmware_dummy.o" \
+	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_dummy.o" \
 	"$tmp/arch_ppc_boot_openfirmware_image.o"
 
 if [ -z "$initrd" ] ; then
@@ -99,20 +108,20 @@ fi
 
 ld \
 	-o "$tmp/output" \
-	-T "$obj_dir/arch_ppc_boot_ld.script" \
+	-T "$obj_dir/pmac/oldworld_coff/arch_ppc_boot_ld.script" \
 	-e _start \
 	-Ttext 0x00500000 \
 	-Bstatic \
-	"$obj_dir/arch_ppc_boot_openfirmware_coffcrt0.o" \
-	"$obj_dir/arch_ppc_boot_openfirmware_start.o" \
-	"$obj_dir/arch_ppc_boot_openfirmware_misc.o" \
-	"$obj_dir/arch_ppc_boot_openfirmware_common.o" \
-	"$obj_dir/arch_ppc_boot_openfirmware_coffmain.o" \
+	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_coffcrt0.o" \
+	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_start.o" \
+	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_misc.o" \
+	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_common.o" \
+	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_coffmain.o" \
 	"$OBJCOPY_RAMDISK_OBJECT" \
-	"$obj_dir/lib_lib.a" \
-	"$obj_dir/arch_ppc_boot_lib_lib.a" \
-	"$obj_dir/arch_ppc_boot_of1275_lib.a" \
-	"$obj_dir/arch_ppc_boot_common_lib.a"
+	"$obj_dir/pmac/oldworld_coff/lib_lib.a" \
+	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_lib_lib.a" \
+	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_of1275_lib.a" \
+	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_common_lib.a"
 	
 objcopy \
 	"$tmp/output" \
@@ -126,8 +135,8 @@ objcopy \
 	-R .comment \
 	"$tmp/output" \
 	"$tmp/output.coff"
-	chmod u+xr "$obj_dir/hack-coff"
-	"$obj_dir/hack-coff" "$tmp/output.coff"
+	chmod u+xr "$obj_dir/pmac/oldworld_coff/hack-coff"
+	"$obj_dir/pmac/oldworld_coff/hack-coff" "$tmp/output.coff"
 
 #
 rm -f "$output"

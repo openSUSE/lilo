@@ -2,8 +2,7 @@
 set -e
 # set -x
 
-obj_dir=.
-obj_dir=/lib/lilo/pmac/newworld
+obj_dir=/lib/lilo
 
 vmlinux=
 initrd=
@@ -14,6 +13,7 @@ until [ "$#" = "0" ] ; do
 		--help|-h|--version)
 		echo "create a 'zImage' for new PowerMacs"
 		echo "Usage: ${0##*/} --vmlinux <ELF binary> --initrd <ramdisk.image.gz> --output <zImage> [--tmp <tempdir>]"
+		echo "additional options: [--objdir <dir>]"
 		exit 1
 		;;
 		--vmlinux)
@@ -41,6 +41,15 @@ until [ "$#" = "0" ] ; do
 			exit 1
 		fi
 		output=$1
+		shift
+		;;
+		--objdir)
+		shift
+		if [ "$#" = "0" -o "$1" = ""  ] ; then
+			echo "option --objdir requires a diretory"
+			exit 1
+		fi
+		obj_dir=$1
 		shift
 		;;
 		--tmp)
@@ -81,7 +90,7 @@ objcopy \
 	-R .comment \
 	--add-section=.image="$tmp/vmlinux.bin.gz" \
 	--set-section-flags=.image=contents,alloc,load,readonly,data \
-	"$obj_dir/arch_ppc_boot_openfirmware_dummy.o" \
+	"$obj_dir/pmac/newworld/arch_ppc_boot_openfirmware_dummy.o" \
 	"$tmp/arch_ppc_boot_openfirmware_image.o"
 
 if [ -z "$initrd" ] ; then
@@ -98,25 +107,25 @@ objcopy \
 fi
 
 ld \
-	-T "$obj_dir/arch_ppc_boot_ld.script" \
+	-T "$obj_dir/pmac/newworld/arch_ppc_boot_ld.script" \
 	-e _start \
 	-Ttext 0x01000000 \
 	-o "$tmp/output" \
-	"$obj_dir/arch_ppc_boot_openfirmware_crt0.o" \
-	"$obj_dir/arch_ppc_boot_openfirmware_start.o" \
-	"$obj_dir/arch_ppc_boot_openfirmware_misc.o" \
-	"$obj_dir/arch_ppc_boot_openfirmware_common.o" \
-	"$obj_dir/arch_ppc_boot_openfirmware_newworldmain.o" \
-	"$obj_dir/lib_lib.a" \
-	"$obj_dir/arch_ppc_boot_lib_lib.a" \
-	"$obj_dir/arch_ppc_boot_of1275_lib.a" \
-	"$obj_dir/arch_ppc_boot_common_lib.a" \
+	"$obj_dir/pmac/newworld/arch_ppc_boot_openfirmware_crt0.o" \
+	"$obj_dir/pmac/newworld/arch_ppc_boot_openfirmware_start.o" \
+	"$obj_dir/pmac/newworld/arch_ppc_boot_openfirmware_misc.o" \
+	"$obj_dir/pmac/newworld/arch_ppc_boot_openfirmware_common.o" \
+	"$obj_dir/pmac/newworld/arch_ppc_boot_openfirmware_newworldmain.o" \
+	"$obj_dir/pmac/newworld/lib_lib.a" \
+	"$obj_dir/pmac/newworld/arch_ppc_boot_lib_lib.a" \
+	"$obj_dir/pmac/newworld/arch_ppc_boot_of1275_lib.a" \
+	"$obj_dir/pmac/newworld/arch_ppc_boot_common_lib.a" \
 	$OBJCOPY_RAMDISK_OBJECT
 
 objcopy \
 	"$tmp/output" \
 	"$tmp/output" \
-	--add-section=.note="$obj_dir/arch_ppc_boot_openfirmware_note" \
+	--add-section=.note="$obj_dir/pmac/newworld/arch_ppc_boot_openfirmware_note" \
 	$OBJCOPY_RAMDISK \
 	-R .comment 
 #

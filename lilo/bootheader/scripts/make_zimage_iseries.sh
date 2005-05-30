@@ -2,8 +2,7 @@
 set -e
 # set -x
 
-obj_dir=.
-obj_dir=/lib/lilo/iseries
+obj_dir=/lib/lilo
 
 vmlinux=
 initrd=
@@ -14,6 +13,7 @@ until [ "$#" = "0" ] ; do
 		--help|-h|--version)
 		echo "create a 'zImage' for new iSeries"
 		echo "Usage: ${0##*/} --vmlinux <ELF binary> --initrd <ramdisk.image.gz> --output <zImage> [--tmp <tempdir>]"
+		echo "additional options: [--objdir <dir>]"
 		exit 1
 		;;
 		--vmlinux)
@@ -41,6 +41,15 @@ until [ "$#" = "0" ] ; do
 			exit 1
 		fi
 		output=$1
+		shift
+		;;
+		--objdir)
+		shift
+		if [ "$#" = "0" -o "$1" = ""  ] ; then
+			echo "option --objdir requires a diretory"
+			exit 1
+		fi
+		obj_dir=$1
 		shift
 		;;
 		--tmp)
@@ -79,12 +88,12 @@ nm "$vmlinux" | \
 	grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > "$tmp/System.map"
 if [ -z "$initrd" ] ; then
-$obj_dir/iseries-addSystemMap \
+$obj_dir/iseries/iseries-addSystemMap \
 	"$tmp/System.map" \
 	"$vmlinux" \
 	"$tmp/output"
 else
-$obj_dir/iseries-addRamDisk \
+$obj_dir/iseries/iseries-addRamDisk \
 	"$initrd" \
 	"$tmp/System.map" \
 	"$vmlinux" \

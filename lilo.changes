@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 22:36:46 CEST 2005 - olh@suse.de
+
+- add option --objdir to mkzimage with /lib/lilo as default
+
+-------------------------------------------------------------------
 Mon May 30 22:22:33 CEST 2005 - olh@suse.de
 
 - move all make_zimage_*.sh scripts to /lib/lilo/scripts

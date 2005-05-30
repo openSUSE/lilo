@@ -5,7 +5,6 @@ set -e
 
 export LANG=C
 export LC_ALL=C
-obj_dir=.
 obj_dir=/lib/lilo
 
 vmlinux=
@@ -25,6 +24,7 @@ until [ "$#" = "0" ] ; do
 		--help|-h|--version)
 		echo "create a 'zImage' for ppc/ppc64"
 		echo "Usage: ${0##*/} --vmlinux <ELF binary> [--initrd <ramdisk.image.gz>] --output <zImage> [--cmdline <kernelcmdline>] [--board <subarch>] [--tmp <tempdir>]"
+		echo "additional options: [--objdir <dir>]"
 		echo "option --board requires a ppc/ppc64 subarch. It can be one of:"
 		echo "chrp|chrp64|pseries iseries pmaccoff pmac prep"
 		exit 1
@@ -72,6 +72,15 @@ until [ "$#" = "0" ] ; do
 			exit 1
 		fi
 		output=$1
+		shift
+		;;
+		--objdir)
+		shift
+		if [ "$#" = "0" -o "$1" = ""  ] ; then
+			echo "option --objdir requires a diretory"
+			exit 1
+		fi
+		obj_dir=$1
 		shift
 		;;
 		--tmp)

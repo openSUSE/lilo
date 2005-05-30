@@ -5,8 +5,7 @@ set -e
 
 export LANG=C
 export LC_ALL=C
-obj_dir=.
-obj_dir=/lib/lilo/chrp
+obj_dir=/lib/lilo
 
 vmlinux=
 initrd=
@@ -18,6 +17,7 @@ until [ "$#" = "0" ] ; do
 		--help|-h|--version)
 		echo "create a 'zImage' for new pSeries"
 		echo "Usage: ${0##*/} --vmlinux <ELF binary> --initrd <ramdisk.image.gz> --output <zImage> [--tmp <tempdir>] [--no-addnote]"
+		echo "additional options: [--objdir <dir>]"
 		exit 1
 		;;
 		--no-addnote)
@@ -49,6 +49,15 @@ until [ "$#" = "0" ] ; do
 			exit 1
 		fi
 		output=$1
+		shift
+		;;
+		--objdir)
+		shift
+		if [ "$#" = "0" -o "$1" = ""  ] ; then
+			echo "option --objdir requires a diretory"
+			exit 1
+		fi
+		obj_dir=$1
 		shift
 		;;
 		--tmp)
@@ -101,7 +110,7 @@ esac
 #
 #
 strings $tmp/vmlinux | grep -E 'Linux version .* .gcc version' > $tmp/uts_string.txt
-cp $obj_dir/empty.o $tmp/empty.o
+cp $obj_dir/chrp/empty.o $tmp/empty.o
 objcopy $tmp/empty.o \
 	--add-section=.kernel:uts_string=$tmp/uts_string.txt \
 	--set-section-flags=.kernel:uts_string=contents,alloc,load,readonly,data
@@ -119,19 +128,19 @@ fi
 rm -f $tmp/output
 #
 ld -Ttext 0x00400000 -e _start \
-	-T $obj_dir/ld.script.chrp64 \
+	-T $obj_dir/chrp/ld.script.chrp64 \
 	-o $tmp/output \
-	$obj_dir/crt0.o \
-	$obj_dir/string.o \
-	$obj_dir/prom.o \
-	$obj_dir/main.o \
-	$obj_dir/div64.o \
+	$obj_dir/chrp/crt0.o \
+	$obj_dir/chrp/string.o \
+	$obj_dir/chrp/prom.o \
+	$obj_dir/chrp/main.o \
+	$obj_dir/chrp/div64.o \
 	$tmp/empty.o \
-	$obj_dir/../common/zlib.a
+	$obj_dir/common/zlib.a
 #
 if [ "$no_addnote" = "false" ] ; then
 echo add note section for RS6K
-$obj_dir/addnote $tmp/output
+$obj_dir/utils/addnote $tmp/output
 fi
 #
 rm -f "$output"
