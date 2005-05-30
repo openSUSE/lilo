@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue May 31 01:08:42 CEST 2005 - olh@suse.de
+
+- rename make_zimage_chrp64.sh to make_zimage_chrp.sh
+  recognize also 32bit chrp
+
+-------------------------------------------------------------------
 Tue May 31 00:54:24 CEST 2005 - olh@suse.de
 
 - add hack-coff binary from 2.6.12-rc5

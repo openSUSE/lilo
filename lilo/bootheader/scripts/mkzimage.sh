@@ -26,7 +26,7 @@ until [ "$#" = "0" ] ; do
 		echo "Usage: ${0##*/} --vmlinux <ELF binary> [--initrd <ramdisk.image.gz>] --output <zImage> [--cmdline <kernelcmdline>] [--board <subarch>] [--tmp <tempdir>]"
 		echo "additional options: [--objdir <dir>]"
 		echo "option --board requires a ppc/ppc64 subarch. It can be one of:"
-		echo "chrp|chrp64|pseries iseries pmaccoff pmac prep"
+		echo "chrp|rs6k iseries pmaccoff pmac prep"
 		exit 1
 		;;
 		--board)
@@ -140,14 +140,14 @@ fi
 case "$kernel_type" in
 	64bit)
 	case "$board_type" in
-			chrp|chrp64|pseries)
-			zimage_sh=make_zimage_chrp64.sh
+			chrp|pseries|rs6k)
+			zimage_sh=make_zimage_chrp.sh
 			;;
 			iseries)
 			zimage_sh=make_zimage_iseries.sh
 			;;
 			pmac|NewWorld)
-			zimage_sh="make_zimage_chrp64.sh --no-addnote"
+			zimage_sh=make_zimage_pmac_newworld.sh
 			;;
 			*)
 			echo "ERROR: boardtype \"$board_type\" not supported as 64bit"
@@ -157,6 +157,9 @@ case "$kernel_type" in
 	;;
 	32bit)
 	case "$board_type" in
+			chrp|rs6k)
+			zimage_sh=make_zimage_chrp.sh
+			;;
 			pmaccoff|OldWorld)
 			zimage_sh=make_zimage_pmac_oldworld_coff.sh
 			;;
