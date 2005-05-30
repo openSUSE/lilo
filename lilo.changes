@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 14:30:53 CEST 2005 - olh@suse.de
+
+- use the gcc provided ppc-asm.h instead of the selfprovided ppc_asm.h
+
+-------------------------------------------------------------------
 Sun May 22 22:46:45 CEST 2005 - olh@suse.de
 
 - update prep binary objects in bootheader to 2.6.12-rc4,
