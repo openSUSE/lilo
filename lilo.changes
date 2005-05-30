@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 19:44:35 CEST 2005 - olh@suse.de
+
+- use zlib_inflate from 2.6.12-rc5
+
+-------------------------------------------------------------------
 Mon May 30 18:11:37 CEST 2005 - olh@suse.de
 
 - split check_elf64 function in bootheader
