@@ -1,3 +1,4 @@
+/*  $Id$ */
 /* zlib.h -- interface of the 'zlib' general purpose compression library
   version 1.1.3, July 9th, 1998
 

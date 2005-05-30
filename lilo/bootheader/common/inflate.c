@@ -1,3 +1,4 @@
+/*  $Id$ */
 /* inflate.c -- zlib interface to inflate modules
  * Copyright (C) 1995-1998 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h 
