@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 17:39:45 CEST 2005 - olh@suse.de
+
+- split gunzip function in bootheader
+
+-------------------------------------------------------------------
 Mon May 30 16:44:22 CEST 2005 - olh@suse.de
 
 - add mmu ihandle and map call-method to map the claimed memory

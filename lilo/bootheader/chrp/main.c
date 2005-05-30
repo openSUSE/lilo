@@ -18,7 +18,7 @@
 #include <prom.h>
 #include "zlib.h"
 
-static void gunzip(void *, int, unsigned char *, int *);
+static void do_gunzip(void *, int, unsigned char *, int *);
 extern void flush_cache(void *, unsigned long);
 
 
@@ -94,6 +94,24 @@ static unsigned long try_claim(unsigned long size)
 	claim_base = PAGE_ALIGN(claim_base + size);
 	return addr;
 }
+
+static void gunzip(unsigned long dest, int destlen,
+		   unsigned long src, int srclen, const char *what)
+{
+	int len;
+	avail_ram = scratch;
+	begin_avail = avail_high = avail_ram;
+	end_avail = scratch + sizeof(scratch);
+	printf("gunzipping %s (0x%lx:0x%lx <- 0x%lx:0x%0lx) using 0x%p:%0xl...",
+	       what, dest, destlen, src, srclen, scratch, sizeof(scratch));
+	len = srclen;
+	heap_use = heap_max = 0;
+	do_gunzip((void *)dest, destlen, (unsigned char *)src, &len);
+	printf("done 0x%lx bytes\n\r", len);
+	printf("0x%x bytes of heap consumed, max in use 0x%x\n\r",
+	       (unsigned)(avail_high - begin_avail), heap_max);
+}
+
 
 void start(unsigned long a1, unsigned long a2, void *promptr)
 {
@@ -174,22 +192,12 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	}
 
 	/* Eventually gunzip the kernel */
-	if (*(unsigned short *)vmlinuz.addr == 0x1f8b) {
-		int len;
-		avail_ram = scratch;
-		begin_avail = avail_high = avail_ram;
-		end_avail = scratch + sizeof(scratch);
-		printf("gunzipping (0x%lx <- 0x%lx:0x%0lx)...",
-		       vmlinux.addr, vmlinuz.addr, vmlinuz.addr+vmlinuz.size);
-		len = vmlinuz.size;
-		gunzip((void *)vmlinux.addr, vmlinux.size,
-			(unsigned char *)vmlinuz.addr, &len);
-		printf("done 0x%lx bytes\n\r", len);
-		printf("0x%x bytes of heap consumed, max in use 0x%x\n\r",
-		       (unsigned)(avail_high - begin_avail), heap_max);
-	} else {
-		memmove((void *)vmlinux.addr,(void *)vmlinuz.addr,vmlinuz.size);
-	}
+	if (*(unsigned short *)vmlinuz.addr == 0x1f8b)
+		gunzip(vmlinux.addr, vmlinux.size, vmlinuz.addr, vmlinuz.size,
+		       "kernel");
+	else
+		memmove((void *)vmlinux.addr, (void *)vmlinuz.addr,
+			vmlinuz.size);
 
 	if ( _builtin_cmd_line.prefer && _builtin_cmd_line.prefer != '0' ) {
 		int l = strlen (_builtin_cmd_line.string)+1;
@@ -305,7 +313,7 @@ void zfree(void *x, void *addr, unsigned nb)
 
 #define DEFLATED	8
 
-static void gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
+static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 {
 	z_stream s;
 	int r, i, flags;
