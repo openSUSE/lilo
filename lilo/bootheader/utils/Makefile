@@ -12,9 +12,10 @@ addnote: addnote.c
 
 install:
 	@set -ex; \
-	$(INSTALL_DIR) $(DESTDIR)$(INSTALLDIR)/chrp/chrp64 ; \
-	$(INSTALL_EXEC) addnote $(DESTDIR)$(INSTALLDIR)/chrp/ ; \
-	ln -fsv ../addnote $(DESTDIR)$(INSTALLDIR)/chrp/chrp64/addnote
+	$(INSTALL_DIR) $(DESTDIR)$(INSTALLDIR)/utils ; \
+	for i in $(PROGS) ; do \
+	$(INSTALL_EXEC) $$i $(DESTDIR)$(INSTALLDIR)/utils/ ; \
+	done
 
 clean:
 	$(RM) *.o .*.d $(PROGS)
