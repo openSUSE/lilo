@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue May 31 00:48:27 CEST 2005 - olh@suse.de
+
+- update make_zimage_pmac*sh to match make_zimage_chrp64.sh
+  link coff binary at 16MB
+
+-------------------------------------------------------------------
 Tue May 31 00:17:58 CEST 2005 - olh@suse.de
 
 - use the new ld.script for chrp64,

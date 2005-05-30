@@ -3,8 +3,6 @@
 set -e
 # set -x
 
-export LANG=C
-export LC_ALL=C
 obj_dir=/lib/lilo
 
 vmlinux=
@@ -91,25 +89,12 @@ else
 	tmp=`mktemp -d $tmp/mkzimage_chrp64.$$.XXXXXX`
 fi
 #
-case "$(file -Lb $vmlinux)" in
-	ELF\ 64-bit*)
-		cp -p $vmlinux $tmp/vmlinux
-		strip -s $tmp/vmlinux
-		gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
-		;;
-	ELF\ 32-bit*)
-		objcopy -j .vmlinuz -O binary $vmlinux $tmp/vmlinux.gz
-		gzip -dfc9 $tmp/vmlinux.gz > $tmp/vmlinux
-		;;
-	*)
-		file -b $vmlinux
-		echo wrong filetype
-		exit 1 
-		;;
-esac
+cp -p $vmlinux $tmp/vmlinux
+strip -s $tmp/vmlinux
+gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
 #
 #
-strings $tmp/vmlinux | grep -E 'Linux version .* .gcc version' > $tmp/uts_string.txt
+strings $tmp/vmlinux | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt
 cp $obj_dir/chrp/empty.o $tmp/empty.o
 objcopy $tmp/empty.o \
 	--add-section=.kernel:uts_string=$tmp/uts_string.txt \
@@ -127,7 +112,10 @@ fi
 #
 rm -f $tmp/output
 #
-ld -Ttext 0x00400000 -e _start \
+ld \
+	-m elf32ppc \
+	-Ttext 0x00400000 \
+	-e _start \
 	-T $obj_dir/chrp/ld.script \
 	-o $tmp/output \
 	$obj_dir/chrp/crt0.o \

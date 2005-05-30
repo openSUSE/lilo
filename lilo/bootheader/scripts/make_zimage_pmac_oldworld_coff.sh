@@ -1,9 +1,11 @@
 #!/bin/bash
+# $Id$
 set -e
 # set -x
 
 obj_dir=/lib/lilo
 
+bootfile_sizelimit=$((4*1024*1024-15*1024))
 vmlinux=
 initrd=
 tmp=
@@ -78,67 +80,63 @@ if [ -z "$output" ] ; then
 	exit 1
 fi
 if [ -z "$tmp" ] ; then
-	tmp=`mktemp -d ${TMPDIR:-/tmp}/mkzimage_pmac_oldworld_coff.$$.XXXXXX`
+	tmp=`mktemp -d ${TMPDIR:-/tmp}/mkzimage_pmac_oldworld.$$.XXXXXX`
 else
-	tmp=`mktemp -d $tmp/mkzimage_pmac_oldworld_coff.$$.XXXXXX`
+	tmp=`mktemp -d $tmp/mkzimage_pmac_oldworld.$$.XXXXXX`
 fi
 #
-
-objcopy  -O binary $vmlinux "$tmp/vmlinux.bin"
-gzip -9 "$tmp/vmlinux.bin"
-objcopy \
-	-R .comment \
-	--add-section=.image="$tmp/vmlinux.bin.gz" \
-	--set-section-flags=.image=contents,alloc,load,readonly,data \
-	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_dummy.o" \
-	"$tmp/arch_ppc_boot_openfirmware_image.o"
-
-if [ -z "$initrd" ] ; then
-OBJCOPY_RAMDISK_OBJECT="$tmp/arch_ppc_boot_openfirmware_image.o"
-OBJCOPY_RAMDISK=
-else
-OBJCOPY_RAMDISK_OBJECT="$tmp/arch_ppc_boot_openfirmware_image_initrd.o"
-OBJCOPY_RAMDISK=" -R .ramdisk "
-objcopy \
-	"$tmp/arch_ppc_boot_openfirmware_image.o" \
-	$OBJCOPY_RAMDISK_OBJECT \
-	--add-section=.ramdisk="$initrd" \
-	--set-section-flags=.ramdisk=contents,alloc,load,readonly,data
+cp -p $vmlinux $tmp/vmlinux
+strip -s $tmp/vmlinux
+gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
+#
+#
+strings $tmp/vmlinux | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt
+cp $obj_dir/chrp/empty.o $tmp/empty.o
+objcopy $tmp/empty.o \
+	--add-section=.kernel:uts_string=$tmp/uts_string.txt \
+	--set-section-flags=.kernel:uts_string=contents,alloc,load,readonly,data
+#
+objcopy $tmp/empty.o \
+	--add-section=.vmlinuz=$tmp/vmlinux.gz \
+	--set-section-flags=.vmlinuz=contents,alloc,load,readonly,data
+#
+if [ ! -z "$initrd" ] ; then
+objcopy $tmp/empty.o \
+	--add-section=.initrd=$initrd \
+	--set-section-flags=.initrd=contents,alloc,load,readonly,data
 fi
-
+#
+rm -f $tmp/output
+#
 ld \
-	-o "$tmp/output" \
-	-T "$obj_dir/pmac/oldworld_coff/arch_ppc_boot_ld.script" \
+	-m elf32ppc \
+	-Ttext 0x01000000 \
 	-e _start \
-	-Ttext 0x00500000 \
-	-Bstatic \
-	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_coffcrt0.o" \
-	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_start.o" \
-	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_misc.o" \
-	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_common.o" \
-	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_openfirmware_coffmain.o" \
-	"$OBJCOPY_RAMDISK_OBJECT" \
-	"$obj_dir/pmac/oldworld_coff/lib_lib.a" \
-	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_lib_lib.a" \
-	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_of1275_lib.a" \
-	"$obj_dir/pmac/oldworld_coff/arch_ppc_boot_common_lib.a"
-	
-objcopy \
-	"$tmp/output" \
-	"$tmp/output" \
-	-R .comment
-
-objcopy \
+	-T $obj_dir/chrp/ld.script \
+	-o $tmp/output \
+	-B static \
+	$obj_dir/chrp/crt0.o \
+	$obj_dir/chrp/string.o \
+	$obj_dir/chrp/prom.o \
+	$obj_dir/chrp/main.o \
+	$obj_dir/chrp/div64.o \
+	$tmp/empty.o \
+	$obj_dir/common/zlib.a
+#
++objcopy \
 	-O aixcoff-rs6000 \
 	-R .stab \
 	-R .stabstr \
 	-R .comment \
-	"$tmp/output" \
-	"$tmp/output.coff"
-	chmod u+xr "$obj_dir/pmac/oldworld_coff/hack-coff"
-	"$obj_dir/pmac/oldworld_coff/hack-coff" "$tmp/output.coff"
+	$tmp/output \
+	$tmp/output.coff
+$obj_dir/utils/hack-coff $tmp/output.coff
 
-#
 rm -f "$output"
 cp "$tmp/output.coff" "$output"
-
+bootfile_finalsize=`wc -c < "$output"`
+if test $bootfile_finalsize -gt $bootfile_sizelimit ; then
+	echo "output file $output is $(($bootfile_finalsize - $bootfile_sizelimit)) bytes too large"
+	echo "booting from openfirmware prompt will not work"
+fi
+rm -rf $tmp
