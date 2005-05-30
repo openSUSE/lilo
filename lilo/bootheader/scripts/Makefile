@@ -3,7 +3,7 @@ SRCROOT  = ..
 include ../MCONFIG
 include ../MRULES
 SCRIPTS= \
-	make_zimage_chrp64.sh \
+	make_zimage_chrp.sh \
 	make_zimage_pmac_newworld.sh \
 	make_zimage_prep.sh \
 	make_zimage_iseries.sh \
