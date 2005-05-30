@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 19:52:49 CEST 2005 - olh@suse.de
+
+- move do_gunzip before use
+
+-------------------------------------------------------------------
 Mon May 30 19:48:25 CEST 2005 - olh@suse.de
 
 - remove unneeded zalloc function in bootheader
