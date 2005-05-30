@@ -26,6 +26,8 @@ INCLUDE = -I$(SRCROOT)/include
 REQFLAGS = $(ARCHREQFLAGS) \
            -nostdinc -isystem $(shell $(CC) -print-file-name=include) \
            -fno-builtin -m32 -fomit-frame-pointer \
+	   -msoft-float \
+	   -Os \
 	   -Wall -Wstrict-prototypes \
 	   $(INCLUDE)
 LDFLAGS =

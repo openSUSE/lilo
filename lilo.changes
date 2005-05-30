@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 14:36:37 CEST 2005 - olh@suse.de
+
+- build bootheader with -Os -msoft-float
+
+-------------------------------------------------------------------
 Mon May 30 14:35:35 CEST 2005 - olh@suse.de
 
 - remove --save-temps from bootheader CFLAGS
