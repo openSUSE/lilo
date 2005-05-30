@@ -114,7 +114,7 @@ ld \
 	-e _start \
 	-T $obj_dir/chrp/ld.script \
 	-o $tmp/output \
-	-B static \
+	-Bstatic \
 	$obj_dir/chrp/crt0.o \
 	$obj_dir/chrp/string.o \
 	$obj_dir/chrp/prom.o \
@@ -123,7 +123,7 @@ ld \
 	$tmp/empty.o \
 	$obj_dir/common/zlib.a
 #
-+objcopy \
+objcopy \
 	-O aixcoff-rs6000 \
 	-R .stab \
 	-R .stabstr \
