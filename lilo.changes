@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 14:35:35 CEST 2005 - olh@suse.de
+
+- remove --save-temps from bootheader CFLAGS
+
+-------------------------------------------------------------------
 Mon May 30 14:30:53 CEST 2005 - olh@suse.de
 
 - use the gcc provided ppc-asm.h instead of the selfprovided ppc_asm.h
