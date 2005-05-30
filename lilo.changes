@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May 31 01:26:33 CEST 2005 - olh@suse.de
+
+- move mkzimage_cmdline and iseriesAddRamdisk to bootheader
+
+-------------------------------------------------------------------
 Tue May 31 01:08:42 CEST 2005 - olh@suse.de
 
 - rename make_zimage_chrp64.sh to make_zimage_chrp.sh

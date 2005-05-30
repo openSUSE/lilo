@@ -88,12 +88,12 @@ nm "$vmlinux" | \
 	grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 	sort > "$tmp/System.map"
 if [ -z "$initrd" ] ; then
-$obj_dir/iseries/iseries-addSystemMap \
+$obj_dir/utils/iseries-addSystemMap \
 	"$tmp/System.map" \
 	"$vmlinux" \
 	"$tmp/output"
 else
-$obj_dir/iseries/iseries-addRamDisk \
+$obj_dir/utils/iseries-addRamDisk \
 	"$initrd" \
 	"$tmp/System.map" \
 	"$vmlinux" \

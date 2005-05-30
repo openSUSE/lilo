@@ -54,9 +54,6 @@ mv second/yaboot.chrp yaboot.chrp
 cd ..
 #
 cd lilo.ppc
-gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addRamDisk lilo-addRamDisk.c
-gcc -Wall $RPM_OPT_FLAGS -s -o iseries-addSystemMap lilo-addSystemMap.c
-gcc -Wall $RPM_OPT_FLAGS -s -o mkzimage_cmdline mkzimage_cmdline.c
 cd bootheader
 make
 
@@ -66,17 +63,12 @@ make
 export NO_BRP_STRIP_DEBUG=true
 #
 rm -rfv $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/lib/lilo/chrp
-mkdir -p $RPM_BUILD_ROOT/lib/lilo/iseries
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/pmac
 mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
 cd lilo.ppc
-cp -a iseries-* $RPM_BUILD_ROOT/lib/lilo/iseries
-cp -a mkzimage_cmdline $RPM_BUILD_ROOT/bin/
-ln -sv /bin/mkzimage_cmdline $RPM_BUILD_ROOT/lib/lilo/chrp/mkzimage_cmdline
 cp -a lib/* $RPM_BUILD_ROOT/lib/lilo
 chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
