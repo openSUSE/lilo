@@ -132,13 +132,13 @@ case "$kernel_type" in
 	64bit)
 	case "$board_type" in
 			chrp|chrp64|pseries)
-			zimage_sh=chrp/make_zimage_chrp64.sh
+			zimage_sh=make_zimage_chrp64.sh
 			;;
 			iseries)
-			zimage_sh=iseries/make_zimage_iseries.sh
+			zimage_sh=make_zimage_iseries.sh
 			;;
 			pmac|NewWorld)
-			zimage_sh="chrp/make_zimage_chrp64.sh --no-addnote"
+			zimage_sh="make_zimage_chrp64.sh --no-addnote"
 			;;
 			*)
 			echo "ERROR: boardtype \"$board_type\" not supported as 64bit"
@@ -149,13 +149,13 @@ case "$kernel_type" in
 	32bit)
 	case "$board_type" in
 			pmaccoff|OldWorld)
-			zimage_sh=pmac/oldworld_coff/make_zimage_pmac_oldworld_coff.sh
+			zimage_sh=make_zimage_pmac_oldworld_coff.sh
 			;;
 			prep)
-			zimage_sh=prep/make_zimage_prep.sh
+			zimage_sh=make_zimage_prep.sh
 			;;
 			pmac|NewWorld)
-			zimage_sh=pmac/newworld/make_zimage_pmac_newworld.sh
+			zimage_sh=make_zimage_pmac_newworld.sh
 			;;
 			*)
 			echo "ERROR: boardtype \"$board_type\" not supported as 32bit"
@@ -176,7 +176,7 @@ fi
 if [ ! -z "$tmp" ] ; then
 options="$options --tmp $tmp"
 fi
-$obj_dir/$zimage_sh $options --vmlinux "$vmlinux" --output "$output"
+bash $obj_dir/scripts/$zimage_sh $options --vmlinux "$vmlinux" --output "$output"
 if [ ! -z "$cmdline" ] ; then
 /bin/mkzimage_cmdline -a 1 -c -s "$cmdline" "$output"
 fi

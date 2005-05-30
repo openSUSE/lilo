@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 22:22:33 CEST 2005 - olh@suse.de
+
+- move all make_zimage_*.sh scripts to /lib/lilo/scripts
+
+-------------------------------------------------------------------
 Mon May 30 22:02:52 CEST 2005 - olh@suse.de
 
 - add check_elf32 function to bootheader
