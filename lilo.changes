@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 14:39:48 CEST 2005 - olh@suse.de
+
+- build bootheader with LANG=C
+
+-------------------------------------------------------------------
 Mon May 30 14:36:37 CEST 2005 - olh@suse.de
 
 - build bootheader with -Os -msoft-float
