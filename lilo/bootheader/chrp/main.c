@@ -68,6 +68,48 @@ struct _builtin_cmd_line  __attribute__ ((__section__ (".kernel:cmdline"))) _bui
 	.cmdline_end_flag = cmdline_end_string,
 };
 
+static int check_elf32(void *p)
+{
+	Elf32_Ehdr *elf32 = p;
+	Elf32_Phdr *elf32ph;
+
+	if (elf32->e_ident[EI_MAG0] != ELFMAG0 ||
+	    elf32->e_ident[EI_MAG1] != ELFMAG1 ||
+	    elf32->e_ident[EI_MAG2] != ELFMAG2 ||
+	    elf32->e_ident[EI_MAG3] != ELFMAG3 ||
+	    elf32->e_ident[EI_CLASS] != ELFCLASS32 ||
+	    elf32->e_ident[EI_DATA] != ELFDATA2MSB ||
+	    elf32->e_type != ET_EXEC || elf32->e_machine != EM_PPC)
+		return 0;
+
+	elf32ph = (Elf32_Phdr *) ((unsigned long)elf32 +
+				  (unsigned long)elf32->e_phoff);
+
+	vmlinux.memsize = (unsigned long)elf32ph->p_memsz;
+	vmlinux.offset = (unsigned long)elf32ph->p_offset;
+
+#ifdef DEBUG
+	printf("PPC32 ELF file:\n\r");
+	printf("e_ehsize    0x%08x\n\r", elf32->e_ehsize);
+	printf("e_phentsize 0x%08x\n\r", elf32->e_phentsize);
+	printf("e_phnum     0x%08lx\n\r", elf32->e_phnum);
+	printf("e_shentsize 0x%08lx\n\r", elf32->e_shentsize);
+	printf("e_shnum     0x%08lx\n\r", elf32->e_shnum);
+	printf("e_shstrndx  0x%08lx\n\r", elf32->e_shstrndx);
+
+	printf("p_type   0x%08x\n\r", elf32ph->p_type);
+	printf("p_flags  0x%08x\n\r", elf32ph->p_flags);
+	printf("p_offset 0x%08lx\n\r", elf32ph->p_offset);
+	printf("p_vaddr  0x%08lx\n\r", elf32ph->p_vaddr);
+	printf("p_paddr  0x%08lx\n\r", elf32ph->p_paddr);
+	printf("p_filesz 0x%08lx\n\r", elf32ph->p_filesz);
+	printf("p_memsz  0x%08lx\n\r", elf32ph->p_memsz);
+	printf("p_align  0x%08lx\n\r", elf32ph->p_align);
+#endif
+
+	return 32;
+}
+
 static int check_elf64(void *p)
 {
 	Elf64_Ehdr *elf64 = p;
@@ -243,6 +285,8 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		memcpy(elfheader, _vmlinux_start, sizeof(elfheader));
 
 	elftype = check_elf64(elfheader);
+	if (!elftype)
+		elftype = check_elf32(elfheader);
 	if (!elftype) {
 		printf("not a powerpc ELF file\n\r");
 		exit();

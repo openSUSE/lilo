@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 22:02:52 CEST 2005 - olh@suse.de
+
+- add check_elf32 function to bootheader
+
+-------------------------------------------------------------------
 Mon May 30 20:55:24 CEST 2005 - olh@suse.de
 
 - look at the ELF header to determine the required claim size,
