@@ -131,7 +131,7 @@ ld -Ttext 0x00400000 -e _start \
 	$obj_dir/main.o \
 	$obj_dir/div64.o \
 	$tmp/empty.o \
-	$obj_dir/zlib.o \
+	$obj_dir/../common/zlib.a \
 	--defsym _vmlinux_memsize=$vmlinux_memsize \
 	--defsym _vmlinux_filesize=$vmlinux_filesize
 #
