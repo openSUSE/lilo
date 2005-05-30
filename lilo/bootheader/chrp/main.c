@@ -117,6 +117,9 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	printf("\n\rzImage starting: loaded at 0x%x (0x%lx/0x%lx/0x%p)\n\r", (unsigned)_start,a1,a2,promptr);
 
+	if (getprop(chosen_handle, "mmu", &mmu, sizeof(mmu)) != 4)
+		exit();
+
 	if (getprop(chosen_handle, "cpu", &bootcpu, sizeof(bootcpu)) == 4) {
 		bootcpu_phandle = instance_to_package(bootcpu);
 		if (bootcpu_phandle == (void *)-1)

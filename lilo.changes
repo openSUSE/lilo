@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 16:44:22 CEST 2005 - olh@suse.de
+
+- add mmu ihandle and map call-method to map the claimed memory
+
+-------------------------------------------------------------------
 Mon May 30 15:44:49 CEST 2005 - olh@suse.de
 
 - add instance-to-package call to bootheader to get the cpu type

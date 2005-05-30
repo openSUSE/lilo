@@ -22,6 +22,7 @@ void *stdin;
 void *stdout;
 void *stderr;
 void *bootcpu;
+void *mmu;
 
 
 int
@@ -157,6 +158,36 @@ claim(unsigned long virt, unsigned long size, unsigned long align)
 	args.align = align;
 	(*prom)(&args);
 	return args.ret;
+}
+
+int
+map(unsigned int phys, unsigned int virt, unsigned int size)
+{
+	struct prom_args {
+		char *service;
+		int nargs;
+		int nret;
+		char *method;
+		void *mmu_ihandle;
+		int misc;
+		unsigned int size;
+		unsigned int virt;
+		unsigned int phys;
+		int ret0;
+	} args;
+
+	args.service = "call-method";
+	args.nargs = 6;
+	args.nret = 1;
+	args.method = "map";
+	args.mmu_ihandle = mmu;
+	args.misc = 0;
+	args.phys = phys;
+	args.virt = virt;
+	args.size = size;
+	(*prom) (&args);
+
+	return (int)args.ret0;
 }
 
 int
