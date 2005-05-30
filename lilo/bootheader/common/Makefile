@@ -23,7 +23,7 @@ install:
 	@set -ex; \
 	$(INSTALL_DIR) $(DESTDIR)$(INSTALLDIR)/common ; \
 	for i in $(OBJS); do \
-	$(INSTALL_DATA) $$i $(DESTDIR)$(INSTALLDIR)/ommonp/$$i; \
+	$(INSTALL_DATA) $$i $(DESTDIR)$(INSTALLDIR)/common/$$i; \
 	done ; \
 
 clean:
