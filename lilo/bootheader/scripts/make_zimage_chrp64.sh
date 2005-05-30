@@ -98,7 +98,7 @@ case "$(file -Lb $vmlinux)" in
 		gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
 		;;
 	ELF\ 32-bit*)
-		objcopy -j .kernel:vmlinux -O binary $vmlinux $tmp/vmlinux.gz
+		objcopy -j .vmlinuz -O binary $vmlinux $tmp/vmlinux.gz
 		gzip -dfc9 $tmp/vmlinux.gz > $tmp/vmlinux
 		;;
 	*)
@@ -116,19 +116,19 @@ objcopy $tmp/empty.o \
 	--set-section-flags=.kernel:uts_string=contents,alloc,load,readonly,data
 #
 objcopy $tmp/empty.o \
-	--add-section=.kernel:vmlinux=$tmp/vmlinux.gz \
-	--set-section-flags=.kernel:vmlinux=contents,alloc,load,readonly,data
+	--add-section=.vmlinuz=$tmp/vmlinux.gz \
+	--set-section-flags=.vmlinuz=contents,alloc,load,readonly,data
 #
 if [ ! -z "$initrd" ] ; then
 objcopy $tmp/empty.o \
-	--add-section=.kernel:initrd=$initrd \
-	--set-section-flags=.kernel:initrd=contents,alloc,load,readonly,data
+	--add-section=.initrd=$initrd \
+	--set-section-flags=.initrd=contents,alloc,load,readonly,data
 fi
 #
 rm -f $tmp/output
 #
 ld -Ttext 0x00400000 -e _start \
-	-T $obj_dir/chrp/ld.script.chrp64 \
+	-T $obj_dir/chrp/ld.script \
 	-o $tmp/output \
 	$obj_dir/chrp/crt0.o \
 	$obj_dir/chrp/string.o \

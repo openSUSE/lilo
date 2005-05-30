@@ -51,13 +51,13 @@ SECTIONS
     *(.rodata.*)
     *(.rodata1)
     *(.got1)
-    __image_begin = .;
-    *(.image)
-    __image_end = .;
+    _vmlinuz_start = .;
+    *(.vmlinuz)
+    _vmlinuz_end = .;
     . = ALIGN(4096);
-    __ramdisk_begin = .;
-    *(.ramdisk)
-    __ramdisk_end = .;
+    _initrd_start = .;
+    *(.initrd)
+    _initrd_end = .;
     . = ALIGN(4096);
     CONSTRUCTORS
   }

@@ -26,8 +26,8 @@ extern void flush_cache(void *, unsigned long);
 #define RAM_END		(256<<20) // Fixme: use OF */
 
 extern char _start[];
-extern char _vmlinux_start[];
-extern char _vmlinux_end[];
+extern char _vmlinuz_start[];
+extern char _vmlinuz_end[];
 extern char _initrd_start[];
 extern char _initrd_end[];
 
@@ -61,7 +61,7 @@ struct _builtin_cmd_line {
 	unsigned char cmdline_end_flag[sizeof(cmdline_end_string)]; /* with trailing zero */
 } __attribute__ ((__packed__));
 
-struct _builtin_cmd_line  __attribute__ ((__section__ (".kernel:cmdline"))) _builtin_cmd_line = {
+struct _builtin_cmd_line _builtin_cmd_line = {
 	.prefer = '0',
 	.cmdling_start_flag = cmdline_start_string,
 	.string = "",
@@ -274,15 +274,15 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	} else
 		cputype = 0;
 
-	vmlinuz.addr = (unsigned long)_vmlinux_start;
-	vmlinuz.size = (unsigned long)(_vmlinux_end - _vmlinux_start);
+	vmlinuz.addr = (unsigned long)_vmlinuz_start;
+	vmlinuz.size = (unsigned long)(_vmlinuz_end - _vmlinuz_start);
 
 	/* Eventually gunzip the ELF header of the kernel */
 	if (*(unsigned short *)vmlinuz.addr == 0x1f8b)
 		gunzip((unsigned long)elfheader, sizeof(elfheader),
 				vmlinuz.addr, vmlinuz.size, "ELF header");
 	else
-		memcpy(elfheader, _vmlinux_start, sizeof(elfheader));
+		memcpy(elfheader, _vmlinuz_start, sizeof(elfheader));
 
 	elftype = check_elf64(elfheader);
 	if (!elftype)

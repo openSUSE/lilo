@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue May 31 00:17:58 CEST 2005 - olh@suse.de
+
+- use the new ld.script for chrp64,
+  remove the .kernel:cmdline section
+
+-------------------------------------------------------------------
 Mon May 30 23:44:24 CEST 2005 - olh@suse.de
 
 - add add arch/ppc/boot/ld.script from 2.6.12-rc5 to bootheader
