@@ -3,11 +3,14 @@ SRCROOT  = ..
 include ../MCONFIG
 include ../MRULES
 
-PROGS       := addnote
+PROGS       := addnote hack-coff
 
 all:	$(PROGS)
 
 addnote: addnote.c
+	$(HOST_CC)  $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $<
+
+hack-coff: hack-coff.c rs6000.h
 	$(HOST_CC)  $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $<
 
 install:
