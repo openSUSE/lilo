@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon May 30 23:44:24 CEST 2005 - olh@suse.de
+
+- add add arch/ppc/boot/ld.script from 2.6.12-rc5 to bootheader
+
+-------------------------------------------------------------------
 Mon May 30 22:36:46 CEST 2005 - olh@suse.de
 
 - add option --objdir to mkzimage with /lib/lilo as default

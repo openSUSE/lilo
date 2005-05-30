@@ -21,6 +21,7 @@ install:
 	$(INSTALL_DATA) $$i $(DESTDIR)$(INSTALLDIR)/chrp/$$i; \
 	done ; \
 	$(INSTALL_DATA) ld.script.chrp64 $(DESTDIR)$(INSTALLDIR)/chrp/
+	$(INSTALL_DATA) ld.script $(DESTDIR)$(INSTALLDIR)/chrp/
 
 clean:
 	$(RM) *.o .*.d
