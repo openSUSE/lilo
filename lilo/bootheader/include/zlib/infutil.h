@@ -12,9 +12,9 @@
 #ifndef _INFUTIL_H
 #define _INFUTIL_H
 
-#include <linux/zconf.h>
-#include "inftrees.h"
-#include "infcodes.h"
+#include <zlib/zconf.h>
+#include <zlib/inftrees.h>
+#include <zlib/infcodes.h>
 
 typedef enum {
       TYPE,     /* get type bits (3, including end bit) */

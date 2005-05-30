@@ -14,10 +14,9 @@
 #ifndef _Z_UTIL_H
 #define _Z_UTIL_H
 
-#include <linux/zlib.h>
-#include <linux/string.h>
-#include <linux/errno.h>
-#include <linux/kernel.h>
+#include <zlib/zlib.h>
+#include <stddef.h>
+#include <string.h>
 
 typedef unsigned char  uch;
 typedef unsigned short ush;

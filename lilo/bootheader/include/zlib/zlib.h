@@ -32,7 +32,7 @@
 #ifndef _ZLIB_H
 #define _ZLIB_H
 
-#include <linux/zconf.h>
+#include <zlib/zconf.h>
 
 #define ZLIB_VERSION "1.1.3"
 

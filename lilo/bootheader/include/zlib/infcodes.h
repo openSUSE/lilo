@@ -12,7 +12,7 @@
 #ifndef _INFCODES_H
 #define _INFCODES_H
 
-#include "infblock.h"
+#include <zlib/infblock.h>
 
 struct inflate_codes_state;
 typedef struct inflate_codes_state inflate_codes_statef;

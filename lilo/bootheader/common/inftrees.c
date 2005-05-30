@@ -4,11 +4,11 @@
  * For conditions of distribution and use, see copyright notice in zlib.h 
  */
 
-#include <linux/zutil.h>
-#include "inftrees.h"
-#include "infutil.h"
+#include <zlib/zutil.h>
+#include <zlib/inftrees.h>
+#include <zlib/infutil.h>
 
-static const char inflate_copyright[] __attribute_used__ =
+static const char inflate_copyright[] =
    " inflate 1.1.3 Copyright 1995-1998 Mark Adler ";
 /*
   If you use the zlib library in a product, an acknowledgment is welcome
