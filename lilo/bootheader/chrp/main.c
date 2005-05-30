@@ -30,8 +30,6 @@ extern char _vmlinux_start[];
 extern char _vmlinux_end[];
 extern char _initrd_start[];
 extern char _initrd_end[];
-void *_vmlinux_filesize;
-void *_vmlinux_memsize;
 
 struct addr_range {
 	unsigned long addr;
@@ -44,6 +42,7 @@ static struct addr_range vmlinuz = {0, 0, 0};
 static struct addr_range initrd  = {0, 0, 0};
 
 static char scratch[128<<10];	/* 128kB of scratch space for gunzip */
+static unsigned char elfheader[256];
 
 typedef void (*kernel_entry_t)( unsigned long,
                                 unsigned long,
@@ -179,7 +178,7 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 	s.avail_in = *lenp - i;
 	s.next_out = dst;
 	s.avail_out = dstlen;
-	r = zlib_inflate(&s, Z_FINISH);
+	r = zlib_inflate(&s, Z_FULL_FLUSH);
 	if (r != Z_OK && r != Z_STREAM_END) {
 		printf("inflate returned %d msg: %s\n\r", r, s.msg);
 		exit();
@@ -203,9 +202,8 @@ static void gunzip(unsigned long dest, int destlen,
 void start(unsigned long a1, unsigned long a2, void *promptr)
 {
 	void *bootcpu_phandle;
-	unsigned long vmlinux_memsize, vmlinux_filesize;
 	kernel_entry_t kernel_entry;
-	int cputype;
+	int cputype, elftype;
 
 	prom = (int (*)(void *)) promptr;
 	chosen_handle = finddevice("/chosen");
@@ -233,27 +231,42 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 			cputype = 32;
 	} else
 		cputype = 0;
+
+	vmlinuz.addr = (unsigned long)_vmlinux_start;
+	vmlinuz.size = (unsigned long)(_vmlinux_end - _vmlinux_start);
+
+	/* Eventually gunzip the ELF header of the kernel */
+	if (*(unsigned short *)vmlinuz.addr == 0x1f8b)
+		gunzip((unsigned long)elfheader, sizeof(elfheader),
+				vmlinuz.addr, vmlinuz.size, "ELF header");
+	else
+		memcpy(elfheader, _vmlinux_start, sizeof(elfheader));
+
+	elftype = check_elf64(elfheader);
+	if (!elftype) {
+		printf("not a powerpc ELF file\n\r");
+		exit();
+	}
+	if (cputype && cputype != elftype) {
+		printf("booting a %d-bit kernel on a %d-bit cpu.\n\r",
+				elftype, cputype);
+		exit();
+	}
+
 	/*
-	 * Now we try to claim some memory for the kernel itself
-	 * our "vmlinux_memsize" is the memory footprint in RAM, _HOWEVER_, what
-	 * our Makefile stuffs in is an image containing all sort of junk including
-	 * an ELF header. We need to do some calculations here to find the right
-	 * size... In practice we add 1Mb, that is enough, but we should really
-	 * consider fixing the Makefile to put a _raw_ kernel in there !
+	 * Additional memory for the device-tree copy, must be mapped
+	 * the kernel doesnt claim and map this area itself
 	 */
-	vmlinux_memsize = (unsigned long) &_vmlinux_memsize;
-	vmlinux_filesize = (unsigned long) &_vmlinux_filesize;
-	vmlinux_memsize += 0x100000;
-	printf("Allocating 0x%lx bytes for kernel ...\n\r", vmlinux_memsize);
-	vmlinux.addr = try_claim(vmlinux_memsize);
+	vmlinux.memsize += 3 * 1024 * 1024;
+	printf("Allocating 0x%lx bytes for kernel ...\n\r", vmlinux.memsize);
+	vmlinux.addr = try_claim(vmlinux.memsize);
 	if (vmlinux.addr == 0) {
 		printf("Can't allocate memory for kernel image !\n\r");
 		exit();
 	}
-	vmlinuz.addr = (unsigned long)_vmlinux_start;
-	vmlinuz.size = (unsigned long)(_vmlinux_end - _vmlinux_start);
-	vmlinux.size = PAGE_ALIGN(vmlinux_filesize);
-	vmlinux.memsize = vmlinux_memsize;
+	printf("map 0x%08lx@0x%p: %d\n\r", vmlinux.memsize, vmlinux.addr,
+			map(vmlinux.addr, vmlinux.addr, vmlinux.memsize));
+
 
 	/*
 	 * Now we try to claim memory for the initrd (and copy it there)
@@ -277,7 +290,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	/* Eventually gunzip the kernel */
 	if (*(unsigned short *)vmlinuz.addr == 0x1f8b)
-		gunzip(vmlinux.addr, vmlinux.size, vmlinuz.addr, vmlinuz.size,
+		gunzip(vmlinux.addr, vmlinux.memsize, vmlinuz.addr, vmlinuz.size,
 		       "kernel");
 	else
 		memmove((void *)vmlinux.addr, (void *)vmlinuz.addr,
@@ -290,12 +303,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		printf ("setprop bootargs: %d\n\r",l);
 	}
 
-	if (!check_elf64((void *)vmlinux.addr)) {
-		printf("Error: not a valid PPC64 ELF file!\n\r");
-		exit();
-	}
-
-	flush_cache((void *)vmlinux.addr, vmlinux.size);
+	flush_cache((void *)vmlinux.addr, vmlinux.memsize);
 
 	kernel_entry = (kernel_entry_t)(vmlinux.addr + vmlinux.offset);
 #ifdef DEBUG

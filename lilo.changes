@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon May 30 20:55:24 CEST 2005 - olh@suse.de
+
+- look at the ELF header to determine the required claim size,
+  do not define the vmlinux file and memsize via ld options anymore
+- pass Z_FULL_FLUSH instead of Z_FINISH to zlibc to extract only
+  a part of the vmlinux.gz
+
+-------------------------------------------------------------------
 Mon May 30 19:52:49 CEST 2005 - olh@suse.de
 
 - move do_gunzip before use
