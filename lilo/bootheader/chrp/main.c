@@ -192,11 +192,11 @@ static void gunzip(unsigned long dest, int destlen,
 		   unsigned long src, int srclen, const char *what)
 {
 	int len;
-	printf("gunzipping %s (0x%lx:0x%lx <- 0x%lx:0x%0lx) using 0x%p:%0xl...",
-	       what, dest, destlen, src, srclen, scratch, sizeof(scratch));
+	printf("uncompressing %s (0x%08lx:0x%08lx <- 0x%08lx:0x%08lx)...",
+	       what, dest, destlen, src, srclen);
 	len = srclen;
 	do_gunzip((void *)dest, destlen, (unsigned char *)src, &len);
-	printf("done 0x%lx bytes\n\r", len);
+	printf("done 0x%08lx bytes\n\r", len);
 }
 
 
