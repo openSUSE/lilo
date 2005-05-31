@@ -51,6 +51,7 @@ SECTIONS
     *(.rodata.*)
     *(.rodata1)
     *(.got1)
+    *(.uts_string)
     _vmlinuz_start = .;
     *(.vmlinuz)
     _vmlinuz_end = .;

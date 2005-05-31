@@ -97,8 +97,8 @@ gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
 strings $tmp/vmlinux | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt
 cp $obj_dir/chrp/empty.o $tmp/empty.o
 objcopy $tmp/empty.o \
-	--add-section=.kernel:uts_string=$tmp/uts_string.txt \
-	--set-section-flags=.kernel:uts_string=contents,alloc,load,readonly,data
+	--add-section=.uts_string=$tmp/uts_string.txt \
+	--set-section-flags=.uts_string=contents,alloc,load,readonly,data
 #
 objcopy $tmp/empty.o \
 	--add-section=.vmlinuz=$tmp/vmlinux.gz \
