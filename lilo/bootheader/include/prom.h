@@ -10,6 +10,8 @@ extern void *stdout;
 extern void *stderr;
 extern void *bootcpu;
 extern void *mmu;
+extern void *memory;
+extern void *memory_phandle;
 
 extern int write(void *handle, void *ptr, int nb);
 extern int read(void *handle, void *ptr, int nb);

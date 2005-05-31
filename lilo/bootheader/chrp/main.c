@@ -261,6 +261,10 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	if (getprop(chosen_handle, "mmu", &mmu, sizeof(mmu)) != 4)
 		exit();
+	if (getprop(chosen_handle, "memory", &memory, sizeof(memory)) != 4)
+		exit();
+	if ((memory_phandle = instance_to_package(memory)) == (void *)-1)
+		exit();
 
 	if (getprop(chosen_handle, "cpu", &bootcpu, sizeof(bootcpu)) == 4) {
 		bootcpu_phandle = instance_to_package(bootcpu);

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May 31 14:04:47 CEST 2005 - olh@suse.de
+
+- add a phandle to get the /memory/available property
+
+-------------------------------------------------------------------
 Tue May 31 13:22:23 CEST 2005 - olh@suse.de
 
 - addnote relies on a fixed ELF header layout, declare .uts_string
