@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May 31 08:39:08 CEST 2005 - olh@suse.de
+
+- add mknote to bootheader
+
+-------------------------------------------------------------------
 Tue May 31 01:26:33 CEST 2005 - olh@suse.de
 
 - move mkzimage_cmdline and iseriesAddRamdisk to bootheader
