@@ -312,6 +312,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		printf("Can't allocate memory for kernel image !\n\r");
 		exit();
 	}
+	if (32 == cputype)
 	printf("map 0x%08lx@0x%p: %d\n\r", vmlinux.memsize, vmlinux.addr,
 			map(vmlinux.addr, vmlinux.addr, vmlinux.memsize));
 

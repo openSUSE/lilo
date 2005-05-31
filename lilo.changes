@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May 31 19:10:20 CEST 2005 - olh@suse.de
+
+- only call map method on 32-bit machines in bootheader
+
+-------------------------------------------------------------------
 Tue May 31 14:04:47 CEST 2005 - olh@suse.de
 
 - add a phandle to get the /memory/available property
