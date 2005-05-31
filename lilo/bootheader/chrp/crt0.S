@@ -13,6 +13,14 @@
 #include <ppc-asm.h>
 
 	.text
+	/*
+	 * _start is defined this way because the XCOFF loader in the OpenFirmware
+	 * on the powermac expects the entry point to be a procedure descriptor.
+	 */
+	.globl	_coff_start
+_coff_start:
+	.long	_start,0,0
+	
 	.globl	_start
 _start:
 	lis	r9,_start@h

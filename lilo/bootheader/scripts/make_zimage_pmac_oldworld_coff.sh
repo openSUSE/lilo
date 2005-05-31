@@ -111,7 +111,7 @@ rm -f $tmp/output
 ld \
 	-m elf32ppc \
 	-Ttext 0x01000000 \
-	-e _start \
+	-e _coff_start \
 	-T $obj_dir/chrp/ld.script \
 	-o $tmp/output \
 	-Bstatic \

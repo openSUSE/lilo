@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue May 31 09:03:22 CEST 2005 - olh@suse.de
+
+- make _start look like a function descriptor for COFF
+
+-------------------------------------------------------------------
 Tue May 31 08:51:09 CEST 2005 - olh@suse.de
 
 - use the mknote util in mkzimage --board pmac
