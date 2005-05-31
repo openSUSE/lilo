@@ -188,7 +188,7 @@ fi
 if [ ! -z "$tmp" ] ; then
 options="$options --tmp $tmp"
 fi
-bash $obj_dir/scripts/$zimage_sh $options --vmlinux "$vmlinux" --output "$output"
+bash $obj_dir/scripts/$zimage_sh $options --vmlinux "$vmlinux" --output "$output" --objdir "$obj_dir"
 if [ ! -z "$cmdline" ] ; then
 $obj_dir/utils/mkzimage_cmdline -a 1 -c -s "$cmdline" "$output"
 fi
