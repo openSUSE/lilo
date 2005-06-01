@@ -28,6 +28,8 @@
 # 2000-01-30  first try with scsi hosts
 #
 
+shopt -s extglob
+
 if false; then    
 #if true; then    
     function dbg_show() {
@@ -153,7 +155,7 @@ file_full_sysfs_path="`/bin/pwd`"
 file_storage_type=
 cd "$file_full_sysfs_path"
 case "$file_full_sysfs_path" in
-    */ide[0-9]*/[0-9]*)
+    */ide+([0-9])/+([0-9]))
       	file_storage_type=ide
       	of_disk_ide_channel="${file_full_sysfs_path##*.}"
       	cd ../..
@@ -163,19 +165,22 @@ case "$file_full_sysfs_path" in
 	fi
       	dbg_show of_disk_ide_channel
       	;;
-    */host[0-9]*/[0-9]*:[0-9]*:[0-9]*:[0-9]*)
+    */host+([0-9])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
       	# file_storage_type=scsi !! or vscsi, will be determined later
-	declare spec="${file_full_sysfs_path##*/host[0-9]*/}"
+ 	declare spec="${file_full_sysfs_path##*/host+([0-9])/}"
 
 	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
-	case $file_full_sysfs_path in
-	    */host[0-9]*/target*/[0-9]*:[0-9]*:[0-9]*:[0-9]*)
-		cd ..
-		;;
-	esac
 	cd ../..
 	;;
+     */host+([0-9])/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
+ 	# new sysfs layout starting with kernel 2.6.10
+ 	declare spec="${file_full_sysfs_path##*/host+([0-9])\/target+([0-9:])/}"
+ 
+ 	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
+ 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
+ 	cd ../../..
+ 	;;
     *)
         # TODO check the rest of the (hardware) world
 	error "could not gather enough information to create open firmware path to device"
@@ -198,7 +203,7 @@ if [ -f devspec ] ; then
 	k2-sata-root)
 	    : found k2-sata-root, guessing channel
 	    counter=0
-	    for i in host[0-9]*; do
+	    for i in host+([0-9]); do
 		: working on virtual scsi host $i
 		case "$file_full_sysfs_path" in
 		    */$i/*)
@@ -408,7 +413,7 @@ else # no 'devspec' found
 	    k2-sata-root)
 		: found k2-sata-root, guessing channel
 		counter=0
-		for i in host[0-9]*; do
+		for i in host+([0-9]); do
 		    : working on virtual scsi host $i
 		    case "$file_full_sysfs_path" in
 		        */$i/*)

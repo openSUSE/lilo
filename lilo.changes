@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Jun  1 13:53:42 CEST 2005 - jplack@suse.de
+
+- be more precise on path globbing, use extglob (#73638)
+- support new 2.6.10+ scsi sysfs layout (#73638)
+- quote root parameter if neccessary (#80223, #85605)
+- prepare boot partition clone feature
+
+-------------------------------------------------------------------
 Tue May 31 19:10:20 CEST 2005 - olh@suse.de
 
 - only call map method on 32-bit machines in bootheader
