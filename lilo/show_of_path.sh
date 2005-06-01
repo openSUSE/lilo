@@ -28,6 +28,12 @@
 # 2000-01-30  first try with scsi hosts
 #
 
+#check for requirements:
+# /proc
+# /dev
+# /sys
+
+
 shopt -s extglob
 
 if false; then    
@@ -55,7 +61,8 @@ function error() {
 }
 
 
-myversion=2004-05-05
+myversion="$Date$"
+
 # if no file path is given on cmd line check for root file system
 file=/
 
