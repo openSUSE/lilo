@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Jun  1 13:46:41 CEST 2005 - jplack@suse.de
+
+- be more precise on path globbing, use extglob (#73638)
+- support new 2.6.10+ scsi sysfs layout (#73638)
+- quote root parameter if neccessary (#80223, #85605)
+- prepare boot partition clone feature
+
+-------------------------------------------------------------------
 Tue May 10 15:44:37 CEST 2005 - jplack@suse.de
 
 - fix: lilo produces append= line without root= (#81278)
