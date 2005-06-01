@@ -30,27 +30,38 @@
 # 2000-01-30  first try with scsi hosts
 #
 
-#check for requirements:
-# /proc
-# /dev
-# /sys
+# check for requirements:
+#   /proc
+#   /sys
+
+trap '{
+    cd /
+    [ $_sysfs_mounted ] && umount /sys
+    [ $_proc_mounted ] && umount /proc
+}' EXIT
+
+# assert that /proc is mounted, else try to mount, on fail complain
+if test -d /proc/device-tree; then
+    :
+elif mount -t proc proc /proc; then
+    _proc_mounted=1
+else
+    error "No /proc/device-tree under /proc and attempt to mount /proc failed" "may be no PowerPC machine?"
+fi
+
+
+# assert that /sys is mounted, else try to mount, on fail complain
+if test -d /sys/block; then
+    :
+elif mount -t sysfs sysfs /sys; then
+    _sysfs_mounted=1
+else
+    error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
+fi
 
 
 shopt -s extglob
-
-if false; then    
-#if true; then    
-    function dbg_show() {
-	while [ "$1" ]; do
-	    echo $1 = ${!1}
-	    shift
-	done
-    }
-else
-    function dbg_show() {
-	:
-    }
-fi
+read d myversion d <<< "$Date$"
 
 
 function error() {
@@ -63,7 +74,6 @@ function error() {
 }
 
 
-myversion="$Date$"
 
 # if no file path is given on cmd line check for root file system
 file=/
@@ -83,6 +93,8 @@ if [ "$#" -gt 0 ] ; then
 	    --quiet|-q)
 		quietmode=1
 		;;
+	    --debug|-d)
+	        debug=1
 	    *)
 	       	file=$1
 	       	break
@@ -92,22 +104,29 @@ if [ "$#" -gt 0 ] ; then
     done
 fi
 
-# check if we run on a NewWorld PowerMacintosh
-if [ -f /proc/device-tree/openprom/model ] ; then
-    while read openfirmware ofversion; do
-	case "$openfirmware" in
-	  iMac,1|OpenFirmware)	MACHINE="pmac_new" ;;
-	  Open)			MACHINE="pmac_old" ;;
-	esac
-    done < <(cat /proc/device-tree/openprom/model;echo)
+if [ "$debug" ]; then    
+    function dbg_show() {
+	while [ "$1" ]; do
+	    echo $1 = ${!1}
+	    shift
+	done
+    }
+else
+    function dbg_show() {
+	:
+    }
 fi
 
-if [ "$MACHINE" = "pmac_old" ]; then
+# check if we run on a OldWorld PowerMacintosh
+if [ -f /proc/device-tree/openprom/model ] &&
+   [[ "$(</proc/device-tree/openprom/model)" == Open\ * ]];
+then 
     error "This machine is an Oldworld, no need for firmware pathnames"
 fi
 
+
 if [ -b $file ] ; then
-    read i i i i file_major file_minor i < <(ls -lL "$file")
+    read i i i i file_major file_minor i <<< $(ls -lL "$file")
     file_major="${file_major%%,*}"
     file_minor="${file_minor##*,}"
     file=/
@@ -130,15 +149,10 @@ file_majorminor=$file_major:$file_minor
 dbg_show file_majorminor
 
 file_sysfs_path=
-# assert that /sys is mounted, else try to mount, on fail complain
-if test -d /sys/block || mount -t sysfs sysfs /sys; then
-    for i in $(find /sys/block -name dev); do
-	: looking at $i
-	if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
-    done
-else
-    error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
-fi
+for i in $(find /sys/block -name dev); do
+    : looking at $i
+    if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
+done
 
 if [ -z "$file_sysfs_path" ] ; then
     error "can not find major:minor $file_majorminor for $file"
