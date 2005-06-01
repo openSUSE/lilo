@@ -1,8 +1,10 @@
 #!/bin/bash
 # set -ex
 #
+# $Id$
 # find a OF bootpath on Apple PowerMacintosh Newworld machines
-# Copyright (C) 2000, 2004 Olaf Hering olh@suse.de
+# Copyright (C) 2000, 2004 Olaf Hering <olh@suse.de>,
+#               2005 Joachim Plack <jplack@suse.de>
 #
 # When booting via BootX then all symlinks are gone ...
 # The MacOS removes them and BenH didn't find (yet) a way to
