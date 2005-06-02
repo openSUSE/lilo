@@ -154,7 +154,14 @@ static int check_elf64(void *p)
 
 static unsigned long claim_base = PROG_START;
 
-static unsigned long try_claim(unsigned long size)
+static void try_map(unsigned long phys, unsigned long virt, unsigned int size, int elftype)
+{
+	if (32 == elftype)
+		printf("map 0x%08lx@0x%p: %d\n\r", size, phys,
+			map(phys, virt, size));
+}
+
+static unsigned long try_claim(unsigned long size, int elftype)
 {
 	unsigned long addr = 0;
 
@@ -168,6 +175,7 @@ static unsigned long try_claim(unsigned long size)
 	}
 	if (addr == 0)
 		return 0;
+	try_map(addr, addr, size, elftype);
 	claim_base = PAGE_ALIGN(claim_base + size);
 	return addr;
 }
@@ -307,14 +315,11 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	 */
 	vmlinux.memsize += 3 * 1024 * 1024;
 	printf("Allocating 0x%lx bytes for kernel ...\n\r", vmlinux.memsize);
-	vmlinux.addr = try_claim(vmlinux.memsize);
+	vmlinux.addr = try_claim(vmlinux.memsize, elftype);
 	if (vmlinux.addr == 0) {
 		printf("Can't allocate memory for kernel image !\n\r");
 		exit();
 	}
-	if (32 == cputype)
-	printf("map 0x%08lx@0x%p: %d\n\r", vmlinux.memsize, vmlinux.addr,
-			map(vmlinux.addr, vmlinux.addr, vmlinux.memsize));
 
 
 	/*
@@ -324,7 +329,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	initrd.memsize = initrd.size;
 	if ( initrd.size > 0 ) {
 		printf("Allocating 0x%lx bytes for initrd ...\n\r", initrd.size);
-		initrd.addr = try_claim(initrd.size);
+		initrd.addr = try_claim(initrd.size, elftype);
 		if (initrd.addr == 0) {
 			printf("Can't allocate memory for initial ramdisk !\n\r");
 			exit();

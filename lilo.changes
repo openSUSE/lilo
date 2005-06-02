@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Jun  2 21:14:41 CEST 2005 - olh@suse.de
+
+- map the claimed memory in bootheader, older firmware on pmac
+  doesnt do it. power4 firmware gets a stack underflow in the map
+  call, so do it only for 32bit
+
+-------------------------------------------------------------------
 Wed Jun  1 13:53:42 CEST 2005 - jplack@suse.de
 
 - be more precise on path globbing, use extglob (#73638)
