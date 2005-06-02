@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun  2 22:59:14 CEST 2005 - olh@suse.de
+
+- map the claimed memory only if relocation is enabled
+
+-------------------------------------------------------------------
 Thu Jun  2 21:29:36 CEST 2005 - olh@suse.de
 
 - update lilo to call mkzimage instead of hardcoded make_zimage_prep.sh
