@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun  2 21:20:28 CEST 2005 - olh@suse.de
+
+- remove pmac binaries from repository, remove leftover iseries dir
+
+-------------------------------------------------------------------
 Thu Jun  2 21:14:41 CEST 2005 - olh@suse.de
 
 - map the claimed memory in bootheader, older firmware on pmac
