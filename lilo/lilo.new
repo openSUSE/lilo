@@ -803,10 +803,10 @@ function running_on_iseries () {
 	if [ -n "$ISERIES_INITRD" ]; then
 	    echo "ISERIES_INITRD  " $ISERIES_INITRD
 	    echo
-	    echo generating $ISERIES_KERNEL_TMPFILE with /lib/lilo/iseries/make_zimage_iseries.sh
+	    echo generating $ISERIES_KERNEL_TMPFILE with /bin/mkzimage
 	    echo
 	    unset ec
-	    /lib/lilo/iseries/make_zimage_iseries.sh \
+	    /bin/mkzimage \
 	      --initrd $ISERIES_INITRD \
 	      --vmlinux $ISERIES_IMAGE \
 	      --output $ISERIES_KERNEL_TMPFILE ; ec=$?
@@ -1009,15 +1009,12 @@ function running_on_prep () {
     if [ ! -z "$PREP_INITRD" ] ; then
 	PREP_INITRD="--initrd $PREP_INITRD"
     fi
-    /lib/lilo/prep/make_zimage_prep.sh \
+    /bin/mkzimage \
     --vmlinux "$PREP_IMAGE" \
     $PREP_INITRD \
     --tmp "$TEMP" \
+    --cmdline "$PREP_CMDLINE" \
     --output "$TEMP/zImage.prep"
-    /lib/lilo/chrp/mkzimage_cmdline \
-    	-a 1 \
-	-s "$PREP_CMDLINE" \
-	"$TEMP/zImage.prep"
     echo "Installing $TEMP/zImage.prep onto $P"
     dd if="$TEMP/zImage.prep" of=$P 2>/dev/null
 }
