@@ -190,20 +190,20 @@ case "$file_full_sysfs_path" in
       	;;
     */host+([0-9])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
       	# file_storage_type=scsi !! or vscsi, will be determined later
- 	declare spec="${file_full_sysfs_path##*/host+([0-9])/}"
+	declare spec="${file_full_sysfs_path##*/host+([0-9])/}"
 
 	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
 	cd ../..
 	;;
-     */host+([0-9])/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
- 	# new sysfs layout starting with kernel 2.6.10
- 	declare spec="${file_full_sysfs_path##*/host+([0-9])\/target+([0-9:])/}"
- 
- 	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
- 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
- 	cd ../../..
- 	;;
+    */host+([0-9])/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
+	# new sysfs layout starting with kernel 2.6.10
+	declare spec="${file_full_sysfs_path##*/host+([0-9])\/target+([0-9:])/}"
+
+	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
+	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
+	cd ../../..
+	;;
     *)
         # TODO check the rest of the (hardware) world
 	error "could not gather enough information to create open firmware path to device"

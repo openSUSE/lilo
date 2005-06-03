@@ -31,7 +31,6 @@
 unset LANG
 unset LC_CTYPE
 
-#CONFIG_LILO_CONF=~olh/ppc/lilo/lilo.conf
 CONFIG_LILO_CONF=/etc/lilo.conf
 SHOW_OF_PATH="/bin/show_of_path.sh --quiet"
 DEFAULT_BOOTFOLDER=suseboot
@@ -267,6 +266,8 @@ while [ "$1" ]; do case "$1" in
     #   SHOW_OF_PATH="$SHOW_OF_PATH --lilo-rootdrive $1"
     #   shift
     #   ;;
+    --quiet)
+    --debug)
     *)
         echo 1>&2 "lilo: Option \"$1\" not supported"
 	Usage;
@@ -285,6 +286,7 @@ function running_on_chrp () {
     # gooseberry:~ # nvsetenv boot-device `cat /sys/class/net/eth1/device/devspec`
     # gooseberry:~ # nvsetenv boot-device
     # boot-device=/pci@400000000112/pci@2,2/ethernet@1
+    # problem is that OF memory has to be released by yaboot upfront
 
 
     # find all PReP boot and FAT partitions
@@ -402,10 +404,11 @@ function running_on_chrp () {
 	if [ "${yaboot_part##*:}" ]; then echo "partition = ${yaboot_part##*:}" ; fi
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
-	if [ "$OPTION_ROOT" ]; then
+	if [ "$OPTION_ROOT" ] && [[ "$OPTION_ROOT" == *=* ]]; then
 	    OPTION_APPEND="root=$OPTION_ROOT $OPTION_APPEND"
 	    unset OPTION_ROOT
 	fi
+	test -z "$OPTION_ROOT"  || echo "root = $OPTION_ROOT"
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 	test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
 
@@ -500,9 +503,9 @@ function running_on_chrp () {
 
 	    echo "image = ${CONFIG_IMAGE_FILE[$i]}"
 	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
-	    if [ "${CONFIG_IMAGE_ROOT[$i]}" ]; then
-	        CONFIG_IMAGE_APPEND[$i]="root=${CONFIG_IMAGE_ROOT[$i]} ${CONFIG_IMAGE_APPEND[$i]}"
-	        unset CONFIG_IMAGE_ROOT[$i]
+	    if [[ "${CONFIG_IMAGE_ROOT[$i]}" == *=* ]] && [[ "${CONFIG_IMAGE_ROOT[$i]}" != \"*=*\" ]]; then
+		# quote root line if it contains unquoted magic equal sign
+	        CONFIG_IMAGE_ROOT[$i]="\"${CONFIG_IMAGE_ROOT[$i]}\""
 	    fi
 	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
 	    test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
@@ -695,6 +698,20 @@ function running_on_chrp () {
 	dd if=/lib/lilo/chrp/yaboot.chrp of=$OPTION_BOOT 2>/dev/null
 	cp $TEMP/yaboot.conf /etc/yaboot.conf || exit 2
 	echo "Converted /etc/lilo.conf to /etc/yaboot.conf"
+    fi
+
+    if [ "$OPTION_CLONE" ]; then
+	error "Cloning of boot partition not yet implemented"
+	# first check for valid block device
+
+	# check for sufficient size, same size is easy, but FAT partition must
+	# only hold content.
+
+	# generate appropriate partition including active boot flag
+
+	# copy stuff, dd for PReP and recursive file copy for FAT
+
+	# generate second OF path and prepend that to boot-device
     fi
 
     # TODO check whether this is neccessary
@@ -1085,6 +1102,15 @@ function parse_config_file () {
 		    OPTION_BOOT[$OPTION_BOOT_COUNT]=$value
 		fi
 		let OPTION_BOOT_COUNT++
+		;;
+	    clone)
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		# this is valid for chrp only ...
+		if [ -L "$value" ]; then
+		    OPTION_CLONE=$(readlink -f $value)
+		else
+		    OPTION_CLONE=$value
+		fi
 		;;
 	    activate)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
