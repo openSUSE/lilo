@@ -10,7 +10,7 @@ LIB          = zlib.a
 
 OBJS        := $(patsubst %,%.o,$(PROGS))
 
-all:	$(OBJS) $(LIB)
+all: $(LIB)
 
 $(LIB): $(OBJS)
 	$(AR) cru $(LIB).~ $(OBJS)
