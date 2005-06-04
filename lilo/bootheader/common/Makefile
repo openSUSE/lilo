@@ -5,24 +5,24 @@ include ../MRULES
 
 MAKEDEPS     = -Wp,-MD,.$(subst /,-,$*).d
 CFLAGS       = $(MAKEDEPS) $(OPTFLAGS) $(REQFLAGS)
-PROGS       := infblock infcodes inffast inflate inftrees infutil
-LIB          = zlib.a
+ZLIB_SRC    := infblock infcodes inffast inflate inftrees infutil
+ZLIB         = zlib.a
 
-OBJS        := $(patsubst %,%.o,$(PROGS))
+ZLIB_OBJS        := $(patsubst %,%.o,$(ZLIB_SRC))
 
-all: $(LIB)
+all: $(ZLIB)
 
-$(LIB): $(OBJS)
-	$(AR) cru $(LIB).~ $(OBJS)
-	$(RANLIB) $(LIB).~
-	mv -f $(LIB).~ $(LIB)
+$(ZLIB): $(ZLIB_OBJS)
+	$(AR) cru $(ZLIB).~ $(OBJS)
+	$(RANLIB) $(ZLIB).~
+	mv -f $(ZLIB).~ $(ZLIB)
 
 #.SECONDARY: $(OBJS)
 
 install:
 	@set -ex; \
 	$(INSTALL_DIR) $(DESTDIR)$(INSTALLDIR)/common ; \
-	for i in $(LIB); do \
+	for i in $(ZLIB); do \
 	$(INSTALL_DATA) $$i $(DESTDIR)$(INSTALLDIR)/common/$$i; \
 	done ; \
 
