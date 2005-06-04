@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Jun  4 22:03:55 CEST 2005 - olh@suse.de
+
+- move some bootheader .o files into prom.a and common.a
+
+-------------------------------------------------------------------
 Thu Jun  2 22:59:14 CEST 2005 - olh@suse.de
 
 - map the claimed memory only if relocation is enabled

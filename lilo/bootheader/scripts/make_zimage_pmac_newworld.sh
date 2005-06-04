@@ -91,7 +91,7 @@ gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
 #
 #
 strings $tmp/vmlinux | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt
-cp $obj_dir/chrp/empty.o $tmp/empty.o
+cp $obj_dir/common/empty.o $tmp/empty.o
 objcopy $tmp/empty.o \
 	--add-section=.uts_string=$tmp/uts_string.txt \
 	--set-section-flags=.uts_string=contents,alloc,load,readonly,data
@@ -115,11 +115,9 @@ ld \
 	-T $obj_dir/chrp/ld.script \
 	-o $tmp/output \
 	$obj_dir/chrp/crt0.o \
-	$obj_dir/chrp/string.o \
-	$obj_dir/chrp/prom.o \
-	$obj_dir/chrp/main.o \
-	$obj_dir/chrp/div64.o \
 	$tmp/empty.o \
+	$obj_dir/chrp/prom.a \
+	$obj_dir/common/common.a \
 	$obj_dir/common/zlib.a
 #
 $obj_dir/utils/mknote > $tmp/note
