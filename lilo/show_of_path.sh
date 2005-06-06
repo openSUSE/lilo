@@ -1,6 +1,7 @@
 #!/bin/bash
 # set -ex
 #
+# $Id$
 # find a OF bootpath on Apple PowerMacintosh Newworld machines
 # Copyright (C) 2000, 2004 Olaf Hering olh@suse.de
 #
@@ -28,7 +29,39 @@
 # 2000-01-30  first try with scsi hosts
 #
 
+# check for requirements:
+#   /proc
+#   /sys
+
+trap '{
+    cd /
+    [ $_sysfs_mounted ] && umount /sys
+    [ $_proc_mounted ] && umount /proc
+}' EXIT
+
+# assert that /proc is mounted, else try to mount, on fail complain
+if test -d /proc/device-tree; then
+    :
+elif mount -t proc proc /proc; then
+    _proc_mounted=1
+else
+    error "No /proc/device-tree under /proc and attempt to mount /proc failed" "may be no PowerPC machine?"
+fi
+
+
+# assert that /sys is mounted, else try to mount, on fail complain
+if test -d /sys/block; then
+    :
+elif mount -t sysfs sysfs /sys; then
+    _sysfs_mounted=1
+else
+    error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
+fi
+
 shopt -s extglob
+read d myversion d <<< "$Date$"
+
+
 
 if false; then    
 #if true; then    
@@ -55,7 +88,6 @@ function error() {
 }
 
 
-myversion=2004-05-05
 # if no file path is given on cmd line check for root file system
 file=/
 
@@ -121,15 +153,11 @@ file_majorminor=$file_major:$file_minor
 dbg_show file_majorminor
 
 file_sysfs_path=
-# assert that /sys is mounted, else try to mount, on fail complain
-if test -d /sys/block || mount -t sysfs sysfs /sys; then
-    for i in $(find /sys/block -name dev); do
-	: looking at $i
-	if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
-    done
-else
-    error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
-fi
+
+for i in $(find /sys/block -name dev); do
+    : looking at $i
+    if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
+done
 
 if [ -z "$file_sysfs_path" ] ; then
     error "can not find major:minor $file_majorminor for $file"
@@ -244,7 +272,7 @@ if [ -f devspec ] ; then
 
 	    # modprobe scsi_transport_fc  ## loaded through dependencies
 	    port=$(
-		printf "/sys/class/fc_transport/%x:%x:%x:%x/port_name" \
+		printf "/sys/class/fc_transport/%d:%d:%d:%d/port_name" \
 		    $of_disk_scsi_host $of_disk_scsi_chan \
 		    $of_disk_scsi_id $of_disk_scsi_lun \
 	    )

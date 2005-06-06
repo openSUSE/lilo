@@ -45,6 +45,35 @@ FDISK=/sbin/fdisk
 PARTED="/usr/sbin/parted -s"
 STAT_CMD=/usr/bin/stat
 
+# check for requirements:
+#   /proc
+#   /sys
+
+trap '{
+    cd /
+    [ $_sysfs_mounted ] && umount /sys
+    [ $_proc_mounted ] && umount /proc
+}' EXIT
+
+# assert that /proc is mounted, else try to mount, on fail complain
+if test -d /proc/device-tree; then
+    :
+elif mount -t proc proc /proc; then
+    _proc_mounted=1
+else
+    error "No /proc/device-tree under /proc and attempt to mount /proc failed" "may be no PowerPC machine?"
+fi
+
+
+# assert that /sys is mounted, else try to mount, on fail complain
+if test -d /sys/block; then
+    :
+elif mount -t sysfs sysfs /sys; then
+    _sysfs_mounted=1
+else
+    error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
+fi
+
 
 #
 #  parse options

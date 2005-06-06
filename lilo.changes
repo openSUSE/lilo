@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Mon Jun  6 23:36:33 CEST 2005 - jplack@suse.de
+
+- fc_transport uses decimals not hex digits, support for more
+  than nine luns or scsi channels or hosts for FC disks (#87235 -
+  LTC16290)
+- Make sure that /proc and /sys is mounted while running lilo or
+  show_of_path.sh, not failing in rescue system (#85852).
+
+-------------------------------------------------------------------
 Wed Jun  1 13:46:41 CEST 2005 - jplack@suse.de
 
 - be more precise on path globbing, use extglob (#73638)
