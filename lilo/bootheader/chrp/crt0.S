@@ -17,9 +17,11 @@
 	 * _start is defined this way because the XCOFF loader in the OpenFirmware
 	 * on the powermac expects the entry point to be a procedure descriptor.
 	 */
+#if 0
 	.globl	_coff_start
 _coff_start:
 	.long	_start,0,0
+#endif
 	
 	.globl	_start
 _start:

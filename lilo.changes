@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jun  7 22:46:32 CEST 2005 - olh@suse.de
+
+- yaboot does not handle ->e_entry points at unaligned offsets
+  disable for COFF function descriptor for the time being
+
+-------------------------------------------------------------------
 Tue Jun  7 22:17:50 CEST 2005 - olh@suse.de
 
 - add %ll support to vsprintf in bootheader
