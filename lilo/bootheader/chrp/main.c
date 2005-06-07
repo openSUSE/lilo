@@ -254,6 +254,11 @@ static void gunzip(unsigned long dest, int destlen,
 	printf("done 0x%08lx bytes\n\r", len);
 }
 
+static void abort(const char *s)
+{
+	printf("%s\n\r", s);
+	exit();
+}
 
 void start(unsigned long a1, unsigned long a2, void *promptr)
 {
@@ -269,12 +274,12 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		exit();
 	stderr = stdout;
 	if (getprop(chosen_handle, "stdin", &stdin, sizeof(stdin)) != 4)
-		exit();
+		abort("no stdin");
 
 	printf("\n\rzImage starting: loaded at 0x%x (0x%lx/0x%lx/0x%p)\n\r", (unsigned)_start,a1,a2,promptr);
 
 	if (getprop(chosen_handle, "mmu", &mmu, sizeof(mmu)) != 4)
-		exit();
+		abort("no mmu");
 
 	if (getprop(chosen_handle, "cpu", &bootcpu, sizeof(bootcpu)) == 4) {
 		bootcpu_phandle = instance_to_package(bootcpu);
@@ -301,14 +306,13 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	elftype = check_elf64(elfheader);
 	if (!elftype)
 		elftype = check_elf32(elfheader);
-	if (!elftype) {
-		printf("not a powerpc ELF file\n\r");
-		exit();
-	}
+	if (!elftype)
+		abort("not a powerpc ELF file\n\r");
+	
 	if (cputype && cputype != elftype) {
 		printf("booting a %d-bit kernel on a %d-bit cpu.\n\r",
 				elftype, cputype);
-		exit();
+		abort("");
 	}
 
 	/*
@@ -318,10 +322,8 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	vmlinux.memsize += 3 * 1024 * 1024;
 	printf("Allocating 0x%lx bytes for kernel ...\n\r", vmlinux.memsize);
 	vmlinux.addr = try_claim(vmlinux.memsize);
-	if (vmlinux.addr == 0) {
-		printf("Can't allocate memory for kernel image !\n\r");
-		exit();
-	}
+	if (vmlinux.addr == 0)
+		abort("Can't allocate memory for kernel image !\n\r");
 
 
 	/*
@@ -332,10 +334,8 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	if ( initrd.size > 0 ) {
 		printf("Allocating 0x%lx bytes for initrd ...\n\r", initrd.size);
 		initrd.addr = try_claim(initrd.size);
-		if (initrd.addr == 0) {
-			printf("Can't allocate memory for initial ramdisk !\n\r");
-			exit();
-		}
+		if (initrd.addr == 0)
+			abort("Can't allocate memory for initial ramdisk !\n\r");
 		a1 = initrd.addr;
 		a2 = initrd.size;
 		printf("initial ramdisk moving 0x%lx <- 0x%lx (0x%lx bytes)\n\r",
@@ -375,8 +375,6 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	kernel_entry( a1, a2, prom, NULL );
 
-	printf("Error: Linux kernel returned to zImage bootloader!\n\r");
-
-	exit();
+	abort("Error: Linux kernel returned to zImage bootloader!\n\r");
 }
 

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun  7 21:57:22 CEST 2005 - olh@suse.de
+
+- change the exit() calls in chrp/main.c into abort(string) calls
+
+-------------------------------------------------------------------
 Tue Jun  7 21:52:28 CEST 2005 - olh@suse.de
 
 - remove the dead getprop(memory) and instance_to_package call
