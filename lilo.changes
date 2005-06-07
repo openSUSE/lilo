@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun  7 19:46:14 CEST 2005 - olh@suse.de
+
+- split common/stdio.c off chrp/prom.c in bootheader
+
+-------------------------------------------------------------------
 Tue Jun  7 19:31:28 CEST 2005 - olh@suse.de
 
 - remove global initializers from bootheader
