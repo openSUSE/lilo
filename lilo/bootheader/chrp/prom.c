@@ -16,8 +16,6 @@ void *stdout;
 void *stderr;
 void *bootcpu;
 void *mmu;
-void *memory;
-void *memory_phandle;
 
 
 int

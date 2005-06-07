@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jun  7 21:52:28 CEST 2005 - olh@suse.de
+
+- remove the dead getprop(memory) and instance_to_package call
+  JS20 has a /chosen/memory property, but its content is 0
+
+-------------------------------------------------------------------
 Tue Jun  7 19:47:46 CEST 2005 - olh@suse.de
 
 - fix function declaration warning for exit()
