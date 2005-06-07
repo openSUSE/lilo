@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun  7 22:17:50 CEST 2005 - olh@suse.de
+
+- add %ll support to vsprintf in bootheader
+
+-------------------------------------------------------------------
 Tue Jun  7 21:57:22 CEST 2005 - olh@suse.de
 
 - change the exit() calls in chrp/main.c into abort(string) calls

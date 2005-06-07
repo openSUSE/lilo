@@ -328,6 +328,10 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L' || *fmt =='Z') {
 			qualifier = *fmt;
 			++fmt;
+			if (qualifier == 'l' && *fmt == 'l') {
+				qualifier = 'L';
+				++fmt;
+			}
 		}
 
 		/* default base */
@@ -412,7 +416,9 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 				--fmt;
 			continue;
 		}
-		if (qualifier == 'l') {
+		if (qualifier == 'L')
+			num = va_arg(args, long long);
+		else if (qualifier == 'l') {
 			num = va_arg(args, unsigned long);
 			if (flags & SIGN)
 				num = (signed long) num;
