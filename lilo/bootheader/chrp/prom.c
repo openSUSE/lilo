@@ -69,7 +69,7 @@ read(void *handle, void *ptr, int nb)
 }
 
 void
-exit()
+exit(void)
 {
 	struct prom_args {
 		char *service;

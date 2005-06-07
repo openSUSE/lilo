@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun  7 19:47:46 CEST 2005 - olh@suse.de
+
+- fix function declaration warning for exit()
+
+-------------------------------------------------------------------
 Tue Jun  7 19:46:14 CEST 2005 - olh@suse.de
 
 - split common/stdio.c off chrp/prom.c in bootheader
