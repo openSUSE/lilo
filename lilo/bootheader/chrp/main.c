@@ -42,9 +42,9 @@ struct addr_range {
 	unsigned long memsize;
 	unsigned long offset;
 };
-static struct addr_range vmlinux = {0, 0, 0};
-static struct addr_range vmlinuz = {0, 0, 0};
-static struct addr_range initrd  = {0, 0, 0};
+static struct addr_range vmlinux;
+static struct addr_range vmlinuz;
+static struct addr_range initrd;
 
 static char scratch[128<<10];	/* 128kB of scratch space for gunzip */
 static unsigned char elfheader[256];
