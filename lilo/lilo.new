@@ -266,14 +266,18 @@ while [ "$1" ]; do case "$1" in
     #   SHOW_OF_PATH="$SHOW_OF_PATH --lilo-rootdrive $1"
     #   shift
     #   ;;
-    --quiet)
-    --debug)
+    --quiet|-q)
+	quietmode=1
+	;;
+    --debug|-d)
+	debug=1
+	;;
     *)
         echo 1>&2 "lilo: Option \"$1\" not supported"
 	Usage;
         exit 1
 	;;
-esac; done
+esac; shift; done
 
 
 function running_on_chrp () {

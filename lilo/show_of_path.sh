@@ -95,6 +95,7 @@ if [ "$#" -gt 0 ] ; then
 		;;
 	    --debug|-d)
 	        debug=1
+		;;
 	    *)
 	       	file=$1
 	       	break
