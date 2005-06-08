@@ -103,19 +103,19 @@ OBJCOPY		:= $(CROSS)objcopy
 
 lgcc = `$(CC) -print-libgcc-file-name`
 
-all: yaboot addnote mkofboot
+all yaboot: second/yaboot
 
-yaboot: $(OBJS) addnote
-	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o second/$@
-	chmod -x second/$@
-	cp -p second/$@ second/$@.chrp
-	util/addnote second/$@.chrp
+second/yaboot: $(OBJS) util/addnote
+	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o $@
+	chmod -x $@
+	cp -p $@ $@.chrp
+	util/addnote $@.chrp
 
-addnote:
-	$(HOSTCC) $(HOSTCFLAGS) -o util/addnote util/addnote.c
+util/addnote:
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ $@.c
 
-elfextract:
-	$(CC) $(UCFLAGS) -o util/elfextract util/elfextract.c
+util/elfextract:
+	$(CC) $(UCFLAGS) -o $@ $@.c
 
 mkofboot:
 	ln -sf ybin ybin/mkofboot
