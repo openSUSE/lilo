@@ -1,23 +1,23 @@
-COMMIT_DIR=/work/src/done/SLES9-SP2
+SUBMIT_DIR=/work/src/done/SLES9-SP3
 BUILD_DIST=sles9-beta-ppc
 
-.PHONY:	export build commit clean
+.PHONY:	export build submit clean
 
 all:
-	@echo "Choose one target out of 'export', 'build', 'commit' or 'clean'"
+	@echo "Choose one target out of 'export', 'build', 'submit' or 'clean'"
 	@echo
 
 export:	.exportdir
 
 build:	.built
 
-commit:	.commited
+submit:	.submitted
 
 
 # worker targets
 
 .exportdir:	lilo.changes
-	@rm -f .build .committed
+	@rm -f .build .submitted
 	set -e ; \
 	tmpdir=`mktemp -d /tmp/temp.XXXXXX`/lilo ;\
 	lv=`cat version` ; \
@@ -28,20 +28,20 @@ commit:	.commited
 	rm -rf version Makefile lilo-$$lv ; \
 	pwd ; \
 	ls -la ; \
-	if /work/src/bin/check_if_valid_source_dir; then cd -; echo $$tmpdir > .exportdir; fi
+	if /work/src/bin/check_if_valid_source_dir; then cd -; echo $$tmpdir > $@; fi
 
 
 .built:	.exportdir
-	@rm -f .commited
+	@rm -f .submitted
 	@echo "Trying to compile lilo package under $$(<.exportdir)"
-	if { cd $$(<.exportdir); export BUILD_DIST=$(BUILD_DIST); sudo build; }; then touch .built; else echo Compile failed; exit 1; fi
+	if { cd $$(<.exportdir); export BUILD_DIST=$(BUILD_DIST); sudo build; }; then touch $@; else echo Compile failed; exit 1; fi
 
-.commited: .built
-	@echo "Target 'commit' will copy $$(<.exportdir) to $(COMMIT_DIR)"
+.submitted: .built
+	@echo "Target 'submit' will copy $$(<.exportdir) to $(SUBMIT_DIR)"
 	@echo "Please confirm or abort"
-	@select s in commit abort;do [ "$$s" == commit ] && break || exit 1; done
-	echo cp -a $$(<.exportdir) $(COMMIT_DIR)
-	@touch .commited
+	@select s in submit abort;do [ "$$s" == submit ] && break || exit 1; done
+	echo cp -a $$(<.exportdir) $(SUBMIT_DIR)
+	@touch $@
 
 clean:
-	rm -f .exportdir .build .committed
+	rm -f .exportdir .build .submitted
