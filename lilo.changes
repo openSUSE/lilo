@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jun  8 09:35:48 CEST 2005 - olh@suse.de
+
+- dont use ANSI colors on pmac telnet console
+
+-------------------------------------------------------------------
 Wed Jun  8 09:00:11 CEST 2005 - olh@suse.de
 
 - use p->p_vaddr as loadaddr in yaboot, not the ELF entry point
