@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jun  8 09:00:11 CEST 2005 - olh@suse.de
+
+- use p->p_vaddr as loadaddr in yaboot, not the ELF entry point
+  reenable COFF function descriptor
+
+-------------------------------------------------------------------
 Wed Jun  8 08:22:24 CEST 2005 - olh@suse.de
 
 - update yaboot makerules to avoid relinking during each make run
