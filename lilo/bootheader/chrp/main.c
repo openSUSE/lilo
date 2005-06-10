@@ -144,12 +144,12 @@ static int check_elf64(void *p)
 	printf("PPC64 ELF file, ph %d\n\r", i);
 	printf("p_type   0x%08x\n\r", elf64ph->p_type);
 	printf("p_flags  0x%08x\n\r", elf64ph->p_flags);
-	printf("p_offset 0x%16llx\n\r", elf64ph->p_offset);
-	printf("p_vaddr  0x%16llx\n\r", elf64ph->p_vaddr);
-	printf("p_paddr  0x%16llx\n\r", elf64ph->p_paddr);
-	printf("p_filesz 0x%16llx\n\r", elf64ph->p_filesz);
-	printf("p_memsz  0x%16llx\n\r", elf64ph->p_memsz);
-	printf("p_align  0x%16llx\n\r", elf64ph->p_align);
+	printf("p_offset 0x%016llx\n\r", elf64ph->p_offset);
+	printf("p_vaddr  0x%016llx\n\r", elf64ph->p_vaddr);
+	printf("p_paddr  0x%016llx\n\r", elf64ph->p_paddr);
+	printf("p_filesz 0x%016llx\n\r", elf64ph->p_filesz);
+	printf("p_memsz  0x%016llx\n\r", elf64ph->p_memsz);
+	printf("p_align  0x%016llx\n\r", elf64ph->p_align);
 	printf("... skipping 0x%lx bytes of ELF header\n\r",
 	       (unsigned long)elf64ph->p_offset);
 #endif

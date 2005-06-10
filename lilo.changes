@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jun 10 21:40:25 CEST 2005 - olh@suse.de
+
+- zeropad the ELF debug output in bootheader
+
+-------------------------------------------------------------------
 Wed Jun  8 09:35:48 CEST 2005 - olh@suse.de
 
 - dont use ANSI colors on pmac telnet console
