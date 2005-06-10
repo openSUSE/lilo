@@ -46,7 +46,7 @@ static struct addr_range vmlinux;
 static struct addr_range vmlinuz;
 static struct addr_range initrd;
 
-static char scratch[128<<10];	/* 128kB of scratch space for gunzip */
+static char scratch[46912];	/* scratch space for gunzip, from zlib_inflate_workspacesize() */
 static unsigned char elfheader[256];
 
 typedef void (*kernel_entry_t)( unsigned long,
