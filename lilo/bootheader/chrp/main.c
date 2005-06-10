@@ -9,6 +9,9 @@
  * as published by the Free Software Foundation; either version
  * 2 of the License, or (at your option) any later version.
  */
+
+#undef DEBUG
+
 #include <stdarg.h>
 #include <stddef.h>
 #include <elf.h>
@@ -54,8 +57,6 @@ typedef void (*kernel_entry_t)( unsigned long,
                                 void *,
 				void *);
 
-
-#undef DEBUG
 
 #define cmdline_start_string   "cmd_line_start"
 #define cmdline_end_string     "cmd_line_end"
@@ -168,9 +169,10 @@ static unsigned long claim_base = PROG_START;
 static void try_map(unsigned long phys, unsigned long virt, unsigned int size)
 {
 	unsigned long msr = mfmsr();
-	if (msr & (MSR_IR|MSR_DR))
-		printf("map 0x%08lx@0x%p: %d\n\r", size, phys,
-			map(phys, virt, size));
+	if (msr & (MSR_IR|MSR_DR)) {
+		printf("map 0x%08lx@0x%p: ", size, phys);
+		printf("%d\n\r", map(phys, virt, size));
+	}
 }
 
 static unsigned long try_claim(unsigned long size)
@@ -250,11 +252,14 @@ static void gunzip(unsigned long dest, int destlen,
 		   unsigned long src, int srclen, const char *what)
 {
 	int len;
-	printf("uncompressing %s (0x%08lx:0x%08lx <- 0x%08lx:0x%08lx)...",
-	       what, dest, destlen, src, srclen);
+	printf("uncompressing %s ", what);
+#ifdef DEBUG
+	printf("(0x%08lx:0x%08lx <- 0x%08lx:0x%08lx)...",
+	       dest, destlen, src, srclen);
+#endif
 	len = srclen;
 	do_gunzip((void *)dest, destlen, (unsigned char *)src, &len);
-	printf("done 0x%08lx bytes\n\r", len);
+	printf("done. (0x%08lx bytes)\n\r", len);
 }
 
 void start(unsigned long a1, unsigned long a2, void *promptr)
@@ -317,11 +322,11 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	 * the kernel doesnt claim and map this area itself
 	 */
 	vmlinux.memsize += 3 * 1024 * 1024;
-	printf("Allocating 0x%lx bytes for kernel ...\n\r", vmlinux.memsize);
 	vmlinux.addr = try_claim(vmlinux.memsize);
 	if (vmlinux.addr == 0)
 		abort("Can't allocate memory for kernel image !\n\r");
 
+	printf("Allocated 0x%08lx bytes for kernel @ 0x%08lx\n\r", vmlinux.memsize, vmlinux.addr);
 
 	/*
 	 * Now we try to claim memory for the initrd (and copy it there)
@@ -329,16 +334,18 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	initrd.size = (unsigned long)(_initrd_end - _initrd_start);
 	initrd.memsize = initrd.size;
 	if ( initrd.size > 0 ) {
-		printf("Allocating 0x%lx bytes for initrd ...\n\r", initrd.size);
 		initrd.addr = try_claim(initrd.size);
 		if (initrd.addr == 0)
 			abort("Can't allocate memory for initial ramdisk !\n\r");
+		printf("Allocated 0x%08lx bytes for initrd @ 0x%08lx\n\r", initrd.size, initrd.addr);
 		a1 = initrd.addr;
 		a2 = initrd.size;
+#ifdef DEBUG
 		printf("initial ramdisk moving 0x%lx <- 0x%lx (0x%lx bytes)\n\r",
 		       initrd.addr, (unsigned long)_initrd_start, initrd.size);
+		printf("initrd head: 0x%lx\n\r", *((unsigned long *)_initrd_start));
+#endif
 		memmove((void *)initrd.addr, (void *)_initrd_start, initrd.size);
-		printf("initrd head: 0x%lx\n\r", *((unsigned long *)initrd.addr));
 	}
 
 	/* Eventually gunzip the kernel */
@@ -351,9 +358,11 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	if ( _builtin_cmd_line.prefer && _builtin_cmd_line.prefer != '0' ) {
 		int l = strlen (_builtin_cmd_line.string)+1;
-		printf("copy built-in cmdline(%d) %s\n\r",l,_builtin_cmd_line.string);
+		printf("copy built-in cmdline(%d):\n\r%s\n\r",l,_builtin_cmd_line.string);
 		l = (int)setprop( chosen_handle, "bootargs", _builtin_cmd_line.string, l);
+#ifdef DEBUG
 		printf ("setprop bootargs: %d\n\r",l);
+#endif
 	}
 
 	flush_cache((void *)vmlinux.addr, vmlinux.memsize);

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jun 10 23:10:15 CEST 2005 - olh@suse.de
+
+- reduce output in bootheader
+
+-------------------------------------------------------------------
 Fri Jun 10 22:20:14 CEST 2005 - olh@suse.de
 
 - reduce the zlib workspace from 128k to 46912 in bootheader
