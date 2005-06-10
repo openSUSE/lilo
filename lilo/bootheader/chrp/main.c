@@ -31,7 +31,7 @@ extern void flush_cache(void *, unsigned long);
 
 /* Value picked to match that used by yaboot */
 #define PROG_START	0x01400000
-#define RAM_END		(256<<20) // Fixme: use OF */
+#define RAM_END		(128<<20) // Fixme: use OF */
 
 extern char _start[];
 extern char _vmlinuz_start[];
@@ -164,7 +164,7 @@ static int check_elf64(void *p)
 	return 64;
 }
 
-static unsigned long claim_base = PROG_START;
+static unsigned long claim_base /* = PROG_START*/;
 
 static void try_map(unsigned long phys, unsigned long virt, unsigned int size)
 {
