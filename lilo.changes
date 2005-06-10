@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jun 10 22:11:17 CEST 2005 - olh@suse.de
+
+- use abort() also in gunzip in bootheader
+
+-------------------------------------------------------------------
 Fri Jun 10 21:40:25 CEST 2005 - olh@suse.de
 
 - zeropad the ELF debug output in bootheader

@@ -73,6 +73,12 @@ struct _builtin_cmd_line _builtin_cmd_line = {
 	.cmdline_end_flag = cmdline_end_string,
 };
 
+static void abort(const char *s)
+{
+	printf("%s\n\r", s);
+	exit();
+}
+
 static int check_elf32(void *p)
 {
 	Elf32_Ehdr *elf32 = p;
@@ -201,8 +207,7 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 	i = 10;
 	flags = src[3];
 	if (src[2] != Z_DEFLATED || (flags & RESERVED) != 0) {
-		printf("bad gzipped data\n\r");
-		exit();
+		abort("bad gzipped data");
 	}
 	if ((flags & EXTRA_FIELD) != 0)
 		i = 12 + src[10] + (src[11] << 8);
@@ -215,13 +220,11 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 	if ((flags & HEAD_CRC) != 0)
 		i += 2;
 	if (i >= *lenp) {
-		printf("gunzip: ran out of data in header\n\r");
-		exit();
+		abort("gunzip: ran out of data in header");
 	}
 
 	if (zlib_inflate_workspacesize() > sizeof(scratch)) {
-		printf("zlib needs more mem\n\r");
-		exit();
+		abort("zlib needs more mem");
 	}
 	memset(&s, 0, sizeof(s));
 	s.workspace = scratch;
@@ -252,12 +255,6 @@ static void gunzip(unsigned long dest, int destlen,
 	len = srclen;
 	do_gunzip((void *)dest, destlen, (unsigned char *)src, &len);
 	printf("done 0x%08lx bytes\n\r", len);
-}
-
-static void abort(const char *s)
-{
-	printf("%s\n\r", s);
-	exit();
 }
 
 void start(unsigned long a1, unsigned long a2, void *promptr)
