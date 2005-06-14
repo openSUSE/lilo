@@ -1,7 +1,10 @@
 SUBMIT_DIR=/work/src/done/SLES9-SP3
 BUILD_DIST=sles9-beta-ppc
+BUILD_ROOT=/abuild/buildsystem.$$HOST.$$LOGNAME
+BUILD_DIR=$(BUILD_ROOT)/usr/src/packages/RPMS
 
-.PHONY:	export build submit clean
+
+.PHONY:	export build submit rpm clean
 
 all:
 	@echo "Choose one target out of 'export', 'build', 'submit' or 'clean'"
@@ -11,13 +14,16 @@ export:	.exportdir
 
 build:	.built
 
+rpm:	.built
+	@cp -av $(BUILD_ROOT)/usr/src/packages/RPMS/ppc/lilo* .
+	
 submit:	.submitted
 
 
 # worker targets
 
 .exportdir:	lilo.changes
-	@rm -f .build .submitted
+	@rm -f .built .submitted
 	set -e ; \
 	tmpdir=`mktemp -d /tmp/temp.XXXXXX`/lilo ;\
 	lv=`cat version` ; \
@@ -34,14 +40,14 @@ submit:	.submitted
 .built:	.exportdir
 	@rm -f .submitted
 	@echo "Trying to compile lilo package under $$(<.exportdir)"
-	if { cd $$(<.exportdir); export BUILD_DIST=$(BUILD_DIST); sudo build; }; then touch $@; else echo Compile failed; exit 1; fi
+	if { cd $$(<.exportdir); export BUILD_DIST=$(BUILD_DIST) BUILD_ROOT=$(BUILD_ROOT); sudo build; }; then touch $@; else echo Compile failed; exit 1; fi
 
 .submitted: .built
 	@echo "Target 'submit' will copy $$(<.exportdir) to $(SUBMIT_DIR)"
 	@echo "Please confirm or abort"
 	@select s in submit abort;do [ "$$s" == submit ] && break || exit 1; done
-	echo cp -a $$(<.exportdir) $(SUBMIT_DIR)
+	cp -av $$(<.exportdir) $(SUBMIT_DIR)
 	@touch $@
 
 clean:
-	rm -f .exportdir .build .submitted
+	rm -f .exportdir .built .submitted
