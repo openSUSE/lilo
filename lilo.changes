@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 14 23:29:55 CEST 2005 - olh@suse.de
+
+- correct argument order for map call in bootheader
+
+-------------------------------------------------------------------
 Tue Jun 14 22:42:27 CEST 2005 - olh@suse.de
 
 - string.h needs stddef.h in bootheader
