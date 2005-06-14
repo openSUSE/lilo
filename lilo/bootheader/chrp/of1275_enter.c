@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id$ */
 #include <prom.h>
 void of1275_enter(void)
 {

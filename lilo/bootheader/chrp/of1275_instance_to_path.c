@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id$ */
 #include <prom.h>
 int of1275_instance_to_path(ihandle node, void *buf, int buflen)
 {

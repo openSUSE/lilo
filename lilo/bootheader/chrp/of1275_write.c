@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id$ */
 #include <prom.h>
 int of1275_write(phandle node, void *buf, int buflen)
 {

@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id$ */
 #include <prom.h>
 int of1275_getprop(phandle node, const char *name, void *buf, int buflen)
 {

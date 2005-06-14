@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id$ */
 #include <prom.h>
 int of1275_seek(ihandle node, unsigned int a, unsigned int b)
 {

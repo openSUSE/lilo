@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id$ */
 #include <prom.h>
 phandle of1275_instance_to_package(ihandle node)
 {

@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id$ */
 #include <prom.h>
 void *of1275_claim(unsigned int virt, unsigned int size, unsigned int align)
 {
