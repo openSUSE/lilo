@@ -264,13 +264,13 @@ static void gunzip(unsigned long dest, int destlen,
 
 void start(unsigned long a1, unsigned long a2, void *promptr)
 {
-	void *bootcpu_phandle;
+	phandle bootcpu_phandle;
 	kernel_entry_t kernel_entry;
 	int cputype, elftype;
 
 	prom = (int (*)(void *)) promptr;
 	chosen_handle = finddevice("/chosen");
-	if (chosen_handle == (void *) -1)
+	if (chosen_handle == (phandle) -1)
 		exit();
 	if (getprop(chosen_handle, "stdout", &stdout, sizeof(stdout)) != 4)
 		exit();
@@ -285,7 +285,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	if (getprop(chosen_handle, "cpu", &bootcpu, sizeof(bootcpu)) == 4) {
 		bootcpu_phandle = instance_to_package(bootcpu);
-		if (bootcpu_phandle == (void *)-1)
+		if (bootcpu_phandle == (phandle)-1)
 			exit();
 
 		if (getprop(bootcpu_phandle, "64-bit", NULL, 0) != -1)

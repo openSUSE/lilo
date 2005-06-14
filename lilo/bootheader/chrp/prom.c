@@ -8,24 +8,26 @@
  * 2 of the License, or (at your option) any later version.
  */
 
+#include <prom.h>
+
 int (*prom)(void *);
 
-void *chosen_handle;
-void *stdin;
-void *stdout;
-void *stderr;
-void *bootcpu;
-void *mmu;
+phandle chosen_handle;
+phandle stdin;
+phandle stdout;
+phandle stderr;
+phandle bootcpu;
+ihandle mmu;
 
 
 int
-write(void *handle, void *ptr, int nb)
+write(ihandle node, void *ptr, int nb)
 {
 	struct prom_args {
 		char *service;
 		int nargs;
 		int nret;
-		void *ihandle;
+		ihandle node;
 		void *addr;
 		int len;
 		int actual;
@@ -34,7 +36,7 @@ write(void *handle, void *ptr, int nb)
 	args.service = "write";
 	args.nargs = 3;
 	args.nret = 1;
-	args.ihandle = handle;
+	args.node = node;
 	args.addr = ptr;
 	args.len = nb;
 	args.actual = -1;
@@ -43,13 +45,13 @@ write(void *handle, void *ptr, int nb)
 }
 
 int
-read(void *handle, void *ptr, int nb)
+read(ihandle node, void *ptr, int nb)
 {
 	struct prom_args {
 		char *service;
 		int nargs;
 		int nret;
-		void *ihandle;
+		ihandle node;
 		void *addr;
 		int len;
 		int actual;
@@ -58,7 +60,7 @@ read(void *handle, void *ptr, int nb)
 	args.service = "read";
 	args.nargs = 3;
 	args.nret = 1;
-	args.ihandle = handle;
+	args.node = node;
 	args.addr = ptr;
 	args.len = nb;
 	args.actual = -1;
@@ -90,7 +92,7 @@ pause(void)
 	(*prom)(&args);
 }
 
-void *
+phandle
 finddevice(const char *name)
 {
 	struct prom_args {
@@ -98,34 +100,34 @@ finddevice(const char *name)
 		int nargs;
 		int nret;
 		const char *devspec;
-		void *phandle;
+		phandle phandle;
 	} args;
 
 	args.service = "finddevice";
 	args.nargs = 1;
 	args.nret = 1;
 	args.devspec = name;
-	args.phandle = (void *) -1;
+	args.phandle = (phandle) -1;
 	(*prom)(&args);
 	return args.phandle;
 }
 
-void *
-instance_to_package(const void *ihandle)
+phandle
+instance_to_package(const ihandle node)
 {
 	struct prom_args {
 		char *service;
 		int nargs;
 		int nret;
-		const void *ihandle;
-		void *phandle;
+		ihandle node;
+		phandle phandle;
 	} args;
 
 	args.service = "instance-to-package";
 	args.nargs = 1;
 	args.nret = 1;
-	args.ihandle = ihandle;
-	args.phandle = (void *)-1;
+	args.node = node;
+	args.phandle = (phandle)-1;
 	(*prom) (&args);
 	return args.phandle;
 }
@@ -161,7 +163,7 @@ map(unsigned int phys, unsigned int virt, unsigned int size)
 		int nargs;
 		int nret;
 		char *method;
-		void *mmu_ihandle;
+		ihandle mmu_ihandle;
 		int misc;
 		unsigned int size;
 		unsigned int virt;
@@ -184,13 +186,13 @@ map(unsigned int phys, unsigned int virt, unsigned int size)
 }
 
 int
-getprop(void *phandle, const char *name, void *buf, int buflen)
+getprop(phandle node, const char *name, void *buf, int buflen)
 {
 	struct prom_args {
 		char *service;
 		int nargs;
 		int nret;
-		void *phandle;
+		phandle node;
 		const char *name;
 		void *buf;
 		int buflen;
@@ -200,7 +202,7 @@ getprop(void *phandle, const char *name, void *buf, int buflen)
 	args.service = "getprop";
 	args.nargs = 4;
 	args.nret = 1;
-	args.phandle = phandle;
+	args.node = node;
 	args.name = name;
 	args.buf = buf;
 	args.buflen = buflen;
@@ -210,13 +212,13 @@ getprop(void *phandle, const char *name, void *buf, int buflen)
 }
 
 int
-setprop(void *node, const char *name, void *buf, int buflen)
+setprop(phandle node, const char *name, void *buf, int buflen)
 {
     struct prom_args {
 	char *service;
 	int nargs;
 	int nret;
-	void *node;
+	phandle node;
 	const char *name;
 	void *buf;
 	int buflen;
