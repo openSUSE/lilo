@@ -2,6 +2,8 @@
 #define _PPC_BOOT_STRING_H_
 /* $Id$ */
 
+#include <stddef.h>
+
 extern char *strcpy(char *dest, const char *src);
 extern char *strncpy(char *dest, const char *src, size_t n);
 extern char *strcat(char *dest, const char *src);

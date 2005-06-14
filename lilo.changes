@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 14 22:42:27 CEST 2005 - olh@suse.de
+
+- string.h needs stddef.h in bootheader
+
+-------------------------------------------------------------------
 Tue Jun 14 22:38:36 CEST 2005 - olh@suse.de
 
 - declare the new OF functions as extern in prom.h in bootloader
