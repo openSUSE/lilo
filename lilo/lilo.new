@@ -141,11 +141,22 @@ function error() {
 		echo "ERROR: parted complains:"
 		cat $TEMP/parted.log
 		;;
+	    12)
+	       	echo '************************************************************'
+		echo '*  We cannot guarantee a proper reboot with your current   *'
+		echo '* non trivial boot configuration which relies on a working *'
+		echo '*               FAT firmware driver from IBM               *'
+		echo '*                                                          *'
+	  	echo '* Please consult your local IBM representative so that he  *'
+		echo '*     can take the appropriate steps to help you out.      *'
+	       	echo '************************************************************'
+		;;
 	    42)
 	        if [ "$OPTION_FORCE" ]; then return; fi
-		echo "If you really want to try this on your own risk, you can add a line saying"
-		echo "    \"force\""
-		echo "into the global section of your /etc/lilo.conf and rerun /sbin/lilo"
+		echo
+		echo "If you really want to try this on your own risk, you can add"
+		echo "a line saying      \"force\"      into the global section of"
+		echo "your /etc/lilo.conf and rerun /sbin/lilo"
 		;;
 	
 	    *)  # plain custom string
@@ -615,19 +626,22 @@ function running_on_chrp () {
 	# check CHRP machine against list of fully functional firmware
 	# implementations. There are various bugs out there which IBM
 	# consistently resists to fix.
-	read fw_status fw_workaround <<< "$(firmware_status)"
+	read fw_status model fw_level fw_workaround <<< "$(firmware_status)"
 	case "$fw_status" in
 	    broken)
-	        error "Broken IBM firmware. Consult IBM for update" 42
+	        error "Broken FAT driver in IBM firmware detected $model/$fw_level." 12 42
+		;;
+	    untested)
+	        error "Untested IBM machine/firmware $model/$fw_level." 12 42
 		;;
 	    unknown)
-	        error "Unknown IBM machine. Not supported configuration" 42
+	        error "Unknown IBM machine $model/$fw_level." 12 42
 		;;
 	    tested)
 	        # hurray a tested and working machine
 		;;
 	    *)
-	    	error "Corrupted firmware status table" 42
+	    	error "Corrupted firmware status table for $model/$fw_level"
 		;;
 	esac
 	if [ "$fw_workaround" ]; then
@@ -750,7 +764,7 @@ function running_on_chrp () {
 	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
 		$PARTED $device set $partition type 0x41; ) >& $TEMP/parted.log
 	    then
-		error "Partition shrink failed for $OPTION_BOOT" 11
+		error "Partition shrink failed for $OPTION_BOOT" 11 42
 	    fi
 	fi
 

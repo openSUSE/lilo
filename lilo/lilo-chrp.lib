@@ -19,26 +19,29 @@ function firmware_status () {
         REPLY=${REPLY##+([ 	])}
         if [ -z "$REPLY" ]; then continue; fi
         read model status fwlevel workaround <<< "$REPLY"
-	if [ "$model" == "$mymodel"]; then
+	if [ "$model" == "$mymodel" ]; then
 	    # check whether firmware level is ok.
-	    local op=${fwlevel%%+([^<>=\!])}"
+	    local op="${fwlevel%%+([^<>=\!])}"
 	    [ "$op" ] || op="=="
-	    fwlevel=${fwlevel##+([<>=\!])}"
-	    if [[ "$op" != @(<=|>=|<|>|\!=|==) ]]; then echo badformat; return; fi
+	    fwlevel="${fwlevel##+([<>=\!])}"
+	    if [[ "$op" != @(<=|>=|<|>|\!=|==) ]]; then
+	        echo badformat $mymodel $myfwlvl#
+		return
+	    fi
 	    if [[ "$op" == @(<=|>=) ]]; then
 	        if [ "$myfwlvl" == "$fwlevel" ]; then
-	            echo $status $workaround
-	            return;
+	            echo $status $mymodel $myfwlvl $workaround
+	            return
 	        fi
 		op=${op:0:1}
 	    fi
 	    if [ "$myfwlvl" $op "$fwlevel" ]; then
-	        echo $status $workaround
-	        return;
+	        echo $status $mymodel $myfwlvl $workaround
+	        return
 	    fi
 	fi
     done < $FW_STATUS_FILE
-    echo unknown
+    echo unknown $mymodel $myfwlvl
 }
 
 #
