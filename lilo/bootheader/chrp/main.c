@@ -23,15 +23,14 @@
 
 extern void flush_cache(void *, unsigned long);
 
-#define MSR_IR		(1<<5)		/* Instruction Relocate */
-#define MSR_DR		(1<<4)		/* Data Relocate */
+#define MSR_IR		(1<<5)	/* Instruction Relocate */
+#define MSR_DR		(1<<4)	/* Data Relocate */
 #define mfmsr()         ({unsigned long rval; \
 		asm volatile("mfmsr %0" : "=r" (rval)); rval;})
 
-
 /* Value picked to match that used by yaboot */
 #define PROG_START	0x01400000
-#define RAM_END		(128<<20) // Fixme: use OF */
+#define RAM_END		(128<<20)	// Fixme: use OF */
 
 extern char _start[];
 extern char _vmlinuz_start[];
@@ -52,19 +51,15 @@ static struct addr_range initrd;
 static char scratch[46912];	/* scratch space for gunzip, from zlib_inflate_workspacesize() */
 static unsigned char elfheader[256];
 
-typedef void (*kernel_entry_t)( unsigned long,
-                                unsigned long,
-                                void *,
-				void *);
-
+typedef void (*kernel_entry_t) (unsigned long, unsigned long, void *, void *);
 
 #define cmdline_start_string   "cmd_line_start"
 #define cmdline_end_string     "cmd_line_end"
 struct _builtin_cmd_line {
 	unsigned char prefer;
-	unsigned char cmdling_start_flag[sizeof(cmdline_start_string)-1]; /* without trailing zero */
-	unsigned char string[512]; /* COMMAND_LINE_SIZE */
-	unsigned char cmdline_end_flag[sizeof(cmdline_end_string)]; /* with trailing zero */
+	unsigned char cmdling_start_flag[sizeof(cmdline_start_string) - 1];	/* without trailing zero */
+	unsigned char string[512];	/* COMMAND_LINE_SIZE */
+	unsigned char cmdline_end_flag[sizeof(cmdline_end_string)];	/* with trailing zero */
 } __attribute__ ((__packed__));
 
 struct _builtin_cmd_line _builtin_cmd_line = {
@@ -164,12 +159,12 @@ static int check_elf64(void *p)
 	return 64;
 }
 
-static unsigned long claim_base /* = PROG_START*/;
+static unsigned long claim_base /* = PROG_START */ ;
 
 static void try_map(unsigned long phys, unsigned long virt, unsigned int size)
 {
 	unsigned long msr = mfmsr();
-	if (msr & (MSR_IR|MSR_DR)) {
+	if (msr & (MSR_IR | MSR_DR)) {
 		printf("map 0x%08lx@0x%p: ", size, phys);
 		printf("%d\n\r", map(phys, virt, size));
 	}
@@ -179,7 +174,7 @@ static unsigned long try_claim(unsigned long size)
 {
 	unsigned long addr = 0;
 
-	for(; claim_base < RAM_END; claim_base += 0x100000) {
+	for (; claim_base < RAM_END; claim_base += 0x100000) {
 #ifdef DEBUG
 		printf("    trying: 0x%08lx\n\r", claim_base);
 #endif
@@ -214,11 +209,9 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 	if ((flags & EXTRA_FIELD) != 0)
 		i = 12 + src[10] + (src[11] << 8);
 	if ((flags & ORIG_NAME) != 0)
-		while (src[i++] != 0)
-			;
+		while (src[i++] != 0) ;
 	if ((flags & COMMENT) != 0)
-		while (src[i++] != 0)
-			;
+		while (src[i++] != 0) ;
 	if ((flags & HEAD_CRC) != 0)
 		i += 2;
 	if (i >= *lenp) {
@@ -244,7 +237,7 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 		printf("inflate returned %d msg: %s\n\r", r, s.msg);
 		exit();
 	}
-	*lenp = s.next_out - (unsigned char *) dst;
+	*lenp = s.next_out - (unsigned char *)dst;
 	zlib_inflateEnd(&s);
 }
 
@@ -268,9 +261,9 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	kernel_entry_t kernel_entry;
 	int cputype, elftype;
 
-	prom = (int (*)(void *)) promptr;
+	prom = (int (*)(void *))promptr;
 	chosen_handle = finddevice("/chosen");
-	if (chosen_handle == (phandle) -1)
+	if (chosen_handle == (phandle) (-1))
 		exit();
 	if (getprop(chosen_handle, "stdout", &stdout, sizeof(stdout)) != 4)
 		exit();
@@ -278,14 +271,15 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	if (getprop(chosen_handle, "stdin", &stdin, sizeof(stdin)) != 4)
 		abort("no stdin");
 
-	printf("\n\rzImage starting: loaded at 0x%x (0x%lx/0x%lx/0x%p)\n\r", (unsigned)_start,a1,a2,promptr);
+	printf("\n\rzImage starting: loaded at 0x%x (0x%lx/0x%lx/0x%p)\n\r",
+	       (unsigned)_start, a1, a2, promptr);
 
 	if (getprop(chosen_handle, "mmu", &mmu, sizeof(mmu)) != 4)
 		abort("no mmu");
 
 	if (getprop(chosen_handle, "cpu", &bootcpu, sizeof(bootcpu)) == 4) {
 		bootcpu_phandle = instance_to_package(bootcpu);
-		if (bootcpu_phandle == (phandle)-1)
+		if (bootcpu_phandle == (phandle) (-1))
 			exit();
 
 		if (getprop(bootcpu_phandle, "64-bit", NULL, 0) != -1)
@@ -301,7 +295,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	/* Eventually gunzip the ELF header of the kernel */
 	if (*(unsigned short *)vmlinuz.addr == 0x1f8b)
 		gunzip((unsigned long)elfheader, sizeof(elfheader),
-				vmlinuz.addr, vmlinuz.size, "ELF header");
+		       vmlinuz.addr, vmlinuz.size, "ELF header");
 	else
 		memcpy(elfheader, _vmlinuz_start, sizeof(elfheader));
 
@@ -310,10 +304,10 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		elftype = check_elf32(elfheader);
 	if (!elftype)
 		abort("not a powerpc ELF file\n\r");
-	
+
 	if (cputype && cputype != elftype) {
 		printf("booting a %d-bit kernel on a %d-bit cpu.\n\r",
-				elftype, cputype);
+		       elftype, cputype);
 		abort("");
 	}
 
@@ -326,61 +320,67 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	if (vmlinux.addr == 0)
 		abort("Can't allocate memory for kernel image !\n\r");
 
-	printf("Allocated 0x%08lx bytes for kernel @ 0x%08lx\n\r", vmlinux.memsize, vmlinux.addr);
+	printf("Allocated 0x%08lx bytes for kernel @ 0x%08lx\n\r",
+	       vmlinux.memsize, vmlinux.addr);
 
 	/*
 	 * Now we try to claim memory for the initrd (and copy it there)
 	 */
 	initrd.size = (unsigned long)(_initrd_end - _initrd_start);
 	initrd.memsize = initrd.size;
-	if ( initrd.size > 0 ) {
+	if (initrd.size > 0) {
 		initrd.addr = try_claim(initrd.size);
 		if (initrd.addr == 0)
-			abort("Can't allocate memory for initial ramdisk !\n\r");
-		printf("Allocated 0x%08lx bytes for initrd @ 0x%08lx\n\r", initrd.size, initrd.addr);
+			abort
+			    ("Can't allocate memory for initial ramdisk !\n\r");
+		printf("Allocated 0x%08lx bytes for initrd @ 0x%08lx\n\r",
+		       initrd.size, initrd.addr);
 		a1 = initrd.addr;
 		a2 = initrd.size;
 #ifdef DEBUG
-		printf("initial ramdisk moving 0x%lx <- 0x%lx (0x%lx bytes)\n\r",
-		       initrd.addr, (unsigned long)_initrd_start, initrd.size);
-		printf("initrd head: 0x%lx\n\r", *((unsigned long *)_initrd_start));
+		printf
+		    ("initial ramdisk moving 0x%lx <- 0x%lx (0x%lx bytes)\n\r",
+		     initrd.addr, (unsigned long)_initrd_start, initrd.size);
+		printf("initrd head: 0x%lx\n\r",
+		       *((unsigned long *)_initrd_start));
 #endif
-		memmove((void *)initrd.addr, (void *)_initrd_start, initrd.size);
+		memmove((void *)initrd.addr, (void *)_initrd_start,
+			initrd.size);
 	}
 
 	/* Eventually gunzip the kernel */
 	if (*(unsigned short *)vmlinuz.addr == 0x1f8b)
-		gunzip(vmlinux.addr, vmlinux.memsize, vmlinuz.addr, vmlinuz.size,
-		       "kernel");
+		gunzip(vmlinux.addr, vmlinux.memsize, vmlinuz.addr,
+		       vmlinuz.size, "kernel");
 	else
 		memmove((void *)vmlinux.addr, (void *)vmlinuz.addr,
 			vmlinuz.size);
 
-	if ( _builtin_cmd_line.prefer && _builtin_cmd_line.prefer != '0' ) {
-		int l = strlen (_builtin_cmd_line.string)+1;
-		printf("copy built-in cmdline(%d):\n\r%s\n\r",l,_builtin_cmd_line.string);
-		l = (int)setprop( chosen_handle, "bootargs", _builtin_cmd_line.string, l);
+	if (_builtin_cmd_line.prefer && _builtin_cmd_line.prefer != '0') {
+		int l = strlen(_builtin_cmd_line.string) + 1;
+		printf("copy built-in cmdline(%d):\n\r%s\n\r", l,
+		       _builtin_cmd_line.string);
+		l = (int)setprop(chosen_handle, "bootargs",
+				 _builtin_cmd_line.string, l);
 #ifdef DEBUG
-		printf ("setprop bootargs: %d\n\r",l);
+		printf("setprop bootargs: %d\n\r", l);
 #endif
 	}
 
 	flush_cache((void *)vmlinux.addr, vmlinux.memsize);
 
-	kernel_entry = (kernel_entry_t)(vmlinux.addr + vmlinux.offset);
+	kernel_entry = (kernel_entry_t) (vmlinux.addr + vmlinux.offset);
 #ifdef DEBUG
-	printf( "kernel:\n\r"
-		"        entry addr = 0x%lx\n\r"
-		"        a1         = 0x%lx,\n\r"
-		"        a2         = 0x%lx,\n\r"
-		"        prom       = 0x%lx,\n\r"
-		"        bi_recs    = 0x%lx,\n\r",
-		(unsigned long)kernel_entry, a1, a2,
-		(unsigned long)prom, NULL);
+	printf("kernel:\n\r"
+	       "        entry addr = 0x%lx\n\r"
+	       "        a1         = 0x%lx,\n\r"
+	       "        a2         = 0x%lx,\n\r"
+	       "        prom       = 0x%lx,\n\r"
+	       "        bi_recs    = 0x%lx,\n\r",
+	       (unsigned long)kernel_entry, a1, a2, (unsigned long)prom, NULL);
 #endif
 
-	kernel_entry( a1, a2, prom, NULL );
+	kernel_entry(a1, a2, prom, NULL);
 
 	abort("Error: Linux kernel returned to zImage bootloader!\n\r");
 }
-

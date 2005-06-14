@@ -10,7 +10,7 @@
 
 #include <prom.h>
 
-int (*prom)(void *);
+int (*prom) (void *);
 
 phandle chosen_handle;
 phandle stdin;
@@ -19,9 +19,7 @@ phandle stderr;
 phandle bootcpu;
 ihandle mmu;
 
-
-int
-write(ihandle node, void *ptr, int nb)
+int write(ihandle node, void *ptr, int nb)
 {
 	struct prom_args {
 		char *service;
@@ -40,12 +38,11 @@ write(ihandle node, void *ptr, int nb)
 	args.addr = ptr;
 	args.len = nb;
 	args.actual = -1;
-	(*prom)(&args);
+	(*prom) (&args);
 	return args.actual;
 }
 
-int
-read(ihandle node, void *ptr, int nb)
+int read(ihandle node, void *ptr, int nb)
 {
 	struct prom_args {
 		char *service;
@@ -64,12 +61,11 @@ read(ihandle node, void *ptr, int nb)
 	args.addr = ptr;
 	args.len = nb;
 	args.actual = -1;
-	(*prom)(&args);
+	(*prom) (&args);
 	return args.actual;
 }
 
-void
-exit(void)
+void exit(void)
 {
 	struct prom_args {
 		char *service;
@@ -77,23 +73,21 @@ exit(void)
 
 	for (;;) {
 		args.service = "exit";
-		(*prom)(&args);
+		(*prom) (&args);
 	}
 }
 
-void
-pause(void)
+void pause(void)
 {
 	struct prom_args {
 		char *service;
 	} args;
 
 	args.service = "enter";
-	(*prom)(&args);
+	(*prom) (&args);
 }
 
-phandle
-finddevice(const char *name)
+phandle finddevice(const char *name)
 {
 	struct prom_args {
 		char *service;
@@ -107,13 +101,12 @@ finddevice(const char *name)
 	args.nargs = 1;
 	args.nret = 1;
 	args.devspec = name;
-	args.phandle = (phandle) -1;
-	(*prom)(&args);
+	args.phandle = (phandle) - 1;
+	(*prom) (&args);
 	return args.phandle;
 }
 
-phandle
-instance_to_package(const ihandle node)
+phandle instance_to_package(const ihandle node)
 {
 	struct prom_args {
 		char *service;
@@ -127,13 +120,12 @@ instance_to_package(const ihandle node)
 	args.nargs = 1;
 	args.nret = 1;
 	args.node = node;
-	args.phandle = (phandle)-1;
+	args.phandle = (phandle) - 1;
 	(*prom) (&args);
 	return args.phandle;
 }
 
-void *
-claim(unsigned long virt, unsigned long size, unsigned long align)
+void *claim(unsigned long virt, unsigned long size, unsigned long align)
 {
 	struct prom_args {
 		char *service;
@@ -151,12 +143,11 @@ claim(unsigned long virt, unsigned long size, unsigned long align)
 	args.virt = virt;
 	args.size = size;
 	args.align = align;
-	(*prom)(&args);
+	(*prom) (&args);
 	return args.ret;
 }
 
-int
-map(unsigned int phys, unsigned int virt, unsigned int size)
+int map(unsigned int phys, unsigned int virt, unsigned int size)
 {
 	struct prom_args {
 		char *service;
@@ -185,8 +176,7 @@ map(unsigned int phys, unsigned int virt, unsigned int size)
 	return (int)args.ret0;
 }
 
-int
-getprop(phandle node, const char *name, void *buf, int buflen)
+int getprop(phandle node, const char *name, void *buf, int buflen)
 {
 	struct prom_args {
 		char *service;
@@ -207,32 +197,31 @@ getprop(phandle node, const char *name, void *buf, int buflen)
 	args.buf = buf;
 	args.buflen = buflen;
 	args.size = -1;
-	(*prom)(&args);
+	(*prom) (&args);
 	return args.size;
 }
 
-int
-setprop(phandle node, const char *name, void *buf, int buflen)
+int setprop(phandle node, const char *name, void *buf, int buflen)
 {
-    struct prom_args {
-	char *service;
-	int nargs;
-	int nret;
-	phandle node;
-	const char *name;
-	void *buf;
-	int buflen;
-	int size;
-    } args;
+	struct prom_args {
+		char *service;
+		int nargs;
+		int nret;
+		phandle node;
+		const char *name;
+		void *buf;
+		int buflen;
+		int size;
+	} args;
 
-    args.service = "setprop";
-    args.nargs = 4;
-    args.nret = 1;
-    args.node = node;
-    args.name = name;
-    args.buf = buf;
-    args.buflen = buflen;
-    args.size = -1;
-    (*prom)(&args);
-    return args.size;
+	args.service = "setprop";
+	args.nargs = 4;
+	args.nret = 1;
+	args.node = node;
+	args.name = name;
+	args.buf = buf;
+	args.buflen = buflen;
+	args.size = -1;
+	(*prom) (&args);
+	return args.size;
 }

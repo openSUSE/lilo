@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 14 15:39:32 CEST 2005 - olh@suse.de
+
+- run chrp/*.c through Lindent
+
+-------------------------------------------------------------------
 Tue Jun 14 15:33:43 CEST 2005 - olh@suse.de
 
 - define and use ihandle and phandle types in bootheader
