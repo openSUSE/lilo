@@ -1,0 +1,36 @@
+#
+#  Status of Firmware FAT drivers on IBM CHRP machines
+#
+#  Uses
+#	/proc/device-tree/model
+#	/proc/device-tree/openprom/ibm,fw-vernum_encoded
+#  to identify machine and firmware level
+#
+
+# Power3 machines
+IBM,7044-270	?	<=SPH00221			MKDOSFS="-s 8"		# ugli
+IBM,7026-B80	tested	<=NAN00252			MKDOSFS="-s 8"		# mandarine
+
+# RS64 machines
+								# papaya
+
+
+# Power4 machines
+IBM,7038-6M2	?	<=RG050131_d79e01_regatta				# sweetie
+IBM,7028-6C4	?	<=RG041029_d79e00_regatta				# gooseberry
+IBM,7028-6E4	?	<=RG041029_d79e00_regatta				# pepino
+IBM,7040-671	broken	<=RG050215_d79e02_regatta				# pomegranate
+
+
+# Power5 machines
+# cherry
+# clementine
+# xiqua
+# satsuma
+# tangelo
+
+# PPC970 blades
+# JS20 GA1
+# JS20 GA2
+# JS20 TelCo
+# JS20++

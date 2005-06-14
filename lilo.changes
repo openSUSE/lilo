@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jun 14 20:07:18 CEST 2005 - jplack@suse.de
+
+- added framework to detect and workaround or bail out for fatal
+  firmware bugs
+
+-------------------------------------------------------------------
 Mon Jun  6 23:36:33 CEST 2005 - jplack@suse.de
 
 - fc_transport uses decimals not hex digits, support for more

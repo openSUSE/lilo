@@ -86,6 +86,8 @@ chmod 754 lilo.{old,new}
 cp -av lilo.old $RPM_BUILD_ROOT/sbin/lilo.old
 cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo
 cp -av lilo-pmac.lib $RPM_BUILD_ROOT/lib/lilo/lilo-pmac.lib
+cp -av lilo-chrp.lib $RPM_BUILD_ROOT/lib/lilo/lilo-chrp.lib
+cp -av firmware_status.chrp $RPM_BUILD_ROOT/lib/lilo/chrp
 cp -av show_of_path.sh $RPM_BUILD_ROOT/bin
 cp -av Finder.bin $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av System.bin $RPM_BUILD_ROOT/lib/lilo/pmac

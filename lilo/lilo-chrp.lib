@@ -1,0 +1,54 @@
+#
+#  library for CHRP routines
+
+unset firmware_status
+
+FW_STATUS_FILE=/lib/lilo/chrp/firmware_status.chrp
+
+function firmware_status () {
+    # Always return ok if status file is missing
+    if ! [ -f "$FW_STATUS_FILE" ]; then
+        echo tested
+        return
+    fi
+    local mymodel="$(</proc/device-tree/model)"
+    local myfwlvl="$(</proc/device-tree/openprom/ibm,fw-vernum_encoded)"
+    while read; do
+        REPLY=${REPLY%%#*}
+        REPLY=${REPLY%%+([ 	])}
+        REPLY=${REPLY##+([ 	])}
+        if [ -z "$REPLY" ]; then continue; fi
+        read model status fwlevel workaround <<< "$REPLY"
+	if [ "$model" == "$mymodel"]; then
+	    # check whether firmware level is ok.
+	    local op=${fwlevel%%+([^<>=\!])}"
+	    [ "$op" ] || op="=="
+	    fwlevel=${fwlevel##+([<>=\!])}"
+	    if [[ "$op" != @(<=|>=|<|>|\!=|==) ]]; then echo badformat; return; fi
+	    if [[ "$op" == @(<=|>=) ]]; then
+	        if [ "$myfwlvl" == "$fwlevel" ]; then
+	            echo $status $workaround
+	            return;
+	        fi
+		op=${op:0:1}
+	    fi
+	    if [ "$myfwlvl" $op "$fwlevel" ]; then
+	        echo $status $workaround
+	        return;
+	    fi
+	fi
+    done < $FW_STATUS_FILE
+    echo unknown
+}
+
+#
+# Local variables:
+#     mode: ksh
+#     mode: font-lock
+#     mode: auto-fill
+#     ksh-indent: 4
+#     ksh-multiline-offset: 2
+#     ksh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#     fill-column: 78
+# End:
+#

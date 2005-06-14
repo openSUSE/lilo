@@ -141,6 +141,13 @@ function error() {
 		echo "ERROR: parted complains:"
 		cat $TEMP/parted.log
 		;;
+	    42)
+	        if [ "$OPTION_FORCE" ]; then return; fi
+		echo "If you really want to try this on your own risk, you can add a line saying"
+		echo "    \"force\""
+		echo "into the global section of your /etc/lilo.conf and rerun /sbin/lilo"
+		;;
+	
 	    *)  # plain custom string
 	        echo "ERROR: $1"
 		;;
@@ -302,6 +309,10 @@ while [ "$1" ]; do case "$1" in
 	;;
 esac; done
 
+function firmware_status () {
+    source /lib/lilo/lilo-chrp.lib
+    firmware_status
+}
 
 function running_on_chrp () {
     echo running on chrp
@@ -601,6 +612,28 @@ function running_on_chrp () {
     [[ "$(</proc/mounts)" == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
 
     if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
+	# check CHRP machine against list of fully functional firmware
+	# implementations. There are various bugs out there which IBM
+	# consistently resists to fix.
+	read fw_status fw_workaround <<< "$(firmware_status)"
+	case "$fw_status" in
+	    broken)
+	        error "Broken IBM firmware. Consult IBM for update" 42
+		;;
+	    unknown)
+	        error "Unknown IBM machine. Not supported configuration" 42
+		;;
+	    tested)
+	        # hurray a tested and working machine
+		;;
+	    *)
+	    	error "Corrupted firmware status table" 42
+		;;
+	esac
+	if [ "$fw_workaround" ]; then
+	    eval $fw_workaround || error "Workaround for broken firmware did not work"
+	fi
+
 	# copy all kernels and initrds from non supported file systems
 	# to one FAT partition
 
@@ -635,7 +668,7 @@ function running_on_chrp () {
 		error "Partition conversion failed for $OPTION_BOOT" 11
 	    fi
 	fi
-	mkfs.msdos -s 8 $OPTION_BOOT || exit 2
+	mkfs.msdos $MKDOSFS $OPTION_BOOT || exit 2
 	cd $TEMP
 	mkdir -p boot || exit 2
 	mount $OPTION_BOOT boot || exit 2
@@ -1149,6 +1182,10 @@ function parse_config_file () {
 	    force_fat)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
 		OPTION_FORCEFAT="yes"
+		;;
+	    force)
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		OPTION_FORCE="yes"
 		;;
 	    progressbar)
 		# do nothing
