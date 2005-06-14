@@ -8,7 +8,7 @@ extern int sprintf(char *buf, const char *fmt, ...);
 
 extern int vsprintf(char *buf, const char *fmt, va_list args);
 
-extern int putc(int c, void *f);
+extern int putc(int c);
 extern int putchar(int c);
 extern int getchar(void);
 

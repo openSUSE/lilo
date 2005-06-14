@@ -9,6 +9,9 @@ phandle stdin;
 phandle stdout;
 phandle stderr;
 
+phandle bootcpu;
+ihandle mmu;
+
 void of1275_prominit(prom_entry entry)
 {
 	promptr = entry;

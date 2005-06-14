@@ -72,7 +72,7 @@ struct _builtin_cmd_line _builtin_cmd_line = {
 static void abort(const char *s)
 {
 	printf("%s\n\r", s);
-	exit();
+	of1275_exit();
 }
 
 static int check_elf32(void *p)
@@ -166,7 +166,7 @@ static void try_map(unsigned long phys, unsigned long virt, unsigned int size)
 	unsigned long msr = mfmsr();
 	if (msr & (MSR_IR | MSR_DR)) {
 		printf("map 0x%08lx@0x%p: ", size, phys);
-		printf("%d\n\r", map(phys, virt, size));
+		printf("%d\n\r", of1275_map(phys, virt, size));
 	}
 }
 
@@ -178,7 +178,7 @@ static unsigned long try_claim(unsigned long size)
 #ifdef DEBUG
 		printf("    trying: 0x%08lx\n\r", claim_base);
 #endif
-		addr = (unsigned long)claim(claim_base, size, 0);
+		addr = (unsigned long)of1275_claim(claim_base, size, 0);
 		if ((void *)addr != (void *)-1)
 			break;
 	}
@@ -226,7 +226,7 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 	r = zlib_inflateInit2(&s, -MAX_WBITS);
 	if (r != Z_OK) {
 		printf("inflateInit2 returned %d\n\r", r);
-		exit();
+		of1275_exit();
 	}
 	s.next_in = src + i;
 	s.avail_in = *lenp - i;
@@ -235,7 +235,7 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 	r = zlib_inflate(&s, Z_FULL_FLUSH);
 	if (r != Z_OK && r != Z_STREAM_END) {
 		printf("inflate returned %d msg: %s\n\r", r, s.msg);
-		exit();
+		of1275_exit();
 	}
 	*lenp = s.next_out - (unsigned char *)dst;
 	zlib_inflateEnd(&s);
@@ -261,28 +261,20 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	kernel_entry_t kernel_entry;
 	int cputype, elftype;
 
-	prom = (int (*)(void *))promptr;
-	chosen_handle = finddevice("/chosen");
-	if (chosen_handle == (phandle) (-1))
-		exit();
-	if (getprop(chosen_handle, "stdout", &stdout, sizeof(stdout)) != 4)
-		exit();
-	stderr = stdout;
-	if (getprop(chosen_handle, "stdin", &stdin, sizeof(stdin)) != 4)
-		abort("no stdin");
+	of1275_prominit(promptr);
 
 	printf("\n\rzImage starting: loaded at 0x%x (0x%lx/0x%lx/0x%p)\n\r",
 	       (unsigned)_start, a1, a2, promptr);
 
-	if (getprop(chosen_handle, "mmu", &mmu, sizeof(mmu)) != 4)
+	if (of1275_getprop(chosen_handle, "mmu", &mmu, sizeof(mmu)) != 4)
 		abort("no mmu");
 
-	if (getprop(chosen_handle, "cpu", &bootcpu, sizeof(bootcpu)) == 4) {
-		bootcpu_phandle = instance_to_package(bootcpu);
+	if (of1275_getprop(chosen_handle, "cpu", &bootcpu, sizeof(bootcpu)) == 4) {
+		bootcpu_phandle = of1275_instance_to_package(bootcpu);
 		if (bootcpu_phandle == (phandle) (-1))
-			exit();
+			of1275_exit();
 
-		if (getprop(bootcpu_phandle, "64-bit", NULL, 0) != -1)
+		if (of1275_getprop(bootcpu_phandle, "64-bit", NULL, 0) != -1)
 			cputype = 64;
 		else
 			cputype = 32;
@@ -360,7 +352,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		int l = strlen(_builtin_cmd_line.string) + 1;
 		printf("copy built-in cmdline(%d):\n\r%s\n\r", l,
 		       _builtin_cmd_line.string);
-		l = (int)setprop(chosen_handle, "bootargs",
+		l = of1275_setprop(chosen_handle, "bootargs",
 				 _builtin_cmd_line.string, l);
 #ifdef DEBUG
 		printf("setprop bootargs: %d\n\r", l);
@@ -377,10 +369,10 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	       "        a2         = 0x%lx,\n\r"
 	       "        prom       = 0x%lx,\n\r"
 	       "        bi_recs    = 0x%lx,\n\r",
-	       (unsigned long)kernel_entry, a1, a2, (unsigned long)prom, NULL);
+	       (unsigned long)kernel_entry, a1, a2, (unsigned long)promptr, NULL);
 #endif
 
-	kernel_entry(a1, a2, prom, NULL);
+	kernel_entry(a1, a2, promptr, NULL);
 
 	abort("Error: Linux kernel returned to zImage bootloader!\n\r");
 }

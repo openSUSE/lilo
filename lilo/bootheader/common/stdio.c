@@ -9,19 +9,35 @@
 #include <div64.h>
 
 int
-putc(int c, void *f)
+write(void *buf, int buflen)
+{
+	if (promptr)
+		return of1275_write(stdout, buf, buflen);
+	return -1;
+}
+
+int
+read(void *buf, int buflen)
+{
+	if (promptr)
+		return of1275_read(stdin, buf, buflen);
+	return -1;
+}
+
+int
+putc(int c)
 {
 	char ch = c;
 
 	if (c == '\n')
-		putc('\r', f);
-	return write(f, &ch, 1) == 1? c: -1;
+		putc('\r');
+	return write(&ch, 1) == 1? c: -1;
 }
 
 int
 putchar(int c)
 {
-	return putc(c, stdout);
+	return putc(c);
 }
 
 int
@@ -29,7 +45,7 @@ fputs(char *str, void *f)
 {
 	int n = strlen(str);
 
-	return write(f, str, n) == n? 0: -1;
+	return write(str, n) == n? 0: -1;
 }
 
 static int
@@ -38,7 +54,7 @@ readchar(void)
 	char ch;
 
 	for (;;) {
-		switch (read(stdin, &ch, 1)) {
+		switch (read(&ch, 1)) {
 		case 1:
 			return ch;
 		case -1:
@@ -461,7 +477,7 @@ printf(const char *fmt, ...)
 	va_start(args, fmt);
 	n = vsprintf(sprint_buf, fmt, args);
 	va_end(args);
-	write(stdout, sprint_buf, n);
+	write(sprint_buf, n);
 	return n;
 }
 
