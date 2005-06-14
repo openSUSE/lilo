@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 14 22:38:36 CEST 2005 - olh@suse.de
+
+- declare the new OF functions as extern in prom.h in bootloader
+
+-------------------------------------------------------------------
 Tue Jun 14 18:57:19 CEST 2005 - olh@suse.de
 
 - add a bunch of OF functions into chrp/prom.a in bootheader
