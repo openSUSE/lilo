@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 14 18:26:49 CEST 2005 - olh@suse.de
+
+- rename chrp/prom.a to chrp/chrp.a in bootheader
+
+-------------------------------------------------------------------
 Tue Jun 14 15:39:32 CEST 2005 - olh@suse.de
 
 - run chrp/*.c through Lindent
