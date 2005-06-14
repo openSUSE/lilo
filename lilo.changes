@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 14 23:48:07 CEST 2005 - olh@suse.de
+
+- tweak kernel_entry_t prototype in bootheader 
+
+-------------------------------------------------------------------
 Tue Jun 14 23:38:22 CEST 2005 - olh@suse.de
 
 - replace calls into prom.c with new OF functions in bootheader

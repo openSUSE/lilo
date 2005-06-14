@@ -51,7 +51,7 @@ static struct addr_range initrd;
 static char scratch[46912];	/* scratch space for gunzip, from zlib_inflate_workspacesize() */
 static unsigned char elfheader[256];
 
-typedef void (*kernel_entry_t) (unsigned long, unsigned long, void *, void *);
+typedef void (*kernel_entry_t) (unsigned long, unsigned long, prom_entry, void *);
 
 #define cmdline_start_string   "cmd_line_start"
 #define cmdline_end_string     "cmd_line_end"
@@ -367,9 +367,9 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	       "        entry addr = 0x%lx\n\r"
 	       "        a1         = 0x%lx,\n\r"
 	       "        a2         = 0x%lx,\n\r"
-	       "        prom       = 0x%lx,\n\r"
+	       "        prom       = 0x%p,\n\r"
 	       "        bi_recs    = 0x%lx,\n\r",
-	       (unsigned long)kernel_entry, a1, a2, (unsigned long)promptr, NULL);
+	       (unsigned long)kernel_entry, a1, a2, promptr, NULL);
 #endif
 
 	kernel_entry(a1, a2, promptr, NULL);
