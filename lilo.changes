@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Jun 15 17:49:55 CEST 2005 - jplack@suse.de
+
+- fix boot problem while using force_fat option
+- fix a couple of typos/syntax error
+- better error messages for the firmware detection framework
+- updated firmware table
+
+-------------------------------------------------------------------
 Tue Jun 14 20:07:18 CEST 2005 - jplack@suse.de
 
 - added framework to detect and workaround or bail out for fatal
