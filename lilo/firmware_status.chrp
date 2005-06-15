@@ -4,22 +4,33 @@
 #  Uses
 #	/proc/device-tree/model
 #	/proc/device-tree/openprom/ibm,fw-vernum_encoded
+#
+#  ??? lsvpd -vp | grep -A1 Platform
+#   tr '\0-\037' '[\n*]'  < ibm,vpd | grep -A1 RM
+#
 #  to identify machine and firmware level
 #
 
 # Power3 machines
-IBM,7044-270	?	<=SPH00221			MKDOSFS="-s 8"		# ugli
-IBM,7026-B80	tested	<=NAN00252			MKDOSFS="-s 8"		# mandarine
+IBM,7044-270	broken		<=SPH00221			MKDOSFS="-s 8"		# ugli
+IBM,7026-B80	untested	<=NAN00252			MKDOSFS="-s 8"		# mandarine
 
 # RS64 machines
-								# papaya
+IBM,7026-6H1    untested      	>=M2P01113                     	MKDOSFS="-s 8"		# papaya
 
 
 # Power4 machines
-IBM,7038-6M2	?	<=RG050131_d79e01_regatta				# sweetie
-IBM,7028-6C4	?	<=RG041029_d79e00_regatta				# gooseberry
-IBM,7028-6E4	?	<=RG041029_d79e00_regatta				# pepino
-IBM,7040-671	broken	<=RG050215_d79e02_regatta				# pomegranate
+IBM,7038-6M2	untested	<=RG050131_d79e01_regatta				# sweetie
+IBM,7028-6C4    untested 	==RG050405_d79e05_regatta
+IBM,7028-6C4    untested 	==3R050405
+IBM,7028-6C4	untested	<=RG041029_d79e00_regatta				# gooseberry
+IBM,7028-6C4	untested	<=3R041029						# gooseberry
+IBM,7028-6C4	untested   	==3R050405						# gooseberry
+IBM,7028-6E4	broken   	<=RG041029_d79e00_regatta				# pepino
+IBM,7028-6E4	untested     	3R050405	   					# pepino
+IBM,7040-671	broken   	<=RG050215_d79e02_regatta				# pomegranate
+IBM,7040-671	broken   	<=3H050215						# pomegranate
+# ??  3H050405 3H050215
 
 
 # Power5 machines
