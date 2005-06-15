@@ -7,6 +7,7 @@ all export:
 	yv=`cat yabootversion` ; \
 	svn export . $$tmpdir ; \
 	cd $$tmpdir ; \
+	chmod -R a+rX .. ; \
 	tar xfz yaboot-$$yv.tar.gz ; \
 	diff -purN yaboot-$$yv yaboot > yaboot-$$yv.patch || : ; \
 	mv -v lilo lilo-$$lv ; \
