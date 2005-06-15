@@ -11,12 +11,17 @@
 #  to identify machine and firmware level
 #
 
+# PPC604 machines
+# lemon B70
+#
+
 # Power3 machines
-IBM,7044-270	broken		<=SPH00221			MKDOSFS="-s 8"		# ugli
-IBM,7026-B80	untested	<=NAN00252			MKDOSFS="-s 8"		# mandarine
+IBM,7044-270	untested	<=SPH00221			#MKDOSFS="-s 8"		# ugli
+IBM,7026-B80	untested	<=NAN00252			#MKDOSFS="-s 8"		# mandarine
+IBM,7026-B80	untested	<=NAN04194
 
 # RS64 machines
-IBM,7026-6H1    untested      	>=M2P01113                     	MKDOSFS="-s 8"		# papaya
+IBM,7026-6H1    tested      	>=M2P01113                     				# papaya
 
 
 # Power4 machines
@@ -26,11 +31,10 @@ IBM,7028-6C4    untested 	==3R050405
 IBM,7028-6C4	untested	<=RG041029_d79e00_regatta				# gooseberry
 IBM,7028-6C4	untested	<=3R041029						# gooseberry
 IBM,7028-6C4	untested   	==3R050405						# gooseberry
-IBM,7028-6E4	broken   	<=RG041029_d79e00_regatta				# pepino
+IBM,7028-6E4	untested  	<=RG041029_d79e00_regatta				# pepino
 IBM,7028-6E4	untested     	3R050405	   					# pepino
-IBM,7040-671	broken   	<=RG050215_d79e02_regatta				# pomegranate
-IBM,7040-671	broken   	<=3H050215						# pomegranate
-# ??  3H050405 3H050215
+IBM,7040-671	tested 		<=3H050215						# pomegranate
+IBM,7040-671	untested	<=3H050405
 
 
 # Power5 machines
