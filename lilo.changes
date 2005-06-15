@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jun 15 10:12:57 CEST 2005 - olh@suse.de
+
+- fix pattern for IDE drive recognition
+
+-------------------------------------------------------------------
 Tue Jun 14 23:48:07 CEST 2005 - olh@suse.de
 
 - tweak kernel_entry_t prototype in bootheader 

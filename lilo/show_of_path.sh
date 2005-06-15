@@ -179,7 +179,7 @@ file_full_sysfs_path="`/bin/pwd`"
 file_storage_type=
 cd "$file_full_sysfs_path"
 case "$file_full_sysfs_path" in
-    */ide+([0-9])/+([0-9]))
+    */ide+([0-9])/+([0-9.]))
       	file_storage_type=ide
       	of_disk_ide_channel="${file_full_sysfs_path##*.}"
       	cd ../..
