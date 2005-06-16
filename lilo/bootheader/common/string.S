@@ -10,7 +10,7 @@
  * NOTE: this code runs in 32 bit mode and is packaged as ELF32.
  */
 
-#include <ppc-asm.h>
+#include <ppc_asm.h>
 
 	.text
 	.globl	strcpy

@@ -14,7 +14,7 @@
  * as published by the Free Software Foundation; either version
  * 2 of the License, or (at your option) any later version.
  */
-#include <ppc-asm.h>
+#include <ppc_asm.h>
 
 	.globl __div64_32
 __div64_32:

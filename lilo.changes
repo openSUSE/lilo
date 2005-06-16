@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun 16 18:41:28 CEST 2005 - olh@suse.de
+
+- use own ppc_asm.h instead of gcc provided one, it defines r1 etc.
+
+-------------------------------------------------------------------
 Thu Jun 16 18:37:45 CEST 2005 - olh@suse.de
 
 - claim the mem range of the zimage executable.
