@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun 16 18:28:54 CEST 2005 - olh@suse.de
+
+- print the whole executable mem range in zimage startup message
+
+-------------------------------------------------------------------
 Thu Jun 16 18:22:12 CEST 2005 - olh@suse.de
 
 - stdio.h in bootheader needs stdarg.h for valist
