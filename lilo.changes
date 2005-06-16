@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jun 16 18:37:45 CEST 2005 - olh@suse.de
+
+- claim the mem range of the zimage executable.
+  some firmware versions dont do it, zlib may overwrite the memory
+
+-------------------------------------------------------------------
 Thu Jun 16 18:28:54 CEST 2005 - olh@suse.de
 
 - print the whole executable mem range in zimage startup message

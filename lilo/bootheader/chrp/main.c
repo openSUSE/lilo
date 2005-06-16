@@ -268,6 +268,9 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	printf("\n\rzImage starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%p)\n\r",
 	       _coff_start, _end, a1, a2, promptr);
 
+	/* the executable memrange may not be claimed by firmware */
+	of1275_claim((unsigned int)_coff_start, (unsigned int)(_end - _coff_start), 0);
+	
 	if (of1275_getprop(chosen_handle, "mmu", &mmu, sizeof(mmu)) != 4)
 		abort("no mmu");
 
