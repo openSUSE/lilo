@@ -2,6 +2,8 @@
 #define _PPC_BOOT_STDIO_H_
 /* $Id$ */
 
+#include <stdarg.h>
+
 extern int printf(const char *fmt, ...);
 
 extern int sprintf(char *buf, const char *fmt, ...);

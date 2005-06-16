@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun 16 18:22:12 CEST 2005 - olh@suse.de
+
+- stdio.h in bootheader needs stdarg.h for valist
+
+-------------------------------------------------------------------
 Wed Jun 15 10:12:57 CEST 2005 - olh@suse.de
 
 - fix pattern for IDE drive recognition
