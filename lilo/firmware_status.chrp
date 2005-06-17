@@ -16,33 +16,30 @@
 #
 
 # Power3 machines
-IBM,7044-270	untested	<=SPH00221			#MKDOSFS="-s 8"		# ugli
+IBM,7044-270	tested		<=SPH00221						# ugli
 IBM,7026-B80	untested	<=NAN00252			#MKDOSFS="-s 8"		# mandarine
 IBM,7026-B80	untested	<=NAN04194
 
 # RS64 machines
-IBM,7026-6H1    tested      	>=M2P01113                     				# papaya
+IBM,7026-6H1    tested      	<=M2P01113                     				# papaya
 
 
 # Power4 machines
-IBM,7038-6M2	untested	<=RG050131_d79e01_regatta				# sweetie
-IBM,7028-6C4    untested 	==RG050405_d79e05_regatta
-IBM,7028-6C4    untested 	==3R050405
-IBM,7028-6C4	untested	<=RG041029_d79e00_regatta				# gooseberry
+IBM,7038-6M2	tested		<=3K050202						# sweetie
 IBM,7028-6C4	untested	<=3R041029						# gooseberry
 IBM,7028-6C4	untested   	==3R050405						# gooseberry
-IBM,7028-6E4	untested  	<=RG041029_d79e00_regatta				# pepino
+IBM,7028-6E4	tested  	<=3R041029 						# pepino
 IBM,7028-6E4	untested     	3R050405	   					# pepino
 IBM,7040-671	tested 		<=3H050215						# pomegranate
 IBM,7040-671	untested	<=3H050405
 
 
 # Power5 machines
-# cherry
-# clementine
-# xiqua
-# satsuma
-# tangelo
+IBM,9111-520	untested	SF220_011			# cherry
+IBM,9117-570	untested	!=any				# clementine
+IBM,9123-705	untested	!=any				# xiqua
+IBM,9123-710	tested		SF225_044			# satsuma
+IBM,9123-720	untested	!=any				# tangelo
 
 # PPC970 blades
 # JS20 GA1
