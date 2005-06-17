@@ -40,12 +40,12 @@ trap '{
 }' EXIT
 
 # assert that /proc is mounted, else try to mount, on fail complain
-if test -d /proc/device-tree; then
+if test -d /proc/1; then
     :
 elif mount -t proc proc /proc; then
     _proc_mounted=1
 else
-    error "No /proc/device-tree under /proc and attempt to mount /proc failed" "may be no PowerPC machine?"
+    error "proc not mounted and attempt to mount /proc failed"
 fi
 
 
@@ -494,13 +494,14 @@ fi
 
 
 #
+#
 # Local variables:
-#     mode: ksh
+#     mode: sh
 #     mode: font-lock
 #     mode: auto-fill
-#     ksh-indent: 4
-#     ksh-multiline-offset: 2
-#     ksh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#     sh-indent: 4
+#     sh-multiline-offset: 2
+#     sh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
 #     fill-column: 78
 # End:
 #

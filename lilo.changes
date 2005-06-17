@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Jun 17 14:41:26 CEST 2005 - jplack@suse.de
+
+- alternative firmware level calculation for Power5 or later
+- fix procfs detection for iSeries
+- updated firmware table
+
+-------------------------------------------------------------------
 Wed Jun 15 17:49:55 CEST 2005 - jplack@suse.de
 
 - fix boot problem while using force_fat option
