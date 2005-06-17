@@ -626,6 +626,10 @@ function running_on_chrp () {
     [[ "$(</proc/mounts)" == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
 
     if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
+	MKDOSFS="-s 1 -F 16"   # default values, minimum size of 2076kB
+	MINDOSFSSIZE=$[2*2076] # does prevent possible misdetection of
+	                       # file system as FAT12
+
 	# check CHRP machine against list of fully functional firmware
 	# implementations. There are various bugs out there which IBM
 	# consistently resists to fix.
@@ -661,6 +665,10 @@ function running_on_chrp () {
 	local -i defaultsize=$(( 180 + $(fsize /lib/lilo/chrp/yaboot.fat) + $(fsize $TEMP/yaboot.conf) ));
 	(( defaultsize += (vmlinux_default==0) ? 0 : $(fsize ${vmlinux_copy[$vmlinux_default]}) ));
 	(( defaultsize += (initrd_default==0) ? 0 : $(fsize ${initrd_copy[$initrd_default]}) ));
+
+	if (( defaultsize < MINDOSFSSIZE )); then
+	    defaultsize=$MINDOSFSSIZE;
+	fi
 
 	if (( bootsize < defaultsize )); then
 	    # may be resize of the partition is possible and helps?
