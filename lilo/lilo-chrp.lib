@@ -12,11 +12,14 @@ function firmware_status () {
         return
     fi
     local mymodel="$(</proc/device-tree/model)"
-    #local myfwlvl="$(</proc/device-tree/openprom/ibm,fw-vernum_encoded)"
-    dummy=$(tr '\0-\037' '[ *]'  < /proc/device-tree/ibm,vpd)
-    dummy=${dummy#*RM }
-    local myfwlvl=${dummy%% *}
-    
+    if [ -f /proc/device-tree/ibm,vpd ]; then
+	dummy=$(tr '\0-\037' '[ *]'  < /proc/device-tree/ibm,vpd)
+	dummy=${dummy#*RM }
+	local myfwlvl=${dummy%% *}
+    else
+	local myfwlvl="$(</proc/device-tree/openprom/ibm,fw-vernum_encoded)"
+    fi
+
     while read; do
         REPLY=${REPLY%%#*}
         REPLY=${REPLY%%+([ 	])}
