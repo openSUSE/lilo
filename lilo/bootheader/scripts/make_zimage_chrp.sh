@@ -89,8 +89,7 @@ else
 	tmp=`mktemp -d $tmp/mkzimage_chrp64.$$.XXXXXX`
 fi
 #
-cp -p $vmlinux $tmp/vmlinux
-strip -s $tmp/vmlinux
+strip -s -o $tmp/vmlinux $vmlinux
 gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
 #
 #
