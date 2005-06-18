@@ -21,7 +21,6 @@ extern phandle chosen_handle;
 extern phandle stdin;
 extern phandle stdout;
 extern phandle stderr;
-extern phandle bootcpu;
 extern ihandle mmu;
 
 extern int call_prom(const char *service, int nargs, int nret, ...);
@@ -46,4 +45,6 @@ extern int of1275_seek(ihandle node, unsigned int a, unsigned int b);
 extern int of1275_setprop(phandle node, const char *name, void *buf, int buflen);
 extern int of1275_write(phandle node, void *buf, int buflen);
 
+extern void find_type_devices(phandle *, const char *type, int);
+extern void show_block_devices(void);
 #endif				/* _PPC_BOOT_PROM_H_ */

@@ -6,7 +6,7 @@ include ../MRULES
 MAKEDEPS     = -Wp,-MD,.$(subst /,-,$*).d
 CFLAGS       = $(MAKEDEPS) $(OPTFLAGS) $(REQFLAGS)
 
-CHRP_SRC    := main
+CHRP_SRC    := main of1275_find_type_devices
 CHRP_OBJS   := $(patsubst %,%.o,$(CHRP_SRC))
 CHRP        := chrp.a
 

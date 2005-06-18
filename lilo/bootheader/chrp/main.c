@@ -259,7 +259,7 @@ static void gunzip(unsigned long dest, int destlen,
 
 void start(unsigned long a1, unsigned long a2, void *promptr)
 {
-	phandle bootcpu_phandle;
+	phandle bootcpu_phandle[1];
 	kernel_entry_t kernel_entry;
 	int cputype, elftype;
 
@@ -274,17 +274,15 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	if (of1275_getprop(chosen_handle, "mmu", &mmu, sizeof(mmu)) != 4)
 		abort("no mmu");
 
-	if (of1275_getprop(chosen_handle, "cpu", &bootcpu, sizeof(bootcpu)) == 4) {
-		bootcpu_phandle = of1275_instance_to_package(bootcpu);
-		if (bootcpu_phandle == (phandle) (-1))
-			of1275_exit();
+	bootcpu_phandle[0] = 0;
+	find_type_devices(bootcpu_phandle, "cpu", sizeof(bootcpu_phandle)/sizeof(phandle));
+	if (!bootcpu_phandle[0])
+		abort("must be a dream");
 
-		if (of1275_getprop(bootcpu_phandle, "64-bit", NULL, 0) != -1)
-			cputype = 64;
-		else
-			cputype = 32;
-	} else
-		cputype = 0;
+	if (of1275_getprop(bootcpu_phandle[0], "64-bit", NULL, 0) != -1)
+		cputype = 64;
+	else
+		cputype = 32;
 
 	vmlinuz.addr = (unsigned long)_vmlinuz_start;
 	vmlinuz.size = (unsigned long)(_vmlinuz_end - _vmlinuz_start);

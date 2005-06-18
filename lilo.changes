@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Jun 18 22:10:53 CEST 2005 - olh@suse.de
+
+- find "cpu" nodes instead of /chosen/cpu to set cpu type
+
+-------------------------------------------------------------------
 Sat Jun 18 17:05:31 CEST 2005 - olh@suse.de
 
 - use strip -o in make_zimage*sh for files with u-w permission
