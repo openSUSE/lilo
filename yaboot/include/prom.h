@@ -41,7 +41,6 @@ typedef int (*prom_entry)(struct prom_args *);
 extern void prom_init (prom_entry pe);
 
 extern prom_entry prom;
-extern int _cpu;
 
 /* I/O */
 
