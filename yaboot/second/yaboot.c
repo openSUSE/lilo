@@ -1461,7 +1461,6 @@ yaboot_main(void)
      if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0)
 	  setup_display();
 	
-     memset(bootdevice, 0, sizeof(bootdevice));
      prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
      DEBUG_F("/chosen/bootpath = %s\n", bootdevice);
      if (bootdevice[0] == 0) {
