@@ -1458,9 +1458,7 @@ setup_display(void)
 int
 yaboot_main(void)
 {
-     /* '" enet:telnet,1.2.3.4" io' will start a telnet daemon, dont do ANSI colors in this case */
-     call_prom("instance-to-path", 3, 1, prom_stdout, bootdevice, sizeof(bootdevice));
-     if (_machine == _MACH_Pmac && strcmp("/packages/telnet", bootdevice))
+     if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0)
 	  setup_display();
 	
      memset(bootdevice, 0, sizeof(bootdevice));

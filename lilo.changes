@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Jun 19 20:54:12 CEST 2005 - olh@suse.de
+
+- check for iso6429-1983-colors property before using ANSI colors
+  in yaboot
+
+-------------------------------------------------------------------
 Sun Jun 19 11:04:18 CEST 2005 - olh@suse.de
 
 - add image[32bit]/image[64bit] handling for yaboot.conf
