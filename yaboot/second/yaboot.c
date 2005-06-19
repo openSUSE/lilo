@@ -119,6 +119,7 @@ char bootdevice[1024];
 char *password = NULL;
 struct boot_fspec_t boot;
 int _machine = _MACH_Pmac;
+static int _cpu;
 int flat_vmlinux;
 
 #ifdef CONFIG_COLOR_TEXT
@@ -181,6 +182,7 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
      int result;
      void* malloc_base = NULL;
      prom_handle root;
+     prom_handle cpus[1];
 
      /* OF seems to do it, but I'm not very confident */
      memset(&__bss_start, 0, &_end - &__bss_start);
@@ -230,8 +232,17 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
 		    _machine = _MACH_chrp;
 	  }
      }
+
+     cpus[0] = 0;
+     find_type_devices(cpus, "cpu", sizeof(cpus)/sizeof(prom_handle));
+     if (cpus[0]) {
+	     if (prom_getprop(cpus[0], "64-bit", NULL, 0) >= 0)
+		     _cpu = 64;
+	     else
+		     _cpu = 32;
+     }
 	
-     DEBUG_F("Running on _machine = %d\n", _machine);
+     DEBUG_F("Running on %d-bit _machine = %d\n", _cpu, _machine);
      DEBUG_SLEEP;
 
      /* Call out main */
@@ -379,7 +390,7 @@ load_config_file(char *device, char* path, int partition)
      opened = 0;
 
      /* Call the parsing code in cfg.c */
-     if (cfg_parse(conf_path, conf_file, sz) < 0) {
+     if (cfg_parse(conf_path, conf_file, sz, _cpu) < 0) {
 	  prom_printf ("Syntax error or read error config\n");
 	  goto bail;
      }

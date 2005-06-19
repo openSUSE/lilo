@@ -41,6 +41,7 @@ typedef int (*prom_entry)(struct prom_args *);
 extern void prom_init (prom_entry pe);
 
 extern prom_entry prom;
+extern int _cpu;
 
 /* I/O */
 
@@ -56,6 +57,7 @@ int prom_readblocks (prom_handle file, int blockNum, int blockCount, void *buffe
 void prom_close (prom_handle file);
 int prom_getblksize (prom_handle file);
 int prom_loadmethod (prom_handle device, void* addr);
+extern void find_type_devices(prom_handle * nodes, const char *type, int max);
 
 #define K_UP    0x141
 #define K_DOWN  0x142

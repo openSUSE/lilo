@@ -53,6 +53,9 @@ struct prom_args {
      void *args[10];
 };
 
+static char ptype[32];
+static int nc, ncmax;
+
 void *
 call_prom (const char *service, int nargs, int nret, ...)
 {
@@ -152,6 +155,42 @@ int
 prom_getprop (prom_handle pack, char *name, void *mem, int len)
 {
      return (int)call_prom ("getprop", 4, 1, pack, name, mem, len);
+}
+
+static prom_handle of1275_child(prom_handle node)
+{
+	return call_prom("child", 1, 1, node);
+}
+static prom_handle of1275_peer(prom_handle node)
+{
+	return call_prom("peer", 1, 1, node);
+}
+
+static void walk_dev_tree(prom_handle root, const char *type, prom_handle * nodes)
+{
+	prom_handle node;
+
+	node = of1275_child(root);
+	while (node) {
+		prom_getprop(node, "device_type", ptype, sizeof(ptype));
+		if (strcmp(type, ptype) == 0) {
+			nodes[nc] = node;
+			if (nc == ncmax)
+				return;
+			nc++;
+			nodes[nc] = 0;
+		}
+		walk_dev_tree(node, type, nodes);
+		node = of1275_peer(node);
+	}
+}
+
+void find_type_devices(prom_handle * nodes, const char *type, int max)
+{
+	prom_handle root = of1275_peer(0);
+	nc = 0;
+	ncmax = max;
+	walk_dev_tree(root, type, nodes);
 }
 
 int

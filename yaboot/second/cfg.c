@@ -43,6 +43,10 @@ typedef struct {
 #define MAX_VAR_NAME MAX_TOKEN
 #define EOF -1
 
+static char *archimage;
+static char image_64bit[] = "image[64bit]";
+static char image_32bit[] = "image[32bit]";
+static int reuse_prev_image;
 CONFIG cf_options[] =
 {
      {cft_strg, "device", NULL},
@@ -291,9 +295,18 @@ static int cfg_set (char *item, char *value)
 {
      CONFIG *walk;
 
-     if (!strcasecmp (item, "image")) {
+     if (!(strcasecmp(item,"image")&&strcasecmp(item,image_32bit)&&strcasecmp(item,image_64bit))) {
 	  struct IMAGES **p = &images;
 
+	  if (!archimage && (!strcasecmp(item,image_32bit)||!strcasecmp(item,image_64bit))) {
+		  reuse_prev_image = 1;
+		  return 0;
+	  }
+	  if (archimage && !reuse_prev_image && strcmp(item,"image") && strcmp(item,archimage)) {
+		  reuse_prev_image = 1;
+		  return 0;
+	  }
+	  reuse_prev_image = 0;
 	  while (*p)
 	       p = &((*p)->next);
 	  *p = (struct IMAGES *)malloc (sizeof (struct IMAGES));
@@ -304,7 +317,12 @@ static int cfg_set (char *item, char *value)
 	  (*p)->next = 0;
 	  curr_table = ((*p)->table);
 	  memcpy (curr_table, cf_image, sizeof (cf_image));
-     }
+	  if (archimage)
+		  item = "image";
+     } else 
+	     if (reuse_prev_image)
+		     return 0;
+
      for (walk = curr_table; walk->type != cft_end; walk++) {
 	  if (walk->name && !strcasecmp (walk->name, item)) {
 	       if (value && walk->type != cft_strg)
@@ -328,10 +346,18 @@ static int cfg_set (char *item, char *value)
      return 0;
 }
 
-int cfg_parse (char *cfg_file, char *buff, int len)
+int cfg_parse (char *cfg_file, char *buff, int len, int cpu)
 {
      char *item, *value;
 
+     switch (cpu) {
+	     case 32:
+		     archimage = image_32bit;
+		     break;
+	     case 64:
+		     archimage = image_64bit;
+		     break;
+	}
      file_name = cfg_file;
      currp = buff;
      endp = currp + len;
