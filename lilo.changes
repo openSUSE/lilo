@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun 20 09:47:24 CEST 2005 - olh@suse.de
+
+- fix /bin dir creation in bootheader/utils/Makefile
+
+-------------------------------------------------------------------
 Sun Jun 19 20:54:12 CEST 2005 - olh@suse.de
 
 - check for iso6429-1983-colors property before using ANSI colors

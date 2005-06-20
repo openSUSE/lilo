@@ -24,7 +24,7 @@ mkzimage_cmdline: mkzimage_cmdline.c
 install:
 	@set -ex; \
 	$(INSTALL_DIR) $(DESTDIR)$(INSTALLDIR)/utils ; \
-	$(INSTALL_DIR) $(DESTDIR)$(INSTALLDIR)/bin ; \
+	$(INSTALL_DIR) $(DESTDIR)/bin ; \
 	for i in $(PROGS) ; do \
 	$(INSTALL_EXEC) $$i $(DESTDIR)$(INSTALLDIR)/utils/ ; \
 	done
