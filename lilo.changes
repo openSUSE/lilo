@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun 20 09:49:55 CEST 2005 - olh@suse.de
+
+- mark scripts and textfiles as config to keep local modifications
+
+-------------------------------------------------------------------
 Mon Jun 20 09:47:24 CEST 2005 - olh@suse.de
 
 - fix /bin dir creation in bootheader/utils/Makefile

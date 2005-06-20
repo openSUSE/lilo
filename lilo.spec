@@ -29,10 +29,6 @@ mv yaboot-%{yaboot_vers} yaboot
 cd yaboot
 %patch10 -p1
 cd ..
-find lilo.ppc/lib -name "*.sh" | xargs -r chmod 755
-find lilo.ppc/lib -name addnote | xargs -r chmod 755
-find lilo.ppc/lib -name hack-coff | xargs -r chmod 755
-find lilo.ppc/lib -name mkprep | xargs -r chmod 755
 
 %build
 cd yaboot
@@ -99,9 +95,28 @@ exit 0
 
 %files
 %defattr (-,root,root)
+%dir /lib/lilo
+%dir /lib/lilo/pmac
+%dir /lib/lilo/prep
+%dir /lib/lilo/chrp
+%dir /lib/lilo/common
+%dir /lib/lilo/scripts
+%dir /lib/lilo/utils
 #
-/lib/lilo
-%attr(755,root,root) /sbin/*
-%attr(755,root,root) /bin/*
-%attr(755,root,root) /bin/show_of_path.sh
+%attr(755,root,root) %config /bin/show_of_path.sh
+%attr(755,root,root) %config /bin/mkzimage
+%attr(755,root,root) %config /lib/lilo/pmac/os-badge-icon
+%attr(644,root,root) /lib/lilo/pmac/*.bin
+%attr(644,root,root) /lib/lilo/pmac/yaboot*
+%attr(644,root,root) /lib/lilo/*/*.o
+%attr(644,root,root) /lib/lilo/*/*.a
+%attr(644,root,root) %config /lib/lilo/*/*ld.script*
+%attr(755,root,root) /lib/lilo/prep/mkprep
+%attr(644,root,root) %config /lib/lilo/lilo-pmac.lib
+%attr(644,root,root) /lib/lilo/chrp/yaboot.*
+%attr(755,root,root) %config /lib/lilo/scripts/*.sh
+%attr(755,root,root) /lib/lilo/utils/*
+%attr(755,root,root) %config /sbin/lilo.old
+%attr(755,root,root) %config /sbin/lilo
+
 %doc %{_docdir}/lilo
