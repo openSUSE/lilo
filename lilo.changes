@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jun 22 21:05:06 CEST 2005 - olh@suse.de
+
+- improve mkzimage --help output 
+
+-------------------------------------------------------------------
 Mon Jun 20 09:49:55 CEST 2005 - olh@suse.de
 
 - mark scripts and textfiles as config to keep local modifications

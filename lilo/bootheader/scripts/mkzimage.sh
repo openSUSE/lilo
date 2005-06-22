@@ -22,9 +22,14 @@ zimage_sh=guess
 until [ "$#" = "0" ] ; do
 	case "$1" in
 		--help|-h|--version)
-		echo "create a 'zImage' for ppc/ppc64"
-		echo "Usage: ${0##*/} --vmlinux <ELF binary> [--initrd <ramdisk.image.gz>] --output <zImage> [--cmdline <kernelcmdline>] [--board <subarch>] [--tmp <tempdir>]"
-		echo "additional options: [--objdir <dir>]"
+		echo "create a 'zImage' for ppc/ppc64, bootable from Openfirmware prompt"
+		echo "Usage: ${0##*/} --vmlinux <ELF binary> --output <zImage>"
+		echo "additional options:"
+		echo "                    [--objdir <dir>]"
+		echo "                    [--initrd <ramdisk.image.gz>]"
+		echo "                    [--cmdline <kernelcmdline>]"
+		echo "                    [--tmp <tempdir>]"
+		echo "                    [--board <subarch>]"
 		echo "option --board requires a ppc/ppc64 subarch. It can be one of:"
 		echo "chrp|rs6k iseries pmaccoff pmac prep"
 		exit 1
