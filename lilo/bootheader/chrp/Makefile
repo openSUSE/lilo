@@ -20,6 +20,7 @@ PROM_SRC    := call_prom prominit \
 		getprop \
 		instance_to_package \
 		instance_to_path \
+		interpret \
 		map \
 		open \
 		package_to_path \

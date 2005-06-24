@@ -33,6 +33,7 @@ extern phandle of1275_finddevice(const char *name);
 extern int of1275_getprop(phandle node, const char *name, void *buf, int buflen);
 extern phandle of1275_instance_to_package(ihandle node);
 extern int of1275_instance_to_path(ihandle node, void *buf, int buflen);
+extern int of1275_interpret(const char *forth);
 extern int of1275_map(unsigned int phys, unsigned int virt, unsigned int size);
 extern ihandle of1275_open(const char *path);
 extern int of1275_package_to_path(phandle node, void *buf, int buflen);

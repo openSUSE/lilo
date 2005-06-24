@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jun 24 11:24:05 CEST 2005 - olh@suse.de
+
+- add of1275_interpret function to bootheader
+
+-------------------------------------------------------------------
 Wed Jun 22 21:05:06 CEST 2005 - olh@suse.de
 
 - improve mkzimage --help output 
