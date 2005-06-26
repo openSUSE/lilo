@@ -70,6 +70,11 @@ struct _builtin_cmd_line _builtin_cmd_line = {
 	.cmdline_end_flag = cmdline_end_string,
 };
 
+int write(void *buf, int buflen)
+{
+	return of1275_write(stdout, buf, buflen);
+}
+
 static int check_elf32(void *p)
 {
 	Elf32_Ehdr *elf32 = p;

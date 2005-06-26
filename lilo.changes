@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jun 26 18:03:27 CEST 2005 - olh@suse.de
+
+- move write function to chrp/main in bootheader
+
+-------------------------------------------------------------------
 Sun Jun 26 14:03:35 CEST 2005 - olh@suse.de
 
 - split gunzip function in bootheader

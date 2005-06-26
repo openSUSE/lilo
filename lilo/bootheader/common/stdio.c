@@ -8,14 +8,7 @@
 #include <prom.h>
 #include <div64.h>
 
-int
-write(void *buf, int buflen)
-{
-	if (promptr)
-		return of1275_write(stdout, buf, buflen);
-	return -1;
-}
-
+#if 0
 int
 read(void *buf, int buflen)
 {
@@ -152,6 +145,7 @@ long simple_strtol(const char *cp,char **endp,unsigned int base)
 	return simple_strtoul(cp,endp,base);
 }
 
+#endif
 
 /* String functions lifted from lib/vsprintf.c and lib/ctype.c */
 unsigned char _ctype[] = {

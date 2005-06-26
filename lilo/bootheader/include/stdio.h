@@ -16,4 +16,6 @@ extern int getchar(void);
 
 extern int fputs(char *str, void *f);
 
+extern int write(void *buf, int buflen);
+
 #endif				/* _PPC_BOOT_STDIO_H_ */
