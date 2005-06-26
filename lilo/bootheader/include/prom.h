@@ -48,4 +48,8 @@ extern int of1275_write(phandle node, void *buf, int buflen);
 
 extern void find_type_devices(phandle *, const char *type, int);
 extern void show_block_devices(void);
+
+/* non-of1275 functions */
+extern void exit(void);
+
 #endif				/* _PPC_BOOT_PROM_H_ */
