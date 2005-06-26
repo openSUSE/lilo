@@ -10,7 +10,7 @@ ZLIB_SRC    := infblock infcodes inffast inflate inftrees infutil
 ZLIB_OBJS   := $(patsubst %,%.o,$(ZLIB_SRC))
 ZLIB         = zlib.a
 
-COMMON_SRC  := abort div64 exit string stdio
+COMMON_SRC  := abort div64 exit gunzip string stdio
 COMMON_OBJS := $(patsubst %,%.o,$(COMMON_SRC))
 COMMON       = common.a
 

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jun 26 14:03:35 CEST 2005 - olh@suse.de
+
+- split gunzip function in bootheader
+
+-------------------------------------------------------------------
 Sun Jun 26 13:35:16 CEST 2005 - olh@suse.de
 
 - add an abort function to bootheader
