@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jun 26 13:35:16 CEST 2005 - olh@suse.de
+
+- add an abort function to bootheader
+
+-------------------------------------------------------------------
 Sun Jun 26 13:26:33 CEST 2005 - olh@suse.de
 
 - add a stdlib.h, move exit function prototype

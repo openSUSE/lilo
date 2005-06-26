@@ -18,6 +18,7 @@
 #include <page.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <prom.h>
 #include <zlib/zutil.h>
 
@@ -70,12 +71,6 @@ struct _builtin_cmd_line _builtin_cmd_line = {
 	.string = "",
 	.cmdline_end_flag = cmdline_end_string,
 };
-
-static void abort(const char *s)
-{
-	printf("%s\n\r", s);
-	of1275_exit();
-}
 
 static int check_elf32(void *p)
 {
