@@ -1,4 +1,5 @@
 /* $Id$ */
+#include <stdlib.h>
 #include <prom.h>
 
 void exit(void)
