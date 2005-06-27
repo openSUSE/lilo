@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <prom.h>
+#include <cmdline.h>
 
 extern void flush_cache(void *, unsigned long);
 
@@ -53,22 +54,6 @@ static struct addr_range initrd;
 static unsigned char elfheader[256];
 
 typedef void (*kernel_entry_t) (unsigned long, unsigned long, prom_entry, void *);
-
-#define cmdline_start_string   "cmd_line_start"
-#define cmdline_end_string     "cmd_line_end"
-struct _builtin_cmd_line {
-	unsigned char prefer;
-	unsigned char cmdling_start_flag[sizeof(cmdline_start_string) - 1];	/* without trailing zero */
-	unsigned char string[512];	/* COMMAND_LINE_SIZE */
-	unsigned char cmdline_end_flag[sizeof(cmdline_end_string)];	/* with trailing zero */
-} __attribute__ ((__packed__));
-
-struct _builtin_cmd_line _builtin_cmd_line = {
-	.prefer = '0',
-	.cmdling_start_flag = cmdline_start_string,
-	.string = "",
-	.cmdline_end_flag = cmdline_end_string,
-};
 
 int write(void *buf, int buflen)
 {

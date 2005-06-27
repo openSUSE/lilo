@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jun 27 18:11:15 CEST 2005 - olh@suse.de
+
+- split builtin_cmdline in bootheader
+
+-------------------------------------------------------------------
 Sun Jun 26 18:03:27 CEST 2005 - olh@suse.de
 
 - move write function to chrp/main in bootheader
