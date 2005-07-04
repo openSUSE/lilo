@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul  4 11:53:13 CEST 2005 - olh@suse.de
+
+- build prep support from source in bootheader
+
+-------------------------------------------------------------------
 Mon Jul  4 09:27:28 CEST 2005 - olh@suse.de
 
 - change prototype of gunzip in bootheader, return the length

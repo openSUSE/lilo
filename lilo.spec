@@ -65,7 +65,6 @@ mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
 cd lilo.ppc
-cp -a lib/* $RPM_BUILD_ROOT/lib/lilo
 chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
 cp -av lilo.old $RPM_BUILD_ROOT/sbin/lilo.old
@@ -111,7 +110,6 @@ exit 0
 %attr(644,root,root) /lib/lilo/*/*.o
 %attr(644,root,root) /lib/lilo/*/*.a
 %attr(644,root,root) %config /lib/lilo/*/*ld.script*
-%attr(755,root,root) /lib/lilo/prep/mkprep
 %attr(644,root,root) %config /lib/lilo/lilo-pmac.lib
 %attr(644,root,root) /lib/lilo/chrp/yaboot.*
 %attr(755,root,root) %config /lib/lilo/scripts/*.sh

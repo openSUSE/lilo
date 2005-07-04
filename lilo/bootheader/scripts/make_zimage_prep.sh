@@ -85,52 +85,49 @@ fi
 #
 
 objcopy  -O binary $vmlinux "$tmp/vmlinux.bin"
+strings $tmp/vmlinux.bin | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt
 gzip -9 "$tmp/vmlinux.bin"
 
-
-if [ -z "$initrd" ] ; then
-objcopy -O elf32-powerpc \
-	--add-section=.image="$tmp/vmlinux.bin.gz" \
-	--set-section-flags=.image=contents,alloc,load,readonly,data \
-	"$obj_dir/prep/arch_ppc_boot_simple_dummy.o" \
-	"$tmp/arch_ppc_boot_simple_image.o"
-else
-objcopy -O elf32-powerpc \
-	--add-section=.ramdisk="$initrd" \
-	--set-section-flags=.ramdisk=contents,alloc,load,readonly,data \
-	--add-section=.image="$tmp/vmlinux.bin.gz" \
-	--set-section-flags=.image=contents,alloc,load,readonly,data \
-	"$obj_dir/prep/arch_ppc_boot_simple_dummy.o" \
-	"$tmp/arch_ppc_boot_simple_image.o"
+cp $obj_dir/common/empty.o $tmp/empty.o
+objcopy $tmp/empty.o \
+	--add-section=.uts_string=$tmp/uts_string.txt \
+	--set-section-flags=.uts_string=contents,alloc,load,readonly,data
+#
+objcopy $tmp/empty.o \
+	--add-section=.vmlinuz=$tmp/vmlinux.bin.gz \
+	--set-section-flags=.vmlinuz=contents,alloc,load,readonly,data
+#
+if [ ! -z "$initrd" ] ; then
+objcopy $tmp/empty.o \
+	--add-section=.initrd=$initrd \
+	--set-section-flags=.initrd=contents,alloc,load,readonly,data
 fi
 
 ld \
-	-T "$obj_dir/prep/arch_ppc_boot_ld.script" \
+	-m elf32ppc \
 	-Ttext 0x00800000 \
 	-Bstatic \
-	-o "$tmp/arch_ppc_boot_prep_zImage.bin" \
-	"$obj_dir/prep/arch_ppc_boot_simple_head.o"  \
-	"$obj_dir/prep/arch_ppc_boot_simple_relocate.o"  \
-	"$obj_dir/prep/arch_ppc_boot_simple_prepmap.o"  \
-	"$obj_dir/prep/arch_ppc_boot_simple_misc.o"  \
-	"$obj_dir/prep/arch_ppc_boot_simple_misc-prep.o"  \
-	"$obj_dir/prep/arch_ppc_boot_simple_mpc10x_memory.o"  \
-	"$tmp/arch_ppc_boot_simple_image.o"  \
-	"$obj_dir/prep/arch_ppc_boot_common_lib.a"  \
-	"$obj_dir/prep/arch_ppc_boot_lib_lib.a" \
-	"$obj_dir/prep/arch_ppc_boot_of1275_lib.a"
+	-e _start \
+	-T $obj_dir/chrp/ld.script \
+	-o $tmp/output.tmp \
+	$obj_dir/prep/crt0.o \
+	$tmp/empty.o \
+	$obj_dir/prep/prep.a \
+	$obj_dir/common/common.a \
+	$obj_dir/chrp/prom.a \
+	$obj_dir/common/zlib.a
 
 objcopy \
 	-O elf32-powerpc \
 	-R .comment \
 	-R .stab \
 	-R .stabstr \
-	"$tmp/arch_ppc_boot_prep_zImage.bin" \
-	"$tmp/arch_ppc_boot_prep_zImage"
+	"$tmp/output.tmp" \
+	"$tmp/output.strip"
 
-"$obj_dir/prep/mkprep" \
+"$obj_dir/utils/mkprep" \
 	-pbp \
-	"$tmp/arch_ppc_boot_prep_zImage" \
+	"$tmp/output.strip" \
 	"$tmp/output"
 
 

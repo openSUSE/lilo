@@ -1,5 +1,5 @@
 # $Id$
-SUBDIRS = chrp common scripts utils
+SUBDIRS = chrp common prep scripts utils
 SRCROOT = .
 export LANG=C
 export LC_ALL=C
