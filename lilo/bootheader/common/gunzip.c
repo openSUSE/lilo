@@ -57,7 +57,7 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 	zlib_inflateEnd(&s);
 }
 
-void gunzip(unsigned long dest, int destlen,
+int gunzip(unsigned long dest, int destlen,
 		   unsigned long src, int srclen, const char *what)
 {
 	int len;
@@ -69,5 +69,6 @@ void gunzip(unsigned long dest, int destlen,
 	len = srclen;
 	do_gunzip((void *)dest, destlen, (unsigned char *)src, &len);
 	printf("done. (0x%08lx bytes)\n\r", len);
+	return len;
 }
 

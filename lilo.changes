@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul  4 09:27:28 CEST 2005 - olh@suse.de
+
+- change prototype of gunzip in bootheader, return the length
+
+-------------------------------------------------------------------
 Mon Jun 27 18:11:15 CEST 2005 - olh@suse.de
 
 - split builtin_cmdline in bootheader
