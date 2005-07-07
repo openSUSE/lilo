@@ -136,6 +136,9 @@ dep:
 docs:
 	make -C doc all
 
+tags:
+	ctags `find -name "*.[chS]"`
+
 bindist: all
 	mkdir ../yaboot-binary-${VERSION}
 	$(GETROOT) make ROOT=../yaboot-binary-${VERSION} install
