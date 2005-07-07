@@ -302,7 +302,7 @@ static int cfg_set (char *item, char *value)
 		  reuse_prev_image = 1;
 		  return 0;
 	  }
-	  if (archimage && !reuse_prev_image && strcmp(item,"image") && strcmp(item,archimage)) {
+	  if (archimage && strcmp(item,"image") && strcmp(item,archimage)) {
 		  reuse_prev_image = 1;
 		  return 0;
 	  }

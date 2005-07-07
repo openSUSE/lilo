@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jul  7 13:28:37 CEST 2005 - olh@suse.de
+
+- fix logic in image[32bit]/image[64bit] handling for yaboot.conf
+
+-------------------------------------------------------------------
 Mon Jul  4 11:53:13 CEST 2005 - olh@suse.de
 
 - build prep support from source in bootheader
