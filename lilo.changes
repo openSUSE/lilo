@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 11 20:08:07 CEST 2005 - olh@suse.de
+
+- add a missing newline to prep bootheader
+
+-------------------------------------------------------------------
 Thu Jul  7 13:28:37 CEST 2005 - olh@suse.de
 
 - fix logic in image[32bit]/image[64bit] handling for yaboot.conf

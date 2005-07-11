@@ -484,7 +484,7 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	       zimage_start, zimage_size + zimage_start);
 
 	if (initrd_size)
-		printf("initrd at:    0x%08p 0x%08p\n",
+		printf("initrd at:     0x%08p 0x%08p\n",
 		       _initrd_start, _initrd_end);
 
 	if (!no_keyb_present)
@@ -524,6 +524,7 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 		}
 		udelay(1000);	/* 1 msec */
 	}
+	printf("\n");
 	*cp = 0;
 
 	zimage_size =
