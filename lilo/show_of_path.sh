@@ -62,22 +62,6 @@ shopt -s extglob
 read d myversion d <<< "$Date$"
 
 
-
-if false; then    
-#if true; then    
-    function dbg_show() {
-	while [ "$1" ]; do
-	    echo $1 = ${!1}
-	    shift
-	done
-    }
-else
-    function dbg_show() {
-	:
-    }
-fi
-
-
 function error() {
     [ "$quietmode" ] && set --
     while [ "$1" ]; do
@@ -106,6 +90,9 @@ if [ "$#" -gt 0 ] ; then
 	    --quiet|-q)
 		quietmode=1
 		;;
+	    --debug|-d)
+		debug=1
+		;;
 	    *)
 	       	file=$1
 	       	break
@@ -113,6 +100,19 @@ if [ "$#" -gt 0 ] ; then
 	esac
 	shift
     done
+fi
+
+if [ "$debug" ]; then    
+    function dbg_show() {
+	while [ "$1" ]; do
+	    echo $1 = ${!1}
+	    shift
+	done
+    }
+else
+    function dbg_show() {
+	:
+    }
 fi
 
 # check if we run on a NewWorld PowerMacintosh

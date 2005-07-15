@@ -1,0 +1,214 @@
+#
+#  library for iSeries specific routines
+
+unset running_on_iseries
+
+
+function running_on_iseries () {
+    echo running on iSeries
+    ISERIES_KERNEL_TMPFILE=$TEMP/vmlinux.initrd
+    
+    if [ ! -z "$OPTION_DEFAULT" ] ; then
+	# find the default= line
+	for ((i=1; i<=CONFIG_IMAGE_COUNT; i++)); do
+	    if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[$i]}" ] ; then
+		ISERIES_IMAGE="${CONFIG_IMAGE_FILE[$i]}" 
+		if [ -n "$OPTION_APPEND" ] ; then
+		    ISERIES_CMDLINE=$OPTION_APPEND
+		fi
+		if [ -n "${CONFIG_IMAGE_APPEND[$i]}" ] ; then
+		    ISERIES_CMDLINE=${CONFIG_IMAGE_APPEND[$i]}
+		fi
+		if [ -n "$OPTION_ROOT" ] ; then
+		    ISERIES_ROOT="root=$OPTION_ROOT"
+		fi
+		if [ -n "${CONFIG_IMAGE_ROOT[$i]}" ] ; then
+		    ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[$i]}"
+		fi
+		if [ -n "$OPTION_INITRD" ] ; then
+		    ISERIES_INITRD=$OPTION_INITRD
+		fi
+		if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
+		    ISERIES_INITRD="${CONFIG_IMAGE_INITRD[$i]}"
+		fi
+	    fi
+	done
+    else
+	# pick the first image= line
+	ISERIES_IMAGE="${CONFIG_IMAGE_FILE[1]}"
+	if [ -n "$OPTION_APPEND" ] ; then
+	    ISERIES_CMDLINE=$OPTION_APPEND
+	fi
+	if [ -n "${CONFIG_IMAGE_APPEND[1]}" ] ; then
+	    ISERIES_CMDLINE=${CONFIG_IMAGE_APPEND[1]}
+	fi
+	if [ -n "$OPTION_ROOT" ] ; then
+	    ISERIES_ROOT="root=$OPTION_ROOT"
+	fi
+	if [ -n "${CONFIG_IMAGE_ROOT[1]}" ] ; then
+	    ISERIES_ROOT="root=${CONFIG_IMAGE_ROOT[1]}"
+	fi
+	if [ -n "$OPTION_INITRD" ] ; then
+	    ISERIES_INITRD=$OPTION_INITRD
+	fi
+	if [ -n "${CONFIG_IMAGE_INITRD[1]}" ] ; then
+	    ISERIES_INITRD="${CONFIG_IMAGE_INITRD[1]}"
+	fi
+    fi
+    
+    #
+    #  loop for multiple OPTION_BOOT entries
+    #
+    for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
+	ISERIES_BOOT="${OPTION_BOOT[$i]##*=}"
+	ISERIES_DEVICE="${OPTION_DEVICE[$i]}" 
+	ISERIES_BOOT_IMAGE="$ISERIES_IMAGE"
+
+	echo "ISERIES_CMDLINE " $ISERIES_CMDLINE
+	echo "ISERIES_ROOT    " $ISERIES_ROOT
+	echo "ISERIES_IMAGE   " $ISERIES_IMAGE
+	echo "ISERIES_BOOT    " $ISERIES_BOOT
+
+	if [ -n "$ISERIES_INITRD" ]; then
+	    echo "ISERIES_INITRD  " $ISERIES_INITRD
+	    echo
+	    echo generating $ISERIES_KERNEL_TMPFILE with /lib/lilo/iseries/make_zimage_iseries.sh
+	    echo
+	    unset ec
+	    /lib/lilo/iseries/make_zimage_iseries.sh \
+	      --initrd $ISERIES_INITRD \
+	      --vmlinux $ISERIES_IMAGE \
+	      --output $ISERIES_KERNEL_TMPFILE ; ec=$?
+	    echo
+	    if [ "$ec" != "0" ]; then
+		echo bootfile generation failed: ec $ec ;
+		exit 1 ;
+	    fi
+	    ISERIES_BOOT_IMAGE=$ISERIES_KERNEL_TMPFILE
+	fi
+	echo ISERIES_BOOT_IMAGE $ISERIES_BOOT_IMAGE
+	unset ISERIES_TARGET
+	if [[ "$ISERIES_BOOT" == [AB] ]]; then
+	    ISERIES_TARGET=slot
+	elif [ -c "$ISERIES_BOOT" -o -d "$ISERIES_BOOT" -o -p "$ISERIES_BOOT" -o -S "$ISERIES_BOOT" ]; then
+	    ISERIES_TARGET=invalid
+	elif [ -b "$ISERIES_BOOT" ]; then
+	    ISERIES_TARGET=block_dev
+	elif [ -f "$ISERIES_BOOT" -o ! -e "$ISERIES_BOOT" ]; then
+	    ISERIES_TARGET=file
+	else
+	    ISERIES_TARGET=invalid
+	fi
+	
+	case "$ISERIES_TARGET" in
+	    slot)
+                echo write to slot $ISERIES_BOOT
+		;;
+	    file)
+	        if [ "${ISERIES_BOOT:0:1}" != "/" ] ; then
+		    echo boot=$ISERIES_BOOT must have an absolute path
+		    if [[ "$ISERIES_BOOT" = ?(a|b|c) ]]; then
+			echo "Did you mean uppercase '$ISERIES_BOOT'?"
+		    fi
+		    exit 1
+		fi
+		echo write to file $ISERIES_BOOT
+		rm -f $ISERIES_BOOT
+		cp -av $ISERIES_BOOT_IMAGE $ISERIES_BOOT
+		;;
+	    block_dev)
+	        echo write to block_dev "$ISERIES_BOOT"
+		;;
+	    invalid)
+		error "boot=$ISERIES_BOOT invalid"
+		;;
+	esac
+	
+	if [ "$ISERIES_TARGET" = "slot" -a -n "$ISERIES_BOOT_IMAGE" ] &&
+	    [ -f "$ISERIES_BOOT_IMAGE" ] ; then
+	    local size name bs=1024 target=/proc/iSeries/mf/$ISERIES_BOOT/vmlinux
+
+	    (( size = $( fsize $ISERIES_BOOT_IMAGE ) * 2 ))
+	    echo "this will take a while... ($size kb)"
+	    echo "writing kernel $ISERIES_BOOT_IMAGE to $target"
+
+	    while ! dd if=$ISERIES_BOOT_IMAGE of=$target bs=${bs}k 2>/dev/null ; do
+		# try smaller chunk size in case of error (ENOMEM)
+		(( bs >>= 1 ));
+		if (( bs < 4 )); then
+		    # bail out below 4kB
+		    echo "failed to write kernel to slot $ISERIES_BOOT"
+		    exit 1
+		fi
+	    done
+		
+	    echo activate kernel slot $ISERIES_BOOT in /proc/iSeries/mf/side
+	    echo $ISERIES_BOOT > /proc/iSeries/mf/side
+	        
+	    # remove any old cmdline content, leads to newlines
+	    dd if=/dev/zero of=/proc/iSeries/mf/$ISERIES_BOOT/cmdline count=1 bs=254 2>/dev/null
+	    echo "$ISERIES_ROOT $ISERIES_CMDLINE" > /proc/iSeries/mf/$ISERIES_BOOT/cmdline
+	fi
+    
+    
+	if [ "$ISERIES_TARGET" = "block_dev" ]; then
+	    #only the device is given and dd to the raw device is a bad idea
+	    if [ -z "${OPTION_PARTITION[$i]}" ]; then
+		echo guess the PReP boot device 
+		PART=`$FDISK -l $ISERIES_DEVICE | fgrep "PPC PReP"`
+		if [ -z "$PART" ] ; then
+		    err_var1="$ISERIES_BOOT"
+		    error 9 3
+		fi
+		if [ `echo "$PART" | wc -l` != 1 ] ; then
+		    err_var1="$ISERIES_BOOT"
+		    error 10 5
+		fi
+		read P dummy <<< "$PART"
+	    else
+		#we have the device, but better safe than sorry
+		echo Boot target is $ISERIES_DEVICE
+		PART=`$FDISK -l $ISERIES_DEVICE | grep $ISERIES_BOOT | fgrep "PPC PReP"`
+		if [ -z "$PART" ] ; then
+		    err_var1=$ISERIES_BOOT; error 9 3
+		fi
+		
+		P=$ISERIES_BOOT
+	    fi
+		
+	    echo Installing "$ISERIES_BOOT_IMAGE" onto $P
+	    dd if="$ISERIES_BOOT_IMAGE" of=$P bs=4096 2>/dev/null
+		
+	    echo setting boot flag on partition ${P%%+([0-9])} ${P##+([^0-9])}
+	    $PARTED ${P%%+([0-9])} set ${P##+([^0-9])} boot on >& $TEMP/parted.log ||
+		error 11
+	fi
+    done  #  end of OPTION_BOOT loop
+
+    if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+	echo "To activate your partition you have to change your NWSD manually"
+	# TODO print nice proposals for OS400 cmds
+	#
+	#  loop for multiple OPTION_BOOT entries
+	#
+	#for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
+
+	# echo "    CHGNWSD <nwsd-name> ......."
+
+	# done
+    fi
+}
+
+
+#
+#
+# Local variables:
+#     mode: sh
+#     mode: font-lock
+#     mode: auto-fill
+#     sh-indent: 4
+#     sh-multiline-offset: 2
+#     sh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#     fill-column: 78
+# End:
+#
