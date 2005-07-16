@@ -465,11 +465,19 @@ int
 printf(const char *fmt, ...)
 {
 	va_list args;
-	int n;
+	int n, i;
 
 	va_start(args, fmt);
 	n = vsprintf(sprint_buf, fmt, args);
 	va_end(args);
+	for (i = 0; sprint_buf[i] && i < sizeof(sprint_buf); i++) {
+		if ('\n' == sprint_buf[i]) {
+			memmove(&sprint_buf[i] + 1, &sprint_buf[i], n - i + 1);
+			n++;
+			i++;
+			sprint_buf[i] = '\r';
+		}
+	}
 	write(sprint_buf, n);
 	return n;
 }
