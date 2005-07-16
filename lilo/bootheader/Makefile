@@ -18,5 +18,7 @@ local-clean:
 local-spotless: local-clean
 	rm -f *~ tags
 
+tags:
+	ctags `find -name "*.[chS]"`
 
 -include MCONFIG
