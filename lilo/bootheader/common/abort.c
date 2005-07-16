@@ -4,6 +4,6 @@
 
 void abort(const char *s)
 {
-	printf("%s\n\r", s);
+	printf("%s\n", s);
 	exit();
 }

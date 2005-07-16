@@ -32,7 +32,7 @@ int inspect_block_node(phandle node, char *devs)
 	else if (strcmp("ide", ptype) == 0)
 		sp = ata;
 	else {
-		printf("block host_type '%s' unknown\n\r", ptype);
+		printf("block host_type '%s' unknown\n", ptype);
 		return -1;
 	}
 
@@ -41,7 +41,7 @@ int inspect_block_node(phandle node, char *devs)
 	of1275_package_to_path(parent_node, ptp, sizeof(ptp));
 #ifdef DEBUG
 	printf("parent %p '%s' ", parent_node, ptp);
-	printf("'%s'\n\r", ptype);
+	printf("'%s'\n", ptype);
 #endif
 	of1275_package_to_path(node, ptp, sizeof(ptp));
 	i = strlen(ptp);
@@ -67,7 +67,7 @@ int inspect_block_node(phandle node, char *devs)
 			if (!handle)
 				continue;
 #ifdef DEBUG
-			printf("opened:'%s' '%p'\n\r", ptp, handle);
+			printf("opened:'%s' '%p'\n", ptp, handle);
 #endif
 			devs[i] = sp[i];
 			of1275_close(handle);
@@ -101,7 +101,7 @@ void show_block_devices(void)
 			for (j = 0; j < sizeof(devs); j++)
 				if (devs[j])
 					printf("'%c' ", devs[j]);
-			printf("\n\r");
+			printf("\n");
 		}
 	}
 }

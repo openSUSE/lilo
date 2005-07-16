@@ -41,7 +41,7 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 	s.workspace = scratch;
 	r = zlib_inflateInit2(&s, -MAX_WBITS);
 	if (r != Z_OK) {
-		printf("inflateInit2 returned %d\n\r", r);
+		printf("inflateInit2 returned %d\n", r);
 		exit();
 	}
 	s.next_in = src + i;
@@ -50,7 +50,7 @@ static void do_gunzip(void *dst, int dstlen, unsigned char *src, int *lenp)
 	s.avail_out = dstlen;
 	r = zlib_inflate(&s, Z_FULL_FLUSH);
 	if (r != Z_OK && r != Z_STREAM_END) {
-		printf("inflate returned %d msg: %s\n\r", r, s.msg);
+		printf("inflate returned %d msg: %s\n", r, s.msg);
 		exit();
 	}
 	*lenp = s.next_out - (unsigned char *) dst;
@@ -68,7 +68,7 @@ int gunzip(unsigned long dest, int destlen,
 #endif
 	len = srclen;
 	do_gunzip((void *)dest, destlen, (unsigned char *)src, &len);
-	printf("done. (0x%08lx bytes)\n\r", len);
+	printf("done. (0x%08lx bytes)\n", len);
 	return len;
 }
 

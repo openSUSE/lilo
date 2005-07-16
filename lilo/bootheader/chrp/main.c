@@ -81,22 +81,22 @@ static int check_elf32(void *p)
 	vmlinux.offset = (unsigned long)elf32ph->p_offset;
 
 #ifdef DEBUG
-	printf("PPC32 ELF file:\n\r");
-	printf("e_ehsize    0x%08x\n\r", elf32->e_ehsize);
-	printf("e_phentsize 0x%08x\n\r", elf32->e_phentsize);
-	printf("e_phnum     0x%08lx\n\r", elf32->e_phnum);
-	printf("e_shentsize 0x%08lx\n\r", elf32->e_shentsize);
-	printf("e_shnum     0x%08lx\n\r", elf32->e_shnum);
-	printf("e_shstrndx  0x%08lx\n\r", elf32->e_shstrndx);
+	printf("PPC32 ELF file:\n");
+	printf("e_ehsize    0x%08x\n", elf32->e_ehsize);
+	printf("e_phentsize 0x%08x\n", elf32->e_phentsize);
+	printf("e_phnum     0x%08lx\n", elf32->e_phnum);
+	printf("e_shentsize 0x%08lx\n", elf32->e_shentsize);
+	printf("e_shnum     0x%08lx\n", elf32->e_shnum);
+	printf("e_shstrndx  0x%08lx\n", elf32->e_shstrndx);
 
-	printf("p_type   0x%08x\n\r", elf32ph->p_type);
-	printf("p_flags  0x%08x\n\r", elf32ph->p_flags);
-	printf("p_offset 0x%08lx\n\r", elf32ph->p_offset);
-	printf("p_vaddr  0x%08lx\n\r", elf32ph->p_vaddr);
-	printf("p_paddr  0x%08lx\n\r", elf32ph->p_paddr);
-	printf("p_filesz 0x%08lx\n\r", elf32ph->p_filesz);
-	printf("p_memsz  0x%08lx\n\r", elf32ph->p_memsz);
-	printf("p_align  0x%08lx\n\r", elf32ph->p_align);
+	printf("p_type   0x%08x\n", elf32ph->p_type);
+	printf("p_flags  0x%08x\n", elf32ph->p_flags);
+	printf("p_offset 0x%08lx\n", elf32ph->p_offset);
+	printf("p_vaddr  0x%08lx\n", elf32ph->p_vaddr);
+	printf("p_paddr  0x%08lx\n", elf32ph->p_paddr);
+	printf("p_filesz 0x%08lx\n", elf32ph->p_filesz);
+	printf("p_memsz  0x%08lx\n", elf32ph->p_memsz);
+	printf("p_align  0x%08lx\n", elf32ph->p_align);
 #endif
 
 	return 32;
@@ -128,16 +128,16 @@ static int check_elf64(void *p)
 	vmlinux.offset = (unsigned long)elf64ph->p_offset;
 
 #ifdef DEBUG
-	printf("PPC64 ELF file, ph %d\n\r", i);
-	printf("p_type   0x%08x\n\r", elf64ph->p_type);
-	printf("p_flags  0x%08x\n\r", elf64ph->p_flags);
-	printf("p_offset 0x%016llx\n\r", elf64ph->p_offset);
-	printf("p_vaddr  0x%016llx\n\r", elf64ph->p_vaddr);
-	printf("p_paddr  0x%016llx\n\r", elf64ph->p_paddr);
-	printf("p_filesz 0x%016llx\n\r", elf64ph->p_filesz);
-	printf("p_memsz  0x%016llx\n\r", elf64ph->p_memsz);
-	printf("p_align  0x%016llx\n\r", elf64ph->p_align);
-	printf("... skipping 0x%lx bytes of ELF header\n\r",
+	printf("PPC64 ELF file, ph %d\n", i);
+	printf("p_type   0x%08x\n", elf64ph->p_type);
+	printf("p_flags  0x%08x\n", elf64ph->p_flags);
+	printf("p_offset 0x%016llx\n", elf64ph->p_offset);
+	printf("p_vaddr  0x%016llx\n", elf64ph->p_vaddr);
+	printf("p_paddr  0x%016llx\n", elf64ph->p_paddr);
+	printf("p_filesz 0x%016llx\n", elf64ph->p_filesz);
+	printf("p_memsz  0x%016llx\n", elf64ph->p_memsz);
+	printf("p_align  0x%016llx\n", elf64ph->p_align);
+	printf("... skipping 0x%lx bytes of ELF header\n",
 	       (unsigned long)elf64ph->p_offset);
 #endif
 
@@ -151,7 +151,7 @@ static void try_map(unsigned long phys, unsigned long virt, unsigned int size)
 	unsigned long msr = mfmsr();
 	if (msr & (MSR_IR | MSR_DR)) {
 		printf("map 0x%08lx@0x%p: ", size, phys);
-		printf("%d\n\r", of1275_map(phys, virt, size));
+		printf("%d\n", of1275_map(phys, virt, size));
 	}
 }
 
@@ -161,7 +161,7 @@ static unsigned long try_claim(unsigned long size)
 
 	for (; claim_base < RAM_END; claim_base += 0x100000) {
 #ifdef DEBUG
-		printf("    trying: 0x%08lx\n\r", claim_base);
+		printf("    trying: 0x%08lx\n", claim_base);
 #endif
 		addr = (unsigned long)of1275_claim(claim_base, size, 0);
 		if ((void *)addr != (void *)-1)
@@ -182,7 +182,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	of1275_prominit(promptr);
 
-	printf("\n\rzImage starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%p)\n\r",
+	printf("\nzImage starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%p)\n",
 	       _coff_start, _end, a1, a2, promptr);
 
 	/* the executable memrange may not be claimed by firmware */
@@ -215,10 +215,10 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	if (!elftype)
 		elftype = check_elf32(elfheader);
 	if (!elftype)
-		abort("not a powerpc ELF file\n\r");
+		abort("not a powerpc ELF file\n");
 
 	if (cputype && cputype != elftype) {
-		printf("booting a %d-bit kernel on a %d-bit cpu.\n\r",
+		printf("booting a %d-bit kernel on a %d-bit cpu.\n",
 		       elftype, cputype);
 		abort("");
 	}
@@ -230,9 +230,9 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 	vmlinux.memsize += 3 * 1024 * 1024;
 	vmlinux.addr = try_claim(vmlinux.memsize);
 	if (vmlinux.addr == 0)
-		abort("Can't allocate memory for kernel image !\n\r");
+		abort("Can't allocate memory for kernel image !\n");
 
-	printf("Allocated 0x%08lx bytes for kernel @ 0x%08lx\n\r",
+	printf("Allocated 0x%08lx bytes for kernel @ 0x%08lx\n",
 	       vmlinux.memsize, vmlinux.addr);
 
 	/*
@@ -244,16 +244,16 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		initrd.addr = try_claim(initrd.size);
 		if (initrd.addr == 0)
 			abort
-			    ("Can't allocate memory for initial ramdisk !\n\r");
-		printf("Allocated 0x%08lx bytes for initrd @ 0x%08lx\n\r",
+			    ("Can't allocate memory for initial ramdisk !\n");
+		printf("Allocated 0x%08lx bytes for initrd @ 0x%08lx\n",
 		       initrd.size, initrd.addr);
 		a1 = initrd.addr;
 		a2 = initrd.size;
 #ifdef DEBUG
 		printf
-		    ("initial ramdisk moving 0x%lx <- 0x%lx (0x%lx bytes)\n\r",
+		    ("initial ramdisk moving 0x%lx <- 0x%lx (0x%lx bytes)\n",
 		     initrd.addr, (unsigned long)_initrd_start, initrd.size);
-		printf("initrd head: 0x%lx\n\r",
+		printf("initrd head: 0x%lx\n",
 		       *((unsigned long *)_initrd_start));
 #endif
 		memmove((void *)initrd.addr, (void *)_initrd_start,
@@ -270,12 +270,12 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	if (_builtin_cmd_line.prefer && _builtin_cmd_line.prefer != '0') {
 		int l = strlen(_builtin_cmd_line.string) + 1;
-		printf("copy built-in cmdline(%d):\n\r%s\n\r", l,
+		printf("copy built-in cmdline(%d):\n%s\n", l,
 		       _builtin_cmd_line.string);
 		l = of1275_setprop(chosen_handle, "bootargs",
 				 _builtin_cmd_line.string, l);
 #ifdef DEBUG
-		printf("setprop bootargs: %d\n\r", l);
+		printf("setprop bootargs: %d\n", l);
 #endif
 	}
 
@@ -283,16 +283,16 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 
 	kernel_entry = (kernel_entry_t) (vmlinux.addr + vmlinux.offset);
 #ifdef DEBUG
-	printf("kernel:\n\r"
-	       "        entry addr = 0x%lx\n\r"
-	       "        a1         = 0x%lx,\n\r"
-	       "        a2         = 0x%lx,\n\r"
-	       "        prom       = 0x%p,\n\r"
-	       "        bi_recs    = 0x%lx,\n\r",
+	printf("kernel:\n"
+	       "        entry addr = 0x%lx\n"
+	       "        a1         = 0x%lx,\n"
+	       "        a2         = 0x%lx,\n"
+	       "        prom       = 0x%p,\n"
+	       "        bi_recs    = 0x%lx,\n",
 	       (unsigned long)kernel_entry, a1, a2, promptr, NULL);
 #endif
 
 	kernel_entry(a1, a2, promptr, NULL);
 
-	abort("Error: Linux kernel returned to zImage bootloader!\n\r");
+	abort("Error: Linux kernel returned to zImage bootloader!\n");
 }

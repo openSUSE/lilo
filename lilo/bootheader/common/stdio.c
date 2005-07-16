@@ -51,7 +51,7 @@ readchar(void)
 		case 1:
 			return ch;
 		case -1:
-			printf("read(stdin) returned -1\r\n");
+			printf("read(stdin) returned -1\n");
 			return -1;
 		}
 	}

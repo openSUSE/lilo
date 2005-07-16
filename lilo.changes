@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Jul 16 21:38:29 CEST 2005 - olh@suse.de
+
+- remove all '\r' in bootheader
+
+-------------------------------------------------------------------
 Sat Jul 16 21:31:02 CEST 2005 - olh@suse.de
 
 - convert all '\n' into '\n\r' in bootheader printf
