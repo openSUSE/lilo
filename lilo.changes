@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jul 17 23:13:58 CEST 2005 - olh@suse.de
+
+- add read function to chrp/prep in bootheader
+
+-------------------------------------------------------------------
 Sun Jul 17 22:32:18 CEST 2005 - olh@suse.de
 
 - add of1275_milliseconds function to bootheader

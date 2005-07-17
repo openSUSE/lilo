@@ -55,6 +55,11 @@ static unsigned char elfheader[256];
 
 typedef void (*kernel_entry_t) (unsigned long, unsigned long, prom_entry, void *);
 
+int read(void *buf, int buflen)
+{
+	return of1275_read(stdin, buf, buflen);
+}
+
 int write(void *buf, int buflen)
 {
 	return of1275_write(stdout, buf, buflen);

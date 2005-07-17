@@ -248,6 +248,26 @@ static int puts(const char *s, int len)
 	return count;
 }
 
+int read(void *buf, int buflen)
+{
+	unsigned char *p = buf;
+	int ret = 0;
+	if (promptr)
+		return of1275_read(stdout, buf, buflen);
+
+	if (serial_tstc(com_port)) {
+		*p = serial_getc(com_port);
+		ret = 1;
+	} else {
+		if (!no_keyb_present)
+			if (CRT_tstc()) {
+				*p = CRT_getc();
+				ret = 1;
+			}
+	}
+	return ret;
+}
+
 int write(void *buf, int buflen)
 {
 	if (promptr)
