@@ -22,6 +22,7 @@ PROM_SRC    := call_prom prominit \
 		instance_to_path \
 		interpret \
 		map \
+		milliseconds \
 		open \
 		package_to_path \
 		parent \
