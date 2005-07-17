@@ -136,6 +136,8 @@ dep:
 docs:
 	make -C doc all
 
+.PHONY: tags
+
 tags:
 	ctags `find -name "*.[chS]"`
 
@@ -156,6 +158,7 @@ bindist: all
 clean:
 	rm -f second/yaboot util/addnote util/elfextract $(OBJS)
 	rm -f second/yaboot.chrp
+	rm -f tags
 	find . -not -path './\{arch\}*' -name '#*' | xargs rm -f
 	find . -not -path './\{arch\}*' -name '.#*' | xargs rm -f
 	find . -not -path './\{arch\}*' -name '*~' | xargs rm -f

@@ -18,6 +18,7 @@ local-clean:
 local-spotless: local-clean
 	rm -f *~ tags
 
+.PHONY: tags
 tags:
 	ctags `find -name "*.[chS]"`
 
