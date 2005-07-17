@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jul 17 22:32:18 CEST 2005 - olh@suse.de
+
+- add of1275_milliseconds function to bootheader
+
+-------------------------------------------------------------------
 Sat Jul 16 21:38:29 CEST 2005 - olh@suse.de
 
 - remove all '\r' in bootheader
