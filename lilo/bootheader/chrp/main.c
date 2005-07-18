@@ -55,6 +55,12 @@ static unsigned char elfheader[256];
 
 typedef void (*kernel_entry_t) (unsigned long, unsigned long, prom_entry, void *);
 
+void mdelay(int ms)
+{
+	ms = of1275_milliseconds() + ms;
+	while(of1275_milliseconds() < ms);
+}
+
 int read(void *buf, int buflen)
 {
 	return of1275_read(stdin, buf, buflen);

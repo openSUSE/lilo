@@ -248,6 +248,17 @@ static int puts(const char *s, int len)
 	return count;
 }
 
+void mdelay(int ms)
+{
+	if (promptr) {
+		ms = of1275_milliseconds() + ms;
+		while(of1275_milliseconds() < ms);
+	} else {
+		while (ms-- > 0)
+			udelay(1000);
+	}
+}
+
 int read(void *buf, int buflen)
 {
 	unsigned char *p = buf;

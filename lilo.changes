@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 18 09:56:16 CEST 2005 - olh@suse.de
+
+- add mdleay function to chrp/prep in bootheader
+
+-------------------------------------------------------------------
 Sun Jul 17 23:13:58 CEST 2005 - olh@suse.de
 
 - add read function to chrp/prep in bootheader

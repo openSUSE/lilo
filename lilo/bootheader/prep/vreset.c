@@ -19,7 +19,8 @@
  */
 
 #include "iso_font.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 extern char *vidmem;
 extern int lines, cols;
@@ -36,12 +37,6 @@ struct VgaRegs {
 	unsigned char io_index;
 	unsigned char io_value;
 };
-
-static void mdelay(int ms)
-{
-	for (; ms > 0; --ms)
-		udelay(1000);
-}
 
 /*
  * Default console text mode registers  used to reset
