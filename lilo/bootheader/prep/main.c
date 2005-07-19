@@ -36,6 +36,8 @@ static int no_keyb_present;	/* keyboard controller is present by default */
 static RESIDUAL hold_resid_buf;
 static RESIDUAL *hold_residual = &hold_resid_buf;
 
+static unsigned long vmlinux_buf;
+#define VMLINUX_SIZE (8 * 1024 * 1024)
 char *vidmem = (char *)0xC00B8000;
 int lines = 25, cols = 80;
 static int orig_x, orig_y = 24;
@@ -464,7 +466,7 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	get_cmdline(_builtin_cmd_line.string, strlen(_builtin_cmd_line.string), sizeof(_builtin_cmd_line.string));
 
 	zimage_size =
-	    gunzip(0x0, 0x400000, zimage_start, zimage_size, "kernel");
+	    gunzip(vmlinux_buf, VMLINUX_SIZE, zimage_start, zimage_size, "kernel");
 
 	/* get the bi_rec address */
 	rec = bootinfo_addr(zimage_size);
@@ -506,6 +508,9 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	}
 	printf("Now booting the kernel\n");
 
+	if (vmlinux_buf)
+		memmove(0x0, (void *)vmlinux_buf, zimage_size);
+
 	return rec;
 }
 
@@ -519,9 +524,18 @@ load_kernel(unsigned long load_addr, int num_words, unsigned long cksum,
 	/* If we have Open Firmware, initialise it immediately */
 	if (OFW) {
 		char tmp[128];
+		void *p;
 
 		of1275_prominit(OFW);
 
+		p = of1275_claim(load_addr, (unsigned long)(&_end) - load_addr, 0);
+		if ((unsigned long)p != load_addr)
+			printf("claim 0x%08x@0x%08x returned 0x%08p\n",
+				(unsigned long)(&_end) - load_addr,
+				load_addr, p);
+
+		vmlinux_buf = (unsigned long)of1275_claim (_ALIGN_UP((unsigned long)(&_end),1*1024*1024), VMLINUX_SIZE, 0);
+		printf("vmlinux buffer @ 0x%08p\n", vmlinux_buf);
 		of1275_instance_to_path(stdin, tmp, sizeof(tmp));
 		printf("stdin  '%s'\n", tmp);
 		of1275_getprop(of1275_instance_to_package(stdin), "device_type", tmp, sizeof(tmp));

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul 19 17:32:27 CEST 2005 - olh@suse.de
+
+- allocate a buffer for extracted vmlinux on prep machines with
+  OpenFirmware. Overwrite firmware memory later.
+
+-------------------------------------------------------------------
 Tue Jul 19 17:28:04 CEST 2005 - olh@suse.de
 
 - remove global variable in prep bootheader
