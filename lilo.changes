@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 19 17:28:04 CEST 2005 - olh@suse.de
+
+- remove global variable in prep bootheader
+
+-------------------------------------------------------------------
 Tue Jul 19 15:03:17 CEST 2005 - olh@suse.de
 
 - some prep machines have openfirmware, but reading from keyboard

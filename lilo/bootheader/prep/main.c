@@ -30,8 +30,6 @@ extern char _initrd_end[];
 
 extern void udelay(long delay);
 
-static unsigned char *cmd_line = _builtin_cmd_line.string;
-
 static int no_keyb_present;	/* keyboard controller is present by default */
 
 static RESIDUAL hold_resid_buf;
@@ -494,7 +492,7 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	if (TotalMemory)
 		bootinfo_append(BI_MEMSIZE, sizeof(int), (void *)&TotalMemory);
 
-	bootinfo_append(BI_CMD_LINE, strlen(cmd_line) + 1, (void *)cmd_line);
+	bootinfo_append(BI_CMD_LINE, strlen(_builtin_cmd_line.string) + 1, (void *)_builtin_cmd_line.string);
 
 	/* add a bi_rec for the initrd if it exists */
 	if (initrd_size) {
