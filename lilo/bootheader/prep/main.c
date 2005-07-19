@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
  * arch/ppc/boot/simple/misc-prep.c
  *
