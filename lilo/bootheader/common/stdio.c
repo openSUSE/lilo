@@ -8,6 +8,57 @@
 #include <prom.h>
 #include <div64.h>
 
+#undef DEBUG
+
+#ifdef DEBUG
+struct key {
+	int n;
+	char c[4];
+};
+static int key_count;
+static struct key keys[256];
+#endif
+
+int getchar(int block)
+{
+	char c[4];
+	int ret;
+
+	memset(c, 0, sizeof(c));
+	while ((ret = read(&c, sizeof(c))) == 0 && block) ;
+
+#ifdef DEBUG
+	if (ret && key_count < sizeof(keys)) {
+		memcpy(&keys[key_count].c, c, sizeof(c));
+		keys[key_count].n = ret;
+		key_count++;
+	}
+#endif
+	if (ret == 1)
+		return c[0];
+	return 0;
+}
+
+void print_keys(void)
+{
+#ifdef DEBUG
+	int c;
+	printf("\n");
+	for (c = 0; c < key_count; c++)
+		printf("key %d: ret %d %02x %02x %02x %02x\n", c, keys[c].n,
+		       keys[c].c[0], keys[c].c[1], keys[c].c[2], keys[c].c[3]);
+#endif
+}
+
+int putc(int c)
+{
+	char ch = c;
+
+	if (c == '\n')
+		putc('\r');
+	return write(&ch, 1) == 1 ? c : -1;
+}
+
 #if 0
 int
 read(void *buf, int buflen)

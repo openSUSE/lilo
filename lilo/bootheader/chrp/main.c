@@ -280,9 +280,11 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 			vmlinuz.size);
 
 	if (_builtin_cmd_line.prefer && _builtin_cmd_line.prefer != '0') {
-		int l = strlen(_builtin_cmd_line.string) + 1;
+		int l = get_cmdline(_builtin_cmd_line.string, strlen(_builtin_cmd_line.string), sizeof(_builtin_cmd_line.string));
+#ifdef DEBUG
 		printf("copy built-in cmdline(%d):\n%s\n", l,
 		       _builtin_cmd_line.string);
+#endif
 		l = of1275_setprop(chosen_handle, "bootargs",
 				 _builtin_cmd_line.string, l);
 #ifdef DEBUG

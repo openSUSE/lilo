@@ -12,4 +12,6 @@ struct _builtin_cmd_line {
 } __attribute__ ((__packed__));
 
 extern struct _builtin_cmd_line _builtin_cmd_line;
+extern int get_cmdline(char *p, int len, int max);
+extern void print_keys(void);
 #endif				/* _PPC_BOOT_CMDLINE_H_ */

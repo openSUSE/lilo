@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 19 14:22:41 CEST 2005 - olh@suse.de
+
+- add the ability to edit the built-in cmdline in bootheader
+
+-------------------------------------------------------------------
 Tue Jul 19 13:21:10 CEST 2005 - olh@suse.de
 
 - print openfirmware entry point on prep in bootheader

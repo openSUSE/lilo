@@ -12,7 +12,7 @@ extern int vsprintf(char *buf, const char *fmt, va_list args);
 
 extern int putc(int c);
 extern int putchar(int c);
-extern int getchar(void);
+extern int getchar(int block);
 
 extern int fputs(char *str, void *f);
 
