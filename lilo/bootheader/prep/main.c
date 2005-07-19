@@ -144,65 +144,6 @@ static void scroll(void)
 		vidmem[i] = ' ';
 }
 
-static int tstc(void)
-{
-	if (!no_keyb_present)
-		return (CRT_tstc() || serial_tstc(com_port));
-	else
-		return (serial_tstc(com_port));
-}
-
-static int getc(void)
-{
-	while (1) {
-		if (serial_tstc(com_port))
-			return (serial_getc(com_port));
-		if (!no_keyb_present)
-			if (CRT_tstc())
-				return (CRT_getc());
-	}
-}
-
-static void prep_putc(const char c)
-{
-	int x, y;
-
-	serial_putc(com_port, c);
-	if (c == '\n')
-		serial_putc(com_port, '\r');
-
-	x = orig_x;
-	y = orig_y;
-
-	if (c == '\n') {
-		x = 0;
-		if (++y >= lines) {
-			scroll();
-			y--;
-		}
-	} else if (c == '\r') {
-		x = 0;
-	} else if (c == '\b') {
-		if (x > 0) {
-			x--;
-		}
-	} else {
-		vidmem[(x + cols * y) * 2] = c;
-		if (++x >= cols) {
-			x = 0;
-			if (++y >= lines) {
-				scroll();
-				y--;
-			}
-		}
-	}
-
-	cursor(x, y);
-
-	orig_x = x;
-	orig_y = y;
-}
-
 static int puts(const char *s, int len)
 {
 	int x, y;
@@ -472,9 +413,6 @@ static
 struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 				    unsigned long cksum)
 {
-	int timer = 0;
-	char ch;
-	unsigned char *cp;
 	struct bi_record *rec;
 	unsigned long initrd_loc, TotalMemory;
 	unsigned long zimage_start, zimage_size, initrd_size;
@@ -524,42 +462,7 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	if (!no_keyb_present)
 		CRT_tstc();	/* Forces keyboard to be initialized */
 
-	/* Display standard Linux/PPC boot prompt for kernel args */
-	printf("\nLinux/PPC load: %s", cmd_line);
-	cp = cmd_line;
-	while (*cp)
-		cp++;
-
-	/*
-	 * If they have a console, allow them to edit the command line.
-	 * Otherwise, don't bother wasting the five seconds.
-	 */
-	while (timer++ < 5 * 1000) {
-		if (tstc()) {
-			while ((ch = getc()) != '\n' && ch != '\r') {
-				/* Test for backspace/delete */
-				if (ch == '\b' || ch == '\177') {
-					if (cp != cmd_line) {
-						cp--;
-						printf("\b \b");
-					}
-					/* Test for ^x/^u (and wipe the line) */
-				} else if (ch == '\030' || ch == '\025') {
-					while (cp != cmd_line) {
-						cp--;
-						printf("\b \b");
-					}
-				} else {
-					*cp++ = ch;
-					prep_putc(ch);
-				}
-			}
-			break;	/* Exit 'timer' loop */
-		}
-		udelay(1000);	/* 1 msec */
-	}
-	printf("\n");
-	*cp = 0;
+	get_cmdline(_builtin_cmd_line.string, strlen(_builtin_cmd_line.string), sizeof(_builtin_cmd_line.string));
 
 	zimage_size =
 	    gunzip(0x0, 0x400000, zimage_start, zimage_size, "kernel");
@@ -587,7 +490,6 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	}
 
 	printf("birecs @ 0x%08p\n", rec);
-	printf("cmdline: '%s'\n", cmd_line);
 	bootinfo_init(rec);
 	if (TotalMemory)
 		bootinfo_append(BI_MEMSIZE, sizeof(int), (void *)&TotalMemory);

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 19 14:53:30 CEST 2005 - olh@suse.de
+
+- use new get_cmdline also on prep in bootheader
+
+-------------------------------------------------------------------
 Tue Jul 19 14:22:41 CEST 2005 - olh@suse.de
 
 - add the ability to edit the built-in cmdline in bootheader
