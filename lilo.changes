@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 19 13:21:10 CEST 2005 - olh@suse.de
+
+- print openfirmware entry point on prep in bootheader
+
+-------------------------------------------------------------------
 Tue Jul 19 13:18:34 CEST 2005 - olh@suse.de
 
 - getprop returns an ihandle, update prototypes in bootheader

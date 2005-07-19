@@ -487,6 +487,9 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	 */
 	TotalMemory = get_mem_size();
 
+	if (promptr)
+		printf("Open Firmware: 0x%p\n", promptr);
+
 	/*
 	 * Reveal where we were loaded at and where we
 	 * were relocated to.
