@@ -204,7 +204,7 @@ int read(void *buf, int buflen)
 {
 	unsigned char *p = buf;
 	int ret = 0;
-	if (promptr)
+	if (promptr && no_keyb_present)
 		return of1275_read(stdin, buf, buflen);
 
 	if (serial_tstc(com_port)) {
@@ -518,8 +518,20 @@ load_kernel(unsigned long load_addr, int num_words, unsigned long cksum,
 	unsigned int pci_viddid, pci_did, tulip_pci_base, tulip_base;
 
 	/* If we have Open Firmware, initialise it immediately */
-	if (OFW)
+	if (OFW) {
+		char tmp[128];
+
 		of1275_prominit(OFW);
+
+		of1275_instance_to_path(stdin, tmp, sizeof(tmp));
+		printf("stdin  '%s'\n", tmp);
+		of1275_getprop(of1275_instance_to_package(stdin), "device_type", tmp, sizeof(tmp));
+		printf("type   '%s'\n", tmp);
+		if (strcmp("serial", tmp) == 0)
+			no_keyb_present = 1;
+		of1275_instance_to_path(stdout, tmp, sizeof(tmp));
+		printf("stdout '%s'\n", tmp);
+	}
 
 	ISA_init((unsigned char *)0x80000000);
 

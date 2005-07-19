@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul 19 15:03:17 CEST 2005 - olh@suse.de
+
+- some prep machines have openfirmware, but reading from keyboard
+  returns no data. read directly from the hardware in this case
+
+-------------------------------------------------------------------
 Tue Jul 19 14:55:56 CEST 2005 - olh@suse.de
 
 - read from stdin, not stdout in prep bootheader
