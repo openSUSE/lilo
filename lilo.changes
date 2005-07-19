@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 19 14:55:56 CEST 2005 - olh@suse.de
+
+- read from stdin, not stdout in prep bootheader
+
+-------------------------------------------------------------------
 Tue Jul 19 14:53:30 CEST 2005 - olh@suse.de
 
 - use new get_cmdline also on prep in bootheader

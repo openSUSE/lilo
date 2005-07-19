@@ -205,7 +205,7 @@ int read(void *buf, int buflen)
 	unsigned char *p = buf;
 	int ret = 0;
 	if (promptr)
-		return of1275_read(stdout, buf, buflen);
+		return of1275_read(stdin, buf, buflen);
 
 	if (serial_tstc(com_port)) {
 		*p = serial_getc(com_port);
