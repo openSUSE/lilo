@@ -5,9 +5,9 @@
 prom_entry promptr;
 
 phandle chosen_handle;
-phandle stdin;
-phandle stdout;
-phandle stderr;
+ihandle stdin;
+ihandle stdout;
+ihandle stderr;
 
 ihandle mmu;
 

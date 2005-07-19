@@ -18,9 +18,9 @@ extern prom_entry promptr;
 
 extern phandle chosen_handle;
 
-extern phandle stdin;
-extern phandle stdout;
-extern phandle stderr;
+extern ihandle stdin;
+extern ihandle stdout;
+extern ihandle stderr;
 extern ihandle mmu;
 
 extern int call_prom(const char *service, int nargs, int nret, ...);

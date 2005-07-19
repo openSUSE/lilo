@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 19 13:18:34 CEST 2005 - olh@suse.de
+
+- getprop returns an ihandle, update prototypes in bootheader
+
+-------------------------------------------------------------------
 Mon Jul 18 09:56:16 CEST 2005 - olh@suse.de
 
 - add mdleay function to chrp/prep in bootheader
