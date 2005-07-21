@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jul 21 13:22:18 CEST 2005 - olh@suse.de
+
+- fix off by one in chrp setup call in bootheader
+
+-------------------------------------------------------------------
 Tue Jul 19 17:32:27 CEST 2005 - olh@suse.de
 
 - allocate a buffer for extracted vmlinux on prep machines with

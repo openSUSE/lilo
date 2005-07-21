@@ -286,7 +286,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr)
 		       _builtin_cmd_line.string);
 #endif
 		l = of1275_setprop(chosen_handle, "bootargs",
-				 _builtin_cmd_line.string, l);
+				 _builtin_cmd_line.string, l + 1);
 #ifdef DEBUG
 		printf("setprop bootargs: %d\n", l);
 #endif
