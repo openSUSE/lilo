@@ -1,4 +1,5 @@
 #!/bin/bash
+# vim: syntax=off
 # set -ex
 #
 # $Id$
