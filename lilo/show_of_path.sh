@@ -178,6 +178,19 @@ cd "$file_sysfs_dir/device"
 file_full_sysfs_path="`/bin/pwd`"
 file_storage_type=
 cd "$file_full_sysfs_path"
+if test -f ieee1394_id ; then
+	file_storage_type=sbp2
+	read ieee1394_id < ieee1394_id
+	ieee1394_id=${ieee1394_id%%:*}
+	until test -f devspec
+	do
+		cd ..
+		if test "$PWD" = "/"
+		then
+			break
+		fi
+	done
+else
 case "$file_full_sysfs_path" in
     */ide+([0-9])/+([0-9.]))
       	file_storage_type=ide
@@ -209,6 +222,8 @@ case "$file_full_sysfs_path" in
         # TODO check the rest of the (hardware) world
 	error "could not gather enough information to create open firmware path to device"
 esac
+# ieee1394_id
+fi 
 
 if [ -f devspec ] ; then
     read file_of_hw_devtype < devspec
@@ -295,6 +310,8 @@ if [ -f devspec ] ; then
 	    [ "$of_disk_fc_wwpn" ] || error "could not get a WWPN for that FC disk"
 	    file_storage_type=fcp
 	    ;;
+	ieee1394)
+	    ;;
 	*)
 	    error "Unknown device type $(< ${file_of_hw_devtype}/device_type)"
 	    ;;
@@ -350,6 +367,11 @@ if [ -f devspec ] ; then
 		printf "%s/%s@%lx"  "${file_of_hw_devtype##/proc/device-tree}" \
 		    $of_disk_vscsi_dir $of_disk_vscsi_nr
 	    )
+	    ;;
+	sbp2)
+	    # /proc/device-tree/pci@f4000000/firewire@e/node@0001d20000038f29/sbp-2@c000/disk@0
+	    # MacOS: boot-device=fw/node@1d20000038f29/sbp-2@c000/@0:7,\\:tbxi
+	    file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}"/node@${ieee1394_id}/sbp-2/disk@0
 	    ;;
 	*)
 	    error "Internal error, can't handle storage type '${file_storage_type}'"

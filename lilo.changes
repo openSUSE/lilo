@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Jul 23 17:30:41 CEST 2005 - olh@suse.de
+
+- add support for ieee1394 sbp2 devices to show_of_path.sh
+
+-------------------------------------------------------------------
 Thu Jul 21 13:22:18 CEST 2005 - olh@suse.de
 
 - fix off by one in chrp setup call in bootheader
