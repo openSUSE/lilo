@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jul 24 23:07:30 CEST 2005 - olh@suse.de
+
+- handle block pathnames without partition part in parse_device_path
+
+-------------------------------------------------------------------
 Sun Jul 24 22:06:44 CEST 2005 - olh@suse.de
 
 - add new parse_device_path function to yaboot

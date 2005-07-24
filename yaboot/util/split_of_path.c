@@ -13,6 +13,8 @@ enum device_type {
 };
 
 struct boot_fspec_t {
+	int part;
+
 	enum device_type type;
 
 	char *device;
@@ -48,6 +50,11 @@ static const char *block_paths[] = {
 	"/vmlinux",
 	"/boot/vmlinux",
 	"&device;:10,/boot/vmlinux",
+	"hd:yaboot",
+	"hd:\\yaboot",
+	"hd:\\\\yaboot",
+	"hd:suseboot\\yaboot",
+	"hd:\\suseboot\\yaboot",
 	NULL,
 };
 

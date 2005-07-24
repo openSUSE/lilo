@@ -4,17 +4,23 @@
 #include <file.h>
 #endif
 #include <string.h>
+#include <stdlib.h>
 
 static void parse_block_device(struct boot_fspec_t *result)
 {
+	char *ip;
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
 	result->type = TYPE_BLOCK;
-	result->directory = strrchr(result->partition, ',');
-	if (!result->directory)
-		return;
-	*result->directory++ = '\0';
+	result->part = strtol(result->partition, &ip, 10);
+	if (result->part)
+		*ip++ = '\0';
+	else
+		result->partition = "";
+	if (',' == ip[0])
+		ip++;
+	result->directory = ip;
 	result->filename = strrchr(result->directory, '/');
 	if (!result->filename)
 		result->filename = strrchr(result->directory, '\\');
