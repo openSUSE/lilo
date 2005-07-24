@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Jul 24 12:11:46 CEST 2005 - olh@suse.de
+
+- handle RAID partitions on x86 partition tables in yaboot
+  (Patch from Dustin Kirkland)
+
+-------------------------------------------------------------------
 Sun Jul 24 12:01:50 CEST 2005 - olh@suse.de
 
 - add support for amiga partition tables to yaboot  (Sven Luther)

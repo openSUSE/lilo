@@ -121,6 +121,7 @@ second/fs_of.o: \
 	include/file.h \
 	include/prom.h \
 	include/fs.h \
+	include/fdisk-part.h \
 	include/partition.h \
 	include/string.h \
 	include/errors.h \
