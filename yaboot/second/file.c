@@ -36,8 +36,6 @@
 #include "errors.h"
 #include "debug.h"
 
-extern char bootdevice[1024];
-
 /* This function follows the device path in the devtree and separates
    the device name, partition number, and other datas (mostly file name)
    the string passed in parameters is changed since 0 are put in place
@@ -69,7 +67,7 @@ parse_device_path(char *imagepath, char *defdevice, int defpart,
 		  char *deffile, struct boot_fspec_t *result)
 {
      char *ptr;
-     char *ipath = NULL;
+     char *ipath;
      char *defdev = NULL;
 
      result->dev = NULL;

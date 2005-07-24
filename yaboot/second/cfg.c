@@ -98,20 +98,21 @@ CONFIG cf_image[] =
      {cft_end, NULL, NULL}};
 
 static char flag_set;
-static char *last_token = NULL, *last_item = NULL, *last_value = NULL;
+static char *last_token, *last_item, *last_value;
 static int line_num;
-static int back = 0;		/* can go back by one char */
-static char *currp = NULL;
-static char *endp = NULL;
-static char *file_name = NULL;
+static int back;		/* can go back by one char */
+static char *currp;
+static char *endp;
+static char *file_name;
 static CONFIG *curr_table = cf_options;
 static jmp_buf env;
 
 static struct IMAGES {
      CONFIG table[sizeof (cf_image) / sizeof (cf_image[0])];
      struct IMAGES *next;
-} *images = NULL;
+} *images;
 
+static
 void cfg_error (char *msg,...)
 {
      va_list ap;
@@ -124,6 +125,7 @@ void cfg_error (char *msg,...)
      longjmp (env, 1);
 }
 
+static
 void cfg_warn (char *msg,...)
 {
      va_list ap;
@@ -135,6 +137,7 @@ void cfg_warn (char *msg,...)
      prom_printf (" near line %d in file %s\n", line_num, file_name);
 }
 
+static
 inline int getc ()
 {
      if (currp == endp)
@@ -418,7 +421,7 @@ int cfg_get_flag (char *image, char *item)
      return !!cfg_get_strg (image, item);
 }
 
-static int printl_count = 0;
+static int printl_count;
 static void printlabel (char *label, int defflag)
 {
      int len = strlen (label);

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jul 24 11:36:44 CEST 2005 - olh@suse.de
+
+- disable dead code in yaboot, remove unneeded global initializers
+
+-------------------------------------------------------------------
 Sat Jul 23 17:30:41 CEST 2005 - olh@suse.de
 
 - add support for ieee1394 sbp2 devices to show_of_path.sh

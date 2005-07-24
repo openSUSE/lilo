@@ -98,11 +98,7 @@ typedef void (*kernel_entry_t)( void *,
                                 unsigned long );
 
 /* Imported functions */
-extern unsigned long reloc_offset(void);
 extern long flush_icache_range(unsigned long start, unsigned long stop);
-
-/* Exported functions */
-int	yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5);
 
 /* Local functions */
 static int	yaboot_main(void);
@@ -114,13 +110,13 @@ static void     setup_display(void);
 
 /* Locals & globals */
 
-int useconf = 0;
-char bootdevice[1024];
-char *password = NULL;
-struct boot_fspec_t boot;
-int _machine = _MACH_Pmac;
+int useconf;
+static char bootdevice[1024];
+static char *password;
+static struct boot_fspec_t boot;
+static int _machine;
 static int _cpu;
-int flat_vmlinux;
+static int flat_vmlinux;
 
 #ifdef CONFIG_COLOR_TEXT
 
@@ -150,22 +146,14 @@ static struct ansi_color_t {
 };
 
 /* Default colors for text ui */
-int fgcolor = 15;
-int bgcolor = 0;
+static int fgcolor = 15;
+static int bgcolor;
 #endif /* CONFIG_COLOR_TEXT */
 
-#if DEBUG
-static int test_bss;
-static int test_data = 0;
-#endif
 static int pause_after;
 static char *pause_message = "Type go<return> to continue.\n";
 static char given_bootargs[1024];
-static int given_bootargs_by_user = 0;
-
-extern unsigned char linux_logo_red[];
-extern unsigned char linux_logo_green[];
-extern unsigned char linux_logo_blue[];
+static int given_bootargs_by_user;
 
 #define DEFAULT_TIMEOUT		-1
 
@@ -174,28 +162,17 @@ extern unsigned char linux_logo_blue[];
 extern char* __bss_start;
 extern char* _end;
 
-static struct first_info *quik_fip = NULL;
-
 int
 yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
 {
      int result;
-     void* malloc_base = NULL;
+     void* malloc_base;
      prom_handle root;
      prom_handle cpus[1];
 
      /* OF seems to do it, but I'm not very confident */
      memset(&__bss_start, 0, &_end - &__bss_start);
   	
-     /* Check for quik first stage bootloader (but I don't think we are
-      * compatible with it anyway, I'll look into backporting to older OF
-      * versions later
-      */
-     if (r5 == 0xdeadbeef) {
-	  r5 = r3;
-	  quik_fip = (struct first_info *)r4;
-     }
-
      /* Initialize OF interface */
      prom_init ((prom_entry) r5);
 	
@@ -210,16 +187,9 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
      DEBUG_F("Malloc buffer allocated at %p (%d bytes)\n",
 	     malloc_base, MALLOCSIZE);
 		
-     /* A few useless DEBUG_F's */
-     DEBUG_F("reloc_offset :  %ld         (should be 0)\n", reloc_offset());
-     DEBUG_F("test_bss     :  %d         (should be 0)\n", test_bss);
-     DEBUG_F("test_data    :  %d         (should be 0)\n", test_data);
-     DEBUG_F("&test_data   :  %p\n", &test_data);
-     DEBUG_F("&test_bss    :  %p\n", &test_bss);
-     DEBUG_F("linked at    :  0x%08x\n", TEXTADDR);
-
      /* ask the OF info if we're a chrp or pmac */
      /* we need to set _machine before calling finish_device_tree */
+     _machine = _MACH_Pmac;
      root = prom_finddevice("/");
      if (root != 0) {
 	  static char model[256];
@@ -281,13 +251,13 @@ check_color_text_ui(char *color)
 
 void print_message_file(char *filename)
 {
-     char *msg = NULL; 
+     char *msg; 
      char *p, *endp;
      char *defdev = boot.dev;
      int defpart = boot.part;
      char msgpath[1024];
      int opened = 0;
-     int result = 0;
+     int result;
      int n;
      struct boot_file_t file;
      struct boot_fspec_t msgfile;
@@ -319,19 +289,16 @@ void print_message_file(char *filename)
      msg = malloc(2001);
      if (!msg)
 	  goto done;
-     else
-	  memset(msg, 0, 2001);
+
+      memset(msg, 0, 2001);
 
      if (file.fs->read(&file, 2000, msg) <= 0)
 	  goto done;
-     else
-	  prom_printf("%s", msg);
-
+     prom_printf("%s", msg);
+     free(msg);
 done:
      if (opened)
 	  file.fs->close(&file);
-     if (msg)
-	  free(msg);
 }
 
 /* Currently, the config file must be at the root of the filesystem.
@@ -341,7 +308,7 @@ done:
 static int
 load_config_file(char *device, char* path, int partition)
 {
-     char *conf_file = NULL, *p;
+     char *conf_file, *p;
      struct boot_file_t file;
      int sz, opened = 0, result = 0;
      char conf_path[512];
@@ -596,12 +563,12 @@ void check_password(char *str)
 int get_params(struct boot_param_t* params)
 {
      int defpart;
-     char *defdevice = NULL;
+     char *defdevice;
      char *p, *q, *endp;
      int c, n;
      char *imagename = NULL, *label;
-     int timeout = -1;
-     int beg = 0, end;
+     int timeout;
+     int beg, end;
      int singlekey = 0;
      int restricted = 0;
      static char imagepath[1024];
@@ -1014,14 +981,6 @@ yaboot_text_ui(void)
 	        * use anything coming from the malloc pool.
 	        */
 	       birec = (struct bi_record *)_ALIGN(loadinfo.filesize+(1<<20)-1,(1<<20));
-
-	       /* We make sure it's mapped. We map only 64k for now, it's
-	        * plenty enough we don't claim since this precise memory
-	        * range may already be claimed by the malloc pool.
-	        */
-	       prom_map (birec, birec, 0x10000);
-	       DEBUG_F("birec at %p\n", birec);
-	       DEBUG_SLEEP;
 
 	       birec->tag = BI_FIRST;
 	       birec->size = sizeof(struct bi_record);

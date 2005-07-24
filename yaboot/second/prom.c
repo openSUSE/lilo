@@ -331,11 +331,13 @@ prom_read (prom_handle file, void *buf, int n)
      return result;
 }
 
+#if 0
 int
 prom_write (prom_handle file, void *buf, int n)
 {
      return (int)call_prom ("write", 3, 1, file, buf, n);
 }
+#endif
 
 int
 prom_seek (prom_handle file, int pos)
@@ -453,7 +455,7 @@ prom_puts (prom_handle file, char *s)
      }
 }
  
-void
+static void
 prom_vfprintf (prom_handle file, char *fmt, va_list ap)
 {
      static char printf_buf[2048];
@@ -469,6 +471,7 @@ prom_vprintf (char *fmt, va_list ap)
      prom_puts (prom_stdout, printf_buf);
 }
 
+#if 0
 void
 prom_fprintf (prom_handle file, char *fmt, ...)
 {
@@ -477,6 +480,7 @@ prom_fprintf (prom_handle file, char *fmt, ...)
      prom_vfprintf (file, fmt, ap);
      va_end (ap);
 }
+#endif
 
 void
 prom_printf (char *fmt, ...)
@@ -518,6 +522,7 @@ prom_perror (int error, char *filename)
 	  prom_printf("%s: Unknown error\n", filename);
 }
 
+#if 0
 void
 prom_readline (char *prompt, char *buf, int len)
 {
@@ -552,6 +557,7 @@ prom_readline (char *prompt, char *buf, int len)
      prom_putchar ('\n');
      buf[i] = 0;
 }
+#endif
 
 #ifdef CONFIG_SET_COLORMAP
 int prom_set_color(prom_handle device, int color, int r, int g, int b)
@@ -615,6 +621,7 @@ prom_release(void *virt, unsigned int size)
 #endif /* bullshit */
 }
 
+#if 0
 void
 prom_map (void *phys, void *virt, int size)
 {
@@ -645,6 +652,7 @@ prom_getargs ()
      args[l] = '\0';
      return args;
 }
+#endif
 
 void
 prom_setargs (char *args)

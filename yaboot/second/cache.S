@@ -62,6 +62,7 @@ flush_icache_range:
 	isync
 	blr
 
+#if 0
 	.text
 	.globl	turn_off_mmu
 	.type	turn_off_mmu,@function
@@ -77,3 +78,4 @@ turn_off_mmu:
 	rfi
 1:
 	blr
+#endif

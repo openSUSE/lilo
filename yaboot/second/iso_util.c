@@ -1,3 +1,4 @@
+#if 0
 /*
  *  linux/fs/isofs/util.c
  *
@@ -90,3 +91,4 @@ isonum_733 (char * p)
  * c-basic-offset: 8
  * End:
  */
+#endif

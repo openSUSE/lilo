@@ -33,9 +33,9 @@
 
 #define SECTOR_BITS 9
 
-int xfs_mount (void);
-int xfs_read_data (char *buf, int len);
-int xfs_dir (char *dirname);
+static int xfs_mount (void);
+static int xfs_read_data (char *buf, int len);
+static int xfs_dir (char *dirname);
 
 /* Exported in struct fs_t */
 static int xfs_open(struct boot_file_t *file, const char *dev_name,
@@ -52,10 +52,10 @@ struct fs_t xfs_filesystem = {
 	close:xfs_close
 };
 
-struct boot_file_t *xfs_file;
+static struct boot_file_t *xfs_file;
 static char FSYS_BUF[32768];
-uint64_t partition_offset;
-int errnum;
+static uint64_t partition_offset;
+static int errnum;
 
 static int
 xfs_open(struct boot_file_t *file, const char *dev_name,
@@ -605,7 +605,7 @@ first_dentry (xfs_ino_t *ino)
 	return next_dentry (ino);
 }
 
-int
+static int
 xfs_mount (void)
 {
 	xfs_sb_t super;
@@ -642,7 +642,7 @@ xfs_mount (void)
 	return 1;
 }
 
-int
+static int
 xfs_read_data (char *buf, int len)
 {
 	xad_t *xad;
@@ -690,7 +690,7 @@ xfs_read_data (char *buf, int len)
 	return xfs_file->pos - startpos;
 }
 
-int
+static int
 xfs_dir (char *dirname)
 {
 	xfs_ino_t ino, parent_ino, new_ino;

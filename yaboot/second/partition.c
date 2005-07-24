@@ -286,7 +286,7 @@ get_part_type(char *device, int partition)
      found = NULL;
 
      if (!parts)
-	  return '\0';
+	  return NULL;
 
      for (p = parts; p && !found; p=p->next) {
 	  DEBUG_F("number: %02d, start: 0x%08lx, length: 0x%08lx, type: %s, name: %s\n",
