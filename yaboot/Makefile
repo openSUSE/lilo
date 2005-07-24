@@ -1,5 +1,9 @@
 ## Setup
 
+export LANG=C
+export LC_ALL=C
+export LC_COLLATE=POSIX
+
 include Config
 
 VERSION = 1.3.13
@@ -74,7 +78,7 @@ UCFLAGS = -Os $(CFLAGS) -Wall -I/usr/include
 # For compiling build-tools that run on the host.
 #
 HOSTCC = gcc
-HOSTCFLAGS = -O2 $(CFLAGS) -Wall -I/usr/include
+HOSTCFLAGS = -O1 -g $(CFLAGS) -Wall -W
 
 ## End of configuration section
 

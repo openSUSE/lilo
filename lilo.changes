@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jul 24 21:54:39 CEST 2005 - olh@suse.de
+
+- reset LANG in yaboot Makefile, build hosttools with -O1 -g
+
+-------------------------------------------------------------------
 Sun Jul 24 21:48:17 CEST 2005 - olh@suse.de
 
 - print /chosen/boot-device in yaboot welcome message (for debugging)
