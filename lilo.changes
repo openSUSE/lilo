@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Jul 24 22:06:44 CEST 2005 - olh@suse.de
+
+- add new parse_device_path function to yaboot
+  add new util/split_of_path to test the new function
+
+-------------------------------------------------------------------
 Sun Jul 24 21:54:39 CEST 2005 - olh@suse.de
 
 - reset LANG in yaboot Makefile, build hosttools with -O1 -g
