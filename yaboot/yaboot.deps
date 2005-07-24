@@ -170,6 +170,7 @@ second/partition.o: \
 	include/ctype.h \
 	include/types.h \
 	include/stdlib.h \
+	include/amiga-part.h \
 	include/mac-part.h \
 	include/fdisk-part.h \
 	include/partition.h \

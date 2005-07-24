@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jul 24 12:01:50 CEST 2005 - olh@suse.de
+
+- add support for amiga partition tables to yaboot  (Sven Luther)
+
+-------------------------------------------------------------------
 Sun Jul 24 11:40:45 CEST 2005 - olh@suse.de
 
 - rename log2 in yaboot reiserfs code
