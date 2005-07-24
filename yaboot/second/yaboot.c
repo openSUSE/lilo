@@ -1362,6 +1362,7 @@ yaboot_main(void)
      useconf = load_config_file(boot.dev, boot.file, boot.part);
 
      prom_printf("Welcome to yaboot version " VERSION "\n");
+     prom_printf("booted from '%s'\n", bootdevice);
      prom_printf("Enter \"help\" to get some basic usage information\n");
 
      /* brain damage. censored. */

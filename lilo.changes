@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jul 24 21:48:17 CEST 2005 - olh@suse.de
+
+- print /chosen/boot-device in yaboot welcome message (for debugging)
+
+-------------------------------------------------------------------
 Sun Jul 24 21:32:12 CEST 2005 - olh@suse.de
 
 - remove birec code from yaboot, was only needed for sysmap
