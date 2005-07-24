@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jul 24 11:40:45 CEST 2005 - olh@suse.de
+
+- rename log2 in yaboot reiserfs code
+
+-------------------------------------------------------------------
 Sun Jul 24 11:36:44 CEST 2005 - olh@suse.de
 
 - disable dead code in yaboot, remove unneeded global initializers
