@@ -94,7 +94,7 @@ CONFIG cf_image[] =
      {cft_flag, "pause-after", NULL},
      {cft_strg, "pause-message", NULL},
      {cft_flag, "novideo", NULL},
-     {cft_strg, "sysmap", NULL},
+     {cft_strg, "sysmap", NULL}, /* ignored */
      {cft_end, NULL, NULL}};
 
 static char flag_set;
