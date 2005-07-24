@@ -237,29 +237,24 @@ static struct fs_t fs_default =
 
 int open_file(const struct boot_fspec_t* spec, struct boot_file_t* file)
 {
-     int result;
-	
      memset(file, 0, sizeof(struct boot_file_t*));
      file->fs        = &fs_default;
 
      DEBUG_F("dev_path = %s\nfile_name = %s\npartition = %d\n",
 	     spec->dev, spec->file, spec->part);
 
-     result = prom_get_devtype(spec->dev);
-     if (result > 0)
-	  file->device_kind = result;
-     else
-	  return result;
-	
-     switch(file->device_kind) {
-     case FILE_DEVICE_BLOCK:
+     file->dev_type = prom_get_devtype(spec->dev);
+
+     switch(file->dev_type) {
+     case TYPE_BLOCK:
 	  DEBUG_F("device is a block device\n");
 	  return file_block_open(file, spec->dev, spec->file, spec->part);
-     case FILE_DEVICE_NET:
+     case TYPE_NET:
 	  DEBUG_F("device is a network device\n");
 	  return file_net_open(file, spec->dev, spec->file);
+     default:
+	  return FILE_ERR_BADDEV;
      }
-     return 0;
 }
 
 /* 

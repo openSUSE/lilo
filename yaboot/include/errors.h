@@ -19,6 +19,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+#ifndef ERRORS_H
+#define ERRORS_H
 
 /* Simple error codes */
 #define FILE_ERR_OK             0
@@ -36,5 +38,10 @@
 #define FILE_ERR_BADDEV         -12
 
 /* Device kind */
-#define FILE_DEVICE_BLOCK       1
-#define FILE_DEVICE_NET         2
+enum device_type {
+	TYPE_UNKNOWN,
+	TYPE_INVALID,
+	TYPE_BLOCK,
+	TYPE_NET
+};
+#endif /* ERRORS_H */

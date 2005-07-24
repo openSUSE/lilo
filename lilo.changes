@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Jul 24 12:45:31 CEST 2005 - olh@suse.de
+
+- change return type of prom_get_devtype to enum in yaboot
+
+-------------------------------------------------------------------
 Sun Jul 24 12:11:46 CEST 2005 - olh@suse.de
 
 - handle RAID partitions on x86 partition tables in yaboot

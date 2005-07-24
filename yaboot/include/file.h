@@ -30,6 +30,7 @@
 #include "types.h"
 #include "stddef.h"
 #include "prom.h"
+#include "errors.h"
 
 struct boot_file_t;
 #include "fs.h"
@@ -51,7 +52,7 @@ struct boot_file_t {
 	 * better malloc'ator)
 	 */
 
-	int		device_kind;
+	enum device_type dev_type;
 	ihandle		of_device;
 	ino_t		inode;
 	__u64           pos;

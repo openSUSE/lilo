@@ -394,7 +394,7 @@ get_part_type(char *device, int partition)
      struct partition_t*	found;
      char *type = NULL;
 
-     if (prom_get_devtype(device) != FILE_DEVICE_BLOCK)
+     if (prom_get_devtype(device) != TYPE_BLOCK)
 	  return NULL;
 
      parts = partitions_lookup(device);
