@@ -768,7 +768,6 @@ yaboot_text_ui(void)
      void		*initrd_base;
      unsigned long	initrd_size;
      kernel_entry_t      kernel_entry;
-     struct bi_record*	birec;
      char*               loc=NULL;
      loadinfo_t          loadinfo;
      void                *initrd_more,*initrd_want;
@@ -907,35 +906,6 @@ yaboot_text_ui(void)
 	  DEBUG_F("flushing icache...");
 	  flush_icache_range ((long)loadinfo.base, (long)loadinfo.base+loadinfo.memsize);
 	  DEBUG_F(" done\n");
-
-	  if (flat_vmlinux) {
-	       /* 
-	        * Fill new boot infos (only if booting a vmlinux).
-	        *
-	        * The birec is low on memory, probably inside the malloc pool,
-	        * so we don't write it earlier. At this point, we should not
-	        * use anything coming from the malloc pool.
-	        */
-	       birec = (struct bi_record *)_ALIGN(loadinfo.filesize+(1<<20)-1,(1<<20));
-
-	       birec->tag = BI_FIRST;
-	       birec->size = sizeof(struct bi_record);
-	       birec = (struct bi_record *)((ulong)birec + birec->size);
-	
-	       birec->tag = BI_BOOTLOADER_ID;
-	       sprintf( (char *)birec->data, "yaboot");
-	       birec->size = sizeof(struct bi_record) + strlen("yaboot") + 1;
-	       birec = (struct bi_record *)((ulong)birec + birec->size);
-	
-	       birec->tag = BI_MACHTYPE;
-	       birec->data[0] = _machine;
-	       birec->size = sizeof(struct bi_record) + sizeof(ulong);
-	       birec = (struct bi_record *)((ulong)birec + birec->size);
-
-	       birec->tag = BI_LAST;
-	       birec->size = sizeof(struct bi_record);
-	       birec = (struct bi_record *)((ulong)birec + birec->size);
-          }
 
           /* compute the kernel's entry point. */
 	  kernel_entry = loadinfo.base + loadinfo.entry - loadinfo.load_loc;

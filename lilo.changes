@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Jul 24 21:32:12 CEST 2005 - olh@suse.de
+
+- remove birec code from yaboot, was only needed for sysmap
+  xmon uses kallsyms now
+
+-------------------------------------------------------------------
 Sun Jul 24 21:28:39 CEST 2005 - olh@suse.de
 
 - remove sysmap code from yaboot
