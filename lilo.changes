@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Aug  4 01:27:28 CEST 2005 - jplack@suse.de
+
+- added code to handle parted´s incompatible switch to SI units
+  in version 1.6.23 or later (#100411)
+
+-------------------------------------------------------------------
 Fri Jul 15 13:19:52 CEST 2005 - jplack@suse.de
 
 - split out iseries and chrp code for easier maintainance

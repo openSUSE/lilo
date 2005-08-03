@@ -324,8 +324,18 @@ function running_on_chrp () {
     #	  4       6000.000  70006.000  extended              lba, type=0f
     #	   ....
     #
+    # starting parted-1.6.23 the numbers got messed up by using
+    # MioByte instead of megabyte and kB of 1000 bytes in size instead
+    # of 1024. Hurray! SI units make so much sense here :-(
+    # Ok, so we switch to calculate internally with 512 Byte units
+
     local -a p_start p_end p_type p_flags
 
+    if (( PVERSION > 1006022 )) then
+	PARTEDPRINT="$PARTED $device unit s print"
+    else
+	PARTEDPRINT="$PARTED $device print"
+    fi
     while read; do
 	local minor start end type fs_n_flags
 
@@ -335,9 +345,8 @@ function running_on_chrp () {
 	case $minor in
 	    1|2|3|4)
 		i=${start/.}
-		p_start[$minor]=${i##*(0)}
-		i=${end/.}
-		p_end[$minor]=${i##*(0)}
+		p_start[$minor]=$(parted2sect $start)
+		p_end[$minor]=$(parted2sect $end)
 		p_type[$minor]=${type}
 		p_flags[$minor]=${fs_n_flags}
 		;;
@@ -345,13 +354,13 @@ function running_on_chrp () {
 		[ "$start" = geometry ] || continue
 		REPLY=${REPLY#Disk geometry*-}
 		REPLY=${REPLY% megabytes*}
-		p_start[5]=${REPLY/.}
+		p_start[5]=$(parted2sect $REPLY)
 		;;
 	    *)
 	        error "unparsable line on parted output: $REPLY"
 		;;
 	esac
-    done < <( $PARTED $device print )
+    done < <( $PARTEDPRINT )
 
     # make it error friendly (tm) and try to unmount boot partition
     [[ "$(</proc/mounts)" == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
@@ -390,7 +399,7 @@ function running_on_chrp () {
 	# to one FAT partition
 
 	# check size of partition OPTION_BOOT, must fit at least the default kernel
-	local -i bootsize=$(( (p_end[partition]-p_start[partition])*2 ))	# size in blocks
+	local -i bootsize=$(( p_end[partition]-p_start[partition] ))	# size in blocks
 	
 	# check if default image/initrd fits, add overhead of 180 blocks approx.
 	local -i defaultsize=$(( 180 + $(fsize /lib/lilo/chrp/yaboot.fat) + $(fsize $TEMP/yaboot.conf) ));
@@ -403,12 +412,12 @@ function running_on_chrp () {
 
 	if (( bootsize < defaultsize )); then
 	    # may be resize of the partition is possible and helps?
-	    if (( (p_start[partition+1]-p_start[partition])*2  < defaultsize )); then
+	    if (( (p_start[partition+1]-p_start[partition])  < defaultsize )); then
 		error "Boot partition '$OPTION_BOOT' cannot hold $defaultsize blocks"
 	    fi
 	    warning "Extending boot partition $OPTION_BOOT, using free disk space"
-	    local start=$(div1000 ${p_start[$partition]})
-	    local end=$(div1000 $((${p_start[$((partition+1))]}-1)) )
+	    local start=$(sect2parted ${p_start[$partition]})
+	    local end=$(sect2parted $((${p_start[$((partition+1))]}-1)) )
 	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
 		$PARTED $device set $partition type 6; ) >& $TEMP/parted.log
 	      then
@@ -500,8 +509,8 @@ function running_on_chrp () {
 	# shrink PReP boot partition if bigger than 4MB
 	if (( (p_end[partition]-p_start[partition]) > 4000 )); then
 	    warning "Shrinking PReP boot partition $OPTION_BOOT, avoiding firmware confusion"
-	    local start=$(div1000 ${p_start[$partition]})
-	    local end=$(div1000 $(( p_start[partition] + $(fsize /lib/lilo/chrp/yaboot.chrp) )) ) 
+	    local start=$(sect2parted ${p_start[$partition]})
+	    local end=$(sect2parted $(( p_start[partition] + $(fsize /lib/lilo/chrp/yaboot.chrp) )) ) 
 	    dd if=/dev/zero of=$OPTION_BOOT bs=4096 count=1
 	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
 		$PARTED $device set $partition type 0x41; ) >& $TEMP/parted.log

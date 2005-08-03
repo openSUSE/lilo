@@ -43,6 +43,10 @@ shopt -s extglob
 
 FDISK=/sbin/fdisk
 PARTED="/usr/sbin/parted -s"
+PVERSION=$($PARTED --version)		# e.g 'GNU Parted 1.6.22'
+PVERSION=${PVERSION#GNU Parted}
+read a b c  <<< "${PVERSION//./ }"
+PVERSION=$(( a*1000000 + b*1000 + c ))	# e.g. 1006022
 STAT_CMD=/usr/bin/stat
 
 # check for requirements:
@@ -204,13 +208,39 @@ function is_on_primary() {
     return 0
 }
 
+# convert a number of 512 byte sectors in a format that parted accepts and the
+# other way `round
+if (( PVERSION > 1006022 )); then
 
-function div1000() {
-    local s=$1
-    while (( ${#s} < 4 )); do s="0$s"; done
-    echo ${s%???}.${s:$[${#s}-3]}
-}
+    function sect2parted() {
+	local s=$1
+	echo ${s}s
+    }
+    function parted2sect() {
+	local s=$1
+	if [ ${s:0-1} == "s" ]; then
+	    echo  ${s/%s}
+	else
+	    echo 0
+	fi
+    }
 
+else
+
+    function sect2parted() {
+	local s=$1
+	s=$(( (s + 1) * 1000 / 2 / 1024 ))
+	while (( ${#s} < 4 )); do s="0$s"; done
+	echo ${s%???}.${s:$[${#s}-3]}
+    }
+    function parted2sect() {
+	local s=$1
+	s=${s/.}
+	s=${s##*(0)}
+	echo $(( s * 1024 * 2 / 1000 ))
+    }
+
+fi
 
 function real_device () {
     # print the real device i.e. map partitions to disks
