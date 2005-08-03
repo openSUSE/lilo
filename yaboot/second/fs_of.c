@@ -63,20 +63,20 @@ static int of_net_seek(struct boot_file_t* file, unsigned int newpos);
 
 struct fs_t of_filesystem =
 {
-     "built-in",
-     of_open,
-     of_read,
-     of_seek,
-     of_close
+	.name = "built-in",
+	.open = of_open,
+	.read = of_read,
+	.seek = of_seek,
+	.close = of_close
 };
 
 struct fs_t of_net_filesystem =
 {
-     "built-in network",
-     of_net_open,
-     of_net_read,
-     of_net_seek,
-     of_close
+	.name = "built-in network",
+	.open = of_net_open,
+	.read = of_net_read,
+	.seek = of_net_seek,
+	.close = of_close
 };
 
 static int

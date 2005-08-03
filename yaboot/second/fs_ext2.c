@@ -57,11 +57,11 @@ static int ext2_close(	struct boot_file_t*	file);
 
 struct fs_t ext2_filesystem =
 {
-     "ext2",
-     ext2_open,
-     ext2_read,
-     ext2_seek,
-     ext2_close
+	.name = "ext2",
+	.open = ext2_open,
+	.read = ext2_read,
+	.seek = ext2_seek,
+	.close = ext2_close
 };
 
 /* IO manager structure for the ext2 library */

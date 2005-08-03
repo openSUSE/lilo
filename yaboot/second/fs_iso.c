@@ -41,11 +41,11 @@ static int iso_close(	struct boot_file_t*	file);
 
 struct fs_t iso_filesystem =
 {
-     "iso9660",
-     iso_open,
-     iso_read,
-     iso_seek,
-     iso_close
+	.name = "iso9660",
+	.open = iso_open,
+	.read = iso_read,
+	.seek = iso_seek,
+	.close = iso_close
 };
 
 static int

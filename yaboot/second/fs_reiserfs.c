@@ -41,11 +41,11 @@ static int reiserfs_seek( struct boot_file_t *file, unsigned int newpos );
 static int reiserfs_close( struct boot_file_t *file );
 
 struct fs_t reiserfs_filesystem = {
-     name:"reiserfs",
-     open:reiserfs_open,
-     read:reiserfs_read,
-     seek:reiserfs_seek,
-     close:reiserfs_close
+     .name = "reiserfs",
+     .open = reiserfs_open,
+     .read = reiserfs_read,
+     .seek = reiserfs_seek,
+     .close = reiserfs_close
 };
 
 static int reiserfs_read_super( void );

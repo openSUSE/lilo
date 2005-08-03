@@ -45,11 +45,11 @@ static int xfs_seek(struct boot_file_t *file, unsigned int newpos);
 static int xfs_close(struct boot_file_t *file);
 
 struct fs_t xfs_filesystem = {
-	name:"xfs",
-	open:xfs_open,
-	read:xfs_read,
-	seek:xfs_seek,
-	close:xfs_close
+	.name = "xfs",
+	.open = xfs_open,
+	.read = xfs_read,
+	.seek = xfs_seek,
+	.close = xfs_close
 };
 
 static struct boot_file_t *xfs_file;

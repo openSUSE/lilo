@@ -227,11 +227,10 @@ default_close(	struct boot_file_t*	file)
 
 static struct fs_t fs_default =
 {
-     "defaults",
-     NULL,
-     default_read,
-     default_seek,
-     default_close
+	.name = "defaults",
+	.read = default_read,
+	.seek = default_seek,
+	.close = default_close
 };
 
 
