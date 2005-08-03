@@ -46,6 +46,7 @@ extern prom_entry prom;
 
 extern prom_handle prom_stdin;
 extern prom_handle prom_stdout;
+extern int stdout_is_screen;
 
 prom_handle prom_open (char *spec);
 int prom_read (prom_handle file, void *buf, int len);

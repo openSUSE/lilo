@@ -40,6 +40,7 @@
 prom_entry prom;
 
 ihandle prom_stdin, prom_stdout;
+int stdout_is_screen;
 
 //extern int vsprintf(char *buf, const char *fmt, va_list args);
 
@@ -426,11 +427,22 @@ prom_nbgetchar()
      return (int) call_prom("read", 3, 1, prom_stdin, &ch, 1) > 0? ch: -1;
 }
 
+static const char newline[] = "\r\n";
+static const char newline_indent[] = "\r\n\t";
+
+static void prom_putnewline(prom_handle file)
+{
+	if (stdout_is_screen)
+		call_prom ("write", 3, 1, file, newline_indent, sizeof(newline_indent));
+	else
+		call_prom ("write", 3, 1, file, newline, sizeof(newline));
+}
+
 void
 prom_putchar (char c)
 {
      if (c == '\n')
-	  call_prom ("write", 3, 1, prom_stdout, "\r\n", 2);
+	  prom_putnewline(prom_stdout);
      else
 	  call_prom ("write", 3, 1, prom_stdout, &c, 1);
 }
@@ -449,7 +461,7 @@ prom_puts (prom_handle file, char *s)
 	  if (*q != 0) 
 	  {
 	       ++q;
-	       call_prom ("write", 3, 1, file, "\r\n", 2);
+	       prom_putnewline(file);
 	  }
      }
 }

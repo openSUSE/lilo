@@ -1316,8 +1316,11 @@ setup_display(void)
 int
 yaboot_main(void)
 {
-     if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0)
+     int i;
+     if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
+	  stdout_is_screen = 1;
 	  setup_display();
+     }
 	
      prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
      DEBUG_F("/chosen/bootpath = %s\n", bootdevice);
@@ -1360,6 +1363,10 @@ yaboot_main(void)
 	     boot.dev, boot.part, boot.file);
 
      useconf = load_config_file(boot.dev, boot.file, boot.part);
+
+     if (stdout_is_screen)
+	     for(i = 0; i < 10 ; i++)
+		     prom_printf("\n");
 
      prom_printf("Welcome to yaboot version " VERSION "\n");
      prom_printf("booted from '%s'\n", bootdevice);

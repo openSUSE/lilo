@@ -228,7 +228,17 @@ function running_on_pmac_new () {
 	    fi
 	    # 1 is the timeout
 	    echo "\" \"(0C)\" fb8-write drop"
-	    echo "\"   press space to boot $SPACE_BAR_HINT ... \" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(0d 0a)\" fb8-write drop"
+	    echo "\" \"(09)  press space to boot $SPACE_BAR_HINT ... \" fb8-write drop"
 	    echo "get-msecs d# 3 3E8 * +"
 	    echo "begin"
 	    echo "  key? if"
