@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug  4 02:48:10 CEST 2005 - jplack@suse.de
+
+- merged Makefile changes from SLES9 branch
+
+-------------------------------------------------------------------
 Thu Aug  4 02:13:42 CEST 2005 - jplack@suse.de
 
 - merged fixes from SLES9 branch
