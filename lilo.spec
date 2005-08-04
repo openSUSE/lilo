@@ -60,6 +60,7 @@ export NO_BRP_STRIP_DEBUG=true
 #
 rm -rfv $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/pmac
+mkdir -p $RPM_BUILD_ROOT/lib/lilo/chrp
 mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/bin
