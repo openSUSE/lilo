@@ -366,7 +366,7 @@ while [ "$1" ]; do case "$1" in
 	Usage;
         exit 1
 	;;
-esac; done
+esac; shift; done
 
 function firmware_status () {
     source /lib/lilo/lilo-chrp.lib

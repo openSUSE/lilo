@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Aug  4 13:48:16 CEST 2005 - jplack@suse.de
+
+- use FAT boot for xfs file systems as yaboot xfs driver seems to
+  have some problems with it natively (#100704)
+
+-------------------------------------------------------------------
 Thu Aug  4 02:48:10 CEST 2005 - jplack@suse.de
 
 - merged Makefile changes from SLES9 branch

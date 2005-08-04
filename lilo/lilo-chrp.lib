@@ -173,7 +173,7 @@ function running_on_chrp () {
 	force_fat=1
     fi
     if ! is_on_primary "$yaboot_part" ||
-	[[ ${fsys[ $(device_of_file /etc/yaboot.conf)]} != @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+	[[ ${fsys[ $(device_of_file /etc/yaboot.conf)]} != @(ext2|ext3|msdos|vfat|reiserfs|iso9660) ]]; then
 	force_fat=1
     fi
     if (( force_fat == 1 )); then
@@ -230,7 +230,7 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660) ]]; then
 		    # is the boot image file on the same device/partition
 		    # from where yaboot.conf has been loaded?
 		    if [ "$yaboot_part" -a "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
@@ -264,7 +264,7 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660) ]]; then
 		    # is the boot initrd file on the same device/partition
 		    # from where yaboot.conf has been loaded?
 		    if [ "$yaboot_part" -a "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
