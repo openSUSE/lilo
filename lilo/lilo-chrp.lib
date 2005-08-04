@@ -331,7 +331,7 @@ function running_on_chrp () {
 
     local -a p_start p_end p_type p_flags
 
-    if (( PVERSION > 1006022 )) then
+    if (( PVERSION > 1006022 )); then
 	PARTEDPRINT="$PARTED $device unit s print"
     else
 	PARTEDPRINT="$PARTED $device print"
