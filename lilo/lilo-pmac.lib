@@ -321,12 +321,12 @@ function running_on_pmac_new () {
 
 #
 # Local variables:
-#     mode: ksh
+#     mode: sh
 #     mode: font-lock
 #     mode: auto-fill
-#     ksh-indent: 4
-#     ksh-multiline-offset: 2
-#     ksh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#     sh-indent: 4
+#     sh-multiline-offset: 2
+#     sh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
 #     fill-column: 78
 # End:
 #

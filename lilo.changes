@@ -1,4 +1,24 @@
 -------------------------------------------------------------------
+Thu Aug  4 02:13:42 CEST 2005 - jplack@suse.de
+
+- merged fixes from SLES9 branch
+- added code to handle parted´s incompatible switch to SI units
+  in version 1.6.23 or later (#100411)
+- split out iseries and chrp code for easier maintainance
+- alternative firmware level calculation for Power5 or later
+- fix procfs detection for iSeries
+- fix boot problem while using force_fat option
+- fix a couple of typos/syntax error
+- better error messages for the firmware detection framework
+- added framework to detect and workaround or bail out for fatal
+  firmware bugs
+- fc_transport uses decimals not hex digits, support for more
+  than nine luns or scsi channels or hosts for FC disks (#87235 -
+  LTC16290)
+- Make sure that /proc and /sys is mounted while running lilo or
+  show_of_path.sh, not failing in rescue system (#85852).
+
+-------------------------------------------------------------------
 Wed Aug  3 15:16:29 CEST 2005 - olh@suse.de
 
 - use c99 initializers for struct fs_t usage in yaboot

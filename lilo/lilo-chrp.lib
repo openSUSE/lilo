@@ -1,0 +1,682 @@
+#
+#  library for CHRP routines
+
+unset firmware_status
+unset running_on_chrp
+unset running_on_prep
+
+FW_STATUS_FILE=/lib/lilo/chrp/firmware_status.chrp
+
+function firmware_status () {
+    # Always return ok if status file is missing
+    if ! [ -f "$FW_STATUS_FILE" ]; then
+        echo tested
+        return
+    fi
+    local mymodel="$(</proc/device-tree/model)"
+    if [ -f /proc/device-tree/ibm,vpd ]; then
+	dummy=$(tr '\0-\037' '[ *]'  < /proc/device-tree/ibm,vpd)
+	dummy=${dummy#*RM }
+	local myfwlvl=${dummy%% *}
+    else
+	local myfwlvl="$(</proc/device-tree/openprom/ibm,fw-vernum_encoded)"
+    fi
+
+    while read; do
+        REPLY=${REPLY%%#*}
+        REPLY=${REPLY%%+([ 	])}
+        REPLY=${REPLY##+([ 	])}
+        if [ -z "$REPLY" ]; then continue; fi
+        read model status fwlevel workaround <<< "$REPLY"
+	if [ "$model" == "$mymodel" ]; then
+	    # check whether firmware level is ok.
+	    local op="${fwlevel%%+([^<>=\!])}"
+	    [ "$op" ] || op="=="
+	    fwlevel="${fwlevel##+([<>=\!])}"
+	    if [[ "$op" != @(<=|>=|<|>|\!=|==) ]]; then
+	        echo badformat $mymodel $myfwlvl#
+		return
+	    fi
+	    if [[ "$op" == @(<=|>=) ]]; then
+	        if [ "$myfwlvl" == "$fwlevel" ]; then
+	            echo $status $mymodel $myfwlvl $workaround
+	            return
+	        fi
+		op=${op:0:1}
+	    fi
+	    if [ "$myfwlvl" $op "$fwlevel" ]; then
+	        echo $status $mymodel $myfwlvl $workaround
+	        return
+	    fi
+	fi
+    done < $FW_STATUS_FILE
+    echo unknown $mymodel $myfwlvl
+}
+
+
+function running_on_chrp () {
+    echo running on chrp
+
+
+    # TODO add support for booting over network:
+    # gooseberry:~ # nvsetenv boot-device
+    # boot-device=/pci@400000000110/pci@2,4/scsi@1/sd@a,0
+    # gooseberry:~ # nvsetenv boot-device `cat /sys/class/net/eth1/device/devspec`
+    # gooseberry:~ # nvsetenv boot-device
+    # boot-device=/pci@400000000112/pci@2,2/ethernet@1
+    # OF cmd line like: 0> boot net:SERVERIP,,CLIENTIP,GW-IP ks=nfs:<server>:/<path>
+    # problem is that OF memory has to be released by yaboot upfront
+
+
+    # find all PReP boot and FAT partitions
+    local -a prep_part fat_part fat32_part
+
+    while read; do
+	local device start end blocks id system
+	[ "${REPLY:0:1}" = "/" ] || continue
+	REPLY="${REPLY/[*]}"  # remove all 'bootable' markers
+	read device start end blocks id system <<< "$REPLY"
+
+	case $id in
+	  41) # PReP boot partition
+	      prep_part=(${prep_part[*]} $device)
+	      ;;
+	  6)  # FAT16 partition
+	      fat_part=(${fat_part[*]} $device)
+	      ;;
+	  c) # FAT32 partition
+	      fat32_part=(${fat32_part[*]} $device)
+	      ;;
+	esac
+	# please note: an empty boot= will cause a full disk scan of
+	# the system
+    done < <( $FDISK -l $OPTION_DEVICE )
+
+    # check all mounted local file systems
+    local -a fsys
+    local device mount type opts
+
+    while read device mount type opts; do
+	if [ "${device:0:1}" = "/" ]; then
+	    local -i dn=$(device_nr $device)
+	    (( dn == 0 )) && continue;
+	    fsys[$dn]="$type";
+	    # echo  fsys[$device/$dn]="$type"
+	fi
+    done < /proc/mounts
+
+    # only the device is given and dd to the raw device is a bad idea
+    # Note: An empty boot= results in an empty OPTION_PARTITION which triggers
+    # the guessing magic
+    if [ -z "$OPTION_PARTITION" ] ; then
+	echo guessing the chrp boot device
+	case $[${#prep_part[*]} + ${#fat_part[*]}] in
+	    1)
+	       	OPTION_BOOT=$prep_part
+	       	[ "$OPTION_BOOT" ] || OPTION_BOOT=$fat_part
+	       	;;
+            0)
+		# special case: YaST2 does not give the option for FAT16 but
+		# only for FAT32 so allow that as a special case
+		
+		if [ ${#fat32_part[*]} == 1 ]; then
+		    OPTION_BOOT=$fat32_part
+		else
+	            err_var1=$OPTION_BOOT; error 9 1
+		fi
+	       	;;
+	    *)
+	       	error 10 2
+	       	;;
+ 	esac
+    else
+	# we have the device, but better safe than sorry
+	if [[ "${prep_part[*]} ${fat_part[*]} ${fat32_part[*]}" != *$OPTION_BOOT* ]]; then
+	    err_var1=$OPTION_BOOT; error 9 1
+	fi
+    fi
+    echo Boot target is ${OPTION_BOOT%%+([0-9])}
+
+    # check all CONFIG_IMAGE_FILEs whether they are on ext2/ext2/fat/reiserfs
+    # else they have to be copied to a fat partition
+    # You have to create a fat partiton if any has to be copied there
+    # fat partition must at least cover yaboot.fat,yaboot.cnf & default image
+    # if not give a fatal error
+    # else if it covers not all give a warning and advice how to fix that. 
+	
+    local -a vmlinux_copy initrd_copy
+    local -i vmlinux_nr=0 initrd_nr=0 force_fat=0
+    local -i vmlinux_default=0 initrd_default=0
+    local boot_path=$(get_of_path $OPTION_BOOT)
+    local boot_disk=${boot_path%%:+([0-9])}
+
+    if [ "$OPTION_FORCEFAT" = "yes" ]; then force_fat=1; fi
+
+    if [ -z "$boot_path" ]; then
+	error "Internal problem: Could not determine open firmware path to '$OPTION_BOOT'" 
+    fi
+
+    # on CHRP the boot partition has to be on a primary partition
+    if ! is_on_primary $boot_path; then
+	error "in config file, boot = $OPTION_BOOT is not a primary partition"
+    fi
+
+    # check whether yaboot.conf is on the same disk as yaboot
+    # (i.e. disk with the PReP partition), else set force_fat=1 also
+    # check for a valid and readable partition containing the config
+    # file.
+    echo -n >> /etc/yaboot.conf
+    dummy=$(get_of_path /etc/yaboot.conf)
+    local yaboot_part=${dummy%,/*yaboot.conf}
+
+    if [ "${boot_disk}" != "${yaboot_part%%:+([0-9])}" ]; then
+	force_fat=1
+    fi
+    if ! is_on_primary "$yaboot_part" ||
+	[[ ${fsys[ $(device_of_file /etc/yaboot.conf)]} != @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+	force_fat=1
+    fi
+    if (( force_fat == 1 )); then
+	yaboot_part=
+    fi
+
+    # starting the work and write the yaboot.conf
+    {
+	echo "# header section"
+	if [ "${yaboot_part##*:}" ]; then echo "partition = ${yaboot_part##*:}" ; fi
+	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
+	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
+	if [ "$OPTION_ROOT" ] && [[ "$OPTION_ROOT" == *=* ]]; then
+	    OPTION_APPEND="root=$OPTION_ROOT $OPTION_APPEND"
+	    unset OPTION_ROOT
+	fi
+	test -z "$OPTION_ROOT"  || echo "root = $OPTION_ROOT"
+	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
+	test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
+
+	echo "# image section"
+	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+	    if [ "${CONFIG_IMAGE_OTHER[$i]}" ]; then
+		warning "There is no chain loader support for yaboot yet" \ 
+			"Entry 'other = ${CONFIG_IMAGE_OTHER[$i]}' ignored"
+		continue
+	    fi
+
+	    # hack to create a zImage.initrd for pseries
+	    # ugly ugly ...
+	    #
+	    #  is no longer needed due to olh 9.3.2004
+	    # still needed, might be a bug in yaboot 26.3.2004
+	    if false && [ -n "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 ]; then
+		if ! bash /lib/lilo/chrp/chrp64/addRamdisk.sh $TEMP \
+		  ${CONFIG_IMAGE_FILE[$i]} \
+		  ${CONFIG_IMAGE_INITRD[$i]} \
+		  ${CONFIG_IMAGE_FILE[$i]}.initrd \
+		  > $TEMP/chrp_initrd_$i.log 2>&1 ; then
+		    cat $TEMP/chrp_initrd_$i.log
+		    exit 1
+		fi
+		
+		CONFIG_IMAGE_FILE[$i]=${CONFIG_IMAGE_FILE[$i]}.initrd
+		unset CONFIG_IMAGE_INITRD[$i]
+	    fi
+
+	    # check for existence of image file
+	    #
+	    if [ -f ${CONFIG_IMAGE_FILE[$i]} ]; then
+		local image="${CONFIG_IMAGE_FILE[$i]}"
+		local path_image=$(get_of_path $image)
+		local devnr_image=$(device_of_file $image) 
+		
+		# check whether the image file lies on a file system that is
+		# readable by yaboot
+		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		    # is the boot image file on the same device/partition
+		    # from where yaboot.conf has been loaded?
+		    if [ "$yaboot_part" -a "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
+			CONFIG_IMAGE_FILE[$i]="$image"
+		    else
+			CONFIG_IMAGE_FILE[$i]="${path_image}"
+		    fi
+		else
+		    # image file needs to be copied to the boot device which has to
+		    # be a FAT file system and be large enough to hold all data
+		    let vmlinux_nr++
+		    if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ]; then
+			vmlinux_default=$vmlinux_nr
+		    fi
+		    vmlinux_copy[$vmlinux_nr]="$image"
+		    CONFIG_IMAGE_FILE[$i]=$(printf "vmlinux.%03d\n" $vmlinux_nr)
+		fi
+	    else
+		warning "image ${CONFIG_IMAGE_FILE[$i]} in
+	    #${CONFIG_IMAGE_LABEL[$i]} is missing" \
+		     "Entry ignored"
+		continue
+	    fi
+
+	    # check for existence of initrd file if applicable
+	    #
+	    if [ "${CONFIG_IMAGE_INITRD[$i]}" -a -f "${CONFIG_IMAGE_INITRD[$i]}" ]; then
+		local image="${CONFIG_IMAGE_INITRD[$i]}"
+		local path_image=$(get_of_path $image)
+		local devnr_image=$(device_of_file $image) 
+		
+		# check whether the image file lies on a file system that is
+		# readable by yaboot
+		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]]; then
+		    # is the boot initrd file on the same device/partition
+		    # from where yaboot.conf has been loaded?
+		    if [ "$yaboot_part" -a "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
+			CONFIG_IMAGE_INITRD[$i]="$image"
+		    else
+			CONFIG_IMAGE_INITRD[$i]="${path_image}"
+		    fi
+		else
+		    # image file needs to be copied to the boot device which has to
+		    # be a FAT file system and be large enough to hold all data
+		    let initrd_nr++
+		    if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ]; then
+			initrd_default=$initrd_nr
+		    fi
+		    initrd_copy[$initrd_nr]="$image"
+		    CONFIG_IMAGE_INITRD[$i]=$(printf "initrd.%03d\n" $initrd_nr)
+		fi
+	    fi
+
+	    echo "image = ${CONFIG_IMAGE_FILE[$i]}"
+	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
+	    if [[ "${CONFIG_IMAGE_ROOT[$i]}" == *=* ]] && [[ "${CONFIG_IMAGE_ROOT[$i]}" != \"*=*\" ]]; then
+		# quote root line if it contains unquoted magic equal sign
+	        CONFIG_IMAGE_ROOT[$i]="\"${CONFIG_IMAGE_ROOT[$i]}\""
+	    fi
+	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
+	    test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
+	    test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || echo "    sysmap = ${CONFIG_IMAGE_SYSMAP[$i]}"
+	    test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${CONFIG_IMAGE_INITRD[$i]}"
+	done
+    } > $TEMP/yaboot.conf
+
+    #echo RESULT:
+    #cat 	$TEMP/yaboot.conf
+    #echo
+    #echo press return to continue
+    #read
+
+    local device=${OPTION_BOOT%%+([0-9])}	 # split boot option to
+    local -i partition=${OPTION_BOOT##+([^0-9])} # dev & part for parted
+
+    if (( partition == 0 )); then
+	error "please specify the boot partition NUMBER in boot= $OPTION_BOOT"
+    fi
+
+    # read specifications for primary partitions from boot device
+
+    # parse and output like the following
+    #
+    #	  parted /dev/sda print
+    #     Disk geometry for /dev/sda: 0.000-70006.835 megabytes
+    #	   ....
+    #	  Minor    Start       End     Type      Filesystem  Flags
+    #	  1          0.016     22.000  primary               type=41
+    #	  2         22.000   1048.000  primary   linux-swap  type=82
+    #	  3       1048.000   5146.000  primary   reiserfs    type=83
+    #	  4       6000.000  70006.000  extended              lba, type=0f
+    #	   ....
+    #
+    # starting parted-1.6.23 the numbers got messed up by using
+    # MioByte instead of megabyte and kB of 1000 bytes in size instead
+    # of 1024. Hurray! SI units make so much sense here :-(
+    # Ok, so we switch to calculate internally with 512 Byte units
+
+    local -a p_start p_end p_type p_flags
+
+    if (( PVERSION > 1006022 )) then
+	PARTEDPRINT="$PARTED $device unit s print"
+    else
+	PARTEDPRINT="$PARTED $device print"
+    fi
+    while read; do
+	local minor start end type fs_n_flags
+
+	[[ "${REPLY:0:1}" == [1234D] ]] || continue
+	read  minor start end type fs_n_flags <<< "$REPLY"
+	(( minor > 4 )) && continue
+	case $minor in
+	    1|2|3|4)
+		i=${start/.}
+		p_start[$minor]=$(parted2sect $start)
+		p_end[$minor]=$(parted2sect $end)
+		p_type[$minor]=${type}
+		p_flags[$minor]=${fs_n_flags}
+		;;
+	    Disk)
+		[ "$start" = geometry ] || continue
+		REPLY=${REPLY#Disk geometry*-}
+		REPLY=${REPLY% megabytes*}
+		p_start[5]=$(parted2sect $REPLY)
+		;;
+	    *)
+	        error "unparsable line on parted output: $REPLY"
+		;;
+	esac
+    done < <( $PARTEDPRINT )
+
+    # make it error friendly (tm) and try to unmount boot partition
+    [[ "$(</proc/mounts)" == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
+
+    if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
+	MKDOSFS="-s 1 -F 16"   # default values, minimum size of 2076kB
+	MINDOSFSSIZE=$[2*2076] # does prevent possible misdetection of
+	                       # file system as FAT12
+
+	# check CHRP machine against list of fully functional firmware
+	# implementations. There are various bugs out there which IBM
+	# consistently resists to fix.
+	read fw_status model fw_level fw_workaround <<< "$(firmware_status)"
+	case "$fw_status" in
+	    broken)
+	        error "Broken FAT driver in IBM firmware detected $model/$fw_level." 12 42
+		;;
+	    untested)
+	        error "Untested IBM machine/firmware $model/$fw_level." 12 42
+		;;
+	    unknown)
+	        error "Unknown IBM machine $model/$fw_level." 12 42
+		;;
+	    tested)
+	        # hurray a tested and working machine
+		;;
+	    *)
+	    	error "Corrupted firmware status table for $model/$fw_level"
+		;;
+	esac
+	if [ "$fw_workaround" ]; then
+	    eval $fw_workaround || error "Workaround for broken firmware did not work"
+	fi
+
+	# copy all kernels and initrds from non supported file systems
+	# to one FAT partition
+
+	# check size of partition OPTION_BOOT, must fit at least the default kernel
+	local -i bootsize=$(( p_end[partition]-p_start[partition] ))	# size in blocks
+	
+	# check if default image/initrd fits, add overhead of 180 blocks approx.
+	local -i defaultsize=$(( 180 + $(fsize /lib/lilo/chrp/yaboot.fat) + $(fsize $TEMP/yaboot.conf) ));
+	(( defaultsize += (vmlinux_default==0) ? 0 : $(fsize ${vmlinux_copy[$vmlinux_default]}) ));
+	(( defaultsize += (initrd_default==0) ? 0 : $(fsize ${initrd_copy[$initrd_default]}) ));
+
+	if (( defaultsize < MINDOSFSSIZE )); then
+	    defaultsize=$MINDOSFSSIZE;
+	fi
+
+	if (( bootsize < defaultsize )); then
+	    # may be resize of the partition is possible and helps?
+	    if (( (p_start[partition+1]-p_start[partition])  < defaultsize )); then
+		error "Boot partition '$OPTION_BOOT' cannot hold $defaultsize blocks"
+	    fi
+	    warning "Extending boot partition $OPTION_BOOT, using free disk space"
+	    local start=$(sect2parted ${p_start[$partition]})
+	    local end=$(sect2parted $((${p_start[$((partition+1))]}-1)) )
+	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
+		$PARTED $device set $partition type 6; ) >& $TEMP/parted.log
+	      then
+		  error "Partition extension failed for $OPTION_BOOT" 11
+	    fi
+	fi
+
+	# create the FAT partition and file system on $OPTION_BOOT
+	if [[ "${fat_part[*]} " != *$OPTION_BOOT\ * ]]; then
+	    # set type to be FAT16
+	    warning "Boot partition $OPTION_BOOT converted to FAT16 type"
+	    if ! $PARTED $device set $partition type 6 >& $TEMP/parted.log; then
+		error "Partition conversion failed for $OPTION_BOOT" 11
+	    fi
+	fi
+	mkfs.msdos $MKDOSFS $OPTION_BOOT || exit 2
+	cd $TEMP
+	mkdir -p boot || exit 2
+	mount $OPTION_BOOT boot || exit 2
+	cp -v /lib/lilo/chrp/yaboot.fat boot/yaboot || exit 2
+	cp -v $TEMP/yaboot.conf boot/yaboot.cnf || exit 2
+
+	# copy default image
+	if (( vmlinux_default != 0 )); then
+	    cp -v ${vmlinux_copy[$vmlinux_default]} \
+	      boot/vmlinux.$(printf "%03d" $vmlinux_default) || exit 2
+	    unset vmlinux_copy[$vmlinux_default]
+	fi
+	if (( initrd_default != 0 )); then
+	    cp -v ${initrd_copy[$initrd_default]} \
+	      boot/initrd.$(printf "%03d" $initrd_default) || exit 2
+	    unset initrd_copy[$initrd_default]
+	fi
+
+	# copy all images except the default ...
+	for (( i=1; i<=vmlinux_nr; i++ )); do
+	    local f="${vmlinux_copy[$i]}"
+	    if [ "$f" ]; then
+		cp -v $f boot/vmlinux.$(printf "%03d" $i) || exit 2
+	    fi
+	done
+	for (( i=1; i<=initrd_nr; i++ )); do
+	    local f="${initrd_copy[$i]}"
+	    if [ "$f" ]; then
+		cp -v $f boot/initrd.$(printf "%03d" $i) || exit 2
+	    fi
+	done
+
+	mkdir boot/ppc
+	# create a bootinfo object to make OF happy
+	{
+	    echo "<chrp-boot>"
+	    echo "    <description>SUSE SLES-9 (PPC)</description>"
+	    echo "    <os-name>SUSE SLES-9 (PPC)</os-name>"
+	    echo "    <boot-script>"
+	    echo "        boot &device;:$partition,yaboot"
+	    echo "    </boot-script>"
+	    echo "</chrp-boot>"
+	} > boot/ppc/bootinfo.txt
+	mkdir boot/ppc/chrp
+	umount boot
+    else
+	# check for PReP partition and convert $OPTION_BOOT if neseccary
+	if [[ "${prep_part[*]} " != *$OPTION_BOOT\ * ]]; then
+	    # set type to be PReP boot
+	    warning "Boot partition $OPTION_BOOT converted to PReP boot type"
+	    if ! $PARTED $device set $partition type 0x41 >& $TEMP/parted.log; then
+		error "Partition conversion failed for $OPTION_BOOT" 11
+	    fi
+	fi
+
+	# check whether $OPTION_BOOT is the first PReP partition on
+	# the boot disk else delete the others to please OF
+	if [[ "${prep_part[*]} " != $OPTION_BOOT\ * ]]; then
+	    # delete all PReP partitions before the boot partition
+	    for (( i=0; i<partition; i++ )); do
+		if [[ "${p_flags[$i]}" = *type=41* ]]; then
+		    warning "Delete ambiguous PReP boot  partition ${device}$i"
+		    if ! $PARTED $device rm $i >& $TEMP/parted.log; then
+			warning "Partition deletion failed for ${device}$i"
+			cat >&2 $TEMP/parted.log
+		    else
+			unset p_flags[$i]
+		    fi
+		fi
+	    done
+	fi
+
+	# shrink PReP boot partition if bigger than 4MB
+	if (( (p_end[partition]-p_start[partition]) > 4000 )); then
+	    warning "Shrinking PReP boot partition $OPTION_BOOT, avoiding firmware confusion"
+	    local start=$(sect2parted ${p_start[$partition]})
+	    local end=$(sect2parted $(( p_start[partition] + $(fsize /lib/lilo/chrp/yaboot.chrp) )) ) 
+	    dd if=/dev/zero of=$OPTION_BOOT bs=4096 count=1
+	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
+		$PARTED $device set $partition type 0x41; ) >& $TEMP/parted.log
+	    then
+		error "Partition shrink failed for $OPTION_BOOT" 11 42
+	    fi
+	fi
+
+	echo Installing /lib/lilo/chrp/yaboot.chrp onto $OPTION_BOOT
+	dd if=/lib/lilo/chrp/yaboot.chrp of=$OPTION_BOOT 2>/dev/null
+	cp $TEMP/yaboot.conf /etc/yaboot.conf || exit 2
+	echo "Converted /etc/lilo.conf to /etc/yaboot.conf"
+    fi
+
+    if [ "$OPTION_CLONE" ]; then
+	error "Cloning of boot partition not yet implemented"
+	# first check for valid block device
+
+	# check for sufficient size, same size is easy, but FAT partition must
+	# only hold content.
+
+	# generate appropriate partition including active boot flag
+
+	# copy stuff, dd for PReP and recursive file copy for FAT
+
+	# generate second OF path and prepend that to boot-device
+    fi
+
+    # TODO check whether this is neccessary
+    if [[ ${p_flags[$partition]} != *boot* ]]; then
+	$PARTED $device set $partition boot on >& $TEMP/parted.log || error 11
+    fi
+
+    if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
+        nvsetenv bootinfo-linux "${boot_path},\ppc\bootinfo.txt"
+        boot_path=${boot_path},yaboot
+    elif [[ "${p_flags[*]}" != *type=41*type=41* ]]; then
+        # open firmware is confused about more than one PReP partition, in that
+        # case keep full OF path
+        boot_path=${boot_path%:+([0-9])}
+    fi
+
+    if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+	echo "Prepending  '$boot_path'" to open firmware variable boot-device
+
+	local -a bootdevice=( $(nvsetenv boot-device) )
+	bootdevice[0]=${bootdevice[0]#boot-device=}
+	for (( i=${#bootdevice[*]}; i-- >0; )); do
+	    if [[ "${bootdevice[$i]}" == ${boot_path}* ]]; then
+		unset bootdevice[$i];
+	    fi
+	done
+	nvsetenv boot-device "$boot_path ${bootdevice[*]}"
+
+	if [ "$(nvsetenv boot-file)" != "boot-file=" ]; then
+	    warning "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
+	    nvsetenv boot-file >&2
+	    nvsetenv boot-file ""
+	fi
+    else
+	warning "boot path not set to boot linux as requested" \
+		"please add '$boot_path' somewhere to your boot path manually"
+    fi
+}
+
+
+function running_on_prep () {
+    echo running on PReP
+    #only the device is given and dd to the raw device is a bad idea
+    
+    if [ -z "$OPTION_PARTITION" ] ; then
+	echo guess the PReP boot device 
+	PART=`$FDISK -l $OPTION_DEVICE | fgrep "PPC PReP"`
+	if [ -z "$PART" ] ; then
+	    err_var1=$OPTION_BOOT; error 9 4
+	fi
+	if [ `echo "$PART" | wc -l` != 1 ] ; then
+	    err_var1="$OPTION_BOOT"
+	    error 10 5
+	fi
+	read P dummy <<< "$PART"
+    else
+	#we have the device, but better safe than sorry
+	echo Boot target is $OPTION_DEVICE
+	PART=`$FDISK -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
+	if [ -z "$PART" ] ; then
+	    err_var1=$OPTION_BOOT; error 9 4
+	fi
+
+	P=$OPTION_BOOT
+    fi
+    PREP_IMAGE=
+    PREP_CMDLINE=
+    PREP_INITRD=
+    if [ ! -z "$OPTION_DEFAULT" ] ; then
+	# find the default= line
+	for ((i=1; i<=CONFIG_IMAGE_COUNT; i++)); do
+	    if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[$i]}" ] ; then
+		PREP_IMAGE="${CONFIG_IMAGE_FILE[$i]}" 
+		if [ -n "$OPTION_APPEND" ] ; then
+		    PREP_CMDLINE=$OPTION_APPEND
+		fi
+		if [ -n "${CONFIG_IMAGE_APPEND[$i]}" ] ; then
+		    PREP_CMDLINE=${CONFIG_IMAGE_APPEND[$i]}
+		fi
+		if [ -n "$OPTION_ROOT" ] ; then
+		    PREP_CMDLINE="root=$OPTION_ROOT $PREP_CMDLINE"
+		fi
+		if [ -n "${CONFIG_IMAGE_ROOT[$i]}" ] ; then
+		    PREP_CMDLINE="root=${CONFIG_IMAGE_ROOT[$i]} $PREP_CMDLINE"
+		fi
+		if [ -n "$OPTION_INITRD" ] ; then
+		    PREP_INITRD=$OPTION_INITRD
+		fi
+		if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
+		    PREP_INITRD="${CONFIG_IMAGE_INITRD[$i]}"
+		fi
+	    fi
+	done
+    else
+	# pick the first image= line
+	PREP_IMAGE="${CONFIG_IMAGE_FILE[1]}"
+	if [ -n "$OPTION_APPEND" ] ; then
+	    PREP_CMDLINE=$OPTION_APPEND
+	fi
+	if [ -n "${CONFIG_IMAGE_APPEND[1]}" ] ; then
+	    PREP_CMDLINE=${CONFIG_IMAGE_APPEND[1]}
+	fi
+	if [ -n "$OPTION_ROOT" ] ; then
+	    PREP_CMDLINE="root=$OPTION_ROOT $PREP_CMDLINE"
+	fi
+	if [ -n "${CONFIG_IMAGE_ROOT[1]}" ] ; then
+	    PREP_CMDLINE="root=${CONFIG_IMAGE_ROOT[1]} $PREP_CMDLINE"
+	fi
+	if [ -n "$OPTION_INITRD" ] ; then
+	    PREP_INITRD=$OPTION_INITRD
+	fi
+	if [ -n "${CONFIG_IMAGE_INITRD[1]}" ] ; then
+	    PREP_INITRD="${CONFIG_IMAGE_INITRD[1]}"
+	fi
+    fi
+    if [ ! -z "$PREP_INITRD" ] ; then
+	PREP_INITRD="--initrd $PREP_INITRD"
+    fi
+    /lib/lilo/prep/make_zimage_prep.sh \
+    --vmlinux "$PREP_IMAGE" \
+    $PREP_INITRD \
+    --tmp "$TEMP" \
+    --output "$TEMP/zImage.prep"
+    /lib/lilo/chrp/mkzimage_cmdline \
+    	-a 1 \
+	-s "$PREP_CMDLINE" \
+	"$TEMP/zImage.prep"
+    echo "Installing $TEMP/zImage.prep onto $P"
+    dd if="$TEMP/zImage.prep" of=$P 2>/dev/null
+}
+
+#
+#
+# Local variables:
+#     mode: sh
+#     mode: font-lock
+#     mode: auto-fill
+#     sh-indent: 4
+#     sh-multiline-offset: 2
+#     sh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#     fill-column: 78
+# End:
+#
