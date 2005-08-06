@@ -1,0 +1,64 @@
+ $Id$
+
+	How to determine the OpenFirmware path to a file
+
+Every path to a file to load must look like this (3.2.1.1 Node names):
+
+	driver-name@unit-address:device-arguments
+
+The content of /chosen/bootpath must be parsed from left to right.
+Everything up to the very first colon is the path to a device. Everything
+after the colon is specific to this device.
+
+path names to files on network devices may look like this:
+	network:[server-ip,other options],filename,[client-ip],[other options]
+path names to files on block devices may look like this:
+	disk:number,/directory/filename
+
+
+The boot path must be split into pieces to allow relative references to
+files in yaboot.conf. Block device paths provide an optional partition
+number, an optional directory and the filename. Network device paths
+must be split into two parts. The part before the filename usually 
+contains the server-ip. The part after the filename is optional on pmac,
+but required on RS6K.
+The device part can be referenced as '&device;' in Forth scripts, this
+appears to work on pmac and RS6K. This shortcut can be used also in
+yaboot.conf to load files from different partitions on the same device.
+It is useful for installations on removeable media.
+
+
+Path names on a block device can contain either '/' or '\' as directory
+delimiter. Filesystems with OpenFirmware filesystem driver (iso9660, FAT,
+HFS, TFTP) use '\', built-in filesystems of yaboot use '/'. The '/' can
+also be used for OF filesystems in yaboot.conf, they are converted to '\'
+as needed.
+
+
+yaboot parses the /chosen/bootpath property on startup and splits it
+into a device part and filesystem part. This info is reused later to
+load a file specified in an image=, initrd= or message= option.
+The device= and partition= options will override the /chosen property.
+
+Recognized strings in a network device path (separated by comma):
+part before filename: 'bootp', 'speed=', 'duplex='
+part after filename: everything up to the end of the string.
+
+Recognized strings in a block device path:
+disk:[partition][,][/][directory][/]filename
+
+If a partition number is specified, the comma after it must also be
+specified.
+
+These pieces are put together again to load either yaboot.conf, yaboot.cnf
+or /etc/yaboot.conf from the location where yaboot was loaded from. 
+On network devices, only yaboot.conf is loaded. yaboot.cnf is useful on FAT.
+/etc/yaboot.conf is useful on RS6K if the drive were yaboot was loaded from
+contains a partition with a filesystem readable by yaboot.
+
+util/split_of_path.c contains a list of recognized path names. A path
+without colon is threaded as a device string if the path comes from
+/chosen/bootpath. It must be a filename if comes from yaboot.conf.
+Path names starting without '/' will be threaded releative to the path
+where yaboot was loaded from, even if they contain a '/'.
+

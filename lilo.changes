@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug  6 21:05:26 CEST 2005 - olh@suse.de
+
+- add README.searchpath to yaboot
+
+-------------------------------------------------------------------
 Thu Aug  4 13:48:16 CEST 2005 - jplack@suse.de
 
 - use FAT boot for xfs file systems as yaboot xfs driver seems to
