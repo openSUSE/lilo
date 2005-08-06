@@ -262,10 +262,10 @@ void print_message_file(char *filename)
      struct boot_file_t file;
      struct boot_fspec_t msgfile;
 
-     defdev = cfg_get_strg(0, "device");
+     defdev = cfg_get_strg(NULL, "device");
      if (!defdev)
 	  defdev = boot.dev;
-     p = cfg_get_strg(0, "partition");
+     p = cfg_get_strg(NULL, "partition");
 	  if (p) {
 	       n = simple_strtol(p, &endp, 10);
 	       if (endp != p && *endp == 0)
@@ -365,14 +365,14 @@ load_config_file(char *device, char* path, int partition)
      DEBUG_F("Config file successfully parsed, %d bytes\n", sz);
 
      /* Now, we do the initialisations stored in the config file */
-     p = cfg_get_strg(0, "init-code");
+     p = cfg_get_strg(NULL, "init-code");
      if (p)
 	  prom_interpret(p);
 
-     password = cfg_get_strg(0, "password");
+     password = cfg_get_strg(NULL, "password");
 	
 #ifdef CONFIG_COLOR_TEXT
-     p = cfg_get_strg(0, "fgcolor");
+     p = cfg_get_strg(NULL, "fgcolor");
      if (p) {
 	  DEBUG_F("fgcolor=%s\n", p);
 	  fgcolor = check_color_text_ui(p);
@@ -380,7 +380,7 @@ load_config_file(char *device, char* path, int partition)
 	       prom_printf("Invalid fgcolor: \"%s\".\n", p);
 	  }
      }
-     p = cfg_get_strg(0, "bgcolor");
+     p = cfg_get_strg(NULL, "bgcolor");
      if (p) {
 	  DEBUG_F("bgcolor=%s\n", p);
 	  bgcolor = check_color_text_ui(p);
@@ -402,11 +402,11 @@ load_config_file(char *device, char* path, int partition)
      }
 #endif /* CONFIG_COLOR_TEXT */
    
-     p = cfg_get_strg(0, "init-message");
+     p = cfg_get_strg(NULL, "init-message");
      if (p)
 	  prom_printf("%s\n", p);
 
-     p = cfg_get_strg(0, "message");
+     p = cfg_get_strg(NULL, "message");
      if (p)
 	  print_message_file(p);
 
@@ -584,7 +584,7 @@ int get_params(struct boot_param_t* params)
      cmdinit();
 
 	  timeout = DEFAULT_TIMEOUT;
-	  if (useconf && (q = cfg_get_strg(0, "timeout")) != 0 && *q != 0)
+	  if (useconf && (q = cfg_get_strg(NULL, "timeout")) != 0 && *q != 0)
 	       timeout = simple_strtol(q, NULL, 0);
 
      prom_printf("boot: ");
@@ -644,17 +644,17 @@ int get_params(struct boot_param_t* params)
      defdevice = boot.dev;
 
      if (useconf) {
-	  defdevice = cfg_get_strg(0, "device");
-	  p = cfg_get_strg(0, "partition");
+	  defdevice = cfg_get_strg(NULL, "device");
+	  p = cfg_get_strg(NULL, "partition");
 	  if (p) {
 	       n = simple_strtol(p, &endp, 10);
 	       if (endp != p && *endp == 0)
 		    defpart = n;
 	  }
-	  p = cfg_get_strg(0, "pause-message");
+	  p = cfg_get_strg(NULL, "pause-message");
 	  if (p)
 	       pause_message = p;
-	  if (cfg_get_flag(0, "restricted"))
+	  if (cfg_get_flag(NULL, "restricted"))
 	       restricted = 1;
 	  p = cfg_get_strg(imagename, "image");
 	  if (p && *p) {

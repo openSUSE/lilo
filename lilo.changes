@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug  6 21:09:31 CEST 2005 - olh@suse.de
+
+- fix NULL pointer confusion in cfg_get_strg/flag calls in yaboot
+
+-------------------------------------------------------------------
 Sat Aug  6 21:05:26 CEST 2005 - olh@suse.de
 
 - add README.searchpath to yaboot
