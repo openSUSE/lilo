@@ -12,7 +12,6 @@ static void parse_block_device(struct boot_fspec_t *result)
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
-	result->type = TYPE_BLOCK;
 	result->part = strtol(result->partition, &ip, 10);
 	if (result->part)
 		*ip++ = '\0';
@@ -42,7 +41,6 @@ static void parse_net_device(struct boot_fspec_t *result)
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
-	result->type = TYPE_NET;
 	p = result->partition;
 
 	if (strncmp("bootp", p, 5) == 0) {
@@ -91,7 +89,8 @@ int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 	result->partition = strchr(result->device, ':');
 	if (result->partition) {
 		*result->partition++ = '\0';
-		switch (prom_get_devtype(result->device)) {
+		result->type = prom_get_devtype(result->device);
+		switch (result->type) {
 		case TYPE_BLOCK:
 			parse_block_device(result);
 			break;
@@ -99,6 +98,7 @@ int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 			parse_net_device(result);
 			break;
 		default:
+			prom_printf("type %d of '%s' not handled\n", result->type, result->device);
 			return 0;
 		}
 	} else {
