@@ -236,7 +236,7 @@ static struct fs_t fs_default =
 
 int open_file(const struct boot_fspec_t* spec, struct boot_file_t* file)
 {
-     memset(file, 0, sizeof(struct boot_file_t*));
+     memset(file, 0, sizeof(struct boot_file_t));
      file->fs        = &fs_default;
 
      DEBUG_F("dev_path = %s\nfile_name = %s\npartition = %d\n",
