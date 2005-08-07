@@ -3,6 +3,12 @@
 #include <string.h>
 
 #define prom_printf printf
+#define simple_strtol strtol
+# define DEBUG_F(fmt, args...)\
+{\
+    prom_printf( "    %s - ", __PRETTY_FUNCTION__ );\
+    prom_printf( fmt, ## args );\
+}
 
 enum device_type {
 	TYPE_UNSET = 0,
@@ -12,7 +18,16 @@ enum device_type {
 	TYPE_NET
 };
 
+struct default_device {
+	enum device_type type;
+	char *device;
+	int part;
+};
+
 struct boot_fspec_t {
+	char*	dev;		/* OF device path */
+	char*	file;		/* File path */
+
 	int part;
 
 	enum device_type type;
