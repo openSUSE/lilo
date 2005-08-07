@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Aug  7 21:15:49 CEST 2005 - olh@suse.de
+
+- split of_net_download of of_net_open in yaboot to reuse download
+  buffer if yaboot.conf file was not found.
+
+-------------------------------------------------------------------
 Sun Aug  7 20:46:10 CEST 2005 - olh@suse.de
 
 - do not vertical indent in yaboot if DEBUG is set

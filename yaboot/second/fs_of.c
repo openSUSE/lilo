@@ -133,6 +133,31 @@ of_open(struct boot_file_t* file, const char* dev_name,
      return FILE_ERR_OK;
 }
 
+static int of_net_download (unsigned char **buffer, ihandle of_device)
+{
+	int ret = FILE_IOERR;
+	unsigned char *p;
+	
+	DEBUG_ENTER;
+	
+	p = prom_claim((void *)LOAD_BUFFER_POS, LOAD_BUFFER_SIZE, 0);
+	if (p == (void *)-1) {
+		prom_printf("Can't claim memory for TFTP download (%08x@%08x)\n", LOAD_BUFFER_SIZE, LOAD_BUFFER_POS);
+		goto out;
+	}
+	memset(p, 0, LOAD_BUFFER_SIZE);
+	DEBUG_F("TFP...\n");
+	ret = prom_loadmethod(of_device, p);
+	DEBUG_F("result: %d\n", ret);
+	if (ret > 0)
+		*buffer = p;
+	else
+		prom_release(p, LOAD_BUFFER_SIZE);
+out:
+	DEBUG_LEAVE_F(ret);
+	return ret;
+}
+
 static int
 of_net_open(struct boot_file_t* file, const char* dev_name,
 	    struct partition_t* part, const char* file_name)
@@ -140,6 +165,7 @@ of_net_open(struct boot_file_t* file, const char* dev_name,
      static char	buffer[1024];
      char               *filename;
      char               *p;
+     int ret;
 
      DEBUG_ENTER;
      DEBUG_OPEN;
@@ -164,27 +190,26 @@ of_net_open(struct boot_file_t* file, const char* dev_name,
      file->pos = 0;
      if ((file->of_device == PROM_INVALID_HANDLE) || (file->of_device == 0))
      {
-	  DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
-	  return FILE_ERR_BAD_FSYS;
+	  ret = FILE_ERR_BAD_FSYS;
+	  goto out;
      }
-	
-     file->buffer = prom_claim((void *)LOAD_BUFFER_POS, LOAD_BUFFER_SIZE, 0);
-     if (file->buffer == (void *)-1) {
-	  prom_printf("Can't claim memory for TFTP download\n");
-	  prom_close(file->of_device);
-	  DEBUG_LEAVE(FILE_IOERR);
-	  return FILE_IOERR;
+
+     ret = FILE_ERR_OK;
+
+     if (file->buffer == NULL) {
+	     ret = of_net_download(&file->buffer, file->of_device);
+	     if (ret > 0) {
+		     file->len = ret;
+		     ret = FILE_ERR_OK;
+	     } else {
+		     prom_printf("download failed: %d\n", ret);
+		     ret = FILE_IOERR;
+	     }
      }
-     memset(file->buffer, 0, LOAD_BUFFER_SIZE);
 
-     DEBUG_F("TFP...\n");
-
-     file->len = prom_loadmethod(file->of_device, file->buffer);
-	
-     DEBUG_F("result: %Ld\n", file->len);
-	
-     DEBUG_LEAVE(FILE_ERR_OK);
-     return FILE_ERR_OK;
+out:
+     DEBUG_LEAVE_F(ret);
+     return ret;
 }
 
 static int
