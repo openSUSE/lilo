@@ -117,20 +117,19 @@ int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 		return 0;
 	strcpy(result->device, imagepath);
 	result->partition = strchr(result->device, ':');
-	if (result->partition) {
+	if (result->partition)
 		*result->partition++ = '\0';
-		result->type = prom_get_devtype(result->device);
-		switch (result->type) {
-		case TYPE_BLOCK:
-			parse_block_device(result);
-			break;
-		case TYPE_NET:
-			parse_net_device(result);
-			break;
-		default:
-			prom_printf("type %d of '%s' not handled\n", result->type, result->device);
-			return 0;
-		}
+	result->type = prom_get_devtype(result->device);
+	switch (result->type) {
+	case TYPE_BLOCK:
+		parse_block_device(result);
+		break;
+	case TYPE_NET:
+		parse_net_device(result);
+		break;
+	default:
+		prom_printf("type %d of '%s' not handled\n", result->type, result->device);
+		return 0;
 	}
 	dump_boot_fspec_t(result);
 	return 1;
