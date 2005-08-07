@@ -67,6 +67,7 @@ static const char *block_paths[] = {
 	"hd:\\\\yaboot",
 	"hd:suseboot\\yaboot",
 	"hd:\\suseboot\\yaboot",
+	"scsi/sd@8,0",
 	NULL,
 };
 
