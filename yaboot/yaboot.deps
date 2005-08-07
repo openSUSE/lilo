@@ -212,6 +212,5 @@ second/yaboot.o: \
 	include/yaboot.h \
 	include/linux/elf.h \
 	include/asm/elf.h \
-	include/bootinfo.h \
 	include/debug.h \
 	include/md5.h

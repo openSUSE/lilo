@@ -45,9 +45,7 @@ struct default_device {
 };
 
 struct boot_fspec_t {
-	char*	dev;		/* OF device path */
 	int	part;		/* Partition number or -1 */
-	char*	file;		/* File path */
 
 	enum device_type type;
 
@@ -85,10 +83,6 @@ struct boot_file_t {
 extern int
 open_file(const struct boot_fspec_t*	spec,
 	  struct boot_file_t*		file);
-
-extern int
-parse_device_path(char *imagepath, char *defdevice, int defpart,
-		  char *deffile, struct boot_fspec_t *result);
 
 int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result);
 int new_parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d);

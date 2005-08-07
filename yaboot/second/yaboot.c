@@ -52,7 +52,6 @@
 #include "cmdline.h"
 #include "yaboot.h"
 #include "linux/elf.h"
-#include "bootinfo.h"
 #include "debug.h"
 
 #define CONFIG_FILE_MAX		0x8000		/* 32k */
@@ -110,7 +109,6 @@ static char bootdevice[1024];
 static char *password;
 static struct boot_fspec_t boot;
 static struct default_device default_device;
-static int _machine;
 static int _cpu;
 static int flat_vmlinux;
 
@@ -163,7 +161,6 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
 {
      int result;
      void* malloc_base;
-     prom_handle root;
      prom_handle cpus[1];
 
      /* OF seems to do it, but I'm not very confident */
@@ -183,22 +180,6 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
      DEBUG_F("Malloc buffer allocated at %p (%d bytes)\n",
 	     malloc_base, MALLOCSIZE);
 		
-     /* ask the OF info if we're a chrp or pmac */
-     /* we need to set _machine before calling finish_device_tree */
-     _machine = _MACH_Pmac;
-     root = prom_finddevice("/");
-     if (root != 0) {
-	  static char model[256];
-	  if (prom_getprop(root, "device_type", model, 256 ) > 0 &&
-	      !strncmp("chrp", model, 4))
-	       _machine = _MACH_chrp;
-	  else {
-	       if (prom_getprop(root, "model", model, 256 ) > 0 &&
-		   !strncmp(model, "IBM", 3))
-		    _machine = _MACH_chrp;
-	  }
-     }
-
      cpus[0] = 0;
      find_type_devices(cpus, "cpu", sizeof(cpus)/sizeof(prom_handle));
      if (cpus[0]) {
@@ -208,7 +189,7 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
 		     _cpu = 32;
      }
 	
-     DEBUG_F("Running on %d-bit _machine = %d\n", _cpu, _machine);
+     DEBUG_F("Running on %d-bit\n", _cpu);
 
      /* Call out main */
      result = yaboot_main();
@@ -247,41 +228,18 @@ check_color_text_ui(char *color)
 static void print_message_file(const char *filename, const struct boot_fspec_t *b, const struct default_device *d)
 {
      char *msg; 
-     char *p, *endp;
-     char *defdev = boot.dev;
-     int defpart = boot.part;
-     char msgpath[1024];
-     int opened = 0;
      int result;
-     int n;
      struct boot_file_t file;
      struct boot_fspec_t msgfile;
 
      new_parse_file_to_load_path(filename, &msgfile, b, d);
 
-     defdev = cfg_get_strg(NULL, "device");
-     if (!defdev)
-	  defdev = boot.dev;
-     p = cfg_get_strg(NULL, "partition");
-	  if (p) {
-	       n = simple_strtol(p, &endp, 10);
-	       if (endp != p && *endp == 0)
-		    defpart = n;	       
-	  }
-
-     strncpy(msgpath, filename, sizeof(msgpath));
-     if (!parse_device_path(msgpath, defdev, defpart, "/etc/yaboot.msg", &msgfile)) {
-	  prom_printf("%s: Unable to parse\n", msgpath);
-	  goto done;
-     }
-
      result = open_file(&msgfile, &file);
      if (result != FILE_ERR_OK) {
-	  prom_printf("%s:%d,", msgfile.dev, msgfile.part);
-	  prom_perror(result, msgfile.file);
-	  goto done;
-     } else
-	  opened = 1;
+	  prom_printf("%s:%d,", msgfile.device, msgfile.part);
+	  prom_perror(result, msgfile.filename);
+	  return;
+     }
 
      msg = malloc(2001);
      if (!msg)
@@ -294,8 +252,7 @@ static void print_message_file(const char *filename, const struct boot_fspec_t *
      prom_printf("%s", msg);
      free(msg);
 done:
-     if (opened)
-	  file.fs->close(&file);
+     file.fs->close(&file);
 }
 
 static const char *config_file_names_net[] = {
@@ -565,25 +522,18 @@ void check_password(char *str)
 static int get_params(struct boot_param_t* params)
 {
      struct default_device img_def_device, *d;
-     int defpart;
-     char *defdevice;
-     char *p, *q, *endp;
-     int c, n;
+     char *p, *q;
+     int c;
      char *imagename = NULL, *label;
      int timeout;
      int beg, end;
      int singlekey = 0;
      int restricted = 0;
-     static char imagepath[1024];
-     static char initrdpath[1024];
 
      d = &default_device;
      pause_after = 0;
      memset(params, 0, sizeof(*params));
      params->args = "";
-     params->kernel.part = -1;
-     params->rd.part = -1;
-     defpart = boot.part;
     
      cmdinit();
 
@@ -645,17 +595,9 @@ static int get_params(struct boot_param_t* params)
 	  imagename = cfg_get_default();
 
      label = 0;
-     defdevice = boot.dev;
 
      if (useconf) {
-	  defdevice = cfg_get_strg(NULL, "device");
 	  new_set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), d);
-	  p = cfg_get_strg(NULL, "partition");
-	  if (p) {
-	       n = simple_strtol(p, &endp, 10);
-	       if (endp != p && *endp == 0)
-		    defpart = n;
-	  }
 	  p = cfg_get_strg(NULL, "pause-message");
 	  if (p)
 	       pause_message = p;
@@ -667,14 +609,6 @@ static int get_params(struct boot_param_t* params)
 	       imagename = p;
 	       if (new_set_def_device(cfg_get_strg(label, "device"), cfg_get_strg(label, "partition"), &img_def_device))
 		       d = &img_def_device;
-	       defdevice = cfg_get_strg(label, "device");
-	       if(!defdevice) defdevice=boot.dev;
-	       p = cfg_get_strg(label, "partition");
-	       if (p) {
-		    n = simple_strtol(p, &endp, 10);
-		    if (endp != p && *endp == 0)
-			 defpart = n;
-	       }
 	       if (cfg_get_flag(label, "restricted"))
 		    restricted = 1;
 	       if (label) {
@@ -689,8 +623,6 @@ static int get_params(struct boot_param_t* params)
      }
 
      if (!strcmp (imagename, "help")) {
-          /* FIXME: defdevice shouldn't need to be reset all over the place */
-	  if(!defdevice) defdevice = boot.dev;
 	  prom_printf(
 	       "\nPress the tab key for a list of defined images.\n"
 	       "The label marked with a \"*\" is is the default image, "
@@ -705,7 +637,9 @@ static int get_params(struct boot_param_t* params)
 	       "If you omit \"device:\" and \"partno\" yaboot will use the values of \n"
 	       "\"device=\" and \"partition=\" in yaboot.conf, right now those are set to: \n"
 	       "device=%s\n"
-	       "partition=%d\n\n", defdevice, defpart);
+	       "partition=%d\n\n",
+	       default_device.device ? default_device.device : boot.device,
+	       default_device.part > 0 ? default_device.part : boot.part);
 	  return 0;
      }
 
@@ -716,10 +650,8 @@ static int get_params(struct boot_param_t* params)
 	  return 0;
      }
      if (!strcmp (imagename, "bye")) {
-	  if (password) {
+	  if (password)
 	       check_password ("Restricted command.");
-	       return 1;
-	  }
 	  return 1; 
      }
 
@@ -731,32 +663,20 @@ static int get_params(struct boot_param_t* params)
 	  return 0;
      }
 
-     strncpy(imagepath, imagename, 1024);
-
      if (!label && password)
 	  check_password ("To boot a custom image you must enter the password.");
 
-     if (!new_parse_file_to_load_path(imagepath, &params->kernel, &boot, d))
-	  prom_printf("%s: Unable to parse\n", imagepath);
-
-     if (!parse_device_path(imagepath, defdevice, defpart,
-			    "/vmlinux", &params->kernel)) {
-	  prom_printf("%s: Unable to parse\n", imagepath);
+     if (!new_parse_file_to_load_path(imagename, &params->kernel, &boot, d)) {
+	  prom_printf("%s: Unable to parse\n", imagename);
 	  return 0;
      }
-     DEBUG_F("after parse_device_path: dev=%s part=%d file=%s\n", params->kernel.dev,
-	     params->kernel.part, params->kernel.file);
 
      if (useconf) {
 	  p = cfg_get_strg(label, "initrd");
 	  if (p && *p) {
 	       DEBUG_F("Parsing initrd path <%s>\n", p);
-	       strncpy(initrdpath, p, 1024);
-	       if (!new_parse_file_to_load_path(initrdpath, &params->rd, &boot, d))
-		       prom_printf("%s: Unable to parse\n", initrdpath);
-	       if (!parse_device_path(initrdpath, defdevice, defpart,
-				      "/root.bin", &params->rd)) {
-		    prom_printf("%s: Unable to parse\n", initrdpath);
+	       if (!new_parse_file_to_load_path(p, &params->rd, &boot, d)) {
+		       prom_printf("%s: Unable to parse\n", p);
 		    return 0;
 	       }
 	  }
@@ -780,7 +700,6 @@ yaboot_text_ui(void)
      void		*initrd_base;
      unsigned long	initrd_size;
      kernel_entry_t      kernel_entry;
-     char*               loc=NULL;
      loadinfo_t          loadinfo;
      void                *initrd_more,*initrd_want;
      unsigned long       initrd_read;
@@ -793,30 +712,16 @@ yaboot_text_ui(void)
     	
 	  if (get_params(&params))
 	       return;
-	  if (!params.kernel.file)
+	  if (!params.kernel.filename)
 	       continue;
 	
 	  prom_printf("Please wait, loading kernel...\n");
 
-	  memset(&file, 0, sizeof(file));
-
-	  if (strlen(boot.file) && !strcmp(boot.file,"\\\\") && params.kernel.file[0] != '/'
-	      && params.kernel.file[0] != '\\') {
-	       loc=(char*)malloc(strlen(params.kernel.file)+3);
-	       if (!loc) {
-		    prom_printf ("malloc error\n");
-		    goto next;
-	       }
-	       strcpy(loc,boot.file);
-	       strcat(loc,params.kernel.file);
-	       free(params.kernel.file);
-	       params.kernel.file=loc;
-	  }
 	  result = open_file(&params.kernel, &file);
 	  if (result != FILE_ERR_OK) {
-	       prom_printf("%s:%d,", params.kernel.dev, params.kernel.part);
-	       prom_perror(result, params.kernel.file);
-	       goto next;
+	       prom_printf("%s:%d,", params.kernel.device, params.kernel.part);
+	       prom_perror(result, params.kernel.filename);
+	       continue;
 	  }
 
 	  /* Read the Elf e_ident, e_type and e_machine fields to
@@ -825,57 +730,38 @@ yaboot_text_ui(void)
 	  if (file.fs->read(&file, sizeof(Elf_Ident), &loadinfo.elf) < sizeof(Elf_Ident)) {
 	       prom_printf("\nCan't read Elf e_ident/e_type/e_machine info\n");
 	       file.fs->close(&file);
-	       memset(&file, 0, sizeof(file));
-	       goto next;
+	       continue;
 	  }
 
 	  if (is_elf32(&loadinfo)) {
 	       if (!load_elf32(&file, &loadinfo)) {
 		    file.fs->close(&file);
-		    memset(&file, 0, sizeof(file));
-		    goto next;
+		    continue;
 	       }
 	       prom_printf("   Elf32 kernel loaded...\n");
 	  } else if (is_elf64(&loadinfo)) {
 	       if (!load_elf64(&file, &loadinfo)) {
 		    file.fs->close(&file);
-		    memset(&file, 0, sizeof(file));
-		    goto next;
+		    continue;
 	       }
 	       prom_printf("   Elf64 kernel loaded...\n");
 	  } else {
-	       prom_printf ("%s: Not a valid ELF image\n", params.kernel.file);
+	       prom_printf ("%s: Not a valid ELF image\n", params.kernel.filename);
 	       file.fs->close(&file);
-	       memset(&file, 0, sizeof(file));
-	       goto next;
+	       continue;
 	  }
 	  file.fs->close(&file);
-	  memset(&file, 0, sizeof(file));
 
 	  /* If ramdisk, load it (only if booting a vmlinux).  For now, we
 	   * can't tell the size it will be so we claim an arbitrary amount
 	   * of 4Mb.
 	   */
-	  if (flat_vmlinux && params.rd.file) {
-	       if(strlen(boot.file) && !strcmp(boot.file,"\\\\") && params.rd.file[0] != '/'
-		  && params.kernel.file[0] != '\\')
-	       {
-		    if (loc) free(loc);
-		    loc=(char*)malloc(strlen(params.rd.file)+3);
-		    if (!loc) {
-			 prom_printf ("Malloc error\n");
-			 goto next;
-		    }
-		    strcpy(loc,boot.file);
-		    strcat(loc,params.rd.file);
-		    free(params.rd.file);
-		    params.rd.file=loc;
-	       }
+	  if (flat_vmlinux && params.rd.filename) {
 	       prom_printf("Loading ramdisk...\n");
 	       result = open_file(&params.rd, &file);
 	       if (result != FILE_ERR_OK) {
-		    prom_printf("%s:%d,", params.rd.dev, params.rd.part);
-		    prom_perror(result, params.rd.file);
+		    prom_printf("%s:%d,", params.rd.device, params.rd.part);
+		    prom_perror(result, params.rd.filename);
 	       }
 	       else {
 #define INITRD_CHUNKSIZE 0x400000
@@ -902,7 +788,6 @@ yaboot_text_ui(void)
 			 }
 		    }
 		    file.fs->close(&file);
-		    memset(&file, 0, sizeof(file));
 	       }
 	       if (initrd_base)
 		    prom_printf("ramdisk loaded at %p, size: %lu Kbytes\n",
@@ -934,9 +819,6 @@ yaboot_text_ui(void)
 
           /* call the kernel with our stack. */
 	  kernel_entry(initrd_base + loadinfo.load_loc, initrd_size, prom, 0, 0);
-	  continue;
-     next:
-	  ; /* do nothing */
      }
 }
 
@@ -1349,34 +1231,6 @@ yaboot_main(void)
 	  prom_printf("%s: Unable to parse\n", bootdevice);
 	  return -1;
      }
-     if (!parse_device_path(bootdevice, NULL, -1, "", &boot)) {
-	  prom_printf("%s: Unable to parse\n", bootdevice);
-	  return -1;
-     }
-     DEBUG_F("After parse_device_path: dev=%s, part=%d, file=%s\n",
-	     boot.dev, boot.part, boot.file);
-
-     if (strlen(boot.file)) {
-	  if (!strncmp(boot.file, "\\\\", 2))
-	       boot.file = "\\\\";
-	  else {
-	       char *p, *last;
-	       p = last = boot.file;
-	       while(*p) {
-		    if (*p == '\\')
-			 last = p;
-		    p++;
-	       }
-	       if (p)
-		    *(last) = 0;
-	       else
-		    boot.file = "";
-	       if (strlen(boot.file))
-		    strcat(boot.file, "\\");
-	  }
-     }
-     DEBUG_F("After pmac path kludgeup: dev=%s, part=%d, file=%s\n",
-	     boot.dev, boot.part, boot.file);
 
      useconf = load_config_file(&boot);
 

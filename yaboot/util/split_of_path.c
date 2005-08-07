@@ -25,9 +25,6 @@ struct default_device {
 };
 
 struct boot_fspec_t {
-	char*	dev;		/* OF device path */
-	char*	file;		/* File path */
-
 	int part;
 
 	enum device_type type;

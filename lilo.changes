@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug  8 00:39:38 CEST 2005 - olh@suse.de
+
+- remove alot of code which were unused after the last change
+
+-------------------------------------------------------------------
 Sun Aug  7 23:50:12 CEST 2005 - olh@suse.de
 
 - use the new parse_device_path api in yaboot, will fix netboot

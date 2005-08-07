@@ -16,9 +16,7 @@ void __dump_boot_fspec_t (const char *fn, int l, const struct boot_fspec_t *p)
 	DEBUG_F("called from '%s(%u)' '%p'\n", fn, l, p);
 	if (!p)
 		return;
-	S(dev);
 	I(part);
-	S(file);
 	I(type);
 	S(device);
 	S(partition);
