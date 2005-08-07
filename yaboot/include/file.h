@@ -33,14 +33,33 @@
 #include "errors.h"
 
 struct boot_file_t;
+struct boot_fspec_t;
 #include "fs.h"
 
 #define FILE_MAX_PATH		1024
+
+struct default_device {
+	enum device_type type;
+	char *device;
+	int part;
+};
 
 struct boot_fspec_t {
 	char*	dev;		/* OF device path */
 	int	part;		/* Partition number or -1 */
 	char*	file;		/* File path */
+
+	enum device_type type;
+
+	char *device;
+
+	char *partition;
+	char *directory;
+
+	char *ip_before_filename;
+	char *ip_after_filename;
+
+	char *filename;
 };
 
 struct boot_file_t {
@@ -71,5 +90,10 @@ extern int
 parse_device_path(char *imagepath, char *defdevice, int defpart,
 		  char *deffile, struct boot_fspec_t *result);
 
+int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result);
+int new_parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d);
+int new_set_def_device(const char *dev, const char *partition, struct default_device *def);
+#define dump_boot_fspec_t(p) do { __dump_boot_fspec_t(__FUNCTION__,__LINE__,p); } while(0)
+void __dump_boot_fspec_t (const char *fn, int l, const struct boot_fspec_t *p);
 
 #endif
