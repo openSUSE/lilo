@@ -39,6 +39,7 @@ extern const struct fs_t        xfs_filesystem;
 extern const struct fs_t        reiserfs_filesystem;
 #endif /* CONFIG_FS_REISERFS */
 
+int fserrorno;
 /* Filesystem handlers yaboot knows about */
 static const struct fs_t *block_filesystems[] = {
      &ext2_filesystem,		/* ext2 */

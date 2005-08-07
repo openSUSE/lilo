@@ -26,7 +26,7 @@
 #include "partition.h"
 #include "file.h"
 
-int fserrorno;
+extern int fserrorno;
 
 struct fs_t {
 	const char* name;
