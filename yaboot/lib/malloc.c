@@ -34,6 +34,7 @@ void malloc_init(void *bottom, unsigned long size)
 {
 	malloc_ptr = bottom;
 	malloc_top = bottom + size;
+	memset(bottom, 'A', size);
 }
 
 void malloc_dispose(void)

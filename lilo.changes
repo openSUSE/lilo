@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Aug  7 20:35:56 CEST 2005 - olh@suse.de
+
+- fill the malloc area with 'A' in yaboot
+
+-------------------------------------------------------------------
 Sun Aug  7 20:30:59 CEST 2005 - olh@suse.de
 
 - build yaboot with -O1 -g if DEBUG is set
