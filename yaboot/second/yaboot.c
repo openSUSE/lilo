@@ -744,7 +744,7 @@ int get_params(struct boot_param_t* params)
 	       strncpy(initrdpath, p, 1024);
 	       if (!parse_device_path(initrdpath, defdevice, defpart,
 				      "/root.bin", &params->rd)) {
-		    prom_printf("%s: Unable to parse\n", imagepath);
+		    prom_printf("%s: Unable to parse\n", initrdpath);
 		    return 0;
 	       }
 	  }
