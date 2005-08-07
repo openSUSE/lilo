@@ -382,7 +382,7 @@ bail:
      return result;
 }
 
-void maintabfunc (void)
+static void maintabfunc (void)
 {
      if (useconf) {
 	  cfg_print_images();
@@ -390,8 +390,7 @@ void maintabfunc (void)
      }
 }
 
-void
-word_split(char **linep, char **paramsp)
+static void word_split(char **linep, char **paramsp)
 {
      char *p;
 
@@ -414,8 +413,7 @@ word_split(char **linep, char **paramsp)
 	  *paramsp = p;
 }
 
-char *
-make_params(char *label, char *params)
+static char * make_params(char *label, char *params)
 {
      char *p, *q;
      static char buffer[2048];
@@ -486,7 +484,7 @@ make_params(char *label, char *params)
      return buffer;
 }
 
-void check_password(char *str)
+static void check_password(char *str)
 {
      int i;
 
@@ -689,8 +687,7 @@ static int get_params(struct boot_param_t* params)
  * to it
  * We also need to add initrd support to this whole mecanism
  */
-void
-yaboot_text_ui(void)
+static void yaboot_text_ui(void)
 {
 #define MAX_HEADERS	32
 
@@ -1207,8 +1204,7 @@ setup_display(void)
 #endif /* CONFIG_SET_COLORMAP */
 }
 
-int
-yaboot_main(void)
+static int yaboot_main(void)
 {
      int i;
      if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
