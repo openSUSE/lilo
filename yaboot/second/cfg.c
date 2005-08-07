@@ -103,7 +103,7 @@ static int line_num;
 static int back;		/* can go back by one char */
 static char *currp;
 static char *endp;
-static char *file_name;
+static const char *file_name;
 static CONFIG *curr_table = cf_options;
 static jmp_buf env;
 
@@ -349,7 +349,7 @@ static int cfg_set (char *item, char *value)
      return 0;
 }
 
-int cfg_parse (char *cfg_file, char *buff, int len, int cpu)
+int cfg_parse (const char *cfg_file, char *buff, int len, int cpu)
 {
      char *item, *value;
 
