@@ -89,6 +89,18 @@ static const char *net_paths[] = {
 	"network:000.000.000.000,,000.000.000.000,000.000.000.000,00",
 	NULL,
 };
+static const char *file_paths[] = {
+#if 0
+	NULL,
+#endif
+	"vmlinux",
+	"/vmlinux",
+	"/boot/vmlinux",
+	"boot/vmlinux",
+	"&device;:9,/boot/vmlinux",
+	"/pci@f2000000/pci-bridge@d/ADPT,2930CU@3/disk@0,0:7,/boot/vmlinux",
+	NULL,
+};
 
 static enum device_type current_devtype;
 
@@ -101,7 +113,30 @@ static enum device_type prom_get_devtype(const char *device)
 #define DEVPATH_TEST 1
 #include "../second/parse_device_path.c"
 
-#define P(m) printf("\t"#m " '%s' ", p.m);
+#define P(m) printf("\t"#m " '%s' ", p->m);
+
+static void print_boot(const struct boot_fspec_t *p) {
+		P(device);
+		P(partition);
+		P(directory);
+		printf("\n");
+		P(filename);
+		printf("\n");
+		P(ip_before_filename);
+		P(ip_after_filename);
+		printf("\n");
+}
+
+static void print_file_to_load(const struct boot_fspec_t *b, const char *p) {
+	int i;
+	struct boot_fspec_t f;
+	for (i = 0; file_paths[i]; i++) {
+		memset(&f, 0, sizeof(struct boot_fspec_t));
+		new_parse_file_to_load_path(file_paths[i], &f, b, NULL);
+		printf("\tfile %d to load from /chosen/bootpath '%s': '%s'\n", i, p, file_paths[i]);
+		print_boot(&f);
+	}
+}
 int main(void)
 {
 	int i;
@@ -112,15 +147,8 @@ int main(void)
 		memset(&p, 0, sizeof(struct boot_fspec_t));
 		new_parse_device_path(block_paths[i], &p);
 		printf("path %d: '%s'\n", i, block_paths[i]);
-		P(device);
-		P(partition);
-		P(directory);
-		printf("\n");
-		P(filename);
-		printf("\n");
-		P(ip_before_filename);
-		P(ip_after_filename);
-		printf("\n");
+		print_boot(&p);
+		print_file_to_load(&p, block_paths[i]);
 	}
 
 	current_devtype = TYPE_NET;
@@ -128,15 +156,8 @@ int main(void)
 		memset(&p, 0, sizeof(struct boot_fspec_t));
 		new_parse_device_path(net_paths[i], &p);
 		printf("path %d: '%s'\n", i, net_paths[i]);
-		P(device);
-		P(partition);
-		P(directory);
-		printf("\n");
-		P(filename);
-		printf("\n");
-		P(ip_before_filename);
-		P(ip_after_filename);
-		printf("\n");
+		print_boot(&p);
+		print_file_to_load(&p, net_paths[i]);
 	}
 	return 0;
 }
