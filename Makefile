@@ -25,7 +25,7 @@ submit:	.submitted
 
 .exportdir:	lilo.changes
 	@rm -f .built .submitted
-	set -ex ; \
+	set -e ; \
 	export LANG=C ; export LC_ALL=C ; export TZ=UTC ; \
 	tmpdir=`mktemp -d /tmp/temp.XXXXXX`/lilo ; \
 	lv=`cat version` ; \
