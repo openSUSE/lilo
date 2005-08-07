@@ -448,7 +448,7 @@ ext2_read(	struct boot_file_t*	file,
      read_last_logical = file->pos / bs;
      read_total = 0;
      read_max = size;
-     read_buffer = (unsigned char*)buffer;
+     read_buffer = buffer;
      read_result = 0;
     
      retval = ext2fs_block_iterate(fs, file->inode, 0, 0, read_iterator, 0);
