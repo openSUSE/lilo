@@ -37,10 +37,13 @@ static void parse_block_device(struct boot_fspec_t *result)
 	prom_printf("%s\n", __FUNCTION__);
 #endif
 	result->part = strtol(result->partition, &ip, 10);
+	DEBUG_F("part '%d', partition '%s', ip '%s'\n", result->part, result->partition, ip);
 	if (result->part)
 		*ip++ = '\0';
-	else
+	else {
+		result->part = -1;
 		result->partition = "";
+	}
 	if (',' == ip[0])
 		ip++;
 	result->directory = ip;
