@@ -31,6 +31,7 @@ submit:	.submitted
 	lv=`cat version` ; \
 	yv=`cat yabootversion` ; \
 	svn export . $$tmpdir ; \
+	svn log -v yaboot > $$tmpdir/yaboot/Changelog.SuSE ; \
 	cd $$tmpdir ; \
 	chmod -R a+rX .. ; \
 	tar xfz yaboot-$$yv.tar.gz ; \
