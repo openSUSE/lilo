@@ -39,6 +39,7 @@
 
 /* Device kind */
 enum device_type {
+	TYPE_UNSET = 0,
 	TYPE_UNKNOWN,
 	TYPE_INVALID,
 	TYPE_BLOCK,
