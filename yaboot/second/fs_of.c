@@ -55,8 +55,7 @@ static int of_seek(struct boot_file_t* file, unsigned int newpos);
 static int of_close(struct boot_file_t* file);
 
 
-static int of_net_open(struct boot_file_t* file, const char* dev_name,
-		       struct partition_t* part, const char* file_name);
+static int of_net_open(struct boot_file_t* file, const struct boot_fspec_t* spec);
 static int of_net_read(struct boot_file_t* file, unsigned int size, void* buffer);
 static int of_net_seek(struct boot_file_t* file, unsigned int newpos);
 
@@ -73,7 +72,7 @@ struct fs_t of_filesystem =
 struct fs_t of_net_filesystem =
 {
 	.name = "built-in network",
-	.open = of_net_open,
+	.new_open = of_net_open,
 	.read = of_net_read,
 	.seek = of_net_seek,
 	.close = of_close
@@ -158,27 +157,26 @@ out:
 	return ret;
 }
 
-static int
-of_net_open(struct boot_file_t* file, const char* dev_name,
-	    struct partition_t* part, const char* file_name)
+static int of_net_open(struct boot_file_t* file, const struct boot_fspec_t* spec)
 {
-     static char	buffer[1024];
-     char               *filename;
-     char               *p;
+     char buffer[1024];
+     char *p = buffer;
      int ret;
 
      DEBUG_ENTER;
-     DEBUG_OPEN;
+     DEBUG_OPEN_NEW;
 
-     strncpy(buffer, dev_name, 768);
-     if (file_name && strlen(file_name)) {
-	  strcat(buffer, ",");
-	  filename = strdup(file_name);
-	  for (p = filename; *p; p++)
-	       if (*p == '/') 
-		    *p = '\\';
-	  strcat(buffer, filename);
-	  free(filename);
+     sprintf(buffer, "%s:%s,", spec->device, spec->ip_before_filename);
+     p = p + strlen(buffer);
+     strcat(buffer, spec->filename);
+     while (*p) {
+	     if (*p == '/')
+		     *p = '\\';
+	     p++;
+     }
+     if (spec->ip_after_filename && strlen(spec->ip_after_filename)) {
+	     strcat(buffer, ",");
+	     strcat(buffer, spec->ip_after_filename);
      }
 			
      DEBUG_F("Opening: \"%s\"\n", buffer);

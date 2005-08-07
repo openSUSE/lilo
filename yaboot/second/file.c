@@ -140,19 +140,19 @@ parse_device_path(char *imagepath, char *defdevice, int defpart,
 }
 
 
-static int
-file_block_open(	struct boot_file_t*	file,
-			const char*		dev_name,
-			const char*		file_name,
-			int			partition)
+static int file_block_open(struct boot_file_t *file, const struct boot_fspec_t* spec)
 {
      struct partition_t*	parts;
      struct partition_t*	p;
      struct partition_t*	found;
+     char f[1024];
+     int partition = spec->part;
 	
-     parts = partitions_lookup(dev_name);
+     parts = partitions_lookup(spec->device);
      found = NULL;
-			
+     sprintf(f, "%s%s", spec->directory, spec->filename);
+     DEBUG_F("filename '%s'\n", f);
+
 #if DEBUG
      if (parts)
 	  prom_printf("partitions:\n");
@@ -163,7 +163,7 @@ file_block_open(	struct boot_file_t*	file,
 	  DEBUG_F("number: %02d, start: 0x%08lx, length: 0x%08lx\n",
 		  p->part_number, p->part_start, p->part_size );
 	  if (partition == -1) {
-	       file->fs = fs_open( file, dev_name, p, file_name );
+	       file->fs = fs_open(file, spec->device, p, f);
 	       if (file->fs == NULL || fserrorno != FILE_ERR_OK)
 		    continue;
 	       else {
@@ -183,7 +183,7 @@ file_block_open(	struct boot_file_t*	file,
       * cases, let OF figure out a default partition.
       */
      DEBUG_F( "Using OF defaults.. (found = %p)\n", found );
-     file->fs = fs_open( file, dev_name, found, file_name );
+     file->fs = fs_open(file, spec->device, found, f);
 
 done:
      if (parts)
@@ -194,11 +194,10 @@ done:
 
 static int
 file_net_open(	struct boot_file_t*	file,
-		const char*		dev_name,
-		const char*		file_name)
+		const struct boot_fspec_t *spec)
 {
      file->fs = fs_of_netboot;
-     return fs_of_netboot->open(file, dev_name, NULL, file_name);
+     return fs_of_netboot->new_open(file, spec);
 }
 
 static int
@@ -242,15 +241,15 @@ int open_file(const struct boot_fspec_t* spec, struct boot_file_t* file)
      DEBUG_F("dev_path = %s\nfile_name = %s\npartition = %d\n",
 	     spec->dev, spec->file, spec->part);
 
-     file->dev_type = prom_get_devtype(spec->dev);
+     file->dev_type = prom_get_devtype(spec->device);
 
      switch(file->dev_type) {
      case TYPE_BLOCK:
 	  DEBUG_F("device is a block device\n");
-	  return file_block_open(file, spec->dev, spec->file, spec->part);
+	  return file_block_open(file, spec);
      case TYPE_NET:
 	  DEBUG_F("device is a network device\n");
-	  return file_net_open(file, spec->dev, spec->file);
+	  return file_net_open(file, spec);
      default:
 	  return FILE_ERR_BADDEV;
      }

@@ -9,8 +9,6 @@ include Config
 VERSION = 1.3.13
 # Debug mode (spam/verbose)
 DEBUG = 0
-# use yaboot.cnf on FAT
-YABOOT_FAT = 0
 # make install vars
 ROOT =
 PREFIX = usr/local
@@ -38,7 +36,7 @@ CROSS =
 #
 YBCFLAGS = -Os $(CFLAGS) -nostdinc -Wall -isystem `gcc -print-file-name=include`
 YBCFLAGS += -DVERSION=\"${VERSION}\"	#"
-YBCFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG) -DYABOOT_FAT=$(YABOOT_FAT)
+YBCFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG)
 YBCFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
 YBCFLAGS += -DKERNELADDR=$(KERNELADDR)
 YBCFLAGS += -I ./include

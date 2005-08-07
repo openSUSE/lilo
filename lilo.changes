@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sun Aug  7 23:50:12 CEST 2005 - olh@suse.de
+
+- use the new parse_device_path api in yaboot, will fix netboot
+  on rs6k and ramdisk loading from system folder on hfs
+  obsoletes yaboot.fat, it looks now for yaboot.cnf, yaboot.conf
+  or /etc/yaboot.conf
+
+-------------------------------------------------------------------
 Sun Aug  7 21:15:49 CEST 2005 - olh@suse.de
 
 - split of_net_download of of_net_open in yaboot to reuse download

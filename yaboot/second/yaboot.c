@@ -55,11 +55,6 @@
 #include "bootinfo.h"
 #include "debug.h"
 
-#if YABOOT_FAT
-#define CONFIG_FILE_NAME	"yaboot.cnf"
-#else
-#define CONFIG_FILE_NAME	"yaboot.conf"
-#endif
 #define CONFIG_FILE_MAX		0x8000		/* 32k */
 
 #ifdef USE_MD5_PASSWORDS
@@ -114,6 +109,7 @@ int useconf;
 static char bootdevice[1024];
 static char *password;
 static struct boot_fspec_t boot;
+static struct default_device default_device;
 static int _machine;
 static int _cpu;
 static int flat_vmlinux;
@@ -213,7 +209,6 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
      }
 	
      DEBUG_F("Running on %d-bit _machine = %d\n", _cpu, _machine);
-     DEBUG_SLEEP;
 
      /* Call out main */
      result = yaboot_main();
@@ -249,7 +244,7 @@ check_color_text_ui(char *color)
 #endif /* CONFIG_COLOR_TEXT */
 
 
-void print_message_file(char *filename)
+static void print_message_file(const char *filename, const struct boot_fspec_t *b, const struct default_device *d)
 {
      char *msg; 
      char *p, *endp;
@@ -261,6 +256,8 @@ void print_message_file(char *filename)
      int n;
      struct boot_file_t file;
      struct boot_fspec_t msgfile;
+
+     new_parse_file_to_load_path(filename, &msgfile, b, d);
 
      defdev = cfg_get_strg(NULL, "device");
      if (!defdev)
@@ -301,18 +298,24 @@ done:
 	  file.fs->close(&file);
 }
 
-/* Currently, the config file must be at the root of the filesystem.
- * todo: recognize the full path to myself and use it to load the
- * config file. Handle the "\\" (blessed system folder)
- */
-static int
-load_config_file(char *device, char* path, int partition)
+static const char *config_file_names_net[] = {
+	"yaboot.conf",
+	NULL
+};
+static const char *config_file_names_block[] = {
+	"yaboot.cnf",
+	"yaboot.conf",
+	"/etc/yaboot.conf",
+	NULL
+};
+static int load_config_file(const struct boot_fspec_t *b)
 {
      char *conf_file, *p;
+     const char **names;
      struct boot_file_t file;
      int sz, opened = 0, result = 0;
-     char conf_path[512];
-     struct boot_fspec_t fspec;
+     int i;
+     struct boot_fspec_t config_fspec;
 
      /* Allocate a buffer for the config file */
      conf_file = malloc(CONFIG_FILE_MAX);
@@ -321,43 +324,44 @@ load_config_file(char *device, char* path, int partition)
 	  goto bail;
      }
 
-     /* Build the path to the file */
-     if (!(YABOOT_FAT) && _machine == _MACH_chrp) /* have a flat file system for FAT */
-	  strcpy(conf_path, "/etc/");
-     else if (path && *path)
-	  strcpy(conf_path, path);
-     else
-	  conf_path[0] = 0;
-     strcat(conf_path, CONFIG_FILE_NAME);
-
-     /* Open it */
-     fspec.dev = device;
-     fspec.file = conf_path;
-     fspec.part = partition;
-     result = open_file(&fspec, &file);
-     if (result != FILE_ERR_OK) {
-	  prom_printf("%s:%d,", fspec.dev, fspec.part);
-	  prom_perror(result, fspec.file);
-	  prom_printf("Can't open config file\n");
-	  goto bail;
+     switch (b->type) {
+	case TYPE_NET:
+		names = config_file_names_net;
+		break;
+	case TYPE_BLOCK:
+		names = config_file_names_block;
+		break;
+	default:
+		prom_printf("type '%d' not handled\n", b->type);
+		goto bail;
+		break;
      }
-     opened = 1;
+     for (i = 0; names[i]; i++) {
+	     if (!new_parse_file_to_load_path(names[i], &config_fspec, b, NULL)) {
+		     prom_printf("can not parse '%s'\n", names[i]);
+		     continue;
+	     }
+	     result = open_file(&config_fspec, &file);
+	     if (result != FILE_ERR_OK)
+		     continue;
+	     opened = 1;
+	     break;
+     }
+
+     if (!opened)
+	     goto bail;
 
      /* Read it */
      sz = file.fs->read(&file, CONFIG_FILE_MAX, conf_file);
      if (sz <= 0) {
 	  prom_printf("Error, can't read config file\n");
+	  file.fs->close(&file);
 	  goto bail;
      }
-     prom_printf("Config file read, %d bytes\n", sz);
-
-     /* Close the file */
-     if (opened)
-	  file.fs->close(&file);
-     opened = 0;
+     prom_printf("Config file '%s' read, %d bytes\n", names[i], sz);
 
      /* Call the parsing code in cfg.c */
-     if (cfg_parse(conf_path, conf_file, sz, _cpu) < 0) {
+     if (cfg_parse(names[i], conf_file, sz, _cpu) < 0) {
 	  prom_printf ("Syntax error or read error config\n");
 	  goto bail;
      }
@@ -368,6 +372,8 @@ load_config_file(char *device, char* path, int partition)
      p = cfg_get_strg(NULL, "init-code");
      if (p)
 	  prom_interpret(p);
+
+     new_set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), &default_device);
 
      password = cfg_get_strg(NULL, "password");
 	
@@ -408,15 +414,11 @@ load_config_file(char *device, char* path, int partition)
 
      p = cfg_get_strg(NULL, "message");
      if (p)
-	  print_message_file(p);
+	  print_message_file(p, &boot, &default_device);
 
      result = 1;
     
 bail:
-
-     if (opened)
-	  file.fs->close(&file);
-    
      if (result != 1 && conf_file)
 	  free(conf_file);
     	
@@ -562,6 +564,7 @@ void check_password(char *str)
 
 static int get_params(struct boot_param_t* params)
 {
+     struct default_device img_def_device, *d;
      int defpart;
      char *defdevice;
      char *p, *q, *endp;
@@ -574,6 +577,7 @@ static int get_params(struct boot_param_t* params)
      static char imagepath[1024];
      static char initrdpath[1024];
 
+     d = &default_device;
      pause_after = 0;
      memset(params, 0, sizeof(*params));
      params->args = "";
@@ -645,6 +649,7 @@ static int get_params(struct boot_param_t* params)
 
      if (useconf) {
 	  defdevice = cfg_get_strg(NULL, "device");
+	  new_set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), d);
 	  p = cfg_get_strg(NULL, "partition");
 	  if (p) {
 	       n = simple_strtol(p, &endp, 10);
@@ -660,6 +665,8 @@ static int get_params(struct boot_param_t* params)
 	  if (p && *p) {
 	       label = imagename;
 	       imagename = p;
+	       if (new_set_def_device(cfg_get_strg(label, "device"), cfg_get_strg(label, "partition"), &img_def_device))
+		       d = &img_def_device;
 	       defdevice = cfg_get_strg(label, "device");
 	       if(!defdevice) defdevice=boot.dev;
 	       p = cfg_get_strg(label, "partition");
@@ -729,6 +736,9 @@ static int get_params(struct boot_param_t* params)
      if (!label && password)
 	  check_password ("To boot a custom image you must enter the password.");
 
+     if (!new_parse_file_to_load_path(imagepath, &params->kernel, &boot, d))
+	  prom_printf("%s: Unable to parse\n", imagepath);
+
      if (!parse_device_path(imagepath, defdevice, defpart,
 			    "/vmlinux", &params->kernel)) {
 	  prom_printf("%s: Unable to parse\n", imagepath);
@@ -742,6 +752,8 @@ static int get_params(struct boot_param_t* params)
 	  if (p && *p) {
 	       DEBUG_F("Parsing initrd path <%s>\n", p);
 	       strncpy(initrdpath, p, 1024);
+	       if (!new_parse_file_to_load_path(initrdpath, &params->rd, &boot, d))
+		       prom_printf("%s: Unable to parse\n", initrdpath);
 	       if (!parse_device_path(initrdpath, defdevice, defpart,
 				      "/root.bin", &params->rd)) {
 		    prom_printf("%s: Unable to parse\n", initrdpath);
@@ -1333,6 +1345,10 @@ yaboot_main(void)
 	  return -1;
      }
 
+     if (!new_parse_device_path(bootdevice, &boot)) {
+	  prom_printf("%s: Unable to parse\n", bootdevice);
+	  return -1;
+     }
      if (!parse_device_path(bootdevice, NULL, -1, "", &boot)) {
 	  prom_printf("%s: Unable to parse\n", bootdevice);
 	  return -1;
@@ -1362,7 +1378,7 @@ yaboot_main(void)
      DEBUG_F("After pmac path kludgeup: dev=%s, part=%d, file=%s\n",
 	     boot.dev, boot.part, boot.file);
 
-     useconf = load_config_file(boot.dev, boot.file, boot.part);
+     useconf = load_config_file(&boot);
 
 #if DEBUG == 0
      if (stdout_is_screen)
