@@ -130,7 +130,7 @@ static void print_file_to_load(const struct boot_fspec_t *b, const char *p) {
 	struct boot_fspec_t f;
 	for (i = 0; file_paths[i]; i++) {
 		memset(&f, 0, sizeof(struct boot_fspec_t));
-		new_parse_file_to_load_path(file_paths[i], &f, b, NULL);
+		parse_file_to_load_path(file_paths[i], &f, b, NULL);
 		printf("\tfile %d to load from /chosen/bootpath '%s': '%s'\n", i, p, file_paths[i]);
 		print_boot(&f);
 	}
@@ -143,7 +143,7 @@ int main(void)
 	current_devtype = TYPE_BLOCK;
 	for (i = 0; block_paths[i]; i++) {
 		memset(&p, 0, sizeof(struct boot_fspec_t));
-		new_parse_device_path(block_paths[i], &p);
+		parse_device_path(block_paths[i], &p);
 		printf("path %d: '%s'\n", i, block_paths[i]);
 		print_boot(&p);
 		print_file_to_load(&p, block_paths[i]);
@@ -152,7 +152,7 @@ int main(void)
 	current_devtype = TYPE_NET;
 	for (i = 0; net_paths[i]; i++) {
 		memset(&p, 0, sizeof(struct boot_fspec_t));
-		new_parse_device_path(net_paths[i], &p);
+		parse_device_path(net_paths[i], &p);
 		printf("path %d: '%s'\n", i, net_paths[i]);
 		print_boot(&p);
 		print_file_to_load(&p, net_paths[i]);

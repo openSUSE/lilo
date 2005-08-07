@@ -84,9 +84,9 @@ extern int
 open_file(const struct boot_fspec_t*	spec,
 	  struct boot_file_t*		file);
 
-int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result);
-int new_parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d);
-int new_set_def_device(const char *dev, const char *partition, struct default_device *def);
+int parse_device_path(const char *imagepath, struct boot_fspec_t *result);
+int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d);
+int set_def_device(const char *dev, const char *partition, struct default_device *def);
 #define dump_boot_fspec_t(p) do { __dump_boot_fspec_t(__FUNCTION__,__LINE__,p); } while(0)
 void __dump_boot_fspec_t (const char *fn, int l, const struct boot_fspec_t *p);
 

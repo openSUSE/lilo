@@ -104,7 +104,7 @@ bootp:
 	result->partition = NULL;
 }
 
-int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result)
+int parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 {
 	DEBUG_F("imagepath '%s'\n", imagepath);
 	if (!imagepath)
@@ -135,7 +135,7 @@ int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 	return 1;
 }
 
-int new_parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d)
+int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d)
 {
 	enum device_type type;
 	char *p, *dev, *comma, *dir, part[42];
@@ -153,7 +153,7 @@ int new_parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *resu
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 			prom_printf("parsing full path '%s'\n", imagepath);
 #endif
-			return new_parse_device_path(imagepath, result);
+			return parse_device_path(imagepath, result);
 		}
 		imagepath = ++p;
 	}
@@ -229,10 +229,10 @@ int new_parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *resu
 			prom_printf("type %d of '%s' not handled\n", result->type, result->device);
 			return 0;
 	}
-	return new_parse_device_path(p, result);
+	return parse_device_path(p, result);
 }
 
-int new_set_def_device(const char *dev, const char *p, struct default_device *def)
+int set_def_device(const char *dev, const char *p, struct default_device *def)
 {
 	int n;
 	char *endp;

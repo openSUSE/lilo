@@ -232,7 +232,7 @@ static void print_message_file(const char *filename, const struct boot_fspec_t *
      struct boot_file_t file;
      struct boot_fspec_t msgfile;
 
-     new_parse_file_to_load_path(filename, &msgfile, b, d);
+     parse_file_to_load_path(filename, &msgfile, b, d);
 
      result = open_file(&msgfile, &file);
      if (result != FILE_ERR_OK) {
@@ -294,7 +294,7 @@ static int load_config_file(const struct boot_fspec_t *b)
 		break;
      }
      for (i = 0; names[i]; i++) {
-	     if (!new_parse_file_to_load_path(names[i], &config_fspec, b, NULL)) {
+	     if (!parse_file_to_load_path(names[i], &config_fspec, b, NULL)) {
 		     prom_printf("can not parse '%s'\n", names[i]);
 		     continue;
 	     }
@@ -330,7 +330,7 @@ static int load_config_file(const struct boot_fspec_t *b)
      if (p)
 	  prom_interpret(p);
 
-     new_set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), &default_device);
+     set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), &default_device);
 
      password = cfg_get_strg(NULL, "password");
 	
@@ -595,7 +595,7 @@ static int get_params(struct boot_param_t* params)
      label = 0;
 
      if (useconf) {
-	  new_set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), d);
+	  set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), d);
 	  p = cfg_get_strg(NULL, "pause-message");
 	  if (p)
 	       pause_message = p;
@@ -605,7 +605,7 @@ static int get_params(struct boot_param_t* params)
 	  if (p && *p) {
 	       label = imagename;
 	       imagename = p;
-	       if (new_set_def_device(cfg_get_strg(label, "device"), cfg_get_strg(label, "partition"), &img_def_device))
+	       if (set_def_device(cfg_get_strg(label, "device"), cfg_get_strg(label, "partition"), &img_def_device))
 		       d = &img_def_device;
 	       if (cfg_get_flag(label, "restricted"))
 		    restricted = 1;
@@ -664,7 +664,7 @@ static int get_params(struct boot_param_t* params)
      if (!label && password)
 	  check_password ("To boot a custom image you must enter the password.");
 
-     if (!new_parse_file_to_load_path(imagename, &params->kernel, &boot, d)) {
+     if (!parse_file_to_load_path(imagename, &params->kernel, &boot, d)) {
 	  prom_printf("%s: Unable to parse\n", imagename);
 	  return 0;
      }
@@ -673,7 +673,7 @@ static int get_params(struct boot_param_t* params)
 	  p = cfg_get_strg(label, "initrd");
 	  if (p && *p) {
 	       DEBUG_F("Parsing initrd path <%s>\n", p);
-	       if (!new_parse_file_to_load_path(p, &params->rd, &boot, d)) {
+	       if (!parse_file_to_load_path(p, &params->rd, &boot, d)) {
 		       prom_printf("%s: Unable to parse\n", p);
 		    return 0;
 	       }
@@ -1223,7 +1223,7 @@ static int yaboot_main(void)
 	  return -1;
      }
 
-     if (!new_parse_device_path(bootdevice, &boot)) {
+     if (!parse_device_path(bootdevice, &boot)) {
 	  prom_printf("%s: Unable to parse\n", bootdevice);
 	  return -1;
      }
