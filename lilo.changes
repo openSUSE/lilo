@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Sun Aug  7 19:33:19 CEST 2005 - olh@suse.de
 
-- clear the while struct in open_file in yaboot, not just a pointer
+- clear the whole struct in open_file in yaboot, not just a pointer
 
 -------------------------------------------------------------------
 Sun Aug  7 13:22:17 CEST 2005 - olh@suse.de
