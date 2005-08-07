@@ -89,17 +89,15 @@ of_open(struct boot_file_t* file, const char* dev_name,
      DEBUG_ENTER;
      DEBUG_OPEN;
 
-     if (part->sys_ind == LINUX_RAID)
-     {
-	  DEBUG_F("skipping because partition is marked LINUX_RAID\n");
- 	  DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
-	  return FILE_ERR_BAD_FSYS;
-     }
-
      strncpy(buffer, dev_name, 768);
      strcat(buffer, ":");
      if (part) {
 	  char pn[3];
+	  if (part->sys_ind == LINUX_RAID) {
+		  DEBUG_F("skipping because partition is marked LINUX_RAID\n");
+		  DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
+		  return FILE_ERR_BAD_FSYS;
+	  }
 	  sprintf(pn, "%02d", part->part_number);
 	  strcat(buffer, pn);
      }

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug  8 00:57:25 CEST 2005 - olh@suse.de
+
+- correct dereference of NULL in RAID partition patch
+
+-------------------------------------------------------------------
 Mon Aug  8 00:39:38 CEST 2005 - olh@suse.de
 
 - remove alot of code which were unused after the last change
