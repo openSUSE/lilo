@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Aug  7 20:30:59 CEST 2005 - olh@suse.de
+
+- build yaboot with -O1 -g if DEBUG is set
+
+-------------------------------------------------------------------
 Sun Aug  7 19:33:19 CEST 2005 - olh@suse.de
 
 - clear the whole struct in open_file in yaboot, not just a pointer

@@ -42,6 +42,9 @@ YBCFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG) -DYABOOT_FAT=$(YABOOT_FAT)
 YBCFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
 YBCFLAGS += -DKERNELADDR=$(KERNELADDR)
 YBCFLAGS += -I ./include
+ifeq ($(DEBUG),1)
+YBCFLAGS += -O1 -g
+endif
 
 ifeq ($(CONFIG_COLOR_TEXT),y)
 YBCFLAGS += -DCONFIG_COLOR_TEXT
@@ -110,7 +113,8 @@ lgcc = `$(CC) -print-libgcc-file-name`
 all yaboot: second/yaboot
 
 second/yaboot: $(OBJS) util/addnote
-	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o $@
+	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o $@.debug
+	strip -o $@ $@.debug
 	chmod -x $@
 	cp -p $@ $@.chrp
 	util/addnote $@.chrp
@@ -164,6 +168,7 @@ bindist: all
 
 clean:
 	rm -f second/yaboot util/addnote util/elfextract $(OBJS)
+	rm -f second/yaboot.debug
 	rm -f second/yaboot.chrp
 	rm -f util/split_of_path
 	rm -f tags
