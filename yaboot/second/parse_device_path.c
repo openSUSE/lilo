@@ -24,11 +24,10 @@ static void parse_block_device(struct boot_fspec_t *result)
 	if (!result->filename)
 		result->filename = strrchr(result->directory, '\\');
 	if (result->filename) {
-		char *p;
+		memmove(result->filename + 2, result->filename + 1, strlen(result->filename + 1) + 1);
 		result->filename++;
-		p = strdup(result->filename);
 		result->filename[0] = '\0';
-		result->filename = p;
+		result->filename++;
 	} else {
 		result->filename = result->directory;
 		result->directory = "";
@@ -85,7 +84,10 @@ int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 	if (!imagepath)
 		return 0;
 
-	result->device = strdup(imagepath);
+	result->device = malloc(strlen(imagepath) + 2);
+	if (!result->device)
+		return 0;
+	strcpy(result->device, imagepath);
 	result->partition = strchr(result->device, ':');
 	if (result->partition) {
 		*result->partition++ = '\0';
@@ -101,18 +103,6 @@ int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 			prom_printf("type %d of '%s' not handled\n", result->type, result->device);
 			return 0;
 		}
-	} else {
-		char *p = strrchr(result->device, '/');
-		if (p) {
-			result->filename = strdup(p);
-			p[1] = '\0';
-			result->directory = result->device;
-			if (!result->directory[1])
-				result->directory++;
-		} else
-			result->filename = result->device;
-		result->type = TYPE_UNKNOWN;
-		result->device = NULL;
 	}
 	return 1;
 }
