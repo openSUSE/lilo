@@ -119,6 +119,8 @@ int new_parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 	result->partition = strchr(result->device, ':');
 	if (result->partition)
 		*result->partition++ = '\0';
+	else
+		result->partition = "";
 	result->type = prom_get_devtype(result->device);
 	switch (result->type) {
 	case TYPE_BLOCK:
