@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Aug  7 20:46:10 CEST 2005 - olh@suse.de
+
+- do not vertical indent in yaboot if DEBUG is set
+
+-------------------------------------------------------------------
 Sun Aug  7 20:35:56 CEST 2005 - olh@suse.de
 
 - fill the malloc area with 'A' in yaboot
