@@ -560,7 +560,7 @@ void check_password(char *str)
      prom_interpret("reset-all");
 }
 
-int get_params(struct boot_param_t* params)
+static int get_params(struct boot_param_t* params)
 {
      int defpart;
      char *defdevice;
