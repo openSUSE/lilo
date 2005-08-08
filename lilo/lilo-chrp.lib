@@ -249,9 +249,9 @@ function running_on_chrp () {
 		    CONFIG_IMAGE_FILE[$i]=$(printf "vmlinux.%03d\n" $vmlinux_nr)
 		fi
 	    else
-		warning "image ${CONFIG_IMAGE_FILE[$i]} in
-	    #${CONFIG_IMAGE_LABEL[$i]} is missing" \
-		     "Entry ignored"
+		warning "image ${CONFIG_IMAGE_FILE[$i]} in " \
+			"${CONFIG_IMAGE_LABEL[$i]} is missing" \
+			"Entry ignored"
 		continue
 	    fi
 
