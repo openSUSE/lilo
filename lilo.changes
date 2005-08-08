@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug  8 14:16:45 CEST 2005 - jplack@suse.de
+
+- fixed trapping, reordered script to fix error handling, cleaned
+  unused stuff (#102519) 
+
+-------------------------------------------------------------------
 Thu Aug  4 01:27:28 CEST 2005 - jplack@suse.de
 
 - added code to handle parted´s incompatible switch to SI units
