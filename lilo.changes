@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug  8 11:13:27 CEST 2005 - olh@suse.de
+
+- close yaboot config file after reading to release tftp area
+
+-------------------------------------------------------------------
 Mon Aug  8 00:57:25 CEST 2005 - olh@suse.de
 
 - correct dereference of NULL in RAID partition patch

@@ -310,9 +310,9 @@ static int load_config_file(const struct boot_fspec_t *b)
 
      /* Read it */
      sz = file.fs->read(&file, CONFIG_FILE_MAX, conf_file);
+     file.fs->close(&file);
      if (sz <= 0) {
 	  prom_printf("Error, can't read config file\n");
-	  file.fs->close(&file);
 	  goto bail;
      }
      prom_printf("Config file '%s' read, %d bytes\n", names[i], sz);
