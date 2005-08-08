@@ -1,5 +1,6 @@
 # $Id$
 SUBMIT_DIR=/work/src/done/STABLE
+BUILD=/work/src/bin/build
 BUILD_DIST=ppc
 BUILD_ROOT=/abuild/buildsystem.$$HOST.$$LOGNAME
 BUILD_DIR=$(BUILD_ROOT)/usr/src/packages/RPMS
@@ -52,7 +53,7 @@ submit:	.submitted
 .built:	.exportdir
 	@rm -f .submitted
 	@echo "Trying to compile lilo package under $$(<.exportdir)"
-	if { cd $$(<.exportdir); export BUILD_DIST=$(BUILD_DIST) BUILD_ROOT=$(BUILD_ROOT); sudo build; }; then touch $@; else echo Compile failed; exit 1; fi
+	if { cd $$(<.exportdir); export BUILD_DIST=$(BUILD_DIST) BUILD_ROOT=$(BUILD_ROOT); sudo $BUILD; }; then touch $@; else echo Compile failed; exit 1; fi
 
 .submitted: .built
 	@echo "Target 'submit' will copy $$(<.exportdir) to $(SUBMIT_DIR)"
