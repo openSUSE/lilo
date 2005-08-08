@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug  8 14:19:04 CEST 2005 - jplack@suse.de
+
+- fixed trapping, reordered script to fix error handling, cleaned
+  unused stuff (#102519)
+
+-------------------------------------------------------------------
 Mon Aug  8 11:13:27 CEST 2005 - olh@suse.de
 
 - close yaboot config file after reading to release tftp area

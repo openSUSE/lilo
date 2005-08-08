@@ -8,7 +8,6 @@
 # jplack@suse.de
 #
 
-
 # interprete a file like the following:
 
 
@@ -27,11 +26,13 @@
 ##     append = "hwinfo=-cdrom 3 desktop"
 ##
 
+## requires    fdisk   parted  stat
+
+
 # Language kills all parsing effort
 unset LANG
 unset LC_CTYPE
 
-#CONFIG_LILO_CONF=~olh/ppc/lilo/lilo.conf
 CONFIG_LILO_CONF=/etc/lilo.conf
 SHOW_OF_PATH="/bin/show_of_path.sh --quiet"
 DEFAULT_BOOTFOLDER=suseboot
@@ -39,8 +40,6 @@ TEMP="${TMPDIR:-/tmp}/ppc_lilo"
 
 shopt -s extglob
 
-
-## requires    fdisk   parted  stat
 
 FDISK=/sbin/fdisk
 PARTED="/usr/sbin/parted -s"
@@ -50,39 +49,16 @@ read a b c  <<< "${PVERSION//./ }"
 PVERSION=$(( a*1000000 + b*1000 + c ))	# e.g. 1006022
 STAT_CMD=/usr/bin/stat
 
-# check for requirements:
-#   /proc
-#   /sys
 
-trap '{
+# trap EXIT function
+function clean_environment () {
     cd /
     [ $_sysfs_mounted ] && umount /sys
     [ $_proc_mounted ] && umount /proc
-}' EXIT
+    [[ $(</proc/mounts) == *$TEMP/boot\ * ]] && umount $TEMP/boot
+    rm -rf $TEMP
+} #end function clean_environment
 
-# assert that /proc is mounted, else try to mount, on fail complain
-if test -d /proc/1; then
-    :
-elif mount -t proc proc /proc; then
-    _proc_mounted=1
-else
-    error "proc not mounted and attempt to mount /proc failed"
-fi
-
-
-# assert that /sys is mounted, else try to mount, on fail complain
-if test -d /sys/block; then
-    :
-elif mount -t sysfs sysfs /sys; then
-    _sysfs_mounted=1
-else
-    error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
-fi
-
-
-#
-#  parse options
-#
 
 function Usage() {
     # TODO: print a usage message that makes sense ...
@@ -210,7 +186,7 @@ function is_on_primary() {
 }
 
 # convert a number of 512 byte sectors in a format that parted accepts and the
-# other way `round
+# other way `round. Behaviour changed in subminor version. Hurray :-(
 if (( PVERSION > 1006022 )); then
 
     function sect2parted() {
@@ -250,23 +226,18 @@ function real_device () {
     local range
     local IFS=:
 
-    # assert that /sys is mounted, else try to mount,
-    # on fail fall back to error value
-    if test -d /sys/block || mount -t sysfs sysfs /sys; then
-	# that and check whether the integer 
-	while read range; do
-	    read major minor < ${range/range/dev}
-	    (( real = major * 256 + minor ))
-	    range=$(<$range)
-	    if (( dev >= real && dev < real + range )); then
-		echo $real
-		return;
-	    fi
-	done < <( find /sys/block -name range )
-    fi
+    while read range; do
+	read major minor < ${range/range/dev}
+	(( real = major * 256 + minor ))
+	range=$(<$range)
+	if (( dev >= real && dev < real + range )); then
+	    echo $real
+	    return;
+	fi
+    done < <( find /sys/block -name range )
+
     echo 0000
 }
-
 
 function device_of_file () {
     # print device number in decimal given a file path
@@ -310,6 +281,17 @@ function device_nr () {
 }
 
 
+function fsize() { # get file size in blocks
+    local s f r
+    if [ -z "$1" ]; then
+	echo 0
+    else
+	read s f r < <(ls -Ls --block-size=512 $1)
+	echo $s
+    fi
+}
+
+
 function check_arch () {
     # check for the current ppc subarch
     unset COPY_BOOT_FILES
@@ -342,6 +324,8 @@ function check_arch () {
 #   main script
 #
 
+#  parse options
+#
 while [ "$1" ]; do case "$1" in
     #--lilo-rootdrive)
     #    if ! [ "$2" ]; then
@@ -418,13 +402,17 @@ function parse_config_file () {
     # OPTION_APPEND contains the global or local append= strings
     # OPTION_INITRD containes the global or local initrd filename
     # OPTION_IMAGE_COPY contains a flag to force copy to the boot partition
-    # internal vars:
     # CONFIG_PARSE_HASIMAGE is a flag if we have a image section.
-    # CONFIG_IMAGE_FILE contains the kernel image for a section
-    # CONFIG_IMAGE_OTHER contains the device of MacOS
+    # CONFIG_IMAGE_FILE array contains the kernel image for a section
+    # CONFIG_IMAGE_OTHER array contains the device of MacOS
+    # CONFIG_IMAGE_COPY array contains copy flag for images on macs
     # CONFIG_IMAGE_COUNT is a simple counter of image sections
     declare option
     local separator value
+
+    if [ ! -f $CONFIG_LILO_CONF ]; then
+	error "Config file $CONFIG_LILO_CONF not found"
+    fi
 
     unset CONFIG_PARSE_HASIMAGE
     CONFIG_IMAGE_COUNT=0
@@ -604,34 +592,42 @@ function check_config_file () {
 } #end function check_config_file
 
 
-function fsize() { # get file size in blocks
-    local s f r
-    if [ -z "$1" ]; then
-	echo 0
-    else
-	read s f r < <(ls -Ls --block-size=512 $1)
-	echo $s
-    fi
-}
+#
+# prepare environment:
+#
+rm -rf $TEMP
+mkdir -p $TEMP
+trap "clean_environment" EXIT INT
 
 
-function prepare_environment () {
-    rm -rf $TEMP
-    mkdir -p $TEMP
-    trap "clean_environment" EXIT INT
-} #end function prepare_environment
+# check for requirements:
+#   /proc
+#   /sys
+
+# assert that /proc is mounted, else try to mount, on fail complain
+if test -d /proc/1; then
+    :
+elif mount -t proc proc /proc; then
+    _proc_mounted=1
+else
+    error "proc not mounted and attempt to mount /proc failed"
+fi
 
 
-function clean_environment () {
-    [[ $(</proc/mounts) == *$TEMP/boot\ * ]] && umount $TEMP/boot
-    rm -rf $TEMP
-} #end function clean_environment
+# assert that /sys is mounted, else try to mount, on fail complain
+if test -d /sys/block; then
+    :
+elif mount -t sysfs sysfs /sys; then
+    _sysfs_mounted=1
+else
+    error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
+fi
+
 
 #
 # here we go
 #
 
-prepare_environment
 check_arch
 parse_config_file
 check_config_file
@@ -643,7 +639,6 @@ case "$MACHINE" in
     prep)      running_on_prep     ;;
     iseries)   running_on_iseries  ;;
 esac
-
 
 #
 #
