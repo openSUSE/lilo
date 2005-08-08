@@ -154,10 +154,11 @@ static int given_bootargs_by_user;
 /* Entry, currently called directly by crt0 (bss not inited) */
 
 extern char __bss_start[];
+extern char _start[];
 extern char _end[];
 
 int
-yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
+yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
 {
      int result;
      void* malloc_base;
@@ -167,7 +168,7 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
      memset(__bss_start, 0, _end - __bss_start);
   	
      /* Initialize OF interface */
-     prom_init ((prom_entry) r5);
+     prom_init (r3, r4, (prom_entry) r5, sp, _start, _end);
 	
      /* Allocate some memory for malloc'ator */
      malloc_base = prom_claim((void *)MALLOCADDR, MALLOCSIZE, 0);

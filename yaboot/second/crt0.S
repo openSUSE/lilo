@@ -15,6 +15,7 @@ _GLOBAL(_start)
 1:	stwu	r0,4(r10)
 	cmp	0,r10,r11
 	bne	1b
+	mr	r6,r1
 	b	yaboot_start
 
 #if 0

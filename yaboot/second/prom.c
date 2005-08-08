@@ -238,7 +238,7 @@ prom_get_devtype (char *device)
 }
 
 void
-prom_init (prom_entry pp)
+prom_init (unsigned long r3, unsigned long r4, prom_entry pp, void *sp, char *_start, char *_end)
 {
      prom = pp;
 
@@ -256,7 +256,7 @@ prom_init (prom_entry pp)
 	  prom_abort ("\nCan't get mmu handle");
 
   // move cursor to fresh line
-     prom_printf ("\n");
+     prom_printf ("\n%08lx/%08lx/%p sp: %p\nyaboot at %p-%p\n", r3, r4, pp, sp, _start, _end);
 
      /* Add a few OF methods (thanks Darwin) */
 #if DEBUG

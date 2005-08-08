@@ -38,7 +38,7 @@ typedef void *phandle;
 struct prom_args;
 typedef int (*prom_entry)(struct prom_args *);
 
-extern void prom_init (prom_entry pe);
+extern void prom_init (unsigned long r3, unsigned long r4, prom_entry pp, void *sp, char *_start, char *_end);
 
 extern prom_entry prom;
 
