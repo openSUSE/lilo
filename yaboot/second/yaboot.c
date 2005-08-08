@@ -153,8 +153,8 @@ static int given_bootargs_by_user;
 
 /* Entry, currently called directly by crt0 (bss not inited) */
 
-extern char* __bss_start;
-extern char* _end;
+extern char __bss_start[];
+extern char _end[];
 
 int
 yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
@@ -164,7 +164,7 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5)
      prom_handle cpus[1];
 
      /* OF seems to do it, but I'm not very confident */
-     memset(&__bss_start, 0, &_end - &__bss_start);
+     memset(__bss_start, 0, _end - __bss_start);
   	
      /* Initialize OF interface */
      prom_init ((prom_entry) r5);
