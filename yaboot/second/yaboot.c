@@ -356,7 +356,7 @@ static int load_config_file(const struct boot_fspec_t *b)
 	  sprintf(temp, "%x to background-color", bgcolor); 
 	  prom_interpret(temp); 
 #if !DEBUG
-	  prom_printf("\xc");
+	  prom_printf("\xc\n");
 #endif /* !DEBUG */
      }
      if (fgcolor >= 0) {
@@ -1199,7 +1199,7 @@ setup_display(void)
 #endif /* COLOR_TEST */
 
 #if !DEBUG
-     prom_printf("\xc");
+     prom_printf("\xc\n");
 #endif /* !DEBUG */
 
 #endif /* CONFIG_SET_COLORMAP */

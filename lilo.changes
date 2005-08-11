@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug 11 23:11:51 CEST 2005 - olh@suse.de
+
+- print newline after clear screen to get indention of next line
+
+-------------------------------------------------------------------
 Thu Aug 11 16:25:35 CEST 2005 - olh@suse.de
 
 - append comma to enet:bootp bootpath
