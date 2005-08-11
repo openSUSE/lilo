@@ -1213,15 +1213,13 @@ static int yaboot_main(void)
 	  setup_display();
      }
 	
-     prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
-     DEBUG_F("/chosen/bootpath = %s\n", bootdevice);
-     if (bootdevice[0] == 0) {
-	  prom_get_options("boot-device", bootdevice, sizeof(bootdevice));
-	  DEBUG_F("boot-device = %s\n", bootdevice);
-     }
-     if (bootdevice[0] == 0) {
-	  prom_printf("Couldn't determine boot device\n");
-	  return -1;
+     if (bootdevice[0] == '\0') {
+	     prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
+	     DEBUG_F("/chosen/bootpath = %s\n", bootdevice);
+	     if (bootdevice[0] == 0) {
+		     prom_printf("Couldn't determine boot device\n");
+		     return -1;
+	     }
      }
 
      if (!parse_device_path(bootdevice, &boot)) {

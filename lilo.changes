@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug 11 13:34:03 CEST 2005 - olh@suse.de
+
+- look only for /chosen/bootpath is global bootdevice is empty
+
+-------------------------------------------------------------------
 Mon Aug  8 14:49:16 CEST 2005 - olh@suse.de
 
 - print stack and prom pointer, and yaboot memory range on startup
