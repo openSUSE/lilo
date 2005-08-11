@@ -34,6 +34,9 @@ static void parse_block_device(struct boot_fspec_t *result)
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
+	if (!result->partition)
+		return;
+
 	result->part = strtol(result->partition, &ip, 10);
 	DEBUG_F("part '%d', partition '%s', ip '%s'\n", result->part, result->partition, ip);
 	if (result->part)
@@ -65,6 +68,9 @@ static void parse_net_device(struct boot_fspec_t *result)
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
+	if (!result->partition)
+		return;
+
 	p = result->partition;
 
 	if (strncmp("bootp", p, 5) == 0) {
@@ -117,8 +123,6 @@ int parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 	result->partition = strchr(result->device, ':');
 	if (result->partition)
 		*result->partition++ = '\0';
-	else
-		result->partition = "";
 	result->type = prom_get_devtype(result->device);
 	switch (result->type) {
 	case TYPE_BLOCK:
@@ -138,7 +142,7 @@ int parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d)
 {
 	enum device_type type;
-	char *p, *dev, *comma, *dir, part[42];
+	char *p, *dev, *comma, *dir, part[42], *ip_b;
 	int len, partition = -1;
 
 	DEBUG_F("imagepath '%s'\n", imagepath);
@@ -173,10 +177,10 @@ int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, 
 		}
 	}
 
+	ip_b = comma = dir = "";
 	switch (type) {
 		case TYPE_BLOCK:
 			part[0] = '\0';
-			comma = dir = "";
 			if (p)
 				len = strlen(dev) + 1 + strlen(imagepath);
 			else {
@@ -188,7 +192,7 @@ int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, 
 				if (partition >= 0)
 					sprintf(part, "%d", partition);
 				comma = ",";
-				if (imagepath[0] != '/' && imagepath[0] != '\\' && !d)
+				if (imagepath[0] != '/' && imagepath[0] != '\\' && !d && b->directory)
 					dir = b->directory;
 				len = strlen(dev) + 1 + strlen(part) + 1 + strlen(dir) + strlen(imagepath);
 			}
@@ -205,7 +209,9 @@ int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, 
 			if (d)
 				len = strlen(dev) + 1;
 			else {
-				len = strlen(dev) + 1 + strlen(b->ip_before_filename) + 1 + strlen(imagepath);
+				if (b->ip_before_filename)
+					ip_b = b->ip_before_filename;
+				len = strlen(dev) + 1 + strlen(ip_b) + 1 + strlen(imagepath);
 				if (b->ip_after_filename)
 					len += 1 + strlen(b->ip_after_filename);
 			}
@@ -217,9 +223,9 @@ int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, 
 				sprintf(p, "%s:%s", dev, imagepath);
 			else {
 				if (b->ip_after_filename)
-					sprintf(p, "%s:%s,%s,%s", dev, b->ip_before_filename, imagepath, b->ip_after_filename);
+					sprintf(p, "%s:%s,%s,%s", dev, ip_b, imagepath, b->ip_after_filename);
 				else
-					sprintf(p, "%s:%s,%s", dev, b->ip_before_filename, imagepath);
+					sprintf(p, "%s:%s,%s", dev, ip_b, imagepath);
 			}
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 			prom_printf("parsing net path '%s' with len %d\n", p, len);

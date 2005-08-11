@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug 11 15:37:45 CEST 2005 - olh@suse.de
+
+- handle missing colon in /chosen/bootpath in yaboot
+
+-------------------------------------------------------------------
 Thu Aug 11 13:34:03 CEST 2005 - olh@suse.de
 
 - look only for /chosen/bootpath is global bootdevice is empty
