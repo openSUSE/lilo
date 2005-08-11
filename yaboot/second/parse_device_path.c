@@ -75,8 +75,11 @@ static void parse_net_device(struct boot_fspec_t *result)
 
 	if (strncmp("bootp", p, 5) == 0) {
 		p = strchr(p, ',');
-		if (!p)
+		if (!p) {
+			result->partition[5] = ',';
+			result->partition[0] = '\0';
 			goto bootp;
+		}
 		p++;
 	}
 	if (strncmp("speed=", p, 6) == 0) {

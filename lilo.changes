@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug 11 16:25:35 CEST 2005 - olh@suse.de
+
+- append comma to enet:bootp bootpath
+
+-------------------------------------------------------------------
 Thu Aug 11 15:37:45 CEST 2005 - olh@suse.de
 
 - handle missing colon in /chosen/bootpath in yaboot
