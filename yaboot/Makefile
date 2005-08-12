@@ -36,11 +36,14 @@ CROSS =
 #
 YBCFLAGS = -Os $(CFLAGS) -nostdinc -Wall -isystem `gcc -print-file-name=include`
 YBCFLAGS += -DVERSION=\"${VERSION}\"	#"
-YBCFLAGS += -DTEXTADDR=$(TEXTADDR) -DDEBUG=$(DEBUG)
+YBCFLAGS += -DTEXTADDR=$(TEXTADDR)
 YBCFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
 YBCFLAGS += -DKERNELADDR=$(KERNELADDR)
 YBCFLAGS += -I ./include
-ifeq ($(DEBUG),1)
+ifneq ($(DEBUG),0)
+YBCFLAGS += -DDEBUG=$(DEBUG)
+endif
+ifeq ($(DEBUG),2)
 YBCFLAGS += -O1 -g
 endif
 

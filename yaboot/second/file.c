@@ -49,7 +49,7 @@ static int file_block_open(struct boot_file_t *file, const struct boot_fspec_t* 
      sprintf(f, "%s%s", spec->directory, spec->filename);
      DEBUG_F("filename '%s'\n", f);
 
-#if DEBUG
+#ifdef DEBUG
      if (parts)
 	  prom_printf("partitions:\n");
      else
@@ -69,7 +69,7 @@ static int file_block_open(struct boot_file_t *file, const struct boot_fspec_t* 
 	  }
 	  if ((partition >= 0) && (partition == p->part_number))
 	       found = p;
-#if DEBUG
+#ifdef DEBUG
 	  if (found)
 	       prom_printf(" (match)\n");
 #endif						

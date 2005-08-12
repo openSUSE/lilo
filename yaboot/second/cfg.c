@@ -371,7 +371,7 @@ int cfg_parse (const char *cfg_file, char *buff, int len, int cpu)
 	  if (!cfg_next (&item, &value))
 	       return 0;
 	  if (!cfg_set (item, value)) {
-#if DEBUG
+#ifdef DEBUG
 	       prom_printf("Can't set item %s to value %s\n", item, value);
 #endif	    
 	  }

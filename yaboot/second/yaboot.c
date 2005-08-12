@@ -355,7 +355,7 @@ static int load_config_file(const struct boot_fspec_t *b)
 	  char temp[64];
 	  sprintf(temp, "%x to background-color", bgcolor); 
 	  prom_interpret(temp); 
-#if !DEBUG
+#ifndef DEBUG
 	  prom_printf("\xc\n");
 #endif /* !DEBUG */
      }
@@ -1198,7 +1198,7 @@ setup_display(void)
      prom_printf("\x1b[1;37m\x1b[2;40m");	
 #endif /* COLOR_TEST */
 
-#if !DEBUG
+#ifndef DEBUG
      prom_printf("\xc\n");
 #endif /* !DEBUG */
 
@@ -1229,7 +1229,7 @@ static int yaboot_main(void)
 
      useconf = load_config_file(&boot);
 
-#if DEBUG == 0
+#ifndef DEBUG
      if (stdout_is_screen)
 	     for(i = 0; i < 10 ; i++)
 		     prom_printf("\n");

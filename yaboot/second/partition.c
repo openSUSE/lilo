@@ -129,7 +129,7 @@ partition_mac_lookup( const char *dev_name, prom_handle disk,
 		    valid = 1;
 		    break;
 	       }
-#if DEBUG
+#ifdef DEBUG
 	  if (!valid)
 	       prom_printf( "MAC: Unsupported partition #%d; type=%s\n",
 			    block, part->type );

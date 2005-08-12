@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 12 19:38:53 CEST 2005 - olh@suse.de
+
+- change all #if DEBUG into #ifdef DEBUG
+  adjust Makefile to pass -O1 -g if DEBUG=2
+
+-------------------------------------------------------------------
 Thu Aug 11 23:11:51 CEST 2005 - olh@suse.de
 
 - print newline after clear screen to get indention of next line

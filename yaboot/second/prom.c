@@ -259,7 +259,7 @@ prom_init (unsigned long r3, unsigned long r4, prom_entry pp, void *sp, char *_s
      prom_printf ("\n%08lx/%08lx/%p sp: %p\nyaboot at %p-%p\n", r3, r4, pp, sp, _start, _end);
 
      /* Add a few OF methods (thanks Darwin) */
-#if DEBUG
+#ifdef DEBUG
      prom_printf ("Adding OF methods...\n");
 #endif  
 

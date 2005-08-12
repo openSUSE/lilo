@@ -18,7 +18,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#if DEBUG
+#ifdef DEBUG
 # define DEBUG_ENTER prom_printf( "--> %s\n", __PRETTY_FUNCTION__ )
 # define DEBUG_LEAVE(str) \
     prom_printf( "<-- %s - %s\n", __PRETTY_FUNCTION__, #str )
