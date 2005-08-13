@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug 13 11:48:20 CEST 2005 - olh@suse.de
+
+- always free config file buffer after parsing
+
+-------------------------------------------------------------------
 Fri Aug 12 19:38:53 CEST 2005 - olh@suse.de
 
 - change all #if DEBUG into #ifdef DEBUG

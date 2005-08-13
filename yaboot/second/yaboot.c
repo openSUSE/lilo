@@ -377,7 +377,7 @@ static int load_config_file(const struct boot_fspec_t *b)
      result = 1;
     
 bail:
-     if (result != 1 && conf_file)
+     if (conf_file)
 	  free(conf_file);
     	
      return result;
