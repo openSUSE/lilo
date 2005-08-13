@@ -64,8 +64,6 @@ CONFIG cf_options[] =
      {cft_strg, "initrd", NULL},
      {cft_flag, "initrd-prompt", NULL},
      {cft_strg, "initrd-size", NULL},
-     {cft_flag, "pause-after", NULL},
-     {cft_strg, "pause-message", NULL},
      {cft_strg, "init-code", NULL},
      {cft_strg, "init-message", NULL},
      {cft_strg, "fgcolor", NULL},
@@ -91,8 +89,6 @@ CONFIG cf_image[] =
      {cft_strg, "initrd", NULL},
      {cft_flag, "initrd-prompt", NULL},
      {cft_strg, "initrd-size", NULL},
-     {cft_flag, "pause-after", NULL},
-     {cft_strg, "pause-message", NULL},
      {cft_flag, "novideo", NULL},
      {cft_strg, "sysmap", NULL}, /* ignored */
      {cft_end, NULL, NULL}};

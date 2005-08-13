@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug 13 14:10:44 CEST 2005 - olh@suse.de
+
+- remove unused code for pause-after/pause-message options
+
+-------------------------------------------------------------------
 Sat Aug 13 12:17:17 CEST 2005 - olh@suse.de
 
 - do not print garbage in reiserfs_read_super debug output

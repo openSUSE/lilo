@@ -144,11 +144,6 @@ static int fgcolor = 15;
 static int bgcolor;
 #endif /* CONFIG_COLOR_TEXT */
 
-static int pause_after;
-static char *pause_message = "Type go<return> to continue.\n";
-static char given_bootargs[1024];
-static int given_bootargs_by_user;
-
 #define DEFAULT_TIMEOUT		-1
 
 /* Entry, currently called directly by crt0 (bss not inited) */
@@ -475,10 +470,6 @@ static char * make_params(char *label, char *params)
 	  *q++ = ' ';
      }
      *q = 0;
-     pause_after = cfg_get_flag (label, "pause-after");
-     p = cfg_get_strg(label, "pause-message");
-     if (p)
-	  pause_message = p;
      if (params)
 	  strcpy(q, params);
 
@@ -530,7 +521,6 @@ static int get_params(struct boot_param_t* params)
      int restricted = 0;
 
      d = &default_device;
-     pause_after = 0;
      memset(params, 0, sizeof(*params));
      params->args = "";
     
@@ -583,8 +573,6 @@ static int get_params(struct boot_param_t* params)
      } else if (!singlekey) {
 	  cmdedit(maintabfunc, 0);
 	  prom_printf("\n");
-	  strcpy(given_bootargs, cbuff);
-	  given_bootargs_by_user = 1;
 	  imagename = cbuff;
 	  word_split(&imagename, &params->args);
      }
@@ -597,9 +585,6 @@ static int get_params(struct boot_param_t* params)
 
      if (useconf) {
 	  set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), d);
-	  p = cfg_get_strg(NULL, "pause-message");
-	  if (p)
-	       pause_message = p;
 	  if (cfg_get_flag(NULL, "restricted"))
 	       restricted = 1;
 	  p = cfg_get_strg(imagename, "image");
