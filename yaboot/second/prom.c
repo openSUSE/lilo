@@ -257,48 +257,6 @@ prom_init (unsigned long r3, unsigned long r4, prom_entry pp, void *sp, char *_s
 
   // move cursor to fresh line
      prom_printf ("\n%08lx/%08lx/%p sp: %p\nyaboot at %p-%p\n", r3, r4, pp, sp, _start, _end);
-
-     /* Add a few OF methods (thanks Darwin) */
-#ifdef DEBUG
-     prom_printf ("Adding OF methods...\n");
-#endif  
-
-     prom_interpret (
-	  /* All values in this forth code are in hex */
-	  "hex "	
-	  /* Those are a few utilities ripped from Apple */
-	  ": D2NIP decode-int nip nip ;\r"	// A useful function to save space
-	  ": GPP$ get-package-property 0= ;\r"	// Another useful function to save space
-	  ": ^on0 0= if -1 throw then ;\r"	// Bail if result zero
-	  ": $CM $call-method ;\r"
-	  );
-
-     /* Some forth words used by the release method */
-     prom_interpret (
-	  " \" /chosen\" find-package if "
-		 "dup \" memory\" rot GPP$ if "
-			 "D2NIP swap "				 // ( MEMORY-ihandle "/chosen"-phandle )
-			 "\" mmu\" rot GPP$ if "
-				 "D2NIP "				 // ( MEMORY-ihandle MMU-ihandle )
-			 "else "
-				 "0 "					 // ( MEMORY-ihandle 0 )
-			 "then "
-		 "else "
-			 "0 0 "						 // ( 0 0 )
-		 "then "
-	  "else "
-		 "0 0 "							 // ( 0 0 )
-	  "then\r"
-	  "value mmu# "
-	  "value mem# "
-	  );
-
-     prom_interpret (
-	  ": ^mem mem# $CM ; "
-	  ": ^mmu mmu# $CM ; "
-	  );
-
-     DEBUG_F("OF interface initialized.\n");
 }
 
 prom_handle
@@ -611,25 +569,6 @@ void
 prom_release(void *virt, unsigned int size)
 {
      call_prom ("release", 2, 0, virt, size);
-#if 0 /* this is bullshit, newworld OF RELEASE method works fine. */
-
-     /* release in not enough, it needs also an unmap call. This bit of forth
-      * code inspired from Darwin's bootloader but could be replaced by direct
-      * calls to the MMU package if needed
-      */
-     call_prom ("interpret", 3, 1,
-#if DEBUG
-		".\" ReleaseMem:\" 2dup . . cr "
-#endif
-		"over \" translate\" ^mmu "		// Find out physical base
-		"^on0 "					// Bail if translation failed
-		"drop "					// Leaving phys on top of stack
-		"2dup \" unmap\" ^mmu "			// Unmap the space first
-		"2dup \" release\" ^mmu "		// Then free the virtual pages
-		"\" release\" ^mem "			// Then free the physical pages
-		,size, virt 
-	  );
-#endif /* bullshit */
 }
 
 #if 0

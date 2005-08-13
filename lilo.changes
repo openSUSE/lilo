@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug 13 14:51:17 CEST 2005 - olh@suse.de
+
+- remove unused firmware code for release method
+
+-------------------------------------------------------------------
 Sat Aug 13 14:10:44 CEST 2005 - olh@suse.de
 
 - remove unused code for pause-after/pause-message options
