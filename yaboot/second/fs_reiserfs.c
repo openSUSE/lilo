@@ -381,13 +381,22 @@ reiserfs_read_super( void )
 {
      struct reiserfs_super_block super;
      __u64 superblock = REISERFS_SUPERBLOCK_BLOCK;
+     char s_magic[sizeof(super.s_magic) + 1];
+     int i;
 
      if (read_disk_block(INFO->file, superblock, 0, sizeof(super), &super) != sizeof(super)) {
 	  DEBUG_F("read_disk_block failed!\n");
 	  return 0;
      }
+     for (i = 0; i < sizeof(s_magic) - 1; i++) {
+	     if ((super.s_magic[i] & 0x7f) < ' ')
+		     s_magic[i] = '.';
+	     else
+		     s_magic[i] = super.s_magic[i] & 0x7f;
+     }
+     s_magic[i] = '\0';
 
-     DEBUG_F( "Found super->magic: \"%s\"\n", super.s_magic );
+     DEBUG_F( "Found super->magic: \"%s\"\n", s_magic );
 
      if( strcmp( REISER2FS_SUPER_MAGIC_STRING, super.s_magic ) != 0 &&
 	 strcmp( REISERFS_SUPER_MAGIC_STRING, super.s_magic ) != 0 )

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug 13 12:17:17 CEST 2005 - olh@suse.de
+
+- do not print garbage in reiserfs_read_super debug output
+
+-------------------------------------------------------------------
 Sat Aug 13 11:48:20 CEST 2005 - olh@suse.de
 
 - always free config file buffer after parsing
