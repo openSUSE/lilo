@@ -1,5 +1,5 @@
 # $Id$
-SUBMIT_DIR=/work/src/done/STABLE
+SUBMIT_DIR=/work/src/done/PPC
 BUILD=/work/src/bin/build
 BUILD_DIST=ppc
 BUILD_ROOT=/abuild/buildsystem.$$HOST.$$LOGNAME
