@@ -163,7 +163,11 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
      memset(__bss_start, 0, _end - __bss_start);
   	
      /* Initialize OF interface */
-     prom_init (r3, r4, (prom_entry) r5, sp, _start, _end);
+     prom_init (r3, r4, (prom_entry) r5);
+
+     prom_printf("\nyaboot starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%08lx;0x%p)\n",
+				_start, _end, r3, r4, r5, sp);
+
 	
      /* Allocate some memory for malloc'ator */
      malloc_base = prom_claim((void *)MALLOCADDR, MALLOCSIZE, 0);

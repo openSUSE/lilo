@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Aug 14 21:55:22 CEST 2005 - olh@suse.de
+
+- print stack pointer and yaboot location in yaboot
+
+-------------------------------------------------------------------
 Sun Aug 14 20:54:18 CEST 2005 - olh@suse.de
 
 - print stack pointer in bootheader, print hint about cmdline edit

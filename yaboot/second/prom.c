@@ -238,7 +238,7 @@ prom_get_devtype (char *device)
 }
 
 void
-prom_init (unsigned long r3, unsigned long r4, prom_entry pp, void *sp, char *_start, char *_end)
+prom_init (unsigned long r3, unsigned long r4, prom_entry pp)
 {
      prom = pp;
 
@@ -254,9 +254,6 @@ prom_init (unsigned long r3, unsigned long r4, prom_entry pp, void *sp, char *_s
 	  prom_abort ("\nCan't get mem handle");
      if (prom_get_chosen ("mmu", &prom_mmu, sizeof(prom_mmu)) <= 0)
 	  prom_abort ("\nCan't get mmu handle");
-
-  // move cursor to fresh line
-     prom_printf ("\n%08lx/%08lx/%p sp: %p\nyaboot at %p-%p\n", r3, r4, pp, sp, _start, _end);
 }
 
 prom_handle
