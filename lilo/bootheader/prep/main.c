@@ -412,7 +412,7 @@ static void bootinfo_append(unsigned long tag, unsigned long size, void *data)
 
 static
 struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
-				    unsigned long cksum)
+				    unsigned long cksum, void *sp, void *old_sp)
 {
 	struct bi_record *rec;
 	unsigned long initrd_loc, TotalMemory;
@@ -429,6 +429,7 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	if (promptr)
 		printf("Open Firmware: 0x%p\n", promptr);
 
+	printf("stack at:      0x%08lx 0x%08lx\n", sp, old_sp);
 	/*
 	 * Reveal where we were loaded at and where we
 	 * were relocated to.
@@ -516,7 +517,7 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 
 unsigned long
 load_kernel(unsigned long load_addr, int num_words, unsigned long cksum,
-	    RESIDUAL * residual, void *OFW)
+	    RESIDUAL * residual, void *OFW, void *sp, void *old_sp)
 {
 	int start_multi = 0;
 	unsigned int pci_viddid, pci_did, tulip_pci_base, tulip_base;
@@ -599,7 +600,7 @@ load_kernel(unsigned long load_addr, int num_words, unsigned long cksum,
 	}
 
 	/* Call decompress_kernel */
-	decompress_kernel(load_addr, num_words, cksum);
+	decompress_kernel(load_addr, num_words, cksum, sp, old_sp);
 
 	if (start_multi) {
 		residual->VitalProductData.SmpIar = (unsigned long)0xc0;

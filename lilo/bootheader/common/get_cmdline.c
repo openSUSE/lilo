@@ -9,7 +9,7 @@ int get_cmdline(char *p, int l, int max)
 {
 	int c, escape, tmp, len = l;
 
-	printf("cmdline: %s", p);
+	printf("edit kernel cmdline within 10 seconds and press RETURN:\n%s", p);
 	tmp = 100;
 	do {
 		c = getchar(0);

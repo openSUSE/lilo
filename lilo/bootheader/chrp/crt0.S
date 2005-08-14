@@ -53,5 +53,6 @@ _start:
 2:	stwu	r0,4(r8)		# Clear out a word
 	bdnz	2b			# Keep clearing until done
 3:
+	mr	r6,r1
 	b	start
 

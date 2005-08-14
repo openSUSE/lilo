@@ -182,6 +182,7 @@ start_ldr:
 	mr	r5,r6		/* Checksum */
 	mr	r6,r11		/* Residual data */
 	mr	r7,r25		/* Validated OFW interface */
+	mr	r8,r1
 	bl	load_kernel
 
 	/*

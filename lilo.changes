@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Aug 14 20:54:18 CEST 2005 - olh@suse.de
+
+- print stack pointer in bootheader, print hint about cmdline edit
+
+-------------------------------------------------------------------
 Sat Aug 13 14:51:17 CEST 2005 - olh@suse.de
 
 - remove unused firmware code for release method
