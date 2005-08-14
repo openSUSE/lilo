@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Aug 14 22:10:34 CEST 2005 - olh@suse.de
+
+- claim the mem range of the yaboot executable.
+  some firmware versions dont do it
+
+-------------------------------------------------------------------
 Sun Aug 14 21:55:22 CEST 2005 - olh@suse.de
 
 - print stack pointer and yaboot location in yaboot

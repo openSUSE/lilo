@@ -168,6 +168,9 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
      prom_printf("\nyaboot starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%08lx;0x%p)\n",
 				_start, _end, r3, r4, r5, sp);
 
+     /* the executable memrange may not be claimed by firmware */
+     if (prom_claim(_start, _end - _start, 0) == _start)
+	     prom_printf("brokenfirmware did not claim executable memory, fixed it myself\n");
 	
      /* Allocate some memory for malloc'ator */
      malloc_base = prom_claim((void *)MALLOCADDR, MALLOCSIZE, 0);
