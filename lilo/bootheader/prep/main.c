@@ -508,6 +508,8 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 		bootinfo_append(BI_INITRD, sizeof(initrd), &initrd);
 	}
 	printf("Now booting the kernel\n");
+	if (promptr)
+		printf("You may not see any kernel console output,\nuse a serial console on COM1 in this case.\n");
 
 	if (vmlinux_buf)
 		memmove(0x0, (void *)vmlinux_buf, zimage_size);

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug 15 14:44:44 CEST 2005 - olh@suse.de
+
+- add a hint for PReP with openfirmware about console usage
+  in bootheader
+
+-------------------------------------------------------------------
 Mon Aug 15 13:06:09 CEST 2005 - olh@suse.de
 
 - move init-message/message output after vertical indention
