@@ -238,7 +238,7 @@ prom_get_devtype (char *device)
 }
 
 void
-prom_init (unsigned long r3, unsigned long r4, prom_entry pp)
+prom_init (prom_entry pp)
 {
      prom = pp;
 

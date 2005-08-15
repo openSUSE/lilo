@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 15 22:53:34 CEST 2005 - olh@suse.de
+
+- remove unused options passed to prom_init in yaboot
+
+-------------------------------------------------------------------
 Mon Aug 15 14:44:44 CEST 2005 - olh@suse.de
 
 - add a hint for PReP with openfirmware about console usage
