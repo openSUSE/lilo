@@ -368,14 +368,6 @@ static int load_config_file(const struct boot_fspec_t *b)
      }
 #endif /* CONFIG_COLOR_TEXT */
    
-     p = cfg_get_strg(NULL, "init-message");
-     if (p)
-	  prom_printf("%s\n", p);
-
-     p = cfg_get_strg(NULL, "message");
-     if (p)
-	  print_message_file(p, &boot, &default_device);
-
      result = 1;
     
 bail:
@@ -1200,6 +1192,7 @@ setup_display(void)
 static int yaboot_main(void)
 {
      int i;
+     char *p;
      if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
 	  stdout_is_screen = 1;
 	  setup_display();
@@ -1226,6 +1219,15 @@ static int yaboot_main(void)
 	     for(i = 0; i < 10 ; i++)
 		     prom_printf("\n");
 #endif
+
+     p = cfg_get_strg(NULL, "init-message");
+     if (p)
+	  prom_printf("%s\n", p);
+
+     p = cfg_get_strg(NULL, "message");
+     if (p)
+	  print_message_file(p, &boot, &default_device);
+
 
      prom_printf("Welcome to yaboot version " VERSION "\n");
      prom_printf("booted from '%s'\n", bootdevice);

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 15 13:06:09 CEST 2005 - olh@suse.de
+
+- move init-message/message output after vertical indention
+
+-------------------------------------------------------------------
 Sun Aug 14 22:10:34 CEST 2005 - olh@suse.de
 
 - claim the mem range of the yaboot executable.
