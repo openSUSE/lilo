@@ -374,7 +374,7 @@ bail:
      if (conf_file)
 	  free(conf_file);
     	
-     return result;
+     return result > 0;
 }
 
 static void maintabfunc (void)
