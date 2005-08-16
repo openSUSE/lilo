@@ -559,7 +559,10 @@ prom_sleep (int seconds)
 void *
 prom_claim (void *virt, unsigned int size, unsigned int align)
 {
-     return call_prom ("claim", 3, 1, virt, size, align);
+     void *p;
+     p = call_prom ("claim", 3, 1, virt, size, align);
+     DEBUG_F("a %p s %08x: %s\n", virt, size, p == virt ? "ok": "busy");
+     return p;
 }
 
 void
