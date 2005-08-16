@@ -106,6 +106,7 @@ exit 0
 %dir /lib/lilo/scripts
 %dir /lib/lilo/utils
 #
+%attr(755,root,root) /bin/mkzimage_cmdline
 %attr(755,root,root) %config /bin/show_of_path.sh
 %attr(755,root,root) %config /bin/mkzimage
 %attr(755,root,root) %config /lib/lilo/pmac/os-badge-icon

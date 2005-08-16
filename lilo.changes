@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 16 15:31:26 CEST 2005 - olh@suse.de
+
+- package /bin/mkzimage_cmdline
+
+-------------------------------------------------------------------
 Mon Aug 15 22:53:34 CEST 2005 - olh@suse.de
 
 - remove unused options passed to prom_init in yaboot
