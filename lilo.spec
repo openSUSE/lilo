@@ -124,3 +124,4 @@ exit 0
 %attr(755,root,root) %config /sbin/lilo
 
 %doc %{_docdir}/lilo
+%doc %{_mandir}/*/*

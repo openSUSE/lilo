@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 16 16:20:27 CEST 2005 - olh@suse.de
+
+- add man page for mkzimage and mkzimage_cmdline
+
+-------------------------------------------------------------------
 Tue Aug 16 15:31:26 CEST 2005 - olh@suse.de
 
 - package /bin/mkzimage_cmdline

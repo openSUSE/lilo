@@ -1,0 +1,56 @@
+.\" $Id$
+.TH mkzimage 8
+.SH NAME
+\fBmkzimage\fR - create bootimage
+.SH SYNOPSIS
+\fBmkzimage --vmlinux <ELF binary> --output <zImage>\fR [options]
+.SH DESCRIPTION
+\fBmkzimage\fR creates a bootimage which can be booted directly from firmware.
+It can create images for PowerMac, IBM pSeries, IBM iSeries and PReP systems.
+.SH OPTIONS
+.TP
+.B \-\-vmlinux <ELF-binary>
+filename of the vmlinux file to boot. This option is mandatory.
+.TP
+.B \-\-output <zImage>
+filename of the output bootfile. This option is mandatory.
+.TP
+.B \-\-initrd <ramdisk>
+filename of the initrd to use.
+.TP
+.B \-\-objdir <directory>
+directory with the helper scripts and objects files to link. This is useful when building from source. Use \fBmkzimage --objdir `pwd`\fR to use the current directory as base.
+.TP
+.B \-\-cmdline 'kernel cmdline'
+force "kernel cmdline" to be passed to the kernel. Options specified in the OpenFirmware \fBboot-file\fR property are ignored. It is possible to edit the cmdline during boot.
+.TP
+.B \-\-board <subarch>
+build a bootimage suiteable for another PPC subarch.
+Recognized options are:
+.SP 1
+.PD 0
+.RS
+.TP
+.B chrp|rs6k
+build an ELF image for CHRP, and add a NOTE section required for IBM RS/6000 and pSeries firmware. This NOTE section will break PowerMacs, do never boot such an image on a Mac!
+.TP
+.B iseries
+append an initrd for IBM iSeries partitions. The normal vmlinux ELF binary will work out of the box. A kernel cmdline can not be appended, the --cmdline option is ignored.
+.TP
+.B pmac
+build an ELF image for PowerMac. The size of the final image must be smaller than 4MB because the firmware can not load files larger than 4MB (4MB - 15kb actually).
+.TP
+.B pmaccoff
+build an XCOFF image for old PowerMacs. They must be booted via network, loading them from disk will likely not work.
+.TP
+.B prep
+build a boot image for PReP systems.
+.RE
+.PD
+.TP
+.B \-\-tmp <tempdir>
+use \fBtempdir\fR as directory for temporary files during linking.
+.SH AUTHOR
+Olaf Hering <olh@suse.de>
+.SH SEE ALSO
+.BR mkzimage_cmdline (1)

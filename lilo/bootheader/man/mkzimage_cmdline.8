@@ -1,0 +1,22 @@
+.\" $Id$
+.TH mkzimage_cmdline 8
+.SH NAME
+\fBmkzimage_cmdline\fR - edit the built-in kernel cmdline in a zImage
+.SH SYNOPSIS
+\fBmkzimage_cmdline [-a 0|1] [-s 'kernel cmdline'] [-c] zImage\fR
+.SH DESCRIPTION
+\fBmkzimage_cmdline\fR adds a kernel cmdline to a zImage. This string will be passed to the kernel, the contents in /options/boot-file will be overwritten with the provided cmdline.
+.SH OPTIONS
+.TP
+.B \-a 0|1
+activate or deactivate the the cmdline
+.TP
+.B \-s 'kernel cmdline'
+pass this string to the kernel. It can be up to 511 chars long.
+.TP
+.B \-c
+clear cmdline area in zImage
+.SH AUTHOR
+Olaf Hering <olh@suse.de>
+.SH SEE ALSO
+.BR mkzimage_cmdline (1)
