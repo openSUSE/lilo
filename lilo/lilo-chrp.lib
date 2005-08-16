@@ -433,6 +433,18 @@ function running_on_chrp () {
 		error "Partition conversion failed for $OPTION_BOOT" 11
 	    fi
 	fi
+
+	# in case of dynamic device nodes there might be times where the
+	# device node disappears temporarily even after partition resize.
+	i=10	# wait for 10 time 0.5 seconds maximum
+	while ! [ -e $OPTION_BOOT ]; do
+	    if (( i-- <= 0 )); then
+		error "Device node for $OPTION_BOOT disappeared" \
+		      "Please check and try to rerun lilo"
+	    fi
+	    usleep 500000
+	done
+
 	mkfs.msdos $MKDOSFS $OPTION_BOOT || exit 2
 	cd $TEMP
 	mkdir -p boot || exit 2
@@ -467,11 +479,43 @@ function running_on_chrp () {
 	done
 
 	mkdir boot/ppc
+	# interpret /etc/SuSE-release if available
+	# 
+	# file is either like:
+	#   SUSE LINUX 10.0 (PPC) preview4
+	#   VERSION = 10.0
+	# or like:
+	#   SUSE LINUX Enterprise Server 9 (ppc)
+	#   VERSION = 9
+	#   PATCHLEVEL = 2
+	#
+	if [ -f /etc/SuSE-release ]; then
+	    {
+		read description
+		description=${description/ppc/PPC}
+		osname="${description/LINUX Enterprise Server /SLES-}"
+		while read; do
+		    read tag value <<< "${REPLY//=/ }"
+		    case $tag in
+			VERSION)
+			    ;;
+			PATCHLEVEL)
+			    description="$description Service Pack $value"
+			    osname="$osname SP$value"
+			    ;;
+		    esac
+		done
+	    } < /etc/SuSE-release
+	else
+	    description="SUSE LINUX Enterprise Server 10 (PPC)"
+	    osname="SUSE SLES-10 (PPC)"
+	fi
+
 	# create a bootinfo object to make OF happy
 	{
 	    echo "<chrp-boot>"
-	    echo "    <description>SUSE SLES-9 (PPC)</description>"
-	    echo "    <os-name>SUSE SLES-9 (PPC)</os-name>"
+	    echo "    <description>$description</description>"
+	    echo "    <os-name>$osname</os-name>"
 	    echo "    <boot-script>"
 	    echo "        boot &device;:$partition,yaboot"
 	    echo "    </boot-script>"
