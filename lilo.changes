@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 16 22:59:04 CEST 2005 - olh@suse.de
+
+- ignore empty input line if yaboot could not load its config file
+
+-------------------------------------------------------------------
 Tue Aug 16 22:31:59 CEST 2005 - olh@suse.de
 
 - allocate tftp download area dynamically in yaboot,

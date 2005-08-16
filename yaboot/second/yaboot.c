@@ -605,6 +605,9 @@ static int get_params(struct boot_param_t* params)
 	  }
      }
 
+     if (imagename == NULL)
+	     return 0;
+
      if (!strcmp (imagename, "help")) {
 	  prom_printf(
 	       "\nPress the tab key for a list of defined images.\n"
