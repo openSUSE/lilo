@@ -44,9 +44,9 @@
 #include "errors.h"
 #include "debug.h"
 
-#define LOAD_BUFFER_POS		0x600000
-/* this cannot be safely increased any further */
-#define LOAD_BUFFER_SIZE	0x600000
+#define LOAD_BUFFER_BASE (42*1024*1024)
+#define LOAD_BUFFER_SIZE (12*1024*1024)
+#define LOAD_BUFFER_TRIES 42
 
 static int of_open(struct boot_file_t* file, const char* dev_name,
 		   struct partition_t* part, const char* file_name);
@@ -132,14 +132,21 @@ of_open(struct boot_file_t* file, const char* dev_name,
 
 static int of_net_download (unsigned char **buffer, ihandle of_device)
 {
-	int ret = FILE_IOERR;
-	unsigned char *p;
+	int ret = LOAD_BUFFER_TRIES;
+	char *p, *mem = (char *)LOAD_BUFFER_BASE;
 	
 	DEBUG_ENTER;
 	
-	p = prom_claim((void *)LOAD_BUFFER_POS, LOAD_BUFFER_SIZE, 0);
-	if (p == (void *)-1) {
-		prom_printf("Can't claim memory for TFTP download (%08x@%08x)\n", LOAD_BUFFER_SIZE, LOAD_BUFFER_POS);
+	do {
+		p = prom_claim(mem, LOAD_BUFFER_SIZE, 0);
+		if (p == mem)
+			break;
+		mem += 1 * 1024 * 1024;
+	} while (--ret);
+	if (0 == ret) {
+		prom_printf("Can't claim memory for TFTP download (%08x @ %08x-%08x)\n",
+				LOAD_BUFFER_SIZE, LOAD_BUFFER_BASE, LOAD_BUFFER_BASE+(LOAD_BUFFER_TRIES*1024*1024));
+		ret = FILE_IOERR;
 		goto out;
 	}
 	memset(p, 0, LOAD_BUFFER_SIZE);

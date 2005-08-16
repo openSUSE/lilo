@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Aug 16 22:31:59 CEST 2005 - olh@suse.de
+
+- allocate tftp download area dynamically in yaboot,
+  12MB starting at 42MB
+
+-------------------------------------------------------------------
 Tue Aug 16 22:00:16 CEST 2005 - olh@suse.de
 
 - add optional debug to prom_claim calls in yaboot
