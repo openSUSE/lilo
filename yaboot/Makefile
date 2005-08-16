@@ -35,6 +35,7 @@ CROSS =
 # The flags for the yaboot binary.
 #
 YBCFLAGS = -Os $(CFLAGS) -nostdinc -Wall -isystem `gcc -print-file-name=include`
+YBCFLAGS += -g
 YBCFLAGS += -DVERSION=\"${VERSION}\"	#"
 YBCFLAGS += -DTEXTADDR=$(TEXTADDR)
 YBCFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
@@ -115,10 +116,9 @@ lgcc = `$(CC) -print-libgcc-file-name`
 all yaboot: second/yaboot
 
 second/yaboot: $(OBJS) util/addnote
-	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o $@.debug
-	strip -o $@ $@.debug
+	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o $@
 	chmod -x $@
-	cp -p $@ $@.chrp
+	cp $@ $@.chrp
 	util/addnote $@.chrp
 
 util/split_of_path: util/split_of_path.c second/parse_device_path.c

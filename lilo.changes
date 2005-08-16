@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 16 21:45:51 CEST 2005 - olh@suse.de
+
+- compile yaboot with -g to simplify debugging, do not strip it
+
+-------------------------------------------------------------------
 Tue Aug 16 16:20:27 CEST 2005 - olh@suse.de
 
 - add man page for mkzimage and mkzimage_cmdline
