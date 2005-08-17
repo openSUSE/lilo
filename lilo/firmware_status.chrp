@@ -28,14 +28,14 @@ IBM,7026-6H1    tested      	<=M2P01113                     				# papaya
 IBM,7038-6M2	tested		<=3K050202						# sweetie
 IBM,7028-6C4	untested	<=3R041029						# gooseberry
 IBM,7028-6C4	untested   	==3R050405						# gooseberry
-IBM,7028-6E4	tested  	<=3R041029 						# pepino
+IBM,7028-6E4	tested  	>=3R041029 						# pepino
 IBM,7028-6E4	untested     	3R050405	   					# pepino
-IBM,7040-671	tested 		<=3H050215						# pomegranate
+IBM,7040-671	tested 		>=3H050215						# pomegranate
 IBM,7040-671	untested	<=3H050405
 
 
 # Power5 machines
-IBM,9111-520	untested	SF220_011			# cherry
+IBM,9111-520	tested		>=SF220_011			# cherry
 IBM,9117-570	untested	!=any				# clementine
 IBM,9123-705	untested	!=any				# xiqua
 IBM,9123-710	tested		SF225_044			# satsuma
