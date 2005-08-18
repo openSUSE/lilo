@@ -1,0 +1,72 @@
+.\" $Id$ \"
+.TH lilo.conf 5
+.SH NAME
+\fBlilo.conf\fR \- lilo((8) configuration file
+.SH DESCRIPTION
+\fB/etc/lilo.conf\fR is used by
+.BR lilo (8)
+to generate a bootloader configuration suitable for PowerPC board type it runs on.
+
+The syntax is similar to the i386 variant. There are global options and options per boot image.
+Unknown options will cause lilo to abort.
+
+.SH GLOBAL OPTIONS
+.TP
+.B boot=
+specifies the Linux device node where the bootinfo should be stored.
+lilo will use sysfs to determine the real hardware and its OpenFirmware device path behind this device node.
+On iSeries systems, boot= can also describe a kernel slot name and a filename for \fB*STMF\fR.
+The kernel slot name can be either A, B or C.
+.TP
+.B activate
+this option will tell lilo to update the OpenFirmware \fBboot-device\fR variable with the full OpenFirmware path pointing to the device specified in \fBboot=\fR. If this option is missing, the system may not boot.
+.TP
+.B clone
+does something wich is not yet documented in this man page
+.TP
+.B force_fat
+does something wich is not yet documented in this man page
+.TP
+.B force
+does something wich is not yet documented in this man page
+.TP
+.B progressbar
+does something wich is not yet documented in this man page
+.TP
+.B bootfolder=
+specifies the name of the directory where boot related files like yaboot are stored on the Apple HFS partition. The default is \fBsuseboot\fR.
+.TP
+.B timeout=
+specifies to time to wait before booting the default image. The value must be in milliseconds, 100 means 10 seconds. If this option is missing, yaboot will wait forever.
+.TP
+.B default=
+specifies the default label. If this option is missing, the first specified image= will be used as default.
+.TP
+.B image=
+specifies a kernel filename to boot and starts a new section.
+.TP
+.B other=
+specfies a Linux device node of a partition with a MacOS installation.
+The label= name should be \fBmacos\fR.  If the name is \fBmacosx\fR, a file named \\System\\Library\\CoreServices\\BootX will be booted, instead of \\\\:tbxi. Use \fBmacosx\fR only if your MacOS X boot folder was "deblessed".
+.SH OPTIONS FOR GLOBAL AND IMAGE SECTIONS
+.TP
+.B root=
+specifies the kernels \fBroot=\fR option. This is passed to the kernel cmdline as is. It can be either a Linux device node name, \fBUUID=uuid-string\fR or \fBLABEL=filesystem-label\fR.
+This option is depreciated, kernel parameters should be passed via the \fBappend=\fR option.
+.TP
+.B append=
+specifies kernel command line options. They are passed as is to the kernel.
+.SH OPTIONS FOR IMAGE SECTIONS
+.TP
+.B label=
+gives the image section a name. This name can be used in yaboot and in the default= option to refer to a kernel image.
+.TP
+.B initrd=
+specifies the initrd filename to be used.
+.TP
+.B sysmap=
+specifies a System.map file, useful for the xmon kernel debugger. yaboot ignores this option because xmon uses kallsyms since kernel 2.6.13.
+.TP
+.B copy
+forces the kernel and initrd to be copied to the HFS partition. This is required when the kernel and initrd resides on a filesystem not readable by yaboot.
+.TP
