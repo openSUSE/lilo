@@ -23,6 +23,7 @@
 #include <cmdline.h>
 
 extern void flush_cache(void *, unsigned long);
+extern int identify_cpu(void);
 
 #define MSR_IR		(1<<5)	/* Instruction Relocate */
 #define MSR_DR		(1<<4)	/* Data Relocate */
@@ -210,7 +211,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	if (of1275_getprop(bootcpu_phandle[0], "64-bit", NULL, 0) != -1)
 		cputype = 64;
 	else
-		cputype = 32;
+		cputype = identify_cpu();
 
 	vmlinuz.addr = (unsigned long)_vmlinuz_start;
 	vmlinuz.size = (unsigned long)(_vmlinuz_end - _vmlinuz_start);

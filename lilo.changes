@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug 19 17:32:29 CEST 2005 - olh@suse.de
+
+- not all 64bit hosts have the 64-bit property in the boot cpu node
+  add a cputable to bootheader to match cpus to 32/64 bit
+
+-------------------------------------------------------------------
 Tue Aug 16 23:02:19 CEST 2005 - olh@suse.de
 
 - fix logic error in yaboot when checking if config file was loaded
