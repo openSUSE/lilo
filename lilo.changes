@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 19 17:44:21 CEST 2005 - olh@suse.de
+
+- add the same cpu table to yaboot
+
+-------------------------------------------------------------------
 Fri Aug 19 17:32:29 CEST 2005 - olh@suse.de
 
 - not all 64bit hosts have the 64-bit property in the boot cpu node

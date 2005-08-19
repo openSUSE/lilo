@@ -93,6 +93,7 @@ typedef void (*kernel_entry_t)( void *,
 
 /* Imported functions */
 extern long flush_icache_range(unsigned long start, unsigned long stop);
+extern int identify_cpu(void);
 
 /* Local functions */
 static int	yaboot_main(void);
@@ -189,8 +190,9 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
 	     if (prom_getprop(cpus[0], "64-bit", NULL, 0) >= 0)
 		     _cpu = 64;
 	     else
-		     _cpu = 32;
-     }
+		     _cpu = identify_cpu();
+     } else 
+	     return -1;
 	
      DEBUG_F("Running on %d-bit\n", _cpu);
 
