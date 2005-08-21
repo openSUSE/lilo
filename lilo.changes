@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Aug 21 11:52:00 CEST 2005 - olh@suse.de
+
+- handle 'partition=' without 'device=' in yaboot.conf
+
+-------------------------------------------------------------------
 Fri Aug 19 17:44:21 CEST 2005 - olh@suse.de
 
 - add the same cpu table to yaboot

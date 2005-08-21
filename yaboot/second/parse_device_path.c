@@ -171,8 +171,10 @@ int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, 
 		switch (d->type) {
 			case TYPE_BLOCK:
 			case TYPE_NET:
-				type = d->type;
-				dev = d->device;
+				if (d->device) {
+					type = d->type;
+					dev = d->device;
+				}
 				break;
 			default:
 				d = NULL;
@@ -260,8 +262,11 @@ int set_def_device(const char *dev, const char *p, struct default_device *def)
 
 	if (p) {
 		n = simple_strtol(p, &endp, 10);
-		if (endp != p && *endp == 0)
+		if (endp != p && *endp == 0) {
+			if (TYPE_UNSET == def->type)
+				def->type = TYPE_BLOCK;
 			def->part = n;	       
+		}
 	}
 	return (dev || p);
 }
