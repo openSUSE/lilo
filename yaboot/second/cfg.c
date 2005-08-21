@@ -280,16 +280,6 @@ static int cfg_next (char **item, char **value)
      return 1;
 }
 
-#if 0
-// The one and only call to this procedure is commented out
-// below, so we don't need this unless we decide to use it again.
-static void cfg_return (char *item, char *value)
-{
-     last_item = item;
-     last_value = value;
-}
-#endif
-
 static int cfg_set (char *item, char *value)
 {
      CONFIG *walk;
@@ -341,7 +331,6 @@ static int cfg_set (char *item, char *value)
      }
      if (walk->type != cft_end)
 	  return 1;
-//    cfg_return (item, value);
      return 0;
 }
 

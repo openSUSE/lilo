@@ -42,8 +42,6 @@ prom_entry prom;
 ihandle prom_stdin, prom_stdout;
 int stdout_is_screen;
 
-//extern int vsprintf(char *buf, const char *fmt, va_list args);
-
 static ihandle prom_mem, prom_mmu;
 static ihandle prom_chosen, prom_options;
 
