@@ -8,8 +8,6 @@
 #include <prom.h>
 #include <div64.h>
 
-#undef DEBUG
-
 #ifdef DEBUG
 struct key {
 	int n;

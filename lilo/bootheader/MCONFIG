@@ -30,6 +30,10 @@ REQFLAGS = $(ARCHREQFLAGS) \
 	   -Os \
 	   -Wall -Wstrict-prototypes \
 	   $(INCLUDE)
+DEBUG   = 0
+ifeq ($(DEBUG),1)
+REQFLAGS += -DDEBUG
+endif
 LDFLAGS =
 AR      = $(CROSS)ar
 RANLIB  = $(CROSS)ranlib

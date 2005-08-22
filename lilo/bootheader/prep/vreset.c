@@ -411,6 +411,22 @@ static long SwapBytes(long lv)
 	return t;
 }
 
+#define DEVID   0
+#define CMD     1
+#define CLASS   2
+#define MEMBASE 4
+
+/* return Vendor ID of card in the slot */
+static
+int PCIVendor(int slotnum)
+{
+	struct PCI_ConfigInfo *pslot;
+
+	pslot = &PCI_slots[slotnum];
+
+	return (pslot->regs[DEVID] & 0xFFFF);
+}
+
 #ifdef DEBUG
 static void printslots(void)
 {
@@ -429,11 +445,6 @@ static void printslots(void)
 	}
 }
 #endif				/* DEBUG */
-
-#define DEVID   0
-#define CMD     1
-#define CLASS   2
-#define MEMBASE 4
 
 static int scanPCI(int start_slt)
 {
@@ -463,17 +474,6 @@ static int scanPCI(int start_slt)
 	}
 
 	return theSlot;
-}
-
-/* return Vendor ID of card in the slot */
-static
-int PCIVendor(int slotnum)
-{
-	struct PCI_ConfigInfo *pslot;
-
-	pslot = &PCI_slots[slotnum];
-
-	return (pslot->regs[DEVID] & 0xFFFF);
 }
 
 /*
