@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Aug 22 16:21:04 CEST 2005 - olh@suse.de
+
+- set claim_base in bootheader to 64MB
+  maple firmware returns memory which is in use for message passing
+
+-------------------------------------------------------------------
 Mon Aug 22 13:40:33 CEST 2005 - olh@suse.de
 
 - allow make DEBUG=1 in bootheader
