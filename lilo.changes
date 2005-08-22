@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 22 13:24:46 CEST 2005 - olh@suse.de
+
+- correct tmpdir name in make_zimage_chrp.sh
+
+-------------------------------------------------------------------
 Sun Aug 21 11:52:00 CEST 2005 - olh@suse.de
 
 - handle 'partition=' without 'device=' in yaboot.conf
