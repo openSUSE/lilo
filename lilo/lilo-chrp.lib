@@ -701,12 +701,12 @@ function running_on_prep () {
     if [ ! -z "$PREP_INITRD" ] ; then
 	PREP_INITRD="--initrd $PREP_INITRD"
     fi
-    /lib/lilo/prep/make_zimage_prep.sh \
+    /bin/mkzimage \
     --vmlinux "$PREP_IMAGE" \
     $PREP_INITRD \
     --tmp "$TEMP" \
     --output "$TEMP/zImage.prep"
-    /lib/lilo/chrp/mkzimage_cmdline \
+    /bin/mkzimage_cmdline \
     	-a 1 \
 	-s "$PREP_CMDLINE" \
 	"$TEMP/zImage.prep"

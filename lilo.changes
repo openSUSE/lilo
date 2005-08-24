@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Aug 24 21:31:18 CEST 2005 - olh@suse.de
+
+- correct path to mkzimage for PReP
+
+-------------------------------------------------------------------
 Mon Aug 22 16:21:04 CEST 2005 - olh@suse.de
 
 - set claim_base in bootheader to 64MB
