@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep  1 16:21:04 CEST 2005 - olh@suse.de
+
+- add yaboot-1.3.11-initrd-claim-loop.patch (#88481 - LTC16331)
+  try to claim different memory regions if the (currently hardcoded)
+  value is busy because the firmware uses this area.
+
+-------------------------------------------------------------------
 Mon Jun 20 13:49:42 CEST 2005 - jplack@suse.de
 
 - work around OFs problems with FAT1^2/FAT16 detection (#87050 -
