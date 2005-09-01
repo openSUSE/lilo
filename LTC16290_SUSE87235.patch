@@ -1,0 +1,11 @@
+--- lilo/show_of_path.sh	(Revision 291)
++++ lilo/show_of_path.sh	(Revision 292)
+@@ -272,7 +244,7 @@
+ 
+ 	    # modprobe scsi_transport_fc  ## loaded through dependencies
+ 	    port=$(
+-		printf "/sys/class/fc_transport/%x:%x:%x:%x/port_name" \
++		printf "/sys/class/fc_transport/%d:%d:%d:%d/port_name" \
+ 		    $of_disk_scsi_host $of_disk_scsi_chan \
+ 		    $of_disk_scsi_id $of_disk_scsi_lun \
+ 	    )

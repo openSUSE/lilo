@@ -20,6 +20,9 @@ Patch5:       yaboot-1.3.6.dif
 Patch6:       yaboot-1.3.11-fat.dif
 Patch7:       yaboot-hole_data-journal.diff
 Patch8:       yaboot-1.3.11-add-ibm-rpa-note.patch
+Patch9:       Force_Fat_bug.patch
+Patch10:      LTC16275_SUSE87050.patch
+Patch11:      LTC16290_SUSE87235.patch
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 # get rid of /usr/lib/rpm/brp-strip-debug 
 # it kills the zImage.chrp-rs6k 
@@ -43,6 +46,10 @@ find lilo.ppc/lib -name "*.sh" | xargs -r chmod 755
 find lilo.ppc/lib -name addnote | xargs -r chmod 755
 find lilo.ppc/lib -name hack-coff | xargs -r chmod 755
 find lilo.ppc/lib -name mkprep | xargs -r chmod 755
+cd lilo.ppc
+%patch9 -p1
+%patch10 -p1
+%patch11 -p1
 
 %build
 cd yaboot
