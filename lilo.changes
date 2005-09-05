@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep  1 16:21:04 CEST 2005 - olh@suse.de
+
+- try to claim different memory regions if the (currently hardcoded)
+  value is busy because the firmware uses this area. (#88481 - LTC16331)
+
+-------------------------------------------------------------------
 Wed Aug 24 21:31:18 CEST 2005 - olh@suse.de
 
 - correct path to mkzimage for PReP

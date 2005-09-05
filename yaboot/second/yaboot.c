@@ -684,6 +684,7 @@ static void yaboot_text_ui(void)
      struct boot_file_t	file;
      int			result;
      static struct boot_param_t	params;
+     void 		*claim_base;
      void		*initrd_base;
      unsigned long	initrd_size;
      kernel_entry_t      kernel_entry;
@@ -752,7 +753,13 @@ static void yaboot_text_ui(void)
 	       }
 	       else {
 #define INITRD_CHUNKSIZE 0x400000
-		    initrd_base = prom_claim(loadinfo.base+loadinfo.memsize, INITRD_CHUNKSIZE, 0);
+		    claim_base = loadinfo.base + loadinfo.memsize;
+		    for (result = 0; result < 42; result++) {
+			    initrd_base = prom_claim(claim_base, INITRD_CHUNKSIZE, 0);
+			    if (initrd_base != (void *)-1)
+				    break;
+			    claim_base += (unsigned long)claim_base + (1*1024*1024);
+		    }
 		    if (initrd_base == (void *)-1) {
 			 prom_printf("Claim failed for initrd memory\n");
 			 initrd_base = NULL;
