@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep  5 16:50:39 CEST 2005 - olh@suse.de
+
+- require gawk sed coreutils instead of absolute path names
+
+-------------------------------------------------------------------
 Thu Sep  1 16:21:04 CEST 2005 - olh@suse.de
 
 - try to claim different memory regions if the (currently hardcoded)
