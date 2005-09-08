@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep  8 15:30:50 CEST 2005 - olh@suse.de
+
+- remove _FORTIFY_SOURCE from RPM_OPT_FLAGS because the binaries
+  have to run on SLES9 as well.
+
+-------------------------------------------------------------------
 Mon Sep  5 16:50:39 CEST 2005 - olh@suse.de
 
 - require gawk sed coreutils instead of absolute path names

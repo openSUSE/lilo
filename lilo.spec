@@ -35,16 +35,16 @@ cd ..
 cd yaboot
 #
 make clean
-make DEBUG=0 VERSION=%{yaboot_vers}.FAT.SuSE YABOOT_FAT=1 yaboot HOSTCFLAGS="$RPM_OPT_FLAGS -g"
+make DEBUG=0 VERSION=%{yaboot_vers}.FAT.SuSE YABOOT_FAT=1 yaboot HOSTCFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
 mv second/yaboot.chrp yaboot.fat
 #
 make clean
-make DEBUG=1 VERSION=%{yaboot_vers}.SuSE yaboot HOSTCFLAGS="$RPM_OPT_FLAGS -g"
+make DEBUG=1 VERSION=%{yaboot_vers}.SuSE yaboot HOSTCFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
 mv second/yaboot yaboot.debug
 mv second/yaboot.chrp yaboot.chrp.debug
 #
 make clean
-make DEBUG=0 VERSION=%{yaboot_vers}.SuSE yaboot HOSTCFLAGS="$RPM_OPT_FLAGS -g"
+make DEBUG=0 VERSION=%{yaboot_vers}.SuSE yaboot HOSTCFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
 mv second/yaboot yaboot
 mv second/yaboot.chrp yaboot.chrp
 #
@@ -52,7 +52,7 @@ cd ..
 #
 cd lilo.ppc
 cd bootheader
-make HOST_CFLAGS="$RPM_OPT_FLAGS -g"
+make HOST_CFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
 
 %install
 # get rid of /usr/lib/rpm/brp-strip-debug 
