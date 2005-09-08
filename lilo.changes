@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Sep  8 16:06:28 CEST 2005 - olh@suse.de
+
+- add console= hint to prep part in bootheader
+
+-------------------------------------------------------------------
 Thu Sep  8 15:30:50 CEST 2005 - olh@suse.de
 
 - remove _FORTIFY_SOURCE from RPM_OPT_FLAGS because the binaries

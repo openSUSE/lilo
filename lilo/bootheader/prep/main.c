@@ -426,6 +426,7 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	 */
 	TotalMemory = get_mem_size();
 
+	printf("zImage.prep starting\n");
 	if (promptr)
 		printf("Open Firmware: 0x%p\n", promptr);
 
@@ -509,7 +510,9 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	}
 	printf("Now booting the kernel\n");
 	if (promptr)
-		printf("You may not see any kernel console output,\nuse a serial console on COM1 in this case.\n");
+		printf("You may not see any kernel console output,\n"
+			"use a serial console on COM1 in this case.\n"
+			"append 'console=ttyS0' to the kernel cmdline\n");
 
 	if (vmlinux_buf)
 		memmove(0x0, (void *)vmlinux_buf, zimage_size);
