@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Sep 12 13:21:43 CEST 2005 - jplack@suse.de
+
+- needed option get-arch for ppc bootloader config to work right
+
+-------------------------------------------------------------------
 Thu Sep  8 16:06:28 CEST 2005 - olh@suse.de
 
 - add console= hint to prep part in bootheader
