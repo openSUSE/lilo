@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 16 20:17:57 CEST 2005 - olh@suse.de
+
+- use p->p_vaddr as loadaddr in yaboot, not the ELF entry point
+
+-------------------------------------------------------------------
 Mon Sep  5 16:32:50 CEST 2005 - olh@suse.de
 
 - add yaboot-1.3.11-initrd-claim-loop.patch (#88481 - LTC16331)
