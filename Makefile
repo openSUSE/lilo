@@ -1,3 +1,4 @@
+# $Id$
 SUBMIT_DIR=/work/src/done/SLES9-SP3
 BUILD_DIST=sles9-beta-ppc
 BUILD_ROOT=/abuild/buildsystem.$$HOST.$$LOGNAME
@@ -34,7 +35,7 @@ submit:	.submitted
 	rm -rf version Makefile lilo-$$lv ; \
 	pwd ; \
 	ls -la ; \
-	if /work/src/bin/check_if_valid_source_dir; then cd -; echo $$tmpdir > $@; fi
+	if /work/src/bin/check_if_valid_source_dir; then cd -; echo $$tmpdir > $@; else exit 1 ; fi
 
 
 .built:	.exportdir
