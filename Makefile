@@ -47,7 +47,7 @@ submit:	.submitted
 	yaboot-$$yv yaboot yabootversion ; \
 	pwd ; \
 	ls -la ; \
-	if /work/src/bin/check_if_valid_source_dir; then cd -; echo $$tmpdir > $@; fi
+	if /work/src/bin/check_if_valid_source_dir; then cd -; echo $$tmpdir > $@; else exit 1 ; fi
 
 
 .built:	.exportdir
