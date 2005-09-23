@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 23 17:52:58 CEST 2005 - jplack@suse.de
+
+- revert doubled application of patch for #87050
+
+-------------------------------------------------------------------
 Fri Sep 16 20:17:57 CEST 2005 - olh@suse.de
 
 - use p->p_vaddr as loadaddr in yaboot, not the ELF entry point
