@@ -28,6 +28,14 @@ Fri Jul 15 13:19:52 CEST 2005 - jplack@suse.de
 - split out iseries and chrp code for easier maintainance
 
 -------------------------------------------------------------------
+Mon Jun 20 13:49:42 CEST 2005 - jplack@suse.de
+
+- work around OFs problems with FAT12/FAT16 detection (#87050 -
+  LTC16275)
+- when internally forced to use FAT, leads to unbootable
+  configurations in some cases (same bug)
+
+-------------------------------------------------------------------
 Fri Jun 17 14:41:26 CEST 2005 - jplack@suse.de
 
 - alternative firmware level calculation for Power5 or later

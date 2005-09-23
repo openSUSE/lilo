@@ -626,6 +626,10 @@ parse_config_file
 check_config_file
 
 case "$MACHINE" in
+	MKDOSFS="-s 1 -F 16"   # default values, minimum size of 2076kB
+	MINDOSFSSIZE=$[2*2076] # does prevent possible misdetection of
+	                       #  file system as FAT12
+
     pmac_new)  running_on_pmac_new ;;
     pmac_old)  running_on_pmac_old ;;
     chrp)      running_on_chrp     ;;
@@ -645,3 +649,7 @@ esac
 #     fill-column: 78
 # End:
 #
+	if (( defaultsize < MINDOSFSSIZE )); then
+	    defaultsize=$MINDOSFSSIZE;
+	fi
+
