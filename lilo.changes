@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Sep 27 17:10:11 CEST 2005 - jplack@suse.de
+
+- rebuild to fix corrupted disk file
+
+-------------------------------------------------------------------
 Fri Sep 23 17:52:58 CEST 2005 - jplack@suse.de
 
 - revert doubled application of patch for #87050
