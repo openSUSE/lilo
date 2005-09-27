@@ -3,6 +3,7 @@ SUBMIT_DIR=/work/src/done/SLES9-SP3
 BUILD_DIST=sles9-beta-ppc
 BUILD_ROOT=/abuild/buildsystem.$$HOST.$$LOGNAME
 BUILD_DIR=$(BUILD_ROOT)/usr/src/packages/RPMS
+export_url=http://svn.suse.de/svn/lilo-ppc/branches/sles9-ppc
 
 
 .PHONY:	export build submit rpm clean
@@ -28,7 +29,7 @@ submit:	.submitted
 	set -e ; \
 	tmpdir=`mktemp -d /tmp/temp.XXXXXX`/lilo ;\
 	lv=`cat version` ; \
-	svn export . $$tmpdir ; \
+	svn export $(export_url) $$tmpdir ; \
 	cd $$tmpdir ; \
 	mv -v lilo lilo-$$lv ; \
 	tar cfvj lilo-$$lv.tar.bz2 lilo-$$lv ; \
