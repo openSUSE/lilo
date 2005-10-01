@@ -86,6 +86,7 @@ fi
 
 objcopy  -O binary $vmlinux "$tmp/vmlinux.bin"
 strings $tmp/vmlinux.bin | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt
+echo -ne "\000" >> $tmp/uts_string.txt
 gzip -9 "$tmp/vmlinux.bin"
 
 cp $obj_dir/common/empty.o $tmp/empty.o

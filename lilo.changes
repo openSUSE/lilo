@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Oct  1 19:40:14 CEST 2005 - olh@suse.de
+
+- append a 0x0 to the utsstring in bootheader
+
+-------------------------------------------------------------------
 Mon Sep 12 13:21:43 CEST 2005 - jplack@suse.de
 
 - needed option get-arch for ppc bootloader config to work right

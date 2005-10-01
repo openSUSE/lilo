@@ -90,6 +90,7 @@ gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
 #
 #
 strings $tmp/vmlinux | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt
+echo -ne "\000" >> $tmp/uts_string.txt
 cp $obj_dir/common/empty.o $tmp/empty.o
 objcopy $tmp/empty.o \
 	--add-section=.uts_string=$tmp/uts_string.txt \
