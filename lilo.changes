@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Oct  1 20:03:06 CEST 2005 - olh@suse.de
+
+- remove PROVIDE from bootheader linker script, adapt prep
+
+-------------------------------------------------------------------
 Sat Oct  1 19:41:13 CEST 2005 - olh@suse.de
 
 - remove mkzimage tmp dir after image creation for iseries and prep

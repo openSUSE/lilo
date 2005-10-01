@@ -38,10 +38,10 @@ relocate:
 
 	/* compute the size of the whole image in words. */
 	GETSYM(r4,_start)
-	GETSYM(r5,end)
+	GETSYM(r5,_end)
 
 	addi	r5,r5,3		/* round up */
-	sub	r5,r5,r4	/* end - _start */
+	sub	r5,r5,r4	/* _end - _start */
 	srwi	r5,r5,2
 	mr	r7,r5		/* Save for later use. */
 
@@ -52,11 +52,11 @@ relocate:
 	cmpw	cr0,r3,r4
 	beq	start_ldr	/* If 0, we don't need to relocate */
 
-	/* Move this code somewhere safe.  This is max(load + size, end)
+	/* Move this code somewhere safe.  This is max(load + size, _end)
 	 * r8 == load address
 	 */
 	GETSYM(r4, _start)
-	GETSYM(r5, end)
+	GETSYM(r5, _end)
 
 	sub	r6,r5,r4
 	add	r6,r8,r6	/* r6 == phys(load + size) */
@@ -134,7 +134,7 @@ do_relocate_from_start:
 	b	do_relocate_out	/* Finished */
 
 do_relocate_from_end:
-	GETSYM(r3, end)
+	GETSYM(r3, _end)
 	slwi	r4,r7,2
 	add	r4,r8,r4	/* Get the physical end */
 1:	lwzu	r5,-4(r4)
@@ -156,10 +156,10 @@ do_relocate_out:
 
 start_ldr:
 /* Clear all of BSS and set up stack for C calls */
-	lis	r3,edata@h
-	ori	r3,r3,edata@l
-	lis	r4,end@h
-	ori	r4,r4,end@l
+	lis	r3,_edata@h
+	ori	r3,r3,_edata@l
+	lis	r4,_end@h
+	ori	r4,r4,_end@l
 	subi	r3,r3,4
 	subi	r4,r4,4
 	li	r0,0

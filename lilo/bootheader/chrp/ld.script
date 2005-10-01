@@ -34,7 +34,6 @@ SECTIONS
     __relocate_end = .;
   }
   _etext = .;
-  PROVIDE (etext = .);
 
   /* Read-write section, merged into data segment: */
   . = ALIGN(4096);
@@ -63,7 +62,6 @@ SECTIONS
     CONSTRUCTORS
   }
   _edata  =  .;
-  PROVIDE (edata = .);
 
   . = ALIGN(4096);
   __bss_start = .;
@@ -75,7 +73,6 @@ SECTIONS
    *(COMMON)
   }
   _end = . ;
-  PROVIDE (end = .);
 
   /DISCARD/ : {
     *(__ksymtab)
