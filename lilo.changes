@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Oct  1 23:12:10 CEST 2005 - olh@suse.de
+
+- remove all unneeded stuff from ld.script in bootheader
+
+-------------------------------------------------------------------
 Sat Oct  1 22:25:06 CEST 2005 - olh@suse.de
 
 - make the bootheader relocateable

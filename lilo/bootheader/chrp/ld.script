@@ -2,87 +2,48 @@
 OUTPUT_ARCH(powerpc)
 SECTIONS
 {
-  /* Read-only sections, merged into text segment: */
-  . = + SIZEOF_HEADERS;
-  .interp : { *(.interp) }
-  .hash          : { *(.hash)		}
-  .dynsym        : { *(.dynsym)		}
-  .dynstr        : { *(.dynstr)		}
-  .rel.text      : { *(.rel.text)		}
-  .rela.text     : { *(.rela.text) 	}
-  .rel.data      : { *(.rel.data)		}
-  .rela.data     : { *(.rela.data) 	}
-  .rel.rodata    : { *(.rel.rodata) 	}
-  .rela.rodata   : { *(.rela.rodata) 	}
-  .rel.got       : { *(.rel.got)		}
-  .rela.got      : { *(.rela.got)		}
-  .rel.ctors     : { *(.rel.ctors)	}
-  .rela.ctors    : { *(.rela.ctors)	}
-  .rel.dtors     : { *(.rel.dtors)	}
-  .rela.dtors    : { *(.rela.dtors)	}
-  .rel.bss       : { *(.rel.bss)		}
-  .rela.bss      : { *(.rela.bss)		}
-  .rel.plt       : { *(.rel.plt)		}
-  .rela.plt      : { *(.rela.plt)		}
-  .plt : { *(.plt) }
-  .text      :
-  {
-    *(.text)
-    *(.fixup)
-    __relocate_start = .;
-    *(.relocate_code)
-    __relocate_end = .;
-  }
-  _etext = .;
+	/*
+	 * OldWorld PowerMacs need alignment in COFF image
+	 * they also like only .text, .data and .bss sections
+	 */
+	.text	:
+	{
+		*(.text)
+		*(.fixup)
+		__relocate_start = .;
+		*(.relocate_code)
+		__relocate_end = .;
+	}
+	_etext = .;
+	. = ALIGN(4096);
+	.data	:
+	{
+		*(.data*)
+		*(.sdata*)
+		*(.rodata*)
+		__got2_start = .;
+		*(.got2)
+		__got2_end = .;
 
-  /* Read-write section, merged into data segment: */
-  . = ALIGN(4096);
-  .data    :
-  {
-    *(.data)
-    *(.data1)
-    *(.data.boot)
-    *(.data.rel.local)
-    *(.sdata)
-    *(.sdata2)
-    *(.got.plt) *(.got)
-    *(.dynamic)
-    *(.rodata)
-    *(.rodata.*)
-    *(.rodata1)
-    *(.got1)
-    __got2_start = .;
-    *(.got2)
-    __got2_end = .;
-    *(.uts_string)
-    _vmlinuz_start = .;
-    *(.vmlinuz)
-    _vmlinuz_end = .;
-    . = ALIGN(4096);
-    _initrd_start = .;
-    *(.initrd)
-    _initrd_end = .;
-    . = ALIGN(4096);
-    CONSTRUCTORS
-  }
-  _edata  =  .;
+		_uts_string_start = .;
+		*(.uts_string)
+		_uts_string_end = .;
 
-  . = ALIGN(4096);
-  __bss_start = .;
-  .bss       :
-  {
-   *(.sbss) *(.scommon)
-   *(.dynbss)
-   *(.bss)
-   *(COMMON)
-  }
-  _end = . ;
+		_vmlinuz_start = .;
+		*(.vmlinuz)
+		_vmlinuz_end = .;
 
-  /DISCARD/ : {
-    *(__ksymtab)
-    *(__ksymtab_strings)
-    *(__bug_table)
-    *(__kcrctab)
-  }
-
+		_initrd_start = .;
+		*(.initrd)
+		_initrd_end = .;
+	}
+	_edata = .;
+	. = ALIGN(4096);
+	__bss_start = .;
+	.bss	:
+	{
+		*(.bss)
+		*(.sbss)
+	}
+	_end = .;
 }
