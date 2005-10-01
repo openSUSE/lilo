@@ -51,8 +51,10 @@ reloc_got2_loop:
 
 clear_caches:
 	lis	r9,_start@h
+	add	r9,r0,r9
 	lis	r8,_etext@ha
 	addi	r8,r8,_etext@l
+	add	r8,r0,r8
 1:	dcbf	r0,r9
 	icbi	r0,r9
 	addi	r9,r9,0x20
