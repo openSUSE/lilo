@@ -135,4 +135,5 @@ objcopy \
 #
 rm -f "$output"
 cp "$tmp/output" "$output"
+rm -rf $tmp
 

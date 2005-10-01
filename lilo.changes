@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Oct  1 19:41:13 CEST 2005 - olh@suse.de
+
+- remove mkzimage tmp dir after image creation for iseries and prep
+
+-------------------------------------------------------------------
 Sat Oct  1 19:40:14 CEST 2005 - olh@suse.de
 
 - append a 0x0 to the utsstring in bootheader
