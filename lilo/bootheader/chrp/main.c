@@ -34,6 +34,7 @@ extern int identify_cpu(void);
 
 extern char _coff_start[];
 extern char _start[];
+extern char __bss_start[];
 extern char _end[];
 extern char _vmlinuz_start[];
 extern char _vmlinuz_end[];
@@ -189,6 +190,9 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	phandle bootcpu_phandle[1];
 	kernel_entry_t kernel_entry;
 	int cputype, elftype;
+
+	/* Clear out the BSS as per ANSI C requirements */
+	memset(__bss_start, 0, _end - __bss_start);
 
 	of1275_prominit(promptr);
 

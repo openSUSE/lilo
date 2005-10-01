@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Oct  1 20:15:03 CEST 2005 - olh@suse.de
+
+- use memset to clear the bss on chrp in bootheader
+
+-------------------------------------------------------------------
 Sat Oct  1 20:03:06 CEST 2005 - olh@suse.de
 
 - remove PROVIDE from bootheader linker script, adapt prep
