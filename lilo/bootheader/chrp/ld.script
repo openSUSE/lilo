@@ -42,6 +42,7 @@ SECTIONS
     *(.data)
     *(.data1)
     *(.data.boot)
+    *(.data.rel.local)
     *(.sdata)
     *(.sdata2)
     *(.got.plt) *(.got)
@@ -50,6 +51,9 @@ SECTIONS
     *(.rodata.*)
     *(.rodata1)
     *(.got1)
+    __got2_start = .;
+    *(.got2)
+    __got2_end = .;
     *(.uts_string)
     _vmlinuz_start = .;
     *(.vmlinuz)

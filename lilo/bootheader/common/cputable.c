@@ -14,6 +14,7 @@
  */
 #include <stdio.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 struct cpu_spec {
 	/* CPU is matched via (PVR & pvr_mask) == pvr_value */
@@ -425,14 +426,14 @@ int identify_cpu(void) {
 	c = loop_cpu_list(cpu_specs_64, cpu);
 	if (c) {
 #ifdef DEBUG
-		printf("64bit cpu %s\n", c);
+		printf("64bit cpu %s\n", PTRRELOC(c));
 #endif
 		return 64;
 	}
 	c = loop_cpu_list(cpu_specs_32, cpu);
 	if (c) {
 #ifdef DEBUG
-		printf("32bit cpu %s\n", c);
+		printf("32bit cpu %s\n", PTRRELOC(c));
 #endif
 		return 32;
 	}

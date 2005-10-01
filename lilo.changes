@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Oct  1 22:25:06 CEST 2005 - olh@suse.de
+
+- make the bootheader relocateable
+
+-------------------------------------------------------------------
 Sat Oct  1 20:15:03 CEST 2005 - olh@suse.de
 
 - use memset to clear the bss on chrp in bootheader

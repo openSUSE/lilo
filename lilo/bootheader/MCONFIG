@@ -28,6 +28,7 @@ REQFLAGS = $(ARCHREQFLAGS) \
            -fno-builtin -m32 -fomit-frame-pointer \
 	   -msoft-float \
 	   -Os \
+	   -fPIC \
 	   -Wall -Wstrict-prototypes \
 	   $(INCLUDE)
 DEBUG   = 0
