@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Oct 29 14:47:52 CEST 2005 - olh@suse.de
+
+- update memcpy in bootheader to deal with unaligned src/dest
+
+-------------------------------------------------------------------
 Sat Oct 29 14:34:59 CEST 2005 - olh@suse.de
 
 - reduce claim_base to 32MB in bootheader, oldworld cant handle 64MB
