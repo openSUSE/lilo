@@ -308,9 +308,8 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	       "        entry addr = 0x%08lx\n"
 	       "        a1         = 0x%08lx,\n"
 	       "        a2         = 0x%08lx,\n"
-	       "        prom       = 0x%p,\n"
-	       "        bi_recs    = 0x%08lx,\n",
-	       (unsigned long)kernel_entry, a1, a2, promptr, NULL);
+	       "        prom       = 0x%p,\n",
+	       (unsigned long)kernel_entry, a1, a2, promptr);
 #endif
 
 	kernel_entry(a1, a2, promptr, NULL);
