@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Oct 29 14:34:59 CEST 2005 - olh@suse.de
+
+- reduce claim_base to 32MB in bootheader, oldworld cant handle 64MB
+
+-------------------------------------------------------------------
 Sat Oct  1 23:12:10 CEST 2005 - olh@suse.de
 
 - remove all unneeded stuff from ld.script in bootheader

@@ -200,8 +200,9 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	       _coff_start, _end, a1, a2, promptr, sp);
 
 	/* maple firmware returns memory which is still in use for message passing */
+	/* oldworld pmac can not claim much above 64MB */
 	if (1)
-		claim_base = 64 * 1024 * 1024;
+		claim_base = 32 * 1024 * 1024;
 	else
 	/* the executable memrange may not be claimed by firmware */
 	of1275_claim((unsigned int)_coff_start, (unsigned int)(_end - _coff_start), 0);
