@@ -148,7 +148,7 @@ static int check_elf64(void *p)
 	printf("p_filesz 0x%016llx\n", elf64ph->p_filesz);
 	printf("p_memsz  0x%016llx\n", elf64ph->p_memsz);
 	printf("p_align  0x%016llx\n", elf64ph->p_align);
-	printf("... skipping 0x%lx bytes of ELF header\n",
+	printf("... skipping 0x%08lx bytes of ELF header\n",
 	       (unsigned long)elf64ph->p_offset);
 #endif
 
@@ -270,9 +270,9 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 		a2 = initrd.size;
 #ifdef DEBUG
 		printf
-		    ("initial ramdisk moving 0x%lx <- 0x%lx (0x%lx bytes)\n",
+		    ("initial ramdisk moving 0x%08lx <- 0x%08lx (0x%08lx bytes)\n",
 		     initrd.addr, (unsigned long)_initrd_start, initrd.size);
-		printf("initrd head: 0x%lx\n",
+		printf("initrd head: 0x%08lx\n",
 		       *((unsigned long *)_initrd_start));
 #endif
 		memmove((void *)initrd.addr, (void *)_initrd_start,
@@ -305,11 +305,11 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	kernel_entry = (kernel_entry_t) (vmlinux.addr + vmlinux.offset);
 #ifdef DEBUG
 	printf("kernel:\n"
-	       "        entry addr = 0x%lx\n"
-	       "        a1         = 0x%lx,\n"
-	       "        a2         = 0x%lx,\n"
+	       "        entry addr = 0x%08lx\n"
+	       "        a1         = 0x%08lx,\n"
+	       "        a2         = 0x%08lx,\n"
 	       "        prom       = 0x%p,\n"
-	       "        bi_recs    = 0x%lx,\n",
+	       "        bi_recs    = 0x%08lx,\n",
 	       (unsigned long)kernel_entry, a1, a2, promptr, NULL);
 #endif
 
