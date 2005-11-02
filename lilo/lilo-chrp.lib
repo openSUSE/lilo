@@ -14,12 +14,14 @@ function firmware_status () {
         return
     fi
     local mymodel="$(</proc/device-tree/model)"
+    local myfwlvl=""
     if [ -f /proc/device-tree/ibm,vpd ]; then
-	dummy=$(tr '\0-\037' '[ *]'  < /proc/device-tree/ibm,vpd)
+	dummy=$(tr -c '[:print:]' '[ *]'  < /proc/device-tree/ibm,vpd)
 	dummy=${dummy#*RM }
-	local myfwlvl=${dummy%% *}
-    else
-	local myfwlvl="$(</proc/device-tree/openprom/ibm,fw-vernum_encoded)"
+	myfwlvl=${dummy%% *}
+    fi
+    if [ -z "$myfwlvl" ]; then
+	myfwlvl=$(</proc/device-tree/openprom/ibm,fw-vernum_encoded)
     fi
 
     while read; do
@@ -433,7 +435,14 @@ function running_on_chrp () {
 		error "Partition conversion failed for $OPTION_BOOT" 11
 	    fi
 	fi
-	mkfs.msdos $MKDOSFS $OPTION_BOOT || exit 2
+	if ! mkfs.msdos $MKDOSFS $OPTION_BOOT; then
+	    warning "Problems creating a FAT file system on '$OPTION_BOOT'" \
+		    "Will not fully use disk space"
+	fi
+	if ! mkfs.msdos $MKDOSFS $OPTION_BOOT 33030; then
+	    error "Not able to create a FAT file system on '$OPTION_BOOT'" \
+		  "using options '$MKDOSFS'. Please try a smaller partition"
+	fi
 	cd $TEMP
 	mkdir -p boot || exit 2
 	mount $OPTION_BOOT boot || exit 2
