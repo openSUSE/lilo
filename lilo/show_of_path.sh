@@ -356,7 +356,7 @@ if [ -f devspec ] ; then
 	    device_id=$(read_int ${file_of_hw_devtype}/device-id)
 	    vendor_id=$(read_int ${file_of_hw_devtype}/vendor-id)
 
-	    printf "device_id=%x  vendor_id=%x\n"  $device_id $vendor_id
+	    dbg_show device_id vendor_id
 
 	    if (( vendor_id == 0x10df && device_id == 0xf900 )); then
 		# PCI_VENDOR_ID_EMULEX==0x10df and PCI_DEVICE_ID==0xf900
