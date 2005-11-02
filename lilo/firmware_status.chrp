@@ -21,16 +21,17 @@ IBM,7026-B80	untested	<=NAN00252			#MKDOSFS="-s 8"		# mandarine
 IBM,7026-B80	untested	<=NAN04194
 
 # RS64 machines
-IBM,7026-6H1    tested      	<=M2P01113                     				# papaya
+IBM,7026-6H1    tested      	<=M2P01113			# papaya
+IBM,7025-6F1	tested          >=M2P050203_condor_       MKDOSFS="-s 8 -F 16" MINDOSFSSIZE=$[16*2076] # orange
 
 
 # Power4 machines
-IBM,7038-6M2	tested		<=3K050202						# sweetie
-IBM,7028-6C4	untested	<=3R041029						# gooseberry
-IBM,7028-6C4	untested   	==3R050405						# gooseberry
-IBM,7028-6E4	tested  	<=3R041029 						# pepino
-IBM,7028-6E4	untested     	3R050405	   					# pepino
-IBM,7040-671	tested 		<=3H050215						# pomegranate
+IBM,7038-6M2	tested		<=3K050202			# sweetie
+IBM,7028-6C4	untested	<=3R041029			# gooseberry
+IBM,7028-6C4	untested   	==3R050405			# gooseberry
+IBM,7028-6E4	tested  	<=3R041029 			# pepino
+IBM,7028-6E4	untested     	3R050405	   		# pepino
+IBM,7040-671	tested 		<=3H050215			# pomegranate
 IBM,7040-671	untested	<=3H050405
 
 
@@ -43,6 +44,7 @@ IBM,9123-720	untested	!=any				# tangelo
 
 # PPC970 blades
 # JS20 GA1
-# JS20 GA2
+IBM,8842-21X	tested		>=FW05131140
+IBM,8842-21X	tested		>=PB204E			# JS20 GA2
 # JS20 TelCo
 # JS20++
