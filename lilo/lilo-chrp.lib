@@ -440,6 +440,19 @@ function running_on_chrp () {
 	cp -v /lib/lilo/chrp/yaboot.fat boot/yaboot || exit 2
 	cp -v $TEMP/yaboot.conf boot/yaboot.cnf || exit 2
 
+	mkdir boot/ppc
+	# create a bootinfo object to make OF happy
+	{
+	    echo "<chrp-boot>"
+	    echo "    <description>SUSE SLES-9 (PPC)</description>"
+	    echo "    <os-name>SUSE SLES-9 (PPC)</os-name>"
+	    echo "    <boot-script>"
+	    echo "        boot &device;:$partition,yaboot"
+	    echo "    </boot-script>"
+	    echo "</chrp-boot>"
+	} > boot/ppc/bootinfo.txt
+	mkdir boot/ppc/chrp
+
 	# copy default image
 	if (( vmlinux_default != 0 )); then
 	    cp -v ${vmlinux_copy[$vmlinux_default]} \
@@ -456,28 +469,21 @@ function running_on_chrp () {
 	for (( i=1; i<=vmlinux_nr; i++ )); do
 	    local f="${vmlinux_copy[$i]}"
 	    if [ "$f" ]; then
-		cp -v $f boot/vmlinux.$(printf "%03d" $i) || exit 2
+		if ! cp -v $f boot/vmlinux.$(printf "%03d" $i); then
+		    warning "Possibly disk full for $f, ignoring"
+		    break;
+		fi
 	    fi
 	done
 	for (( i=1; i<=initrd_nr; i++ )); do
 	    local f="${initrd_copy[$i]}"
 	    if [ "$f" ]; then
-		cp -v $f boot/initrd.$(printf "%03d" $i) || exit 2
+		if ! cp -v $f boot/initrd.$(printf "%03d" $i); then
+		    warning "Possibly disk full for $f, ignoring"
+		    break;
+		fi
 	    fi
 	done
-
-	mkdir boot/ppc
-	# create a bootinfo object to make OF happy
-	{
-	    echo "<chrp-boot>"
-	    echo "    <description>SUSE SLES-9 (PPC)</description>"
-	    echo "    <os-name>SUSE SLES-9 (PPC)</os-name>"
-	    echo "    <boot-script>"
-	    echo "        boot &device;:$partition,yaboot"
-	    echo "    </boot-script>"
-	    echo "</chrp-boot>"
-	} > boot/ppc/bootinfo.txt
-	mkdir boot/ppc/chrp
 	umount boot
     else
 	# check for PReP partition and convert $OPTION_BOOT if neseccary
