@@ -72,6 +72,26 @@ function error() {
 }
 
 
+function read_qbyte() {
+    local file=$1;
+    local count=$2;
+
+    [ -r $file ] || return;
+    while (( count-- )) && read addr val; do
+	echo $val
+    done < <(od --read-bytes=$[4*count] --width=4 -t x4 $file)
+}
+
+
+function read_int() {
+    [ "$1" ] || return;
+    echo $(( 0x$(read_qbyte "$1" 1) ))
+}
+
+
+
+
+
 # if no file path is given on cmd line check for root file system
 file=/
 
@@ -332,8 +352,24 @@ if [ -f devspec ] ; then
 	    else
 		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
 	    fi
+	   
+	    device_id=$(read_int ${file_of_hw_devtype}/device-id)
+	    vendor_id=$(read_int ${file_of_hw_devtype}/vendor-id)
+
+	    printf "device_id=%x  vendor_id=%x\n"  $device_id $vendor_id
+
+	    if (( vendor_id == 0x10df && device_id == 0xf900 )); then
+		# PCI_VENDOR_ID_EMULEX==0x10df and PCI_DEVICE_ID==0xf900
+		lun_format="%x000000000000"
+	    elif (( vendor_id == 0x1077 && device_id == 0x2312 )); then
+		# PCI_VENDOR_ID_QLOGIC==0x1077 and PCI_DEVICE_ID==0x2312
+		lun_format="%04x000000000000"
+	    else
+		lun_format="%016x"
+	    fi
+
 	    file_of_hw_path=$(
-		printf "%s/%s@%s,%016x" \
+		printf "%s/%s@%s,${lun_format}" \
 		    "${file_of_hw_devtype##/proc/device-tree}" \
 		    $of_disk_fc_dir $of_disk_fc_wwpn $of_disk_fc_lun
 	    )
@@ -365,54 +401,35 @@ else # no 'devspec' found
 	dbg_show file_full_sysfs_path
 	# find the path via the device-tree
 	dev_vendor="$(< vendor)"
+	dev_vendor=$(($dev_vendor))
 	dev_device="$(< device)"
+	dev_device=$(($dev_device))
 	dev_subsystem_vendor="$(< subsystem_vendor)"
+	dev_subsystem_vendor=$(($dev_subsystem_vendor))
 	dev_subsystem_device="$(< subsystem_device)"
+	dev_subsystem_device=$(($dev_subsystem_device))
+
 	for i in `find /proc/device-tree -name vendor-id`
 	do
-		: looking at $i
-		dev_of_pci_id=
-		while read a vendor_id; do
-		    dev_of_pci_id="0x$vendor_id"
-		    break
-		done  < <(od --read-bytes=8 --width=8 -t x4 $i)
-		: vendor-id $dev_of_pci_id
-		dev_of_pci_id=$(($dev_of_pci_id))
-		dev_vendor=$(($dev_vendor))
-		if [ "$dev_of_pci_id" != "$dev_vendor" ] ; then continue ; fi
-		if [ ! -f "${i%/*}/device-id" ] ; then continue ; fi
-		while read a device_id; do
-		    dev_of_pci_id="0x$device_id"
-		    break
-		done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/device-id")
-		: device-id $dev_of_pci_id
-		dev_of_pci_id=$(($dev_of_pci_id))
-		dev_device=$(($dev_device))
-		if [ "$dev_of_pci_id" != "$dev_device" ] ; then continue ; fi
-		if [ -f "${i%/*}/subsystem-vendor-id" ] ; then
-		    while read a sub_vendor_id; do
-			dev_of_pci_id="0x$sub_vendor_id"
-			break
-		    done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-vendor-id")
-		    : sub-vendor-id $dev_of_pci_id
-		    dev_of_pci_id=$(($dev_of_pci_id))
-		    dev_subsystem_vendor=$(($dev_subsystem_vendor))
-		    if [ "$dev_of_pci_id" != "$dev_subsystem_vendor" ] ; then continue ; fi
-		    while read a sub_device_id; do
-			dev_of_pci_id="0x$sub_device_id"
-			break
-		    done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-id")
-		    : sub-device-id $dev_of_pci_id
-		    dev_of_pci_id=$(($dev_of_pci_id))
-		    dev_subsystem_device=$(($dev_subsystem_device))
-		    if [ "$dev_of_pci_id" != "$dev_subsystem_device" ] ; then continue ; fi
-		fi
-		: found $i
-		if [ -z "$of_device_list" ] ; then
-			of_device_list="${i%/*}"
-		else
-			of_device_list="$of_device_list ${i%/*}"
-		fi
+	  : looking at $i
+	  dev_of_pci_id=$(read_int "$i")
+	  if [ "$dev_of_pci_id" != "$dev_vendor" ] ; then continue ; fi
+	  if [ ! -f "${i%/*}/device-id" ] ; then continue ; fi
+	  dev_of_pci_id=$(read_int "${i%/*}/device-id")
+	  
+	  if [ "$dev_of_pci_id" != "$dev_device" ] ; then continue ; fi
+	  if [ -f "${i%/*}/subsystem-vendor-id" ] ; then
+	      dev_of_pci_id=$(read_int "${i%/*}/subsystem-vendor-id")
+	      if [ "$dev_of_pci_id" != "$dev_subsystem_vendor" ] ; then continue ; fi
+	      dev_of_pci_id=$(read_int "${i%/*}/subsystem-id")
+	      if [ "$dev_of_pci_id" != "$dev_subsystem_device" ] ; then continue ; fi
+	  fi
+	  : found $i
+	  if [ -z "$of_device_list" ] ; then
+	      of_device_list="${i%/*}"
+	  else
+	      of_device_list="$of_device_list ${i%/*}"
+	  fi
 	done
 	dbg_show of_device_list
 	case "$of_device_list" in
@@ -421,11 +438,9 @@ else # no 'devspec' found
 		for i in $of_device_list
 		do
 		: working on $i
-			while read a addr
-			do
-			addr="0x$addr"
-			break
-			done < <(od -t x8 -j4 -N8 < $i/assigned-addresses)
+		read dummy high low < <(read_qbyte $i/assigned-addresses 3)
+		addr="0x${high}${low}"
+
 		: addr $addr , pure guess ...
 		grep -q ^$addr resource || continue
 		: found $i
