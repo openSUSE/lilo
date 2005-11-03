@@ -438,10 +438,10 @@ function running_on_chrp () {
 	if ! mkfs.msdos $MKDOSFS $OPTION_BOOT; then
 	    warning "Problems creating a FAT file system on '$OPTION_BOOT'" \
 		    "Will not fully use disk space"
-	fi
-	if ! mkfs.msdos $MKDOSFS $OPTION_BOOT 33030; then
-	    error "Not able to create a FAT file system on '$OPTION_BOOT'" \
-		  "using options '$MKDOSFS'. Please try a smaller partition"
+	    if ! mkfs.msdos $MKDOSFS $OPTION_BOOT 33030; then
+		error "Not able to create a FAT file system on '$OPTION_BOOT'" \
+		      "using options '$MKDOSFS'. Please try a smaller partition"
+	    fi
 	fi
 	cd $TEMP
 	mkdir -p boot || exit 2
