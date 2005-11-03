@@ -368,7 +368,6 @@ if [ -f devspec ] ; then
 	    elif (( vendor_id == 0x1077 )); then
 		# PCI_VENDOR_ID_QLOGIC==0x1077 and PCI_DEVICE_ID==0x2312
 		lun_format="%04x000000000000"
-	    else
 	    fi
 
 	    file_of_hw_path=$(
