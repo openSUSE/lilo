@@ -358,14 +358,17 @@ if [ -f devspec ] ; then
 
 	    dbg_show device_id vendor_id
 
-	    if (( vendor_id == 0x10df && device_id == 0xf900 )); then
-		# PCI_VENDOR_ID_EMULEX==0x10df and PCI_DEVICE_ID==0xf900
-		lun_format="%x000000000000"
-	    elif (( vendor_id == 0x1077 && device_id == 0x2312 )); then
+	    lun_format="%016x"	# fallback LUN encoding
+	    if (( vendor_id == 0x10df )); then
+		if (( device_id == 0xf900 )); then
+		    # PCI_VENDOR_ID_EMULEX==0x10df and PCI_DEVICE_ID==0xf900
+		    # TODO: may be check /sys/class/scsi_host/hostX/lpfc_max_luns
+		    lun_format="%x000000000000"
+		fi
+	    elif (( vendor_id == 0x1077 )); then
 		# PCI_VENDOR_ID_QLOGIC==0x1077 and PCI_DEVICE_ID==0x2312
 		lun_format="%04x000000000000"
 	    else
-		lun_format="%016x"
 	    fi
 
 	    file_of_hw_path=$(
