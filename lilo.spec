@@ -2,7 +2,7 @@
 # neededforbuild  
 
 Name:         lilo
-%define lilo_vers  0.1.3
+%define lilo_vers  0.1.4
 %define yaboot_vers 1.3.11
 Group:        System/Boot
 License:      BSD, Other License(s), see package
