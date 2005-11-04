@@ -360,13 +360,18 @@ if [ -f devspec ] ; then
 
 	    lun_format="%016x"	# fallback LUN encoding
 	    if (( vendor_id == 0x10df )); then
-		if (( device_id == 0xf900 )); then
-		    # PCI_VENDOR_ID_EMULEX==0x10df and PCI_DEVICE_ID==0xf900
+		# PCI_VENDOR_ID_EMULEX==0x10df
+		id=$(printf "%04x" $device_id)
+		if [[ $id == @(f901|f981|f982|fa00|fa01|fd00) ]]; then
+		    warning "Emulex FC HBA with device id 0x$id not yet tested." \
+			    "Reboot may fail."
+		fi
+		if [[ $id == @(f900|f901|f980|f981|f982|fa00|fa01|fd00) ]]; then
 		    # TODO: may be check /sys/class/scsi_host/hostX/lpfc_max_luns
 		    lun_format="%x000000000000"
 		fi
 	    elif (( vendor_id == 0x1077 )); then
-		# PCI_VENDOR_ID_QLOGIC==0x1077 and PCI_DEVICE_ID==0x2312
+		# PCI_VENDOR_ID_QLOGIC==0x1077
 		lun_format="%04x000000000000"
 	    fi
 

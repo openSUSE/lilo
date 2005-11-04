@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Nov  4 18:52:14 CET 2005 - jplack@suse.de
+
+- accept more EMulex cards due to testing@IBM (#94471 - LTC16772)
+
+-------------------------------------------------------------------
 Thu Nov  3 20:09:30 CET 2005 - jplack@suse.de
 
 - better fwlevel detection, cut FAT partition in case of error
