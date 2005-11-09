@@ -95,7 +95,6 @@ $obj_dir/utils/iseries-addSystemMap \
 else
 $obj_dir/utils/iseries-addRamDisk \
 	"$initrd" \
-	"$tmp/System.map" \
 	"$vmlinux" \
 	"$tmp/output"
 fi
