@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Nov  9 17:12:02 CET 2005 - olh@suse.de
+
+- remove initalizers for locals in iseries-addRamDisk
+
+-------------------------------------------------------------------
 Sat Oct 29 14:47:52 CEST 2005 - olh@suse.de
 
 - update memcpy in bootheader to deal with unaligned src/dest
