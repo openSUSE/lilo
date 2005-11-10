@@ -562,9 +562,9 @@ function running_on_chrp () {
     if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
         nvsetenv bootinfo-linux "${boot_path},\ppc\bootinfo.txt"
         boot_path=${boot_path},yaboot
-    elif [[ "${p_flags[*]}" != *type=41*type=41* ]]; then
-        # open firmware is confused about more than one PReP partition, in that
-        # case keep full OF path
+    else
+        # open firmware is confused about more than one PReP partition, but
+        # we made sure the first one is the right one :-)
         boot_path=${boot_path%:+([0-9])}
     fi
 

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Nov 10 17:19:20 CET 2005 - jplack@suse.de
+
+-  handle multiple prep partitions properly (installation blocker)
+
+-------------------------------------------------------------------
 Fri Nov  4 18:52:14 CET 2005 - jplack@suse.de
 
 - accept more EMulex cards due to testing@IBM (#94471 - LTC16772)
