@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov 22 20:28:30 CET 2005 - olh@suse.de
+
+- remove -s option from strip in make_zimage* scripts, to remove debug
+
+-------------------------------------------------------------------
 Wed Nov  9 21:26:19 CET 2005 - olh@suse.de
 
 - remove need for extra System.map in iseries-addRamDisk
