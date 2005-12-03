@@ -58,6 +58,8 @@ make HOST_CFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
 # get rid of /usr/lib/rpm/brp-strip-debug 
 # it kills the zImage.chrp-rs6k 
 export NO_BRP_STRIP_DEBUG=true
+# do not strip binaries, keep debug info
+export NO_DEBUGINFO_STRIP_DEBUG=true
 #
 rm -rfv $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/pmac
