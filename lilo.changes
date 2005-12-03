@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sat Dec  3 10:59:52 CET 2005 - olh@suse.de
+
+- remove leading zeros from partition number in of_open in yaboot.
+  OpenFirmware handles it as whole disk (136537 - LTC20058)
+
+-------------------------------------------------------------------
 Tue Nov 22 20:28:30 CET 2005 - olh@suse.de
 
 - remove -s option from strip in make_zimage* scripts, to remove debug
