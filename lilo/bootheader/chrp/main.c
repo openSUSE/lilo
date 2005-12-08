@@ -303,15 +303,8 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	flush_cache((void *)vmlinux.addr, vmlinux.memsize);
 
 	kernel_entry = (kernel_entry_t) (vmlinux.addr + vmlinux.offset);
-#ifdef DEBUG
-	printf("kernel:\n"
-	       "        entry addr = 0x%08lx\n"
-	       "        a1         = 0x%08lx,\n"
-	       "        a2         = 0x%08lx,\n"
-	       "        prom       = 0x%p,\n",
-	       (unsigned long)kernel_entry, a1, a2, promptr);
-#endif
-
+	printf( "entering kernel at 0x%08x(%x/%x/%08x)\n",
+			kernel_entry, a1, a2, promptr);
 	kernel_entry(a1, a2, promptr, NULL);
 
 	abort("Error: Linux kernel returned to zImage bootloader!\n");

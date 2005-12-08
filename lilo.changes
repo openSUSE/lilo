@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec  8 21:05:32 CET 2005 - olh@suse.de
+
+- print kernel entry address unconditionally in bootheader
+
+-------------------------------------------------------------------
 Sat Dec  3 11:03:55 CET 2005 - olh@suse.de
 
 - do not strip binaries in during rpm build (134860)
