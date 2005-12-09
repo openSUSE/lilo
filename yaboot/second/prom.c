@@ -71,11 +71,11 @@ call_prom (const char *service, int nargs, int nret, ...)
      va_end(list);
      for (i = 0; i < nret; ++i)
 	  prom_args.args[i + nargs] = 0;
-     prom (&prom_args);
+     if (prom (&prom_args) < 0)
+	     return -1;
      if (nret > 0)
 	  return prom_args.args[nargs];
-     else
-	  return 0;
+     return 0;
 }
 
 void *
@@ -94,8 +94,8 @@ call_prom_return (const char *service, int nargs, int nret, ...)
 	  prom_args.args[i] = va_arg(list, void *);
      for (i = 0; i < nret; ++i)
 	  prom_args.args[i + nargs] = 0;
-     if (prom (&prom_args) != 0)
-	  return PROM_INVALID_HANDLE;
+     if (prom (&prom_args) < 0)
+	  return -1;
      if (nret > 0) {
 	  result = prom_args.args[nargs];
 	  for (i=1; i<nret; i++) {
