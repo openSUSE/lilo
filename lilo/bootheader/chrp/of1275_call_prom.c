@@ -17,7 +17,7 @@ int call_prom(const char *service, int nargs, int nret, ...)
 	va_end(list);
 	for (i = 0; i < nret; ++i)
 		prom_args.args[i + nargs] = 0;
-	if (promptr(&prom_args))
+	if (promptr(&prom_args) < 0)
 		return -1;
 	return (nret > 0) ? prom_args.args[nargs] : 0;
 }
