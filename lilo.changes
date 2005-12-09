@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Dec  9 14:00:03 CET 2005 - olh@suse.de
+
+- better memcpy in bootheader to deal with unaligned src/dest
+
+-------------------------------------------------------------------
 Thu Dec  8 21:05:32 CET 2005 - olh@suse.de
 
 - print kernel entry address unconditionally in bootheader

@@ -99,124 +99,98 @@ memset:
 
 	.globl	memmove
 memmove:
-	cmpwi	0,r5,0
-	beqlr
 	cmplw	0,r3,r4
 	bgt	backwards_memcpy
 	/* fall through */
 
 	.globl	memcpy
 memcpy:
-	cmpwi	0,r5,0
-	beqlr
-	andi.	r0,r4,3			/* get src word aligned */
-	beq	20f
-10:	subfic	r0,r0,4
-	cmpd	r0,r5
-	blt	11f
-	mr	r0,r5
-11:	mtctr	r0
-12:	lbz	r7,0(r4)
-	stb	r7,0(r3)
-	addi	r4,r4,1
-	addi	r3,r3,1
-	bdnz	12b
-	subf.	r5,r0,r5
-	beqlr
-20:	andi.	r0,r3,3			/* get dest word aligned */
-	beq	30f
-	subfic	r0,r0,4
-	cmpd	r0,r5
-	blt	21f
-	mr	r0,r5
-21:	mtctr	r0
-22:	lbz	r7,0(r4)
-	stb	r7,0(r3)
-	addi	r4,r4,1
-	addi	r3,r3,1
-	bdnz	22b
-	subf.	r5,r0,r5
-	beqlr
-	andi.	r0,r4,3			/* get src word aligned */
-	bne	10b
-30:
 	rlwinm.	r7,r5,32-3,3,31		/* r7 = r5 >> 3 */
 	addi	r6,r3,-4
 	addi	r4,r4,-4
-	beq	32f			/* if less than 8 bytes to do */
+	beq	3f			/* if less than 8 bytes to do */
+	andi.	r0,r6,3			/* get dest word aligned */
 	mtctr	r7
-31:	lwz	r7,4(r4)
+	bne	5f
+1:	lwz	r7,4(r4)
 	lwzu	r8,8(r4)
 	stw	r7,4(r6)
 	stwu	r8,8(r6)
-	bdnz	31b
+	bdnz	1b
 	andi.	r5,r5,7
-32:	cmplwi	0,r5,4
-	blt	33f
+2:	cmplwi	0,r5,4
+	blt	3f
 	lwzu	r0,4(r4)
 	addi	r5,r5,-4
 	stwu	r0,4(r6)
-33:	cmpwi	0,r5,0
+3:	cmpwi	0,r5,0
 	beqlr
 	mtctr	r5
 	addi	r4,r4,3
 	addi	r6,r6,3
-34:	lbzu	r0,1(r4)
+4:	lbzu	r0,1(r4)
 	stbu	r0,1(r6)
-	bdnz	34b
+	bdnz	4b
 	blr
+5:	subfic	r0,r0,4
+	cmpw	cr1,r0,r5
+	add	r7,r0,r4
+	andi.	r7,r7,3			/* will source be word-aligned too? */
+	ble	cr1,3b
+	bne	3b			/* do byte-by-byte if not */
+	mtctr	r0
+6:	lbz	r7,4(r4)
+	addi	r4,r4,1
+	stb	r7,4(r6)
+	addi	r6,r6,1
+	bdnz	6b
+	subf	r5,r0,r5
+	rlwinm.	r7,r5,32-3,3,31
+	beq	2b
+	mtctr	r7
+	b	1b
 
 	.globl	backwards_memcpy
 backwards_memcpy:
+	rlwinm.	r7,r5,32-3,3,31		/* r7 = r5 >> 3 */
 	add	r6,r3,r5
 	add	r4,r4,r5
-
-	andi.	r0,r4,3			/* get src word aligned */
-	beq	20f
-10:	cmpd	r0,r5
-	blt	11f
-	mr	r0,r5
-11:	mtctr	r0
-12:	lbzu	r7,-1(r4)
-	stbu	r7,-1(r6)
-	bdnz	12b
-	subf.	r5,r0,r5
-	beqlr
-20:	andi.	r0,r6,3			/* get dest word aligned */
-	beq	30f
-	cmpd	r0,r5
-	blt	21f
-	mr	r0,r5
-21:	mtctr	r0
-22:	lbzu	r7,-1(r4)
-	stbu	r7,-1(r6)
-	bdnz	22b
-	subf.	r5,r0,r5
-	beqlr
-	andi.	r0,r4,3			/* get src word aligned */
-	bne	10b
-30:
-	rlwinm.	r7,r5,32-3,3,31		/* r7 = r5 >> 3 */
-	beq	32f
+	beq	3f
+	andi.	r0,r6,3
 	mtctr	r7
-31:	lwz	r7,-4(r4)
+	bne	5f
+1:	lwz	r7,-4(r4)
 	lwzu	r8,-8(r4)
 	stw	r7,-4(r6)
 	stwu	r8,-8(r6)
-	bdnz	31b
+	bdnz	1b
 	andi.	r5,r5,7
-32:	cmplwi	0,r5,4
-	blt	33f
+2:	cmplwi	0,r5,4
+	blt	3f
 	lwzu	r0,-4(r4)
 	subi	r5,r5,4
 	stwu	r0,-4(r6)
-33:	cmpwi	0,r5,0
+3:	cmpwi	0,r5,0
 	beqlr
 	mtctr	r5
-34:	lbzu	r0,-1(r4)
+4:	lbzu	r0,-1(r4)
 	stbu	r0,-1(r6)
-	bdnz	34b
+	bdnz	4b
 	blr
+5:	cmpw	cr1,r0,r5
+	subf	r7,r0,r4
+	andi.	r7,r7,3
+	ble	cr1,3b
+	bne	3b
+	mtctr	r0
+6:	lbzu	r7,-1(r4)
+	stbu	r7,-1(r6)
+	bdnz	6b
+	subf	r5,r0,r5
+	rlwinm.	r7,r5,32-3,3,31
+	beq	2b
+	mtctr	r7
+	b	1b
 
 	.globl	memcmp
 memcmp:
