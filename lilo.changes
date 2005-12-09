@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Dec  9 18:22:49 CET 2005 - olh@suse.de
+
+- prom_entry in bootheader returns int, not void
+
+-------------------------------------------------------------------
 Fri Dec  9 14:00:03 CET 2005 - olh@suse.de
 
 - better memcpy in bootheader to deal with unaligned src/dest

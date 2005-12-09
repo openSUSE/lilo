@@ -13,7 +13,7 @@ struct prom_args {
 	prom_arg_t args[10];
 };
 
-typedef void (*prom_entry) (struct prom_args *);
+typedef int (*prom_entry) (struct prom_args *);
 extern prom_entry promptr;
 
 extern phandle chosen_handle;
