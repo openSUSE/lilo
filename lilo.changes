@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Dec  9 18:27:29 CET 2005 - olh@suse.de
+
+- do not ignore the return value from prom in call_prom in bootheader
+
+-------------------------------------------------------------------
 Fri Dec  9 18:22:49 CET 2005 - olh@suse.de
 
 - prom_entry in bootheader returns int, not void
