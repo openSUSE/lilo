@@ -11,6 +11,7 @@ CHRP_OBJS   := $(patsubst %,%.o,$(CHRP_SRC))
 CHRP        := chrp.a
 
 PROM_SRC    := call_prom prominit \
+		call_prom_ret \
 		child \
 		claim \
 		close \

@@ -24,6 +24,7 @@ extern ihandle stderr;
 extern ihandle mmu;
 
 extern int call_prom(const char *service, int nargs, int nret, ...);
+extern int call_prom_ret(const char *service, int nargs, int nret, unsigned int *rets, ...);
 extern phandle of1275_child(phandle node);
 extern void *of1275_claim(unsigned int virt, unsigned int size, unsigned int align);
 extern void of1275_close(phandle node);
