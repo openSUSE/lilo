@@ -184,11 +184,16 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	printf("\nzImage starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%p;0x%p)\n",
 	       _coff_start, _end, a1, a2, promptr, sp);
 
-	/* maple firmware returns memory which is still in use for message passing */
-	/* oldworld pmac can not claim much above 64MB */
-	if (1)
-		claim_base = 32 * 1024 * 1024;
+	/* Maple firmware returns memory which is still in use for message passing
+	 * Thats why claim_base is set to 32MB
+	 * OldWorld Pmac can not claim above RAM end, even with MMU enabled
+	 * on >601, a BAT max size is 256Mb and the kernel uses 2 of them,
+	 * but on 601, a BAT max size is 8Mb. Try to claim memory above 5MB in this case
+	 */
+	if (claim_needs_map)
+		claim_base = 5 * 1024 * 1024;
 	else
+		claim_base = 32 * 1024 * 1024;
 	/* the executable memrange may not be claimed by firmware */
 	of1275_claim((unsigned int)_coff_start, (unsigned int)(_end - _coff_start), 0);
 	

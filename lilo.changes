@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Dec 10 23:15:51 CET 2005 - olh@suse.de
+
+- set claim_base to 5MB for OldWorld in bootheader
+
+-------------------------------------------------------------------
 Sat Dec 10 19:54:06 CET 2005 - olh@suse.de
 
 - do bytecopy in memcpy if src unaligned
