@@ -112,6 +112,8 @@ memcpy:
 	andi.	r0,r6,3			/* get dest word aligned */
 	mtctr	r7
 	bne	5f
+	andi.	r0,r4,3			/* byte copy if src unaligned */
+	bne	3f
 1:	lwz	r7,4(r4)
 	lwzu	r8,8(r4)
 	stw	r7,4(r6)
@@ -159,6 +161,8 @@ backwards_memcpy:
 	andi.	r0,r6,3
 	mtctr	r7
 	bne	5f
+	andi.	r0,r4,3
+	bne	3f
 1:	lwz	r7,-4(r4)
 	lwzu	r8,-8(r4)
 	stw	r7,-4(r6)

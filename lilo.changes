@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Dec 10 19:54:06 CET 2005 - olh@suse.de
+
+- do bytecopy in memcpy if src unaligned
+
+-------------------------------------------------------------------
 Sat Dec 10 18:44:52 CET 2005 - olh@suse.de
 
 - claim memory in the /memory and mmu node on old Macs in bootheader
