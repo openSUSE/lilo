@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Dec 10 18:44:52 CET 2005 - olh@suse.de
+
+- claim memory in the /memory and mmu node on old Macs in bootheader
+
+-------------------------------------------------------------------
 Sat Dec 10 17:26:24 CET 2005 - olh@suse.de
 
 - add call_prom_ret to bootheader

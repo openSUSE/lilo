@@ -22,6 +22,8 @@ extern ihandle stdin;
 extern ihandle stdout;
 extern ihandle stderr;
 extern ihandle mmu;
+extern phandle memory;
+extern int claim_needs_map;
 
 extern int call_prom(const char *service, int nargs, int nret, ...);
 extern int call_prom_ret(const char *service, int nargs, int nret, unsigned int *rets, ...);

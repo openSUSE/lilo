@@ -23,11 +23,6 @@
 extern void flush_cache(void *, unsigned long);
 extern int identify_cpu(void);
 
-#define MSR_IR		(1<<5)	/* Instruction Relocate */
-#define MSR_DR		(1<<4)	/* Data Relocate */
-#define mfmsr()         ({unsigned long rval; \
-		asm volatile("mfmsr %0" : "=r" (rval)); rval;})
-
 /* Value picked to match that used by yaboot */
 #define PROG_START	0x01400000
 #define RAM_END		(128<<20)	// Fixme: use OF */
@@ -157,15 +152,6 @@ static int check_elf64(void *p)
 
 static unsigned long claim_base /* = PROG_START */ ;
 
-static void try_map(unsigned long phys, unsigned long virt, unsigned int size)
-{
-	unsigned long msr = mfmsr();
-	if (msr & (MSR_IR | MSR_DR)) {
-		printf("map 0x%08lx@0x%p: ", size, phys);
-		printf("%d\n", of1275_map(phys, virt, size));
-	}
-}
-
 static unsigned long try_claim(unsigned long size)
 {
 	unsigned long addr = 0;
@@ -180,7 +166,6 @@ static unsigned long try_claim(unsigned long size)
 	}
 	if (addr == 0)
 		return 0;
-	try_map(addr, addr, size);
 	claim_base = PAGE_ALIGN(claim_base + size);
 	return addr;
 }
@@ -207,9 +192,6 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	/* the executable memrange may not be claimed by firmware */
 	of1275_claim((unsigned int)_coff_start, (unsigned int)(_end - _coff_start), 0);
 	
-	if (of1275_getprop(chosen_handle, "mmu", &mmu, sizeof(mmu)) != 4)
-		abort("no mmu");
-
 	bootcpu_phandle[0] = 0;
 	find_type_devices(bootcpu_phandle, "cpu", sizeof(bootcpu_phandle)/sizeof(phandle));
 	if (!bootcpu_phandle[0])
