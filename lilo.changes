@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Dec 12 14:59:56 CET 2005 - olh@suse.de
+
+- add vendor to zImage banner
+
+-------------------------------------------------------------------
 Sat Dec 10 23:15:51 CET 2005 - olh@suse.de
 
 - set claim_base to 5MB for OldWorld in bootheader

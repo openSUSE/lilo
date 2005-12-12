@@ -181,7 +181,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 
 	of1275_prominit(promptr);
 
-	printf("\nzImage starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%p;0x%p)\n",
+	printf("\nSuSE Linux zImage starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%p; sp: 0x%p)\n",
 	       _coff_start, _end, a1, a2, promptr, sp);
 
 	/* Maple firmware returns memory which is still in use for message passing

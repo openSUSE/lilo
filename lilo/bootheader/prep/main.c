@@ -426,7 +426,7 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	 */
 	TotalMemory = get_mem_size();
 
-	printf("zImage.prep starting\n");
+	printf("SuSE Linux zImage.prep starting\n");
 	if (promptr)
 		printf("Open Firmware: 0x%p\n", promptr);
 
