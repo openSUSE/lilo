@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Dec 12 15:22:37 CET 2005 - olh@suse.de
+
+- fix NULL pointer confusion in yaboot prom.c
+
+-------------------------------------------------------------------
 Mon Dec 12 14:59:56 CET 2005 - olh@suse.de
 
 - add vendor to zImage banner

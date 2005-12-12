@@ -70,12 +70,12 @@ call_prom (const char *service, int nargs, int nret, ...)
 	  prom_args.args[i] = va_arg(list, void *);
      va_end(list);
      for (i = 0; i < nret; ++i)
-	  prom_args.args[i + nargs] = 0;
+	  prom_args.args[i + nargs] = NULL;
      if (prom (&prom_args) < 0)
-	     return -1;
+	     return (void *)-1;
      if (nret > 0)
 	  return prom_args.args[nargs];
-     return 0;
+     return NULL;
 }
 
 void *
@@ -93,9 +93,9 @@ call_prom_return (const char *service, int nargs, int nret, ...)
      for (i = 0; i < nargs; ++i)
 	  prom_args.args[i] = va_arg(list, void *);
      for (i = 0; i < nret; ++i)
-	  prom_args.args[i + nargs] = 0;
+	  prom_args.args[i + nargs] = NULL;
      if (prom (&prom_args) < 0)
-	  return -1;
+	     return (void *)-1;
      if (nret > 0) {
 	  result = prom_args.args[nargs];
 	  for (i=1; i<nret; i++) {
@@ -103,7 +103,7 @@ call_prom_return (const char *service, int nargs, int nret, ...)
 	       *rp = prom_args.args[i+nargs];
 	  }
      } else
-	  result = 0;
+	  result = NULL;
      va_end(list);
      return result;
 }
@@ -124,12 +124,12 @@ call_method_1 (char *method, prom_handle h, int nargs, ...)
      for (i = 0; i < nargs; ++i)
 	  prom_args.args[2+i] = va_arg(list, void *);
      va_end(list);
-     prom_args.args[2+nargs] = 0;
-     prom_args.args[2+nargs+1] = 0;
+     prom_args.args[2+nargs] = NULL;
+     prom_args.args[2+nargs+1] = NULL;
   
      prom (&prom_args);
 
-     if (prom_args.args[2+nargs] != 0)
+     if (prom_args.args[2+nargs] != NULL)
      {
 	  prom_printf ("method '%s' failed %p\n", method, prom_args.args[2+nargs]);
 	  return 0;
