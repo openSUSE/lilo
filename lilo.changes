@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Dec 14 00:55:32 CET 2005 - olh@suse.de
+
+- adapt lilo script to new bash to prevent syntax errors (#138447)
+
+-------------------------------------------------------------------
 Mon Dec 12 15:22:37 CET 2005 - olh@suse.de
 
 - fix NULL pointer confusion in yaboot prom.c

@@ -45,7 +45,7 @@ FDISK=/sbin/fdisk
 PARTED="/usr/sbin/parted -s"
 PVERSION=$($PARTED --version)		# e.g 'GNU Parted 1.6.22'
 PVERSION=${PVERSION#GNU Parted}
-read a b c  <<< "${PVERSION//./ }"
+read a b c d e f  <<< "${PVERSION//./ }"
 PVERSION=$(( a*1000000 + b*1000 + c ))	# e.g. 1006022
 STAT_CMD=/usr/bin/stat
 
