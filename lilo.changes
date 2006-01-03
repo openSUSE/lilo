@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan  3 22:45:55 CET 2006 - olh@suse.de
+
+- remove the yaboot.fat file, it is equal to yaboot.chrp
+
+-------------------------------------------------------------------
 Tue Jan  3 22:42:40 CET 2006 - olh@suse.de
 
 - yaboot must always load the initrd if it is specified

@@ -142,7 +142,7 @@ function running_on_chrp () {
     # check all CONFIG_IMAGE_FILEs whether they are on ext2/ext2/fat/reiserfs
     # else they have to be copied to a fat partition
     # You have to create a fat partiton if any has to be copied there
-    # fat partition must at least cover yaboot.fat,yaboot.cnf & default image
+    # fat partition must at least cover yaboot.chrp,yaboot.cnf & default image
     # if not give a fatal error
     # else if it covers not all give a warning and advice how to fix that. 
 	
@@ -404,7 +404,7 @@ function running_on_chrp () {
 	local -i bootsize=$(( p_end[partition]-p_start[partition] ))	# size in blocks
 	
 	# check if default image/initrd fits, add overhead of 180 blocks approx.
-	local -i defaultsize=$(( 180 + $(fsize /lib/lilo/chrp/yaboot.fat) + $(fsize $TEMP/yaboot.conf) ));
+	local -i defaultsize=$(( 180 + $(fsize /lib/lilo/chrp/yaboot.chrp) + $(fsize $TEMP/yaboot.conf) ));
 	(( defaultsize += (vmlinux_default==0) ? 0 : $(fsize ${vmlinux_copy[$vmlinux_default]}) ));
 	(( defaultsize += (initrd_default==0) ? 0 : $(fsize ${initrd_copy[$initrd_default]}) ));
 
@@ -451,7 +451,7 @@ function running_on_chrp () {
 	cd $TEMP
 	mkdir -p boot || exit 2
 	mount $OPTION_BOOT boot || exit 2
-	cp -v /lib/lilo/chrp/yaboot.fat boot/yaboot || exit 2
+	cp -v /lib/lilo/chrp/yaboot.chrp boot/yaboot || exit 2
 	cp -v $TEMP/yaboot.conf boot/yaboot.cnf || exit 2
 
 	# copy default image

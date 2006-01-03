@@ -35,10 +35,6 @@ cd ..
 cd yaboot
 #
 make clean
-make DEBUG=0 VERSION=%{yaboot_vers}.FAT.SuSE YABOOT_FAT=1 yaboot HOSTCFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
-mv second/yaboot.chrp yaboot.fat
-#
-make clean
 make DEBUG=1 VERSION=%{yaboot_vers}.SuSE yaboot HOSTCFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
 mv second/yaboot yaboot.debug
 mv second/yaboot.chrp yaboot.chrp.debug
@@ -89,7 +85,7 @@ cd ..
 cd ..
 cd yaboot
 cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/lib/lilo/pmac
-cp -av yaboot.chrp* yaboot.fat $RPM_BUILD_ROOT/lib/lilo/chrp
+cp -av yaboot.chrp* $RPM_BUILD_ROOT/lib/lilo/chrp
 cd ..
 
 %triggerpostun  -- lilo < 0.0.10
