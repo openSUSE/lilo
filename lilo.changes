@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jan  3 22:42:40 CET 2006 - olh@suse.de
+
+- yaboot must always load the initrd if it is specified
+  basing this decision on the the ELF entry point breaks when the
+  entry point differs from yaboots assumptions
+
+-------------------------------------------------------------------
 Wed Dec 14 00:55:32 CET 2005 - olh@suse.de
 
 - adapt lilo script to new bash to prevent syntax errors (#138447)

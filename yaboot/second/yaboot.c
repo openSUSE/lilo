@@ -111,7 +111,6 @@ static char *password;
 static struct boot_fspec_t boot;
 static struct default_device default_device;
 static int _cpu;
-static int flat_vmlinux;
 
 #ifdef CONFIG_COLOR_TEXT
 
@@ -744,7 +743,7 @@ static void yaboot_text_ui(void)
 	   * can't tell the size it will be so we claim an arbitrary amount
 	   * of 4Mb.
 	   */
-	  if (flat_vmlinux && params.rd.filename) {
+	  if (params.rd.filename) {
 	       prom_printf("Loading ramdisk...\n");
 	       result = open_file(&params.rd, &file);
 	       if (result != FILE_ERR_OK) {
@@ -904,10 +903,8 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
       * KERNELADDR and all other binaries at their e_entry value.
       */
      if (e->e_entry == KERNEL_LINK_ADDR_PPC32) {
-          flat_vmlinux = 1;
           loadaddr = KERNELADDR;
      } else {
-          flat_vmlinux = 0;
           loadaddr = loadinfo->load_loc;
      }
 
@@ -1043,10 +1040,8 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
       * KERNELADDR and all other binaries at their e_entry value.
       */
      if (e->e_entry == KERNEL_LINK_ADDR_PPC64) {
-          flat_vmlinux = 1;
           loadaddr = KERNELADDR;
      } else {
-          flat_vmlinux = 0;
           loadaddr = e->e_entry;
      }
 
