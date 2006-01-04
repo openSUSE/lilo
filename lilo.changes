@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jan  4 19:17:14 CET 2006 - olh@suse.de
+
+- use md5_init() where possible in yaboot md5.c
+
+-------------------------------------------------------------------
 Wed Jan  4 19:11:19 CET 2006 - olh@suse.de
 
 - compile and run a md5test app during yaboot compilation

@@ -148,10 +148,9 @@ md5_transform (const unsigned char block[64])
   state[3] += d;
 }
 
-static void
-md5_init(void)
+static void md5_init(void)
 {
-  memcpy ((char *) state, (char *) initstate, sizeof (initstate));
+  memcpy (state, initstate, sizeof (initstate));
   length = 0;
 }
 
@@ -241,8 +240,7 @@ md5_password (const char *key, char *crypted, int check)
   digest = md5_final ();
   memcpy (alt_result, digest, 16);
   
-  memcpy ((char *) state, (char *) initstate, sizeof (initstate));
-  length = 0;
+  md5_init();
   md5_update (key, keylen);
   md5_update (crypted, 3 + saltlen); /* include the $1$ header */
   for (i = keylen; i > 16; i -= 16)
@@ -257,8 +255,7 @@ md5_password (const char *key, char *crypted, int check)
     {
       memcpy (alt_result, digest, 16);
 
-      memcpy ((char *) state, (char *) initstate, sizeof (initstate));
-      length = 0;
+      md5_init();
       if ((i & 1) != 0)
 	md5_update (key, keylen);
       else
@@ -326,8 +323,7 @@ md5_password (const char *key, char *crypted, int check)
 static char *
 md5 (const char *input) 
 {
-  memcpy ((char *) state, (char *) initstate, sizeof (initstate));
-  length = 0;
+  md5_init();
   md5_update (input, strlen (input));
   return md5_final ();
 }
