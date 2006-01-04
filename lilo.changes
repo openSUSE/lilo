@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jan  4 19:11:19 CET 2006 - olh@suse.de
+
+- compile and run a md5test app during yaboot compilation
+
+-------------------------------------------------------------------
 Tue Jan  3 22:45:55 CET 2006 - olh@suse.de
 
 - remove the yaboot.fat file, it is equal to yaboot.chrp

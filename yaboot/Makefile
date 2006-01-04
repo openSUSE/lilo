@@ -114,7 +114,7 @@ OBJCOPY		:= $(CROSS)objcopy
 
 lgcc = `$(CC) -print-libgcc-file-name`
 
-all yaboot: second/yaboot
+all yaboot: second/yaboot md5test
 
 second/yaboot: $(OBJS) util/addnote
 	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o $@
@@ -131,6 +131,10 @@ util/addnote:
 util/elfextract:
 	$(CC) $(UCFLAGS) -o $@ $@.c
 
+md5test: second/md5.c
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ second/md5.c -Iinclude -DTEST -Os
+	./$@
+	
 mkofboot:
 	ln -sf ybin ybin/mkofboot
 	@if [ $$(grep '^VERSION=' ybin/ybin | cut -f2 -d=) != ${VERSION} ] ; then	\
@@ -175,6 +179,7 @@ clean:
 	rm -f second/yaboot.chrp
 	rm -f util/split_of_path
 	rm -f tags
+	rm -f md5test
 	find . -not -path './\{arch\}*' -name '#*' | xargs rm -f
 	find . -not -path './\{arch\}*' -name '.#*' | xargs rm -f
 	find . -not -path './\{arch\}*' -name '*~' | xargs rm -f

@@ -332,6 +332,7 @@ md5 (const char *input)
   return md5_final ();
 }
 
+static int ret;
 static void
 test (char *buffer, char *expected) 
 {
@@ -343,7 +344,7 @@ test (char *buffer, char *expected)
     sprintf (result+2*i, "%02x", digest[i]);
 
   if (strcmp (result, expected))
-    printf ("MD5(%s) failed: %s\n", buffer, result);
+    ret += printf ("MD5(%s) failed: %s\n", buffer, result);
   else
     printf ("MD5(%s) OK\n", buffer);
 }
@@ -376,7 +377,7 @@ main (void)
     printf ("Password differs\n");
   else
     printf ("Password OK\n");
-  return 0;
+  return ret;
 }
 #endif
 
