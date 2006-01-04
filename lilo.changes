@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jan  4 20:15:51 CET 2006 - olh@suse.de
+
+- provide a md5sum function in yaboot
+
+-------------------------------------------------------------------
 Wed Jan  4 19:17:14 CET 2006 - olh@suse.de
 
 - use md5_init() where possible in yaboot md5.c

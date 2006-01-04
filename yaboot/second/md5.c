@@ -319,25 +319,22 @@ md5_password (const char *key, char *crypted, int check)
 }
 #endif
 
-#ifdef TEST
-static char *
-md5 (const char *input) 
+unsigned char *md5sum(const char *input, int len) 
 {
   md5_init();
-  md5_update (input, strlen (input));
+  md5_update(input, len);
   return md5_final ();
 }
 
+#ifdef TEST
 static int ret;
 static void
 test (char *buffer, char *expected) 
 {
-  char result[16 * 3 +1];
-  unsigned char* digest = md5 (buffer);
-  int i;
+  char result[MD5_RESULT_BUFSIZE];
+  unsigned char *digest = md5sum(buffer, strlen (buffer));
 
-  for (i=0; i < 16; i++)
-    sprintf (result+2*i, "%02x", digest[i]);
+  md5_fill_result_string(result, digest);
 
   if (strcmp (result, expected))
     ret += printf ("MD5(%s) failed: %s\n", buffer, result);
