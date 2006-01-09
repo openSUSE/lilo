@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan  9 18:00:13 CET 2006 - olh@suse.de
+
+- recognize the maple board in mkzimage, it has no machine: line
+
+-------------------------------------------------------------------
 Wed Jan  4 20:15:51 CET 2006 - olh@suse.de
 
 - provide a md5sum function in yaboot

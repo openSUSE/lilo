@@ -142,6 +142,15 @@ if [ "$board_type" = "guess" ] ; then
 		esac
 	done < /proc/cpuinfo
 fi
+if [ "$board_type" = "guess" ] ; then
+	test -f /proc/cpuinfo || mount -v -n -t proc proc /proc
+	line=`cat < /proc/device-tree/model`
+	case "$line" in
+		Momentum,Maple-D)	board_type="chrp" ;;
+		Momentum,Maple-L)	board_type="chrp" ;;
+		*) echo "board type '$line' not recognized, specify one with --board" ;;
+	esac
+fi
 case "$kernel_type" in
 	64bit)
 	case "$board_type" in
