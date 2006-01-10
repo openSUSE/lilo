@@ -24,7 +24,7 @@ submit:	.submitted
 
 # worker targets
 
-.exportdir:	lilo.changes
+.exportdir:	lilo.changes version
 	@rm -f .built .submitted
 	set -e ; \
 	export LANG=C ; export LC_ALL=C ; export TZ=UTC ; \
