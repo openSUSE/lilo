@@ -76,6 +76,26 @@ function error() {
 
 
 
+function read_qbyte() {
+    local file=$1;
+    local count=$2;
+
+    [ -r $file ] || return;
+    while (( count-- )) && read addr val; do
+	echo $val
+    done < <(od --read-bytes=$[4*count] --width=4 -t x4 $file)
+}
+
+
+function read_int() {
+    [ "$1" ] || return;
+    echo $(( 0x$(read_qbyte "$1" 1) ))
+}
+
+
+
+
+
 # if no file path is given on cmd line check for root file system
 file=/
 
@@ -220,8 +240,18 @@ case "$file_full_sysfs_path" in
 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
 	cd ../../..
 	;;
+    */host+([0-9])/rport-+([0-9]):+([0-9])-+([0-9])/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
+	# new sysfs layout starting with kernel 2.6.15
+	declare spec="${file_full_sysfs_path##*/host+([0-9])\/rport-+([-0-9:])\/target+([0-9:])/}"
+
+	: spec $spec
+	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
+	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
+	cd ../../../..
+	;;
     *)
         # TODO check the rest of the (hardware) world
+	: file_full_sysfs_path $file_full_sysfs_path
 	error "could not gather enough information to create open firmware path to device"
 esac
 # ieee1394_id
@@ -285,17 +315,26 @@ if [ -f devspec ] ; then
 
 	    # modprobe scsi_transport_fc  ## loaded through dependencies
 	    port=$(
-		printf "/sys/class/fc_transport/%d:%d:%d:%d/port_name" \
+		printf "/sys/class/fc_transport/target%d:%d:%d/port_name" \
 		    $of_disk_scsi_host $of_disk_scsi_chan \
-		    $of_disk_scsi_id $of_disk_scsi_lun \
+		    $of_disk_scsi_id \
 	    )
+
+	    if ! [ -f "$port" ]; then
+		port=$(
+		    printf "/sys/class/fc_transport/%d:%d:%d:%d/port_name" \
+			$of_disk_scsi_host $of_disk_scsi_chan \
+			$of_disk_scsi_id $of_disk_scsi_lun \
+		)
+	    fi
 
 	    if [ -f "$port" ]; then
 		# read the appropriate /sys/class/fc_transport/*/port_name
 		of_disk_fc_wwpn=$(< $port)
 		of_disk_fc_wwpn=${of_disk_fc_wwpn#0x} 	# remove leading 0x
 	    elif [ -f info ]; then
-	        # TODO this is currently only tested on emulex cards, check others!!!
+	        # this is currently only tested on emulex cards, cnd it´s a fall back
+		# FC HBA should support fc_transport layer!
 		scsi_id=0
 	        while read; do
 		    [[ "$REPLY" == *WWPN* ]] || continue
@@ -347,8 +386,31 @@ if [ -f devspec ] ; then
 	    else
 		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
 	    fi
+	   
+	    device_id=$(read_int ${file_of_hw_devtype}/device-id)
+	    vendor_id=$(read_int ${file_of_hw_devtype}/vendor-id)
+
+	    dbg_show device_id vendor_id
+
+	    lun_format="%016x"	# fallback LUN encoding
+	    if (( vendor_id == 0x10df )); then
+		# PCI_VENDOR_ID_EMULEX==0x10df
+		id=$(printf "%04x" $device_id)
+		if [[ $id == @(f901|f981|f982|fa00|fa01|fd00) ]]; then
+		    warning "Emulex FC HBA with device id 0x$id not yet tested." \
+			    "Reboot may fail."
+		fi
+		if [[ $id == @(f900|f901|f980|f981|f982|fa00|fa01|fd00) ]]; then
+		    # TODO: may be check /sys/class/scsi_host/hostX/lpfc_max_luns
+		    lun_format="%x000000000000"
+		fi
+	    elif (( vendor_id == 0x1077 )); then
+		# PCI_VENDOR_ID_QLOGIC==0x1077
+		lun_format="%04x000000000000"
+	    fi
+
 	    file_of_hw_path=$(
-		printf "%s/%s@%s,%016x" \
+		printf "%s/%s@%s,${lun_format}" \
 		    "${file_of_hw_devtype##/proc/device-tree}" \
 		    $of_disk_fc_dir $of_disk_fc_wwpn $of_disk_fc_lun
 	    )
@@ -385,54 +447,35 @@ else # no 'devspec' found
 	dbg_show file_full_sysfs_path
 	# find the path via the device-tree
 	dev_vendor="$(< vendor)"
+	dev_vendor=$(($dev_vendor))
 	dev_device="$(< device)"
+	dev_device=$(($dev_device))
 	dev_subsystem_vendor="$(< subsystem_vendor)"
+	dev_subsystem_vendor=$(($dev_subsystem_vendor))
 	dev_subsystem_device="$(< subsystem_device)"
+	dev_subsystem_device=$(($dev_subsystem_device))
+
 	for i in `find /proc/device-tree -name vendor-id`
 	do
-		: looking at $i
-		dev_of_pci_id=
-		while read a vendor_id; do
-		    dev_of_pci_id="0x$vendor_id"
-		    break
-		done  < <(od --read-bytes=8 --width=8 -t x4 $i)
-		: vendor-id $dev_of_pci_id
-		dev_of_pci_id=$(($dev_of_pci_id))
-		dev_vendor=$(($dev_vendor))
-		if [ "$dev_of_pci_id" != "$dev_vendor" ] ; then continue ; fi
-		if [ ! -f "${i%/*}/device-id" ] ; then continue ; fi
-		while read a device_id; do
-		    dev_of_pci_id="0x$device_id"
-		    break
-		done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/device-id")
-		: device-id $dev_of_pci_id
-		dev_of_pci_id=$(($dev_of_pci_id))
-		dev_device=$(($dev_device))
-		if [ "$dev_of_pci_id" != "$dev_device" ] ; then continue ; fi
-		if [ -f "${i%/*}/subsystem-vendor-id" ] ; then
-		    while read a sub_vendor_id; do
-			dev_of_pci_id="0x$sub_vendor_id"
-			break
-		    done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-vendor-id")
-		    : sub-vendor-id $dev_of_pci_id
-		    dev_of_pci_id=$(($dev_of_pci_id))
-		    dev_subsystem_vendor=$(($dev_subsystem_vendor))
-		    if [ "$dev_of_pci_id" != "$dev_subsystem_vendor" ] ; then continue ; fi
-		    while read a sub_device_id; do
-			dev_of_pci_id="0x$sub_device_id"
-			break
-		    done < <(od --read-bytes=8 --width=8 -t x4 "${i%/*}/subsystem-id")
-		    : sub-device-id $dev_of_pci_id
-		    dev_of_pci_id=$(($dev_of_pci_id))
-		    dev_subsystem_device=$(($dev_subsystem_device))
-		    if [ "$dev_of_pci_id" != "$dev_subsystem_device" ] ; then continue ; fi
-		fi
-		: found $i
-		if [ -z "$of_device_list" ] ; then
-			of_device_list="${i%/*}"
-		else
-			of_device_list="$of_device_list ${i%/*}"
-		fi
+	  : looking at $i
+	  dev_of_pci_id=$(read_int "$i")
+	  if [ "$dev_of_pci_id" != "$dev_vendor" ] ; then continue ; fi
+	  if [ ! -f "${i%/*}/device-id" ] ; then continue ; fi
+	  dev_of_pci_id=$(read_int "${i%/*}/device-id")
+	  
+	  if [ "$dev_of_pci_id" != "$dev_device" ] ; then continue ; fi
+	  if [ -f "${i%/*}/subsystem-vendor-id" ] ; then
+	      dev_of_pci_id=$(read_int "${i%/*}/subsystem-vendor-id")
+	      if [ "$dev_of_pci_id" != "$dev_subsystem_vendor" ] ; then continue ; fi
+	      dev_of_pci_id=$(read_int "${i%/*}/subsystem-id")
+	      if [ "$dev_of_pci_id" != "$dev_subsystem_device" ] ; then continue ; fi
+	  fi
+	  : found $i
+	  if [ -z "$of_device_list" ] ; then
+	      of_device_list="${i%/*}"
+	  else
+	      of_device_list="$of_device_list ${i%/*}"
+	  fi
 	done
 	dbg_show of_device_list
 	case "$of_device_list" in
@@ -441,11 +484,9 @@ else # no 'devspec' found
 		for i in $of_device_list
 		do
 		: working on $i
-			while read a addr
-			do
-			addr="0x$addr"
-			break
-			done < <(od -t x8 -j4 -N8 < $i/assigned-addresses)
+		read dummy high low < <(read_qbyte $i/assigned-addresses 3)
+		addr="0x${high}${low}"
+
 		: addr $addr , pure guess ...
 		grep -q ^$addr resource || continue
 		: found $i

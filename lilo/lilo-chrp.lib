@@ -609,7 +609,7 @@ function running_on_chrp () {
 		unset bootdevice[$i];
 	    fi
 	done
-	nvsetenv boot-device "$boot_path ${bootdevice[*]}"
+	nvsetenv boot-device "$boot_path ${bootdevice[@]}"
 
 	if [ "$(nvsetenv boot-file)" != "boot-file=" ]; then
 	    warning "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
