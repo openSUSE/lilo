@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Jan 16 16:16:07 CET 2006 - jplack@suse.de
+
+- handle new sysfs layout starting with kernel 2.6.15
+- merge fixes from SLES9 SP3
+- bump version
+
+-------------------------------------------------------------------
 Mon Jan  9 18:00:13 CET 2006 - olh@suse.de
 
 - recognize the maple board in mkzimage, it has no machine: line
