@@ -112,9 +112,10 @@ fi
 #
 rm -f $tmp/output
 #
+link_addr=`printf '0x%08x\n' $(( ( 64 * 1024 )  ))`
 ld \
 	-m elf32ppc \
-	-Ttext 0x00400000 \
+	-Ttext $link_addr \
 	-e _start \
 	-T $obj_dir/chrp/ld.script \
 	-o $tmp/output \
