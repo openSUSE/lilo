@@ -59,7 +59,6 @@ function firmware_status () {
 function running_on_chrp () {
     echo running on chrp
 
-
     # TODO add support for booting over network:
     # gooseberry:~ # nvsetenv boot-device
     # boot-device=/pci@400000000110/pci@2,4/scsi@1/sd@a,0
@@ -298,12 +297,6 @@ function running_on_chrp () {
 	    test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${CONFIG_IMAGE_INITRD[$i]}"
 	done
     } > $TEMP/yaboot.conf
-
-    #echo RESULT:
-    #cat 	$TEMP/yaboot.conf
-    #echo
-    #echo press return to continue
-    #read
 
     local device=${OPTION_BOOT%%+([0-9])}	 # split boot option to
     local -i partition=${OPTION_BOOT##+([^0-9])} # dev & part for parted
@@ -552,16 +545,30 @@ function running_on_chrp () {
 	    done
 	fi
 
+	local -i yaboot_size=$(fsize /lib/lilo/chrp/yaboot.chrp)
+	local    resize_errmsg=""
+
 	# shrink PReP boot partition if bigger than 4MB
 	if (( (p_end[partition]-p_start[partition]) > 4000 )); then
 	    warning "Shrinking PReP boot partition $OPTION_BOOT, avoiding firmware confusion"
+	    resize_errmsg="Partition shrink failed for $OPTION_BOOT"
+	fi
+	# extend PReP boot partition if too small to hold yaboot binary
+	if (( (p_end[partition]-p_start[partition]) < yaboot_size )); then
+	    warning "Extend PReP boot partition $OPTION_BOOT to hold yaboot"
+	    resize_errmsg="Partition extension failed for $OPTION_BOOT"
+	fi
+	
+	# now do resize if any of the above reason fits
+	if [ "$resize_errmsg" ]; then
+	    p_end[$partition]=$(( p_start[partition] + yaboot_size ))
 	    local start=$(sect2parted ${p_start[$partition]})
-	    local end=$(sect2parted $(( p_start[partition] + $(fsize /lib/lilo/chrp/yaboot.chrp) )) ) 
+	    local end=$(sect2parted ${p_end[$partition]}) 
 	    dd if=/dev/zero of=$OPTION_BOOT bs=4096 count=1
 	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
 		$PARTED $device set $partition type 0x41; ) >& $TEMP/parted.log
 	    then
-		error "Partition shrink failed for $OPTION_BOOT" 11 42
+		error "$resize_errmsg" 11
 	    fi
 	fi
 
@@ -572,7 +579,7 @@ function running_on_chrp () {
     fi
 
     if [ "$OPTION_CLONE" ]; then
-	error "Cloning of boot partition not yet implemented"
+	warning "Cloning of boot partition not yet implemented"
 	# first check for valid block device
 
 	# check for sufficient size, same size is easy, but FAT partition must
@@ -609,7 +616,7 @@ function running_on_chrp () {
 		unset bootdevice[$i];
 	    fi
 	done
-	nvsetenv boot-device "$boot_path ${bootdevice[@]}"
+	nvsetenv boot-device "$boot_path ${bootdevice[*]}"
 
 	if [ "$(nvsetenv boot-file)" != "boot-file=" ]; then
 	    warning "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
