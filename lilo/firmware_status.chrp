@@ -22,7 +22,7 @@ IBM,7026-B80	untested	<=NAN04194
 
 # RS64 machines
 IBM,7026-6H1    tested      	<=M2P01113                     				# papaya
-
+IBM,7025-6F1	tested		>=M2P050203						# orange
 
 # Power4 machines
 IBM,7038-6M2	tested		<=3K050202						# sweetie

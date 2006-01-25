@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jan 25 16:50:34 CET 2006 - jplack@suse.de
+
+- disabling firmware check for now (#144953) 
+
+-------------------------------------------------------------------
 Wed Jan 25 16:09:25 CET 2006 - jplack@suse.de
 
 - do extend prep partitions if neccessary (#141320)
