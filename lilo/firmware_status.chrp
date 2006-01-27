@@ -45,4 +45,5 @@ IBM,9123-720	untested	!=any				# tangelo
 # JS20 GA1
 # JS20 GA2
 # JS20 TelCo
-# JS20++
+IBM,8842-21X	tested		!=any				# JS20++
+

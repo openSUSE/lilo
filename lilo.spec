@@ -1,5 +1,4 @@
 # norootforbuild
-# neededforbuild  
 
 Name:         lilo
 %define yaboot_vers 0
