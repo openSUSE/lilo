@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan 30 15:06:06 CET 2006 - olh@suse.de
+
+- do not assume PT_LOAD is the first ELF phdr in bootheader
+
+-------------------------------------------------------------------
 Mon Jan 30 11:04:46 CET 2006 - olh@suse.de
 
 - use built-in pwd -P rather than /bin/pwd (#145965)

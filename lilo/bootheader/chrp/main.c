@@ -70,6 +70,7 @@ static int check_elf32(void *p)
 {
 	Elf32_Ehdr *elf32 = p;
 	Elf32_Phdr *elf32ph;
+	unsigned int i;
 
 	if (elf32->e_ident[EI_MAG0] != ELFMAG0 ||
 	    elf32->e_ident[EI_MAG1] != ELFMAG1 ||
@@ -82,6 +83,10 @@ static int check_elf32(void *p)
 
 	elf32ph = (Elf32_Phdr *) ((unsigned long)elf32 +
 				  (unsigned long)elf32->e_phoff);
+
+	for (i = 0; i < (unsigned int)elf32->e_phnum; i++, elf32ph++)
+		if (elf32ph->p_type == PT_LOAD && elf32ph->p_offset != 0)
+			break;
 
 	vmlinux.memsize = (unsigned long)elf32ph->p_memsz;
 	vmlinux.offset = (unsigned long)elf32ph->p_offset;
