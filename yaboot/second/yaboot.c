@@ -158,7 +158,7 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
      /* Initialize OF interface */
      prom_init ((prom_entry) r5);
 
-     prom_printf("\nyaboot starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%08lx;0x%p)\n",
+     prom_printf("\nyaboot starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%08lx;sp: 0x%p)\n",
 				_start, _end, r3, r4, r5, sp);
 
      /* the executable memrange may not be claimed by firmware */

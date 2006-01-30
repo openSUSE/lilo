@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan 30 17:10:16 CET 2006 - olh@suse.de
+
+- make the stackpointer value more obvious in yaboot
+
+-------------------------------------------------------------------
 Mon Jan 30 16:40:41 CET 2006 - olh@suse.de
 
 - load the kernel to the lowest availabe address in yaboot
