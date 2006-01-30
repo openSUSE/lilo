@@ -867,25 +867,16 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
      }
 
      /* Scan through the program header
-      * HACK:  We must return the _memory size of the kernel image, not the
-      *        file size (because we have to leave room before other boot
-      *	  infos. This code works as a side effect of the fact that
-      *	  we have one section and vaddr == p_paddr
       */
      loadinfo->memsize = loadinfo->filesize = loadinfo->offset = 0;
      p = ph;
      for (i = 0; i < e->e_phnum; ++i, ++p) {
 	  if (p->p_type != PT_LOAD || p->p_offset == 0)
 	       continue;
-	  if (loadinfo->memsize == 0) {
-	       loadinfo->offset = p->p_offset;
-	       loadinfo->memsize = p->p_memsz;
-	       loadinfo->filesize = p->p_filesz;
-	       loadinfo->load_loc = p->p_vaddr;
-	  } else {
-	       loadinfo->memsize = p->p_offset + p->p_memsz - loadinfo->offset; /* XXX Bogus */
-	       loadinfo->filesize = p->p_offset + p->p_filesz - loadinfo->offset;
-	  }
+	  loadinfo->offset = p->p_offset;
+	  loadinfo->memsize = p->p_memsz;
+	  loadinfo->filesize = p->p_filesz;
+	  loadinfo->load_loc = p->p_vaddr;
      }
 
      if (loadinfo->memsize == 0) {
@@ -1004,25 +995,17 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
      }
 
      /* Scan through the program header
-      * HACK:  We must return the _memory size of the kernel image, not the
-      *        file size (because we have to leave room before other boot
-      *	  infos. This code works as a side effect of the fact that
-      *	  we have one section and vaddr == p_paddr
       */
      loadinfo->memsize = loadinfo->filesize = loadinfo->offset = 0;
      p = ph;
      for (i = 0; i < e->e_phnum; ++i, ++p) {
 	  if (p->p_type != PT_LOAD || p->p_offset == 0)
 	       continue;
-	  if (loadinfo->memsize == 0) {
-	       loadinfo->offset = p->p_offset;
-	       loadinfo->memsize = p->p_memsz;
-	       loadinfo->filesize = p->p_filesz;
-	       loadinfo->load_loc = p->p_vaddr;
-	  } else {
-	       loadinfo->memsize = p->p_offset + p->p_memsz - loadinfo->offset; /* XXX Bogus */
-	       loadinfo->filesize = p->p_offset + p->p_filesz - loadinfo->offset;
-	  }
+	  loadinfo->offset = p->p_offset;
+	  loadinfo->memsize = p->p_memsz;
+	  loadinfo->filesize = p->p_filesz;
+	  loadinfo->load_loc = p->p_vaddr;
+	  break;
      }
 
      if (loadinfo->memsize == 0) {

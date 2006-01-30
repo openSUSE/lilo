@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan 30 15:18:18 CET 2006 - olh@suse.de
+
+- look only at the first ELF PT_LOAD section in yaboot
+
+-------------------------------------------------------------------
 Mon Jan 30 15:06:06 CET 2006 - olh@suse.de
 
 - do not assume PT_LOAD is the first ELF phdr in bootheader
