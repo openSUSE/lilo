@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jan 30 16:40:41 CET 2006 - olh@suse.de
+
+- load the kernel to the lowest availabe address in yaboot
+  assume the executable to load is relocateable
+
+-------------------------------------------------------------------
 Mon Jan 30 15:18:18 CET 2006 - olh@suse.de
 
 - look only at the first ELF PT_LOAD section in yaboot

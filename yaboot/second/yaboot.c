@@ -63,14 +63,7 @@
 /* align addr on a size boundry - adjust address up if needed -- Cort */
 #define _ALIGN(addr,size)	(((addr)+size-1)&(~(size-1)))
 
-/* Addresses where the PPC32 and PPC64 vmlinux kernels are linked at.
- * These are used to determine whether we are booting a vmlinux, in
- * which case, it will be loaded at KERNELADDR.  Otherwise (eg zImage),
- * we load the binary where it was linked at (ie, e_entry field in
- * the ELF header).
- */
-#define KERNEL_LINK_ADDR_PPC32	0xC0000000UL
-#define KERNEL_LINK_ADDR_PPC64	0xC000000000000000ULL
+#define CLAIM_END (128 * 1024 * 1024) /* FIXME: look at /memory/available */
 
 typedef struct {
      union {
@@ -886,23 +879,10 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
 
      /* leave some room (1Mb) for boot infos */
      loadinfo->memsize = _ALIGN(loadinfo->memsize,(1<<20)) + 0x100000;
-     /* Claim OF memory */
-     DEBUG_F("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
 
-     /* Determine whether we are trying to boot a vmlinux or some
-      * other binary image (eg, zImage).  We load vmlinux's at
-      * KERNELADDR and all other binaries at their e_entry value.
-      */
-     if (e->e_entry == KERNEL_LINK_ADDR_PPC32) {
-          loadaddr = KERNELADDR;
-     } else {
-          loadaddr = loadinfo->load_loc;
-     }
+     loadaddr = 0;
 
-     /* On some systems, loadaddr may already be claimed, so try some
-      * other nearby addresses before giving up.
-      */
-     for(addr=loadaddr; addr <= loadaddr * 8 ;addr+=0x100000) {
+     for(addr = loadaddr; addr < CLAIM_END; addr += 0x100000) {
 	  loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
 	  if (loadinfo->base != (void *)-1) break;
      }
@@ -910,11 +890,8 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
 	  prom_printf("Claim error, can't allocate kernel memory\n");
 	  return 0;
      }	
-
-     DEBUG_F("After ELF parsing, load base: %p, mem_sz: 0x%08lx\n",
-	     loadinfo->base, loadinfo->memsize);
-     DEBUG_F("    wanted load base: 0x%08lx, mem_sz: 0x%08lx\n",
-	     loadaddr, loadinfo->memsize);
+     prom_printf("Allocated 0x%08lx bytes for executable @ 0x%p\n",
+		     loadinfo->memsize, loadinfo->base);
 
      /* Load the program segments... */
      p = ph;
@@ -1015,23 +992,13 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
 
      /* leave some room (1Mb) for boot infos */
      loadinfo->memsize = _ALIGN(loadinfo->memsize,(1<<20)) + 0x100000;
-     /* Claim OF memory */
-     DEBUG_F("Before prom_claim, mem_sz: 0x%08lx\n", loadinfo->memsize);
 
-     /* Determine whether we are trying to boot a vmlinux or some
-      * other binary image (eg, zImage).  We load vmlinux's at
-      * KERNELADDR and all other binaries at their e_entry value.
-      */
-     if (e->e_entry == KERNEL_LINK_ADDR_PPC64) {
-          loadaddr = KERNELADDR;
-     } else {
-          loadaddr = e->e_entry;
-     }
+     loadaddr = 0;
 
      /* On some systems, loadaddr may already be claimed, so try some
       * other nearby addresses before giving up.
       */
-     for(addr=loadaddr; addr <= loadaddr * 8 ;addr+=0x100000) {
+     for(addr = loadaddr; addr < CLAIM_END; addr += 0x100000) {
 	  loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
 	  if (loadinfo->base != (void *)-1) break;
      }
@@ -1039,11 +1006,9 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
 	  prom_printf("Claim error, can't allocate kernel memory\n");
 	  return 0;
      }	
+     prom_printf("Allocated 0x%08lx bytes for kernel @ 0x%p\n",
+		     loadinfo->memsize, loadinfo->base);
 
-     DEBUG_F("After ELF parsing, load base: %p, mem_sz: 0x%08lx\n",
-	     loadinfo->base, loadinfo->memsize);
-     DEBUG_F("    wanted load base: 0x%08lx, mem_sz: 0x%08lx\n",
-	     loadaddr, loadinfo->memsize);
 
      /* Load the program segments... */
      p = ph;
