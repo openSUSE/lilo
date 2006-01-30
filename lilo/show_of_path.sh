@@ -197,7 +197,7 @@ if [ ! -L "$file_sysfs_dir/device" ] ; then
 fi
 
 cd "$file_sysfs_dir/device"
-file_full_sysfs_path="`/bin/pwd`"
+file_full_sysfs_path="`pwd -P`"
 file_storage_type=
 cd "$file_full_sysfs_path"
 if test -f ieee1394_id ; then

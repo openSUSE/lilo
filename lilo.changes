@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan 30 11:04:46 CET 2006 - olh@suse.de
+
+- use built-in pwd -P rather than /bin/pwd (#145965)
+
+-------------------------------------------------------------------
 Wed Jan 25 22:41:14 CET 2006 - olh@suse.de
 
 - link the zImage for chrp at 64k instead of 4MB (#145152)
