@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan 30 17:24:17 CET 2006 - olh@suse.de
+
+- try harder when looking for memory for initrd in yaboot (#143795)
+
+-------------------------------------------------------------------
 Mon Jan 30 17:10:16 CET 2006 - olh@suse.de
 
 - make the stackpointer value more obvious in yaboot

@@ -746,7 +746,7 @@ static void yaboot_text_ui(void)
 	       else {
 #define INITRD_CHUNKSIZE 0x400000
 		    claim_base = loadinfo.base + loadinfo.memsize;
-		    for (result = 0; result < 42; result++) {
+		    for (result = 0; result < 128; result++) {
 			    initrd_base = prom_claim(claim_base, INITRD_CHUNKSIZE, 0);
 			    if (initrd_base != (void *)-1)
 				    break;
