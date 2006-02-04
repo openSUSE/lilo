@@ -11,6 +11,7 @@ Requires:     hfsutils
 Requires:     dosfstools
 Requires:     gawk sed coreutils
 #Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
+Requires:     powerpc-utils
 Requires:     binutils
 Version:      0
 Release:      0

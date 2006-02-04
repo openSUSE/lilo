@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Feb  4 22:45:14 CET 2006 - olh@suse.de
+
+- require powerpc-utils
+
+-------------------------------------------------------------------
 Mon Jan 30 20:05:32 CET 2006 - olh@suse.de
 
 - start looking for initrd memory at lower addresses, but after
