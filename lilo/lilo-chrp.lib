@@ -326,11 +326,6 @@ function running_on_chrp () {
 
     local -a p_start p_end p_type p_flags
 
-    if (( PVERSION > 1006022 )); then
-	PARTEDPRINT="$PARTED $device unit s print"
-    else
-	PARTEDPRINT="$PARTED $device print"
-    fi
     while read; do
 	local minor start end type fs_n_flags
 
@@ -355,15 +350,27 @@ function running_on_chrp () {
 	        error "unparsable line on parted output: $REPLY"
 		;;
 	esac
-    done < <( $PARTEDPRINT )
+    done < <( parted_print )
 
     # make it error friendly (tm) and try to unmount boot partition
     [[ "$(</proc/mounts)" == *$OPTION_BOOT\ * ]] && umount $OPTION_BOOT
 
     if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
-	MKDOSFS="-s 1 -F 16"   # default values, minimum size of 2076kB
+	# check size of partition OPTION_BOOT, must fit at least the default kernel
+	local -i bootsize=$(( p_end[partition]-p_start[partition] ))	# size in blocks
+	
+	SECSPERCLUSTER=1       # default values, minimum size of 2076kB
 	MINDOSFSSIZE=$[2*2076] # does prevent possible misdetection of
-	                       # file system as FAT12
+                               # file system as FAT12
+	MAXDOSFSSIZE=$[SECSPERCLUSTER * 65536]
+
+	while (( bootsize > MAXDOSFSSIZE && SECSPERCLUSTER < 128 )); do
+	    ((
+		SECSPERCLUSTER *= 2
+		MINDOSFSSIZE *= 2
+		MAXDOSFSSIZE *= 2
+	    ))
+	done
 
 	# check CHRP machine against list of fully functional firmware
 	# implementations. There are various bugs out there which IBM
@@ -389,13 +396,11 @@ function running_on_chrp () {
 	if [ "$fw_workaround" ]; then
 	    eval $fw_workaround || error "Workaround for broken firmware did not work"
 	fi
+	MKDOSFS="-s $SECSPERCLUSTER -F 16"
 
 	# copy all kernels and initrds from non supported file systems
 	# to one FAT partition
 
-	# check size of partition OPTION_BOOT, must fit at least the default kernel
-	local -i bootsize=$(( p_end[partition]-p_start[partition] ))	# size in blocks
-	
 	# check if default image/initrd fits, add overhead of 180 blocks approx.
 	local -i defaultsize=$(( 180 + $(fsize /lib/lilo/chrp/yaboot.chrp) + $(fsize $TEMP/yaboot.conf) ));
 	(( defaultsize += (vmlinux_default==0) ? 0 : $(fsize ${vmlinux_copy[$vmlinux_default]}) ));
@@ -413,8 +418,9 @@ function running_on_chrp () {
 	    warning "Extending boot partition $OPTION_BOOT, using free disk space"
 	    local start=$(sect2parted ${p_start[$partition]})
 	    local end=$(sect2parted $((${p_start[$((partition+1))]}-1)) )
-	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
-		$PARTED $device set $partition type 6; ) >& $TEMP/parted.log
+	    if ! ( set -x;
+		YAST_IS_RUNNING=1 parted_call $device resize $partition $start $end &&
+		parted_call $device set $partition type 6; ) >& $TEMP/parted.log
 	      then
 		  error "Partition extension failed for $OPTION_BOOT" 11
 	    fi
@@ -424,21 +430,10 @@ function running_on_chrp () {
 	if [[ "${fat_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be FAT16
 	    warning "Boot partition $OPTION_BOOT converted to FAT16 type"
-	    if ! $PARTED $device set $partition type 6 >& $TEMP/parted.log; then
+	    if ! parted_call $device set $partition type 6 >& $TEMP/parted.log; then
 		error "Partition conversion failed for $OPTION_BOOT" 11
 	    fi
 	fi
-
-	# in case of dynamic device nodes there might be times where the
-	# device node disappears temporarily even after partition resize.
-	i=10	# wait for 10 time 0.5 seconds maximum
-	while ! [ -e $OPTION_BOOT ]; do
-	    if (( i-- <= 0 )); then
-		error "Device node for $OPTION_BOOT disappeared" \
-		      "Please check and try to rerun lilo"
-	    fi
-	    usleep 500000
-	done
 
 	mkfs.msdos $MKDOSFS $OPTION_BOOT || exit 2
 	cd $TEMP
@@ -523,7 +518,7 @@ function running_on_chrp () {
 	if [[ "${prep_part[*]} " != *$OPTION_BOOT\ * ]]; then
 	    # set type to be PReP boot
 	    warning "Boot partition $OPTION_BOOT converted to PReP boot type"
-	    if ! $PARTED $device set $partition type 0x41 >& $TEMP/parted.log; then
+	    if ! parted_call $device set $partition type 0x41 >& $TEMP/parted.log; then
 		error "Partition conversion failed for $OPTION_BOOT" 11
 	    fi
 	fi
@@ -535,7 +530,7 @@ function running_on_chrp () {
 	    for (( i=0; i<partition; i++ )); do
 		if [[ "${p_flags[$i]}" = *type=41* ]]; then
 		    warning "Delete ambiguous PReP boot  partition ${device}$i"
-		    if ! $PARTED $device rm $i >& $TEMP/parted.log; then
+		    if ! parted_call $device rm $i >& $TEMP/parted.log; then
 			warning "Partition deletion failed for ${device}$i"
 			cat >&2 $TEMP/parted.log
 		    else
@@ -565,8 +560,9 @@ function running_on_chrp () {
 	    local start=$(sect2parted ${p_start[$partition]})
 	    local end=$(sect2parted ${p_end[$partition]}) 
 	    dd if=/dev/zero of=$OPTION_BOOT bs=4096 count=1
-	    if ! ( set -x; YAST_IS_RUNNING=1 $PARTED $device resize $partition $start $end &&
-		$PARTED $device set $partition type 0x41; ) >& $TEMP/parted.log
+	    if ! ( set -x;
+		YAST_IS_RUNNING=1 parted_call $device resize $partition $start $end &&
+		parted_call $device set $partition type 0x41; ) >& $TEMP/parted.log
 	    then
 		error "$resize_errmsg" 11
 	    fi
@@ -594,7 +590,7 @@ function running_on_chrp () {
 
     # TODO check whether this is neccessary
     if [[ ${p_flags[$partition]} != *boot* ]]; then
-	$PARTED $device set $partition boot on >& $TEMP/parted.log || error 11
+	parted_call $device set $partition boot on >& $TEMP/parted.log || error 11
     fi
 
     if (( vmlinux_nr + initrd_nr + force_fat > 0 )); then
