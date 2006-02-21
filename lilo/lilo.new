@@ -201,6 +201,9 @@ if (( PVERSION > 1006022 )); then
 	    echo 0
 	fi
     }
+    function parted_print(){
+	$PARTED $device unit s print
+    }
 
 else
 
@@ -216,8 +219,26 @@ else
 	s=${s##*(0)}
 	echo $(( s * 1024 * 2 / 1000 ))
     }
+    function parted_print() {
+	$PARTED $device print
+    }
 
 fi
+
+function parted_call() {
+    # call parted binary
+    $PARTED "$@"
+    local ret=$?
+
+    # wait for pending triggered udev events.
+    # until we know how to do better, just wait for _all_ events to finish
+    local loop=300	# wait for a maximum of 30sec
+    while [ -d /dev/.udev/queue ] && (( loop-- > 0 )); do
+	sleep 0.1
+    done
+
+    return $ret
+}
 
 function real_device () {
     # print the real device i.e. map partitions to disks
