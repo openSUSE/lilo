@@ -10,14 +10,13 @@ Obsoletes:    yaboot activate quik
 Requires:     hfsutils
 Requires:     dosfstools
 Requires:     gawk sed coreutils
-#Requires:     /bin/awk /usr/bin/od /bin/sed /usr/bin/stat /bin/pwd /bin/ls
 Requires:     powerpc-utils
 Requires:     binutils
 Version:      0
 Release:      0
 Source0:      lilo-%{version}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
-Patch10:       yaboot-%{yaboot_vers}.patch
+Patch10:      yaboot-%{yaboot_vers}.patch
 
 # $Id$
 %description
