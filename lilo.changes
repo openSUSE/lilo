@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Feb 23 17:18:27 CET 2006 - jplack@suse.de
+
+- implemented 'waiting for udev after execution of parted' function (#152028)
+- enable use of boot partitions greater than 32MB
+- bump version to 10.1.1
+
+-------------------------------------------------------------------
 Sat Feb  4 22:45:14 CET 2006 - olh@suse.de
 
 - require powerpc-utils
