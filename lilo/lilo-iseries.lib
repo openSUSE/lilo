@@ -74,10 +74,10 @@ function running_on_iseries () {
 	if [ -n "$ISERIES_INITRD" ]; then
 	    echo "ISERIES_INITRD  " $ISERIES_INITRD
 	    echo
-	    echo generating $ISERIES_KERNEL_TMPFILE with /lib/lilo/iseries/make_zimage_iseries.sh
+	    echo generating $ISERIES_KERNEL_TMPFILE with mkzimage
 	    echo
 	    unset ec
-	    /lib/lilo/iseries/make_zimage_iseries.sh \
+	    mkzimage \
 	      --initrd $ISERIES_INITRD \
 	      --vmlinux $ISERIES_IMAGE \
 	      --output $ISERIES_KERNEL_TMPFILE ; ec=$?
