@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Mar  4 12:31:35 CET 2006 - olh@suse.de
+
+- remove asm code to clear bss in yaboot, its done by yaboot_start
+
+-------------------------------------------------------------------
 Wed Mar  1 09:12:14 CET 2006 - olh@suse.de
 
 - correct usage of mkzimage for iseries
