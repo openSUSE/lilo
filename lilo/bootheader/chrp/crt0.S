@@ -63,6 +63,8 @@ clear_caches:
 	sync
 	isync
 
+	addi	r1,r1,-16
+	rlwinm	r1,r1,0,0,27
 	mr	r6,r1
 	b	start
 

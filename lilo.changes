@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Sat Mar  4 12:35:00 CET 2006 - olh@suse.de
+
+- force 16byte alignment of stackpointer in yaboot and bootheader
+  depending on the location in filesystem where yaboot is compiled,
+  it may be unaligned on pmac
+
+-------------------------------------------------------------------
 Sat Mar  4 12:31:35 CET 2006 - olh@suse.de
 
 - remove asm code to clear bss in yaboot, its done by yaboot_start

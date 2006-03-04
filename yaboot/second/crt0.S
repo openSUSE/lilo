@@ -2,6 +2,8 @@
 #include "asm/processor.h"
 
 _GLOBAL(_start)
+	addi	r1,r1,-16
+	rlwinm	r1,r1,0,0,27
 	mr	r6,r1
 	b	yaboot_start
 
