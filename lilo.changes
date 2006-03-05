@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Mar  5 13:52:07 CET 2006 - olh@suse.de
+
+- remove unused and misleading partition checks from yaboot
+
+-------------------------------------------------------------------
 Sun Mar  5 13:44:06 CET 2006 - olh@suse.de
 
 - remove unused partition name/type members from yaboot

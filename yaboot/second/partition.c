@@ -40,22 +40,6 @@
 #include "linux/iso_fs.h"
 #include "debug.h"
 #include "errors.h"
-
-/* We currently don't check the partition type, some users
- * are putting crap there and still expect it to work...
- */
-#undef CHECK_FOR_VALID_MAC_PARTITION_TYPE
-
-#ifdef CHECK_FOR_VALID_MAC_PARTITION_TYPE
-static const char *valid_mac_partition_types[] = {
-     "apple_unix_svr2",
-     "linux",
-     "apple_hfs",
-     "apple_boot",
-     "apple_bootstrap",
-     NULL
-};
-#endif
     
 
 /* Local functions */
@@ -101,10 +85,6 @@ partition_mac_lookup( const char *dev_name, prom_handle disk,
      map_size = 1;
      for (block=1; block < map_size + 1; block++)
      {
-#ifdef CHECK_FOR_VALID_MAC_PARTITION_TYPE
-	  int valid = 0;
-	  const char *ptype;
-#endif
 	  if (prom_readblocks(disk, block, 1, block_buffer) != 1) {
 	       prom_printf("Can't read partition %d\n", block);
 	       break;
@@ -118,26 +98,8 @@ partition_mac_lookup( const char *dev_name, prom_handle disk,
 	  if (block == 1)
 	       map_size = part->map_count;
 		
-#ifdef CHECK_FOR_VALID_MAC_PARTITION_TYPE
-	  /* We don't bother looking at swap partitions of any type, 
-	   * and the rest are the ones we know about */
-	  for (ptype = valid_mac_partition_types; ptype; ptype++)
-	       if (!strcmp (part->type, ptype))
-	       {
-		    valid = 1;
-		    break;
-	       }
-#ifdef DEBUG
-	  if (!valid)
-	       prom_printf( "MAC: Unsupported partition #%d; type=%s\n",
-			    block, part->type );
-#endif
-#endif
 
 
-#ifdef CHECK_FOR_VALID_MAC_PARTITION_TYPE
-	  if (valid)
-#endif
 	       /* We use the partition block size from the partition table.
 		* The filesystem implmentations are responsible for mapping
 		* to their own fs blocksize */
