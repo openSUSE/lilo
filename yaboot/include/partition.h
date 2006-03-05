@@ -23,14 +23,11 @@
 #ifndef PARTITION_H
 #define PARTITION_H
 
-struct partition_t;
 
 #include "types.h"
 #include "stddef.h"
 #include "prom.h"
 
-#define MAX_PARTITIONS	32
-#define MAX_PART_NAME	32
 
 struct partition_t {
 	struct partition_t*	next;
