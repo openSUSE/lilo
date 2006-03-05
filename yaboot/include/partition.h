@@ -24,9 +24,6 @@
 #define PARTITION_H
 
 
-#include "types.h"
-#include "stddef.h"
-#include "prom.h"
 
 
 struct partition_t {
