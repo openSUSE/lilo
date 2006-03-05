@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Mar  5 13:44:06 CET 2006 - olh@suse.de
+
+- remove unused partition name/type members from yaboot
+
+-------------------------------------------------------------------
 Sun Mar  5 13:32:01 CET 2006 - olh@suse.de
 
 - remove unused get_part_type from yaboot

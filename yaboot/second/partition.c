@@ -65,16 +65,14 @@ static unsigned long swab32(unsigned long value);
 static unsigned char block_buffer[MAX_BLOCK_SIZE];
 
 static void
-add_new_partition(struct partition_t**	list, int part_number, const char *part_type,
-		  const char *part_name, unsigned long part_start, unsigned long part_size,
+add_new_partition(struct partition_t**	list, int part_number,
+		  unsigned long part_start, unsigned long part_size,
 		  unsigned short part_blocksize, int sys_ind)
 {
      struct partition_t*	part;
      part = (struct partition_t*)malloc(sizeof(struct partition_t));
 	
      part->part_number = part_number;
-     strncpy(part->part_type, part_type, MAX_PART_NAME);
-     strncpy(part->part_name, part_name, MAX_PART_NAME);
      part->part_start = part_start;
      part->part_size = part_size;
      part->blocksize = part_blocksize;
@@ -146,8 +144,6 @@ partition_mac_lookup( const char *dev_name, prom_handle disk,
 	       add_new_partition(
 		    list, /* partition list */
 		    block, /* partition number */
-		    part->type, /* type */
-		    part->name, /* name */
 		    part->start_block + part->data_start, /* start */
 		    part->data_count, /* size */
 		    ptable_block_size,
@@ -175,8 +171,6 @@ partition_fdisk_lookup( const char *dev_name, prom_handle disk,
 	  if (part->sys_ind == LINUX_NATIVE || part->sys_ind == LINUX_RAID) {
 	       add_new_partition(  list,
 				   partition,
-				   "Linux", /* type */
-				   '\0', /* name */
 				   swab32(*(unsigned int *)(part->start4)),
 				   swab32(*(unsigned int *)(part->size4)),
 				   512 /*blksize*/,
@@ -315,8 +309,6 @@ partition_amiga_lookup( const char *dev_name, prom_handle disk,
 	       add_new_partition(
 		    list, /* partition list */
 		    partition, /* partition number */
-		    "Linux", /* type */
-		    '\0', /* name */
 		    blockspercyl * amiga_block[AMIGA_PART_LOWCYL], /* start */
 		    blockspercyl * (amiga_block[AMIGA_PART_HIGHCYL] - amiga_block[AMIGA_PART_LOWCYL] + 1), /* size */
 		    prom_blksize,
@@ -365,8 +357,6 @@ partitions_lookup(const char *device)
      } else if (prom_blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
 	  add_new_partition(&list,
 			    0,
-			    '\0',
-			    '\0',
 			    iso_root_block,
 			    0,
 			    prom_blksize,
