@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Mar  5 13:32:01 CET 2006 - olh@suse.de
+
+- remove unused get_part_type from yaboot
+
+-------------------------------------------------------------------
 Sat Mar  4 12:35:00 CET 2006 - olh@suse.de
 
 - force 16byte alignment of stackpointer in yaboot and bootheader

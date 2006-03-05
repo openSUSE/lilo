@@ -386,35 +386,6 @@ bail:
      return list;
 }
 
-char *
-get_part_type(char *device, int partition)
-{
-     struct partition_t*	parts;
-     struct partition_t*	p;
-     struct partition_t*	found;
-     char *type = NULL;
-
-     if (prom_get_devtype(device) != TYPE_BLOCK)
-	  return NULL;
-
-     parts = partitions_lookup(device);
-     found = NULL;
-
-     if (!parts)
-	  return NULL;
-
-     for (p = parts; p && !found; p=p->next) {
-	  DEBUG_F("number: %02d, start: 0x%08lx, length: 0x%08lx, type: %s, name: %s\n",
-		  p->part_number, p->part_start, p->part_size, p->part_type, p->part_name);
-	  if ((partition >= 0) && (partition == p->part_number)) {
-	       type = strdup(p->part_type);
-	       break;
-	  }	  
-     }
-     if (parts)
-	  partitions_free(parts);
-     return type;
-}
 
 /* Freed in reverse order of allocation to help malloc'ator */
 void
