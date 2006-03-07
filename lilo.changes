@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar  7 23:02:28 CET 2006 - olh@suse.de
+
+- remove unused blocksize argument in partition code in yaboot
+
+-------------------------------------------------------------------
 Tue Mar  7 22:54:34 CET 2006 - olh@suse.de
 
 - remove unused device name argument in partition code in yaboot

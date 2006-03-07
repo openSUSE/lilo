@@ -75,7 +75,7 @@ add_new_partition(struct partition_t**	list, int part_number,
  */
 static void
 partition_mac_lookup(prom_handle disk,
-                      unsigned int prom_blksize, struct partition_t** list )
+                      struct partition_t** list )
 {
      int block, map_size;
 
@@ -121,7 +121,7 @@ partition_mac_lookup(prom_handle disk,
  */
 static void
 partition_fdisk_lookup(prom_handle disk,
-                        unsigned int prom_blksize, struct partition_t** list )
+                        struct partition_t** list )
 {
      int partition;
 
@@ -316,10 +316,10 @@ partitions_lookup(const char *device)
      }	
      if (desc->signature == MAC_DRIVER_MAGIC) {
 	  /* pdisk partition format */
-	  partition_mac_lookup(disk, prom_blksize, &list);
+	  partition_mac_lookup(disk, &list);
      } else if ((block_buffer[510] == 0x55) && (block_buffer[511] == 0xaa)) {
 	  /* fdisk partition format */
-	  partition_fdisk_lookup(disk, prom_blksize, &list);
+	  partition_fdisk_lookup(disk, &list);
      } else if (prom_blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
 	  add_new_partition(&list,
 			    0,
