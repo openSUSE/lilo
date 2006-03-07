@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar  7 20:50:58 CET 2006 - olh@suse.de
+
+- correct cacheflush loop to actually do something in bootheader
+  add same cacheflush to yaboot
+
+-------------------------------------------------------------------
 Sun Mar  5 13:52:07 CET 2006 - olh@suse.de
 
 - remove unused and misleading partition checks from yaboot

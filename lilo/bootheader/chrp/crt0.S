@@ -50,7 +50,8 @@ reloc_got2_loop:
 	bdnz	reloc_got2_loop
 
 clear_caches:
-	lis	r9,_start@h
+	lis	r9,_start@ha
+	addi	r9,r9,_start@l
 	add	r9,r0,r9
 	lis	r8,_etext@ha
 	addi	r8,r8,_etext@l
@@ -58,7 +59,7 @@ clear_caches:
 1:	dcbf	r0,r9
 	icbi	r0,r9
 	addi	r9,r9,0x20
-	cmplwi	0,r9,8
+	cmplw	cr0,r9,r8
 	blt	1b
 	sync
 	isync
