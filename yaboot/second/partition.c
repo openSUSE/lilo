@@ -74,7 +74,7 @@ add_new_partition(struct partition_t**	list, int part_number,
  * a bit more complicated
  */
 static void
-partition_mac_lookup( const char *dev_name, prom_handle disk,
+partition_mac_lookup(prom_handle disk,
                       unsigned int prom_blksize, struct partition_t** list )
 {
      int block, map_size;
@@ -120,7 +120,7 @@ partition_mac_lookup( const char *dev_name, prom_handle disk,
  * partitioned disks.
  */
 static void
-partition_fdisk_lookup( const char *dev_name, prom_handle disk,
+partition_fdisk_lookup(prom_handle disk,
                         unsigned int prom_blksize, struct partition_t** list )
 {
      int partition;
@@ -199,7 +199,7 @@ _amiga_checksum (unsigned int blk_size)
 }
 
 static int
-_amiga_find_rdb (const char *dev_name, prom_handle disk, unsigned int prom_blksize)
+_amiga_find_rdb (prom_handle disk, unsigned int prom_blksize)
 {
 	int i;
 	unsigned int *amiga_block = (unsigned int *) block_buffer;
@@ -223,7 +223,7 @@ _amiga_find_rdb (const char *dev_name, prom_handle disk, unsigned int prom_blksi
 }
 
 static void
-partition_amiga_lookup( const char *dev_name, prom_handle disk,
+partition_amiga_lookup(prom_handle disk,
                         unsigned int prom_blksize, struct partition_t** list )
 {
 	int partition, part;
@@ -316,10 +316,10 @@ partitions_lookup(const char *device)
      }	
      if (desc->signature == MAC_DRIVER_MAGIC) {
 	  /* pdisk partition format */
-	  partition_mac_lookup(device, disk, prom_blksize, &list);
+	  partition_mac_lookup(disk, prom_blksize, &list);
      } else if ((block_buffer[510] == 0x55) && (block_buffer[511] == 0xaa)) {
 	  /* fdisk partition format */
-	  partition_fdisk_lookup(device, disk, prom_blksize, &list);
+	  partition_fdisk_lookup(disk, prom_blksize, &list);
      } else if (prom_blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
 	  add_new_partition(&list,
 			    0,
@@ -328,9 +328,9 @@ partitions_lookup(const char *device)
 			    prom_blksize,
 			    0);
 	  prom_printf("ISO9660 disk\n");
-     } else if (_amiga_find_rdb(device, disk, prom_blksize) != -1) {
+     } else if (_amiga_find_rdb(disk, prom_blksize) != -1) {
 	  /* amiga partition format */
-	  partition_amiga_lookup(device, disk, prom_blksize, &list);
+	  partition_amiga_lookup(disk, prom_blksize, &list);
      } else {
 	  prom_printf("No supported partition table detected\n");
 	  goto bail;
