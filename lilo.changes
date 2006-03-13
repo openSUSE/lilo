@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Mar 13 14:27:26 CET 2006 - olh@suse.de
+
+- the claim_base for kernel and initrd in yaboot was recently
+  adjusted to start looking for memory at lower addresses
+  This fails randomly on 32bit RS/6000. adjust claim_base to 32mb
+
+-------------------------------------------------------------------
 Tue Mar  7 23:02:28 CET 2006 - olh@suse.de
 
 - remove unused blocksize argument in partition code in yaboot

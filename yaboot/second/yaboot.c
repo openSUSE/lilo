@@ -746,7 +746,13 @@ static void yaboot_text_ui(void)
 	       else {
 #define INITRD_CHUNKSIZE 0x400000
 		    /* put initrd after the kernels final location */
-		    claim_base = (void *)loadinfo.memsize;
+		    /* it seems that the B50 has trouble with a location between
+		     * real-base and 32M. The kernel crashes at random places in
+		     * prom_init, usually in opening display. */
+		     if (64 == _cpu)
+			    claim_base = (void *)loadinfo.memsize;
+		     else
+			    claim_base = (void *)(32 * 1024 * 1024);
 		    for (result = 0; result < 128; result++) {
 			    initrd_base = prom_claim(claim_base, INITRD_CHUNKSIZE, 0);
 			    if (initrd_base != (void *)-1)
@@ -881,7 +887,13 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
      /* leave some room (1Mb) for boot infos */
      loadinfo->memsize = _ALIGN(loadinfo->memsize,(1<<20)) + 0x100000;
 
-     loadaddr = 0;
+    /* it seems that the B50 has trouble with a location between
+     * real-base and 32M. The kernel crashes at random places in
+     * prom_init, usually in opening display. */
+     if (64 == _cpu)
+	loadaddr = 0;
+     else
+	loadaddr = 32 * 1024 * 1024;
 
      for(addr = loadaddr; addr < CLAIM_END; addr += 0x100000) {
 	  loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
