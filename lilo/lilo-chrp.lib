@@ -127,7 +127,7 @@ function running_on_chrp () {
 		fi
 	       	;;
 	    *)
-	       	error 10 2
+	       	err_var1=$OPTION_BOOT; error 10 2
 	       	;;
  	esac
     else

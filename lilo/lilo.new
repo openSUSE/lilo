@@ -93,7 +93,7 @@ function _error() {
 	       	echo '************************************************************'
 	       	echo '* There is more than one PPC PReP Boot (type 0x41) or FAT  *'
 	       	echo '* on this system. Please specify the boot partition NUMBER *'
-	       	printf '* in boot= %-30s                  *\n' $OPTION_BOOT
+	       	printf '* in boot= %-30s                  *\n' $err_var1
 	       	echo '************************************************************'
 		;;
 	    3)
@@ -298,7 +298,7 @@ function device_nr () {
 	return;
     fi
 
-    echo $[ $($STAT_CMD --format "0x%t*256 + 0x%T" $d) ]
+    echo $[ $($STAT_CMD --dereference --format "0x%t*256 + 0x%T" $d) ]
 }
 
 
