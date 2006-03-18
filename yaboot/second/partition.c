@@ -126,6 +126,55 @@ static int msdos_is_linux_partition(unsigned char sys_ind) {
 	return (sys_ind == LINUX_NATIVE || sys_ind == LINUX_RAID);
 }
 
+static int msdos_is_extended_partition(unsigned char sys_ind) {
+	return (EXTENDED == sys_ind || WIN98_EXTENDED == sys_ind || LINUX_EXTENDED == sys_ind);
+}
+
+static void msdos_parse_extended(prom_handle disk, struct partition_t** list, unsigned int start, unsigned int size) {
+	int i, partition = 5;
+	unsigned int partition_start = start;
+	unsigned int partition_size = size;
+	unsigned int offset, length, next;
+	unsigned char buffer[MAX_BLOCK_SIZE];
+	struct fdisk_partition *part;
+	while (1) {
+		if (partition_start >= start + size)
+			return;
+		if (!prom_readblocks(disk, partition_start, 1, buffer))
+			return;
+		if (!msdos_magic_present(buffer))
+			return;
+		part = (struct fdisk_partition *) (buffer + 0x1be);
+		for (i = 0; i < 4; i++, part++) {
+			offset = le32_to_cpu(part->start);
+			length = le32_to_cpu(part->size);
+			next = partition_start + offset;
+			if (!le32_to_cpu(part->size) || msdos_is_extended_partition(part->sys_ind))
+				continue;
+			if (!msdos_is_linux_partition(part->sys_ind))
+				break;
+			if (i >= 2) {
+				if (offset + length > partition_size)
+					continue;
+				if (next < partition_start)
+					continue;
+				if (next + length > partition_start + partition_size)
+					continue;
+			}
+			add_new_partition(list, partition, next, length, 512, part->sys_ind);
+			partition++;
+		}
+		part -= 4;
+		for (i = 0; i < 4; i++, part++)
+			if (le32_to_cpu(part->size) && msdos_is_extended_partition(part->sys_ind))
+				break;
+		if (i == 4) 
+			break;
+		partition_start = start + le32_to_cpu(part->start);
+		partition_size = le32_to_cpu(part->size);
+	}
+}
+
 static void
 partition_fdisk_lookup(prom_handle disk,
                         struct partition_t** list )
@@ -139,14 +188,10 @@ partition_fdisk_lookup(prom_handle disk,
 	  (struct fdisk_partition *) (block_buffer + 0x1be);
 
      for (partition=1; partition <= 4 ;partition++, part++) {
-	  if (msdos_is_linux_partition(part->sys_ind)) {
-	       add_new_partition(  list,
-				   partition,
-				   le32_to_cpu(part->start),
-				   le32_to_cpu(part->size),
-				   512 /*blksize*/,
-				   part->sys_ind /* partition type */ );
-	  }
+	if (msdos_is_linux_partition(part->sys_ind))
+		add_new_partition(list, partition, le32_to_cpu(part->start), le32_to_cpu(part->size), 512, part->sys_ind);
+	else if (msdos_is_extended_partition(part->sys_ind))
+		msdos_parse_extended(disk, list, le32_to_cpu(part->start), le32_to_cpu(part->size));
      }
 }
 
