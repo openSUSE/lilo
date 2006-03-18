@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Mar 18 23:18:21 CET 2006 - olh@suse.de
+
+- pass u64 to seek in prom_readblocks in yaboot
+
+-------------------------------------------------------------------
 Sat Mar 18 23:14:16 CET 2006 - olh@suse.de
 
 - use u32 for msdos partition table start/size in yaboot

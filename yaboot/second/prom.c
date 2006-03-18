@@ -318,14 +318,16 @@ prom_readblocks (prom_handle dev, int blockNum, int blockCount, void *buffer)
 #if READ_BLOCKS_USE_READ
      int status;
      unsigned int blksize;
+     unsigned long long pos;
   
      blksize = prom_getblksize(dev);
      if (blksize <= 1)
 	  blksize = 512;
-     status = prom_seek(dev, blockNum * blksize);
+     pos = (unsigned long long)blockNum * (unsigned long long)blksize;
+     status = prom_seek(dev, pos);
      if (status != 1) {
 	  return 0;
-	  prom_printf("Can't seek to 0x%x\n", blockNum * blksize);
+	  prom_printf("Can't seek to 0x%Lx\n", pos);
      }
   	
      status = prom_read(dev, buffer, blockCount * blksize);
