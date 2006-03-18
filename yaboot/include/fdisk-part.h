@@ -38,6 +38,6 @@ struct fdisk_partition {
 	unsigned char end_head;         /* end head */
 	unsigned char end_sector;       /* end sector */
 	unsigned char end_cyl;          /* end cylinder */
-	unsigned char start4[4];        /* starting sector counting from 0 */
-	unsigned char size4[4];         /* nr of sectors in partition */
+	unsigned int start;             /* starting sector counting from 0 */
+	unsigned int size;              /* nr of sectors in partition */
 };

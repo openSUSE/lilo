@@ -40,10 +40,9 @@
 #include "linux/iso_fs.h"
 #include "debug.h"
 #include "errors.h"
+#include "byteorder.h"
     
 
-/* Local functions */
-static unsigned long swab32(unsigned long value);
 
 #define MAX_BLOCK_SIZE	2048
 static unsigned char block_buffer[MAX_BLOCK_SIZE];
@@ -135,8 +134,8 @@ partition_fdisk_lookup(prom_handle disk,
 	  if (part->sys_ind == LINUX_NATIVE || part->sys_ind == LINUX_RAID) {
 	       add_new_partition(  list,
 				   partition,
-				   swab32(*(unsigned int *)(part->start4)),
-				   swab32(*(unsigned int *)(part->size4)),
+				   le32_to_cpu(part->start),
+				   le32_to_cpu(part->size),
 				   512 /*blksize*/,
 				   part->sys_ind /* partition type */ );
 	  }
@@ -354,18 +353,6 @@ partitions_free(struct partition_t* list)
 	  free(list);
 	  list = next;
      }
-}
-unsigned long
-swab32(unsigned long value)
-{
-     __u32 result;
-
-     __asm__("rlwimi %0,%1,24,16,23\n\t"
-	     "rlwimi %0,%1,8,8,15\n\t"
-	     "rlwimi %0,%1,24,0,7"
-	     : "=r" (result)
-	     : "r" (value), "0" (value >> 24));
-     return result;
 }
 
 

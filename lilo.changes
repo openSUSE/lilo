@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Mar 18 23:14:16 CET 2006 - olh@suse.de
+
+- use u32 for msdos partition table start/size in yaboot
+
+-------------------------------------------------------------------
 Sat Mar 18 23:06:25 CET 2006 - olh@suse.de
 
 - use u64 for prom_seek in yaboot, remove prom_lseek
