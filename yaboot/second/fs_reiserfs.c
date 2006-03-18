@@ -37,7 +37,7 @@ static int reiserfs_open( struct boot_file_t *file, const char *dev_name,
 static int reiserfs_read( struct boot_file_t *file, unsigned int size,
 
 			  void *buffer );
-static int reiserfs_seek( struct boot_file_t *file, unsigned int newpos );
+static int reiserfs_seek( struct boot_file_t *file, unsigned long long newpos );
 static int reiserfs_close( struct boot_file_t *file );
 
 struct fs_t reiserfs_filesystem = {
@@ -130,7 +130,7 @@ reiserfs_read( struct boot_file_t *file, unsigned int size, void *buffer )
 }
 
 static int
-reiserfs_seek( struct boot_file_t *file, unsigned int newpos )
+reiserfs_seek( struct boot_file_t *file, unsigned long long newpos )
 {
      file->pos = newpos;
      return FILE_ERR_OK;
@@ -173,8 +173,8 @@ read_disk_block( struct boot_file_t *file, __u32 block, __u32 start,
      pos += (unsigned long long)INFO->partition_offset + (unsigned long long)start;
      DEBUG_F( "Reading %u bytes, starting at block %u, disk offset %Lu\n",
 	      length, block, pos );
-     if (!prom_lseek( file->of_device, pos )) {
-	  DEBUG_F("prom_lseek failed\n");
+     if (!prom_seek( file->of_device, pos )) {
+	  DEBUG_F("prom_seek failed\n");
 	  return 0;
      }
      return prom_read( file->of_device, buf, length );

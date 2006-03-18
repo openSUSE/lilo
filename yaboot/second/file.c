@@ -107,7 +107,7 @@ default_read(	struct boot_file_t*	file,
 
 static int
 default_seek(	struct boot_file_t*	file,
-		unsigned int		newpos)
+		unsigned long long	newpos)
 {
      prom_printf("WARNING ! default_seek called !\n");
      return FILE_ERR_EOF;

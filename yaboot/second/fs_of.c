@@ -51,13 +51,13 @@
 static int of_open(struct boot_file_t* file, const char* dev_name,
 		   struct partition_t* part, const char* file_name);
 static int of_read(struct boot_file_t* file, unsigned int size, void* buffer);
-static int of_seek(struct boot_file_t* file, unsigned int newpos);
+static int of_seek(struct boot_file_t* file, unsigned long long newpos);
 static int of_close(struct boot_file_t* file);
 
 
 static int of_net_open(struct boot_file_t* file, const struct boot_fspec_t* spec);
 static int of_net_read(struct boot_file_t* file, unsigned int size, void* buffer);
-static int of_net_seek(struct boot_file_t* file, unsigned int newpos);
+static int of_net_seek(struct boot_file_t* file, unsigned long long newpos);
 
 
 struct fs_t of_filesystem =
@@ -238,7 +238,7 @@ of_net_read(struct boot_file_t* file, unsigned int size, void* buffer)
 }
 
 static int
-of_seek(struct boot_file_t* file, unsigned int newpos)
+of_seek(struct boot_file_t* file, unsigned long long newpos)
 {
      if (prom_seek(file->of_device, newpos)) {
 	  file->pos = newpos;
@@ -249,7 +249,7 @@ of_seek(struct boot_file_t* file, unsigned int newpos)
 }
 
 static int
-of_net_seek(struct boot_file_t* file, unsigned int newpos)
+of_net_seek(struct boot_file_t* file, unsigned long long newpos)
 {
      file->pos = (newpos > file->len) ? file->len : newpos;
      return FILE_ERR_OK;

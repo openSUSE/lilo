@@ -41,7 +41,7 @@ static int xfs_dir (char *dirname);
 static int xfs_open(struct boot_file_t *file, const char *dev_name,
 		    struct partition_t *part, const char *file_name);
 static int xfs_read(struct boot_file_t *file, unsigned int size, void *buffer);
-static int xfs_seek(struct boot_file_t *file, unsigned int newpos);
+static int xfs_seek(struct boot_file_t *file, unsigned long long newpos);
 static int xfs_close(struct boot_file_t *file);
 
 struct fs_t xfs_filesystem = {
@@ -126,7 +126,7 @@ xfs_read(struct boot_file_t *file, unsigned int size, void *buffer)
 }
 
 static int
-xfs_seek(struct boot_file_t *file, unsigned int newpos)
+xfs_seek(struct boot_file_t *file, unsigned long long newpos)
 {
 	file->pos = newpos;
 	return FILE_ERR_OK;
@@ -152,8 +152,8 @@ read_disk_block(struct boot_file_t *file, uint64_t block, int start,
 	pos += partition_offset + start;
 	DEBUG_F("Reading %d bytes, starting at block %Lu, disk offset %Lu\n",
 		length, block, pos);
-	if (!prom_lseek(file->of_device, pos)) {
-		DEBUG_F("prom_lseek failed\n");
+	if (!prom_seek(file->of_device, pos)) {
+		DEBUG_F("prom_seek failed\n");
 		return 0;
 	}
 	return prom_read(file->of_device, buf, length);

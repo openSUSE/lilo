@@ -36,7 +36,7 @@ static int iso_read(	struct boot_file_t*	file,
 			unsigned int		size,
 			void*			buffer);
 static int iso_seek(	struct boot_file_t*	file,
-			unsigned int		newpos);
+			unsigned long long	newpos);
 static int iso_close(	struct boot_file_t*	file);
 
 struct fs_t iso_filesystem =
@@ -67,7 +67,7 @@ iso_read(	struct boot_file_t*	file,
 
 static int
 iso_seek(	struct boot_file_t*	file,
-		unsigned int		newpos)
+		unsigned long long	newpos)
 {
      return FILE_ERR_BAD_FSYS;
 }

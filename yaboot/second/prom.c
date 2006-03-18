@@ -293,14 +293,7 @@ prom_write (prom_handle file, void *buf, int n)
 #endif
 
 int
-prom_seek (prom_handle file, int pos)
-{
-     int status = (int)call_prom ("seek", 3, 1, file, 0, pos);
-     return status == 0 || status == 1;
-}
-
-int
-prom_lseek (prom_handle file, unsigned long long pos)
+prom_seek (prom_handle file, unsigned long long pos)
 {
      int status = (int)call_prom ("seek", 3, 1, file,
 				  (unsigned int)(pos >> 32), (unsigned int)(pos & 0xffffffffUL));

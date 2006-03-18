@@ -43,7 +43,7 @@ struct fs_t {
 			void*			buffer);
 				
 	int (*seek)(	struct boot_file_t*	file,
-			unsigned int		newpos);
+			unsigned long long	newpos);
 					
 	int (*close)(	struct boot_file_t*	file);
 };

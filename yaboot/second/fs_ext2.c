@@ -52,7 +52,7 @@ static int ext2_read(	struct boot_file_t*	file,
 			unsigned int		size,
 			void*			buffer);
 static int ext2_seek(	struct boot_file_t*	file,
-			unsigned int		newpos);
+			unsigned long long	newpos);
 static int ext2_close(	struct boot_file_t*	file);
 
 struct fs_t ext2_filesystem =
@@ -498,7 +498,7 @@ ext2_read(	struct boot_file_t*	file,
 	       unsigned long long pos =
 		    ((unsigned long long)pblock) * (unsigned long long)bs;
 	       pos += doff;
-	       prom_lseek(file->of_device, pos);
+	       prom_seek(file->of_device, pos);
 	       status = prom_read(file->of_device, block_buffer, bs);
 	       if (status != bs) {
 		    prom_printf("ext2: io error in read, ex: %d, got: %d\n",
@@ -520,7 +520,7 @@ ext2_read(	struct boot_file_t*	file,
 
 static int
 ext2_seek(	struct boot_file_t*	file,
-		unsigned int		newpos)
+		unsigned long long	newpos)
 {
      if (!opened)
 	  return FILE_CANT_SEEK;
@@ -601,7 +601,7 @@ static errcode_t linux_read_blk (io_channel channel, unsigned long block, int co
      tempb = (((unsigned long long) block) *
 	      ((unsigned long long)bs)) + (unsigned long long)doff;
      size = (count < 0) ? -count : count * bs;
-     prom_lseek(cur_file->of_device, tempb);
+     prom_seek(cur_file->of_device, tempb);
      if (prom_read(cur_file->of_device, data, size) != size) {
 	  DEBUG_F("\nRead error on block %ld\n", block);
 	  return EXT2_ET_SHORT_READ;
