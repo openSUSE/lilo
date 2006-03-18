@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Mar 18 23:24:49 CET 2006 - olh@suse.de
+
+- add helper function to check for usable msdos partition in yaboot
+
+-------------------------------------------------------------------
 Sat Mar 18 23:22:03 CET 2006 - olh@suse.de
 
 - add helper function to check for msdos partition magic in yaboot

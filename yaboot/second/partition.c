@@ -122,6 +122,10 @@ static int msdos_magic_present(unsigned char *buffer) {
 	return (buffer[510] == 0x55) && (buffer[511] == 0xaa);
 }
 
+static int msdos_is_linux_partition(unsigned char sys_ind) {
+	return (sys_ind == LINUX_NATIVE || sys_ind == LINUX_RAID);
+}
+
 static void
 partition_fdisk_lookup(prom_handle disk,
                         struct partition_t** list )
@@ -135,7 +139,7 @@ partition_fdisk_lookup(prom_handle disk,
 	  (struct fdisk_partition *) (block_buffer + 0x1be);
 
      for (partition=1; partition <= 4 ;partition++, part++) {
-	  if (part->sys_ind == LINUX_NATIVE || part->sys_ind == LINUX_RAID) {
+	  if (msdos_is_linux_partition(part->sys_ind)) {
 	       add_new_partition(  list,
 				   partition,
 				   le32_to_cpu(part->start),
