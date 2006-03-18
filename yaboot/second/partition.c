@@ -118,6 +118,10 @@ partition_mac_lookup(prom_handle disk,
  * Same function as partition_mac_lookup(), except for fdisk
  * partitioned disks.
  */
+static int msdos_magic_present(unsigned char *buffer) {
+	return (buffer[510] == 0x55) && (buffer[511] == 0xaa);
+}
+
 static void
 partition_fdisk_lookup(prom_handle disk,
                         struct partition_t** list )
@@ -316,7 +320,7 @@ partitions_lookup(const char *device)
      if (desc->signature == MAC_DRIVER_MAGIC) {
 	  /* pdisk partition format */
 	  partition_mac_lookup(disk, &list);
-     } else if ((block_buffer[510] == 0x55) && (block_buffer[511] == 0xaa)) {
+     } else if (msdos_magic_present(block_buffer)) {
 	  /* fdisk partition format */
 	  partition_fdisk_lookup(disk, &list);
      } else if (prom_blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
