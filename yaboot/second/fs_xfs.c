@@ -648,7 +648,7 @@ xfs_read_data (char *buf, int len)
 	xad_t *xad;
 	xfs_fileoff_t endofprev, endofcur, offset;
 	xfs_filblks_t xadlen;
-	int toread, startpos, endpos;
+	unsigned long long toread, startpos, endpos, lenght;
 
 	if (icore.di_format == XFS_DINODE_FMT_LOCAL) {
 		memmove(buf, inode->di_u.di_c + xfs_file->pos, len);
@@ -657,27 +657,29 @@ xfs_read_data (char *buf, int len)
 	}
 
 	startpos = xfs_file->pos;
-	endpos = xfs_file->pos + len;
-	if (endpos > xfs_file->len)
-		endpos = xfs_file->len;
+	if (len > xfs_file->len)
+		endpos = xfs_file->pos + xfs_file->len;
+	else
+		endpos = xfs_file->pos + len;
+	lenght = endpos - startpos;
 	endofprev = (xfs_fileoff_t)-1;
 	init_extents ();
-	while (len > 0 && (xad = next_extent ())) {
+	while (lenght > 0 && (xad = next_extent ())) {
 		offset = xad->offset;
 		xadlen = xad->len;
 		if (isinxt (xfs_file->pos >> xfs.blklog, offset, xadlen)) {
 			endofcur = (offset + xadlen) << xfs.blklog; 
 			toread = (endofcur >= endpos)
-				  ? len : (endofcur - xfs_file->pos);
+				  ? lenght : (endofcur - xfs_file->pos);
 			read_disk_block(xfs_file, fsb2daddr (xad->start),
 					xfs_file->pos - (offset << xfs.blklog), toread, buf);
 			buf += toread;
-			len -= toread;
+			lenght -= toread;
 			xfs_file->pos += toread;
 		} else if (offset > endofprev) {
 			toread = ((offset << xfs.blklog) >= endpos)
-				  ? len : ((offset - endofprev) << xfs.blklog);
-			len -= toread;
+				  ? lenght : ((offset - endofprev) << xfs.blklog);
+			lenght -= toread;
 			xfs_file->pos += toread;
 			for (; toread; toread--) {
 				*buf++ = 0;

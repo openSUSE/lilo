@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Mar 19 11:11:46 CET 2006 - olh@suse.de
+
+- fix reading from xfs in yaboot
+
+-------------------------------------------------------------------
 Sat Mar 18 23:43:01 CET 2006 - olh@suse.de
 
 - add support for msdos extended partitions to yaboot
