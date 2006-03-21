@@ -587,7 +587,7 @@ function check_config_file () {
 		error "boot = $OPTION_BOOT is not a valid block device"
 	    fi
 	    if [ $OPTION_BOOT_COUNT -ne 1 ]; then
-		errot "only one boot= line allowed here!"
+		error "only one boot= line allowed here!"
 	    fi
 	fi
     fi
