@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Mar 22 10:35:00 CET 2006 - olh@suse.de
+
+- update libext2fs.a in yaboot to fix out-of-bounds access in
+  ext2fs_namei_follow
+
+-------------------------------------------------------------------
 Wed Mar 22 09:56:47 CET 2006 - olh@suse.de
 
 - improve debug output in ext2 linux_read_blk in yaboot
