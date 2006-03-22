@@ -275,7 +275,7 @@ read_dump_range(void)
      int size;
 
 #ifdef VERBOSE_DEBUG
-     DEBUG_F("   dumping range: start: 0x%x count: 0x%x\n",
+     DEBUG_F("   dumping range: start: 0x%lx count: 0x%lx\n",
 	     read_range_count, read_range_start);
 #endif
      /* Check if we need to handle a special case for the last block */
@@ -313,7 +313,7 @@ static int
 read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
 {
 #ifdef VERBOSE_DEBUG
-     DEBUG_F("read_it: p_bloc: 0x%x, l_bloc: 0x%x, f_pos: 0x%x, rng_pos: 0x%x   ",
+     DEBUG_F("read_it: p_bloc: 0x%x, l_bloc: 0x%x, f_pos: 0x%Lx, rng_pos: 0x%lx   ",
 	     *blocknr, lg_block, read_cur_file->pos, read_last_logical);
 #endif
      if (lg_block < 0) {
@@ -357,7 +357,7 @@ read_iterator(ext2_filsys fs, blk_t *blocknr, int lg_block, void *private)
      if (lg_block && lg_block != read_last_logical) {
 	  unsigned long nzero;
 #ifdef VERBOSE_DEBUG
-	  DEBUG_F(" hole from lg_bloc 0x%x\n", read_last_logical);
+	  DEBUG_F(" hole from lg_bloc 0x%lx\n", read_last_logical);
 #endif
 	  if (read_cur_file->pos % bs) {
 	       int offset = read_cur_file->pos % bs;
@@ -456,7 +456,7 @@ ext2_read(	struct boot_file_t*	file,
 	  retval = read_result;
      if (!retval && read_range_start) {
 #ifdef VERBOSE_DEBUG
-	  DEBUG_F("on exit: range_start is 0x%x, calling dump...\n",
+	  DEBUG_F("on exit: range_start is 0x%lx, calling dump...\n",
 		  read_range_start);
 #endif
 	  read_dump_range();
