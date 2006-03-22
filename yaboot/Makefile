@@ -6,7 +6,7 @@ export LC_COLLATE=POSIX
 
 include Config
 
-VERSION = 1.3.13
+VERSION = r$(shell env -i svn info | sed -n "/^Last Changed Rev:[[:blank:]]\+/s@^[^:]\+:[[:blank:]]\+@@p" )
 # Debug mode (spam/verbose)
 DEBUG = 0
 # make install vars
