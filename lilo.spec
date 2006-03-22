@@ -15,8 +15,7 @@ Requires:     binutils
 Version:      0
 Release:      0
 Source0:      lilo-%{version}.tar.bz2
-Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.gz
-Patch10:      yaboot-%{yaboot_vers}.patch
+Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
 
 # $Id$
 %description
@@ -26,9 +25,6 @@ lilo for ppc
 %setup -q -T -c -a 0 -a 1
 mv lilo-%{version} lilo.ppc
 mv yaboot-%{yaboot_vers} yaboot
-cd yaboot
-%patch10 -p1
-cd ..
 
 %build
 cd yaboot

@@ -30,13 +30,15 @@ submit:	.submitted
 	export LANG=C ; export LC_ALL=C ; export TZ=UTC ; \
 	tmpdir=`mktemp -d /tmp/temp.XXXXXX`/lilo ; \
 	lv=`cat version` ; \
-	yv=`cat yabootversion` ; \
+	yv=$$lv-r`svn info yaboot | sed -n "/^Last Changed Rev:[[:blank:]]\+/s@^[^:]\+:[[:blank:]]\+@@p"` ; \
 	svn export . $$tmpdir ; \
 	svn log -v yaboot > $$tmpdir/yaboot/Changelog.SuSE ; \
 	cd $$tmpdir ; \
 	chmod -R a+rX .. ; \
-	tar xfz yaboot-$$yv.tar.gz ; \
-	diff -purN yaboot-$$yv yaboot > yaboot-$$yv.patch || : ; \
+	rm -f yaboot*.tar.gz ; \
+	sed -i "/^VERSION/s@^.*@VERSION = $$yv@" yaboot/Makefile ; \
+	mv -v yaboot yaboot-$$yv ; \
+	tar cfj yaboot-$$yv.tar.bz2 yaboot-$$yv ; \
 	mv -v lilo lilo-$$lv ; \
 	tar cfj lilo-$$lv.tar.bz2 lilo-$$lv ; \
 	mv lilo.spec lilo.spec.in ; \
@@ -44,7 +46,7 @@ submit:	.submitted
 	mv lilo.spec lilo.spec.in ; \
 	sed "s/^%define yaboot_vers.*/%define yaboot_vers $$yv/" < lilo.spec.in > lilo.spec ; \
 	rm -rf version Makefile lilo-$$lv lilo.spec.in \
-	yaboot-$$yv yaboot yabootversion ; \
+	yaboot-$$yv ; \
 	pwd ; \
 	ls -la ; \
 	if /work/src/bin/check_if_valid_source_dir; then cd -; echo $$tmpdir > $@; else exit 1 ; fi
