@@ -75,14 +75,14 @@ static errcode_t linux_flush (io_channel channel);
 
 static struct struct_io_manager struct_linux_manager =
 {
-     EXT2_ET_MAGIC_IO_MANAGER,
-     "linux I/O Manager",
-     linux_open,
-     linux_close,
-     linux_set_blksize,
-     linux_read_blk,
-     linux_write_blk,
-     linux_flush
+     .magic = EXT2_ET_MAGIC_IO_MANAGER,
+     .name = "linux I/O Manager",
+     .open = linux_open,
+     .close = linux_close,
+     .set_blksize = linux_set_blksize,
+     .read_blk = linux_read_blk,
+     .write_blk = linux_write_blk,
+     .flush = linux_flush,
 };
 
 static io_manager linux_io_manager = &struct_linux_manager;
