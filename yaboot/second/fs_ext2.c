@@ -592,7 +592,7 @@ static errcode_t linux_set_blksize (io_channel channel, int blksize)
 
 static errcode_t linux_read_blk (io_channel channel, unsigned long block, int count, void *data)
 {
-     int size;
+     int size, size_read;
      unsigned long long tempb;
 
      if (count == 0)
@@ -602,8 +602,9 @@ static errcode_t linux_read_blk (io_channel channel, unsigned long block, int co
 	      ((unsigned long long)bs)) + (unsigned long long)doff;
      size = (count < 0) ? -count : count * bs;
      prom_seek(cur_file->of_device, tempb);
-     if (prom_read(cur_file->of_device, data, size) != size) {
-	  DEBUG_F("\nRead error on block %ld\n", block);
+     size_read = prom_read(cur_file->of_device, data, size);
+     if (size_read != size) {
+	  DEBUG_F("\nRead error on block %lx. expected %x, got %x\n", block, size, size_read);
 	  return EXT2_ET_SHORT_READ;
      }
      return 0;

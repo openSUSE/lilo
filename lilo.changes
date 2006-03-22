@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 22 09:56:47 CET 2006 - olh@suse.de
+
+- improve debug output in ext2 linux_read_blk in yaboot
+
+-------------------------------------------------------------------
 Wed Mar 22 09:46:59 CET 2006 - olh@suse.de
 
 - use our own yaboot.tar.bz2 from svn
