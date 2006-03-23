@@ -187,13 +187,19 @@ file_sysfs_dir="${file_sysfs_path%/dev}"
 dbg_show file_sysfs_dir
 if [ ! -L "$file_sysfs_dir/device" ] ; then
     # maybe a partition
+    if [ ! -L "$file_sysfs_dir/../device" ] ; then
+    	if [ -d "$file_sysfs_dir/md" ] ; then
+	    error "soft raid (${file_sysfs_dir##*/}) is not readable by open firmware"
+	elif [[ "$file_sysfs_dir" == */dm-* ]]; then
+	    error "mapped devices like ${file_sysfs_dir##*/} are not readable by open firmware"
+	else
+	    error "driver for sysfs path $file_sysfs_dir has no full sysfs support"
+	fi
+    fi
     file_partition="${file_sysfs_dir##*[a-z]}"
     dbg_show file_partition
     file_sysfs_dir="${file_sysfs_dir%/*}"
     dbg_show file_sysfs_dir
-    if [ ! -L "$file_sysfs_dir/device" ] ; then
-	error "driver for sysfs path $file_sysfs_dir has no full sysfs support"
-    fi
 fi
 
 cd "$file_sysfs_dir/device"
@@ -553,7 +559,6 @@ else
 fi
 
 
-
 #
 #
 # Local variables:
@@ -566,4 +571,3 @@ fi
 #     fill-column: 78
 # End:
 #
-
