@@ -348,8 +348,8 @@ function running_on_chrp () {
 
 	while (( bootsize > MAXDOSFSSIZE && SECSPERCLUSTER < 128 )); do
 	    ((
-		SECSPERCLUSTER *= 2
-		MINDOSFSSIZE *= 2
+		SECSPERCLUSTER *= 2,
+		MINDOSFSSIZE *= 2,
 		MAXDOSFSSIZE *= 2
 	    ))
 	done
