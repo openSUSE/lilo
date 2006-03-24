@@ -1,3 +1,4 @@
+#! /bin/bash
 # $Id$
 # vim: syntax=sh
 #
@@ -201,25 +202,6 @@ function running_on_chrp () {
 		warning "There is no chain loader support for yaboot yet" \ 
 			"Entry 'other = ${CONFIG_IMAGE_OTHER[$i]}' ignored"
 		continue
-	    fi
-
-	    # hack to create a zImage.initrd for pseries
-	    # ugly ugly ...
-	    #
-	    #  is no longer needed due to olh 9.3.2004
-	    # still needed, might be a bug in yaboot 26.3.2004
-	    if false && [ -n "${CONFIG_IMAGE_INITRD[$i]}" -a -d /proc/ppc64 ]; then
-		if ! bash /lib/lilo/chrp/chrp64/addRamdisk.sh $TEMP \
-		  ${CONFIG_IMAGE_FILE[$i]} \
-		  ${CONFIG_IMAGE_INITRD[$i]} \
-		  ${CONFIG_IMAGE_FILE[$i]}.initrd \
-		  > $TEMP/chrp_initrd_$i.log 2>&1 ; then
-		    cat $TEMP/chrp_initrd_$i.log
-		    exit 1
-		fi
-		
-		CONFIG_IMAGE_FILE[$i]=${CONFIG_IMAGE_FILE[$i]}.initrd
-		unset CONFIG_IMAGE_INITRD[$i]
 	    fi
 
 	    # check for existence of image file
@@ -724,6 +706,7 @@ function running_on_prep () {
 #     mode: font-lock
 #     mode: auto-fill
 #     sh-indent: 4
+#     sh-shell: bash
 #     sh-multiline-offset: 2
 #     sh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
 #     fill-column: 78
