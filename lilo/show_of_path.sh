@@ -189,6 +189,11 @@ if [ ! -L "$file_sysfs_dir/device" ] ; then
     # maybe a partition
     if [ ! -L "$file_sysfs_dir/../device" ] ; then
     	if [ -d "$file_sysfs_dir/md" ] ; then
+	    # TODO: think about whether we enable reading of
+	    # $(<md/level) == raid0 through the first
+	    # partition/device (md/rd0/block) of the soft raid
+	    # array, but til then I´d consider this a hack, maybe a
+	    # special parameter --raid is an option 
 	    error "soft raid (${file_sysfs_dir##*/}) is not readable by open firmware"
 	elif [[ "$file_sysfs_dir" == */dm-* ]]; then
 	    error "mapped devices like ${file_sysfs_dir##*/} are not readable by open firmware"
