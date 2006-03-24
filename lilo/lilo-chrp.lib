@@ -57,6 +57,42 @@ function firmware_status () {
 }
 
 
+declare -a _filesystem
+
+# check whether a file lies on a file system that is
+# readable by yaboot
+function can_yaboot_read () {
+    local path="$1"
+
+    # check for invalid path
+    [ -e "$path" ] || return 1;
+
+    # initialize _filesystem array when needed
+    if [ "${_filesystem[0]}" != "invalid" ]; then
+        # check all mounted local partitions and remember file systems
+	local device mount type opts
+
+	while read device mount type opts; do
+	    if [ "${device:0:1}" = "/" ]; then
+		local -i dn=$(device_nr $device)
+		(( dn == 0 )) && continue;
+		_filesystem[$dn]="$type";
+	    fi
+	done < /proc/mounts
+	_filesystem[0]="invalid"
+    fi
+
+    local fs=${_filesystem[$(device_of_file $path)]}
+
+    # check for a file system yaboot can handle
+    [[ "$fs" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660) ]] || return 1;
+
+    # return true finally
+    return 0
+}
+
+
+
 function running_on_chrp () {
     echo running on chrp
 
@@ -93,19 +129,6 @@ function running_on_chrp () {
 	# please note: an empty boot= will cause a full disk scan of
 	# the system
     done < <( $FDISK -l $OPTION_DEVICE )
-
-    # check all mounted local file systems
-    local -a fsys
-    local device mount type opts
-
-    while read device mount type opts; do
-	if [ "${device:0:1}" = "/" ]; then
-	    local -i dn=$(device_nr $device)
-	    (( dn == 0 )) && continue;
-	    fsys[$dn]="$type";
-	    # echo  fsys[$device/$dn]="$type"
-	fi
-    done < /proc/mounts
 
     # only the device is given and dd to the raw device is a bad idea
     # Note: An empty boot= results in an empty OPTION_PARTITION which triggers
@@ -175,7 +198,8 @@ function running_on_chrp () {
 	force_fat=1
     fi
     if ! is_on_primary "$yaboot_part" ||
-	[[ ${fsys[ $(device_of_file /etc/yaboot.conf)]} != @(ext2|ext3|msdos|vfat|reiserfs|iso9660) ]]; then
+       ! can_yaboot_read "/etc/yaboot.conf";
+    then
 	force_fat=1
     fi
     if (( force_fat == 1 )); then
@@ -213,11 +237,11 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660) ]]; then
+		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && can_yaboot_read "$image"; then
 		    # is the boot image file on the same device/partition
 		    # from where yaboot.conf has been loaded?
 		    if [ "$yaboot_part" -a "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
-			CONFIG_IMAGE_FILE[$i]="$image"
+			# FIXME: null oper, CONFIG_IMAGE_FILE[$i]="$image"
 		    else
 			CONFIG_IMAGE_FILE[$i]="${path_image}"
 		    fi
@@ -247,7 +271,9 @@ function running_on_chrp () {
 		
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if [ "$OPTION_FORCEFAT" != "yes" ] && is_on_primary "$path_image" && [[ "${fsys[$devnr_image]}" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660) ]]; then
+		if [ "$OPTION_FORCEFAT" != "yes" ] &&
+		    is_on_primary "$path_image" && can_yaboot_read "$image";
+		then
 		    # is the boot initrd file on the same device/partition
 		    # from where yaboot.conf has been loaded?
 		    if [ "$yaboot_part" -a "${path_image:0:${#yaboot_part}}" = "$yaboot_part" ]; then
