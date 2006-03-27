@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 27 21:47:54 CEST 2006 - olh@suse.de
+
+- update make tags to handle quilt meta data
+
+-------------------------------------------------------------------
 Mon Mar 27 14:32:57 CEST 2006 - jplack@suse.de
 
 - fixed #159333, FAT size calculation fails for large boot partitions

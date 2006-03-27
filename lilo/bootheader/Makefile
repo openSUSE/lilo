@@ -20,6 +20,6 @@ local-spotless: local-clean
 
 .PHONY: tags
 tags:
-	ctags `find -name "*.[chS]"`
+	ctags `find \( -path '*/.pc' -o -path '*/.svn' \) -prune -o -name "*.[chS]"`
 
 -include MCONFIG
