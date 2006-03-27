@@ -92,6 +92,7 @@ void prom_map (void *phys, void *virt, int size);
 prom_handle prom_finddevice (char *name);
 prom_handle prom_findpackage (char *path);
 int prom_getprop (prom_handle dev, char *name, void *buf, int len);
+int prom_setprop (prom_handle dev, char *name, void *buf, int len);
 enum device_type prom_get_devtype (char *device);
 
 /* misc */

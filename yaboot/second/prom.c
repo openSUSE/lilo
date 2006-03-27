@@ -156,6 +156,12 @@ prom_getprop (prom_handle pack, char *name, void *mem, int len)
      return (int)call_prom ("getprop", 4, 1, pack, name, mem, len);
 }
 
+int
+prom_setprop (prom_handle pack, char *name, void *mem, int len)
+{
+     return (int)call_prom ("setprop", 4, 1, pack, name, mem, len);
+}
+
 static prom_handle of1275_child(prom_handle node)
 {
 	return call_prom("child", 1, 1, node);
