@@ -792,7 +792,7 @@ static void yaboot_text_ui(void)
 	  }
 
 	  DEBUG_F("setting kernel args to: %s\n", params.args);
-	  prom_setargs(params.args);
+	  prom_set_chosen ("bootargs", params.args, strlen(params.args) + 1);
 	  DEBUG_F("flushing icache...");
 	  flush_icache_range ((long)loadinfo.base, (long)loadinfo.base+loadinfo.memsize);
 	  DEBUG_F(" done\n");
