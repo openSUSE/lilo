@@ -109,7 +109,7 @@ call_prom_return (const char *service, int nargs, int nret, ...)
 }
 
 static void *
-call_method_1 (char *method, prom_handle h, int nargs, ...)
+call_method_1 (const char *method, prom_handle h, int nargs, ...)
 {
      va_list list;
      int i;
@@ -118,7 +118,7 @@ call_method_1 (char *method, prom_handle h, int nargs, ...)
      prom_args.service = "call-method";
      prom_args.nargs = nargs+2;
      prom_args.nret = 2;
-     prom_args.args[0] = method;
+     prom_args.args[0] = (void *)method;
      prom_args.args[1] = h;
      va_start (list, nargs);
      for (i = 0; i < nargs; ++i)
@@ -139,25 +139,25 @@ call_method_1 (char *method, prom_handle h, int nargs, ...)
 
 
 prom_handle
-prom_finddevice (char *name)
+prom_finddevice (const char *name)
 {
      return call_prom ("finddevice", 1, 1, name);
 }
 
 prom_handle
-prom_findpackage(char *path)
+prom_findpackage(const char *path)
 {
      return call_prom ("find-package", 1, 1, path);
 }
 
 int
-prom_getprop (prom_handle pack, char *name, void *mem, int len)
+prom_getprop (prom_handle pack, const char *name, void *mem, int len)
 {
      return (int)call_prom ("getprop", 4, 1, pack, name, mem, len);
 }
 
 int
-prom_setprop (prom_handle pack, char *name, void *mem, int len)
+prom_setprop (prom_handle pack, const char *name, void *mem, int len)
 {
      return (int)call_prom ("setprop", 4, 1, pack, name, mem, len);
 }
@@ -199,19 +199,19 @@ void find_type_devices(prom_handle * nodes, const char *type, int max)
 }
 
 int
-prom_get_chosen (char *name, void *mem, int len)
+prom_get_chosen (const char *name, void *mem, int len)
 {
      return prom_getprop (prom_chosen, name, mem, len);
 }
 
 int
-prom_set_chosen (char *name, void *mem, int len)
+prom_set_chosen (const char *name, void *mem, int len)
 {
      return prom_setprop (prom_chosen, name, mem, len);
 }
 
 enum device_type
-prom_get_devtype (char *device)
+prom_get_devtype (const char *device)
 {
      phandle    dev;
      int        result;
@@ -259,7 +259,7 @@ prom_init (prom_entry pp)
 }
 
 prom_handle
-prom_open (char *spec)
+prom_open (const char *spec)
 {
      return call_prom ("open", 1, 1, spec, strlen(spec));
 }
@@ -419,7 +419,7 @@ prom_puts (prom_handle file, char *s)
 }
  
 static void
-prom_vfprintf (prom_handle file, char *fmt, va_list ap)
+prom_vfprintf (prom_handle file, const char *fmt, va_list ap)
 {
      static char printf_buf[2048];
      vsprintf (printf_buf, fmt, ap);
@@ -427,7 +427,7 @@ prom_vfprintf (prom_handle file, char *fmt, va_list ap)
 }
 
 void
-prom_vprintf (char *fmt, va_list ap)
+prom_vprintf (const char *fmt, va_list ap)
 {
      static char printf_buf[2048];
      vsprintf (printf_buf, fmt, ap);
@@ -436,7 +436,7 @@ prom_vprintf (char *fmt, va_list ap)
 
 #if 0
 void
-prom_fprintf (prom_handle file, char *fmt, ...)
+prom_fprintf (prom_handle file, const char *fmt, ...)
 {
      va_list ap;
      va_start (ap, fmt);
@@ -446,7 +446,7 @@ prom_fprintf (prom_handle file, char *fmt, ...)
 #endif
 
 void
-prom_printf (char *fmt, ...)
+prom_printf (const char *fmt, ...)
 {
      va_list ap;
      va_start (ap, fmt);
@@ -455,7 +455,7 @@ prom_printf (char *fmt, ...)
 }
 
 void
-prom_perror (int error, char *filename)
+prom_perror (int error, const char *filename)
 {
      if (error == FILE_ERR_EOF)
 	  prom_printf("%s: Unexpected End Of File\n", filename);
@@ -487,7 +487,7 @@ prom_perror (int error, char *filename)
 
 #if 0
 void
-prom_readline (char *prompt, char *buf, int len)
+prom_readline (const char *prompt, char *buf, int len)
 {
      int i = 0;
      int c;
@@ -536,7 +536,7 @@ prom_exit ()
 }
 
 void
-prom_abort (char *fmt, ...)
+prom_abort (const char *fmt, ...)
 {
      va_list ap;
      va_start (ap, fmt);
@@ -591,7 +591,7 @@ prom_unmap (void *phys, void *virt, int size)
 
 #endif
 
-int prom_interpret (char *forth)
+int prom_interpret (const char *forth)
 {
      return (int)call_prom("interpret", 1, 1, forth);
 }

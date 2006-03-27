@@ -48,7 +48,7 @@ extern prom_handle prom_stdin;
 extern prom_handle prom_stdout;
 extern int stdout_is_screen;
 
-prom_handle prom_open (char *spec);
+prom_handle prom_open (const char *spec);
 int prom_read (prom_handle file, void *buf, int len);
 int prom_write (prom_handle file, void *buf, int len);
 int prom_seek (prom_handle file, unsigned long long pos);
@@ -68,17 +68,17 @@ void prom_putchar (char);
 int prom_nbgetchar();
 
 #ifdef __GNUC__
-void prom_vprintf (char *fmt, va_list ap) __attribute__ ((format (printf, 1, 0)));
-void prom_fprintf (prom_handle dev, char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
-void prom_printf (char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
+void prom_vprintf (const char *fmt, va_list ap) __attribute__ ((format (printf, 1, 0)));
+void prom_fprintf (prom_handle dev, const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
+void prom_printf (const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 #else
-void prom_vprintf (char *fmt, va_list ap);
-void prom_fprintf (prom_handle dev, char *fmt, ...);
-void prom_printf (char *fmt, ...);
+void prom_vprintf (const char *fmt, va_list ap);
+void prom_fprintf (prom_handle dev, const char *fmt, ...);
+void prom_printf (const char *fmt, ...);
 #endif
 
-void prom_perror (int error, char *filename);
-void prom_readline (char *prompt, char *line, int len);
+void prom_perror (int error, const char *filename);
+void prom_readline (const char *prompt, char *line, int len);
 int prom_set_color(prom_handle device, int color, int r, int g, int b);
 
 /* memory */
@@ -89,22 +89,22 @@ void prom_map (void *phys, void *virt, int size);
 
 /* packages and device nodes */
 
-prom_handle prom_finddevice (char *name);
-prom_handle prom_findpackage (char *path);
-int prom_getprop (prom_handle dev, char *name, void *buf, int len);
-int prom_setprop (prom_handle dev, char *name, void *buf, int len);
-enum device_type prom_get_devtype (char *device);
+prom_handle prom_finddevice (const char *name);
+prom_handle prom_findpackage (const char *path);
+int prom_getprop (prom_handle dev, const char *name, void *buf, int len);
+int prom_setprop (prom_handle dev, const char *name, void *buf, int len);
+enum device_type prom_get_devtype (const char *device);
 
 /* misc */
 
 void prom_exit ();
-void prom_abort (char *fmt, ...);
+void prom_abort (const char *fmt, ...);
 void prom_sleep (int seconds);
 
-int prom_interpret (char *forth);
+int prom_interpret (const char *forth);
 
-int prom_get_chosen (char *name, void *mem, int len);
-int prom_set_chosen (char *name, void *mem, int len);
+int prom_get_chosen (const char *name, void *mem, int len);
+int prom_set_chosen (const char *name, void *mem, int len);
 
 extern int prom_getms(void);
 extern void prom_pause(void);
