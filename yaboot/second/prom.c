@@ -205,6 +205,12 @@ prom_get_chosen (char *name, void *mem, int len)
 }
 
 int
+prom_set_chosen (char *name, void *mem, int len)
+{
+     return prom_setprop (prom_chosen, name, mem, len);
+}
+
+int
 prom_get_options (char *name, void *mem, int len)
 {
      if (prom_options == (void *)-1)
