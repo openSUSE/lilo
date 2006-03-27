@@ -167,9 +167,9 @@ function get_of_path() {
     $SHOW_OF_PATH $1
     errnum=$?
 
-    if (( errnum != 0 )); then
-	error "show_of_path.sh returned error $errnum while analysing path $1"
-    fi
+    #if (( errnum != 0 )); then
+    #	error "show_of_path.sh returned error $errnum while analysing path $1"
+    #fi
 }
 
 
@@ -202,7 +202,8 @@ if (( PVERSION > 1006022 )); then
 	fi
     }
     function parted_print(){
-	$PARTED $device unit s print
+	local device=$1
+	$PARTED "$device" unit s print
     }
 
 else
@@ -220,7 +221,8 @@ else
 	echo $(( s * 1024 * 2 / 1000 ))
     }
     function parted_print() {
-	$PARTED $device print
+	local device=$1
+	$PARTED "$device" print
     }
 
 fi
@@ -530,6 +532,8 @@ function parse_config_file () {
 		OPTION_OTHER=$value
 		;;
 	    root)
+		# FIXME: fix some common typos like missing quotes of spaces
+		# like that? "'${a//*( )=*( )/=}'"
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
 		    OPTION_ROOT=$value
 		else
@@ -545,6 +549,8 @@ function parse_config_file () {
 		CONFIG_IMAGE_LABEL[$CONFIG_IMAGE_COUNT]=$value
 		;;
 	    append)
+		# FIXME: fix some common typos like missing quotes of spaces
+		# like that? "'${a//*( )=*( )/=}'"
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
 		    # use eval to strip ""
 		    eval OPTION_APPEND=$value
