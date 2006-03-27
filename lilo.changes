@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Mon Mar 27 14:32:57 CEST 2006 - jplack@suse.de
+
+- fixed #159333, FAT size calculation fails for large boot partitions
+- give better/avoid/supress irritating error messages (#160078)
+- moved yaboot read ability detection into function 'can_yaboot_read' to avoid code duplication
+- complete code review/rework for inner config file translation
+- clone= feature now really works
+- FAT boot decision making code is now transparent
+- partition= line creation fixed, code is transparent now (#158185) 
+- fixed typo in #148612
+- bump version to 10.1.5
+
+-------------------------------------------------------------------
 Wed Mar 22 10:35:00 CET 2006 - olh@suse.de
 
 - update libext2fs.a in yaboot to fix out-of-bounds access in
