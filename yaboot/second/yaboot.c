@@ -55,6 +55,7 @@
 #include "debug.h"
 
 #define CONFIG_FILE_MAX		0x8000		/* 32k */
+#define BOOTPATH_LEN		1024
 
 #ifdef USE_MD5_PASSWORDS
 #include "md5.h"
@@ -99,7 +100,6 @@ static void     setup_display(void);
 /* Locals & globals */
 
 int useconf;
-static char bootdevice[1024];
 static char *password;
 static struct boot_fspec_t boot;
 static struct default_device default_device;
@@ -1161,24 +1161,28 @@ static int yaboot_main(void)
 {
      int i;
      char *p;
+     char *bootpath;
      if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
 	  stdout_is_screen = 1;
 	  setup_display();
      }
-	
-     if (bootdevice[0] == '\0') {
-	     prom_get_chosen("bootpath", bootdevice, sizeof(bootdevice));
-	     DEBUG_F("/chosen/bootpath = %s\n", bootdevice);
-	     if (bootdevice[0] == 0) {
-		     prom_printf("Couldn't determine boot device\n");
-		     return -1;
-	     }
-     }
 
-     if (!parse_device_path(bootdevice, &boot)) {
-	  prom_printf("%s: Unable to parse\n", bootdevice);
-	  return -1;
-     }
+	bootpath = malloc(BOOTPATH_LEN);
+	if (bootpath) {
+		memset(bootpath, 0, BOOTPATH_LEN);
+		i = prom_get_chosen("bootpath", bootpath, BOOTPATH_LEN - 1);
+		DEBUG_F("/chosen/bootpath = %s\n", bootpath);
+		if (bootpath[0] == 0) {
+			prom_printf("Couldn't determine boot device\n");
+			return -1;
+		}
+
+		if (!parse_device_path(bootpath, &boot)) {
+			prom_printf("%s: Unable to parse\n", bootpath);
+			return -1;
+		}
+		prom_set_chosen("yaboot,bootpath", bootpath, strlen(bootpath) + 1);
+	}
 
      useconf = load_config_file(&boot);
 
@@ -1198,8 +1202,9 @@ static int yaboot_main(void)
 
 
      prom_printf("Welcome to yaboot version " VERSION "\n");
-     prom_printf("booted from '%s'\n", bootdevice);
+     prom_printf("booted from '%s'\n", bootpath);
      prom_printf("Enter \"help\" to get some basic usage information\n");
+     free(bootpath);
 
      /* brain damage. censored. */
 
