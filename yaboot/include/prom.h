@@ -97,9 +97,6 @@ enum device_type prom_get_devtype (char *device);
 
 /* misc */
 
-char *prom_getargs ();
-void prom_setargs (char *args);
-
 void prom_exit ();
 void prom_abort (char *fmt, ...);
 void prom_sleep (int seconds);
@@ -108,7 +105,6 @@ int prom_interpret (char *forth);
 
 int prom_get_chosen (char *name, void *mem, int len);
 int prom_set_chosen (char *name, void *mem, int len);
-int prom_get_options (char *name, void *mem, int len);
 
 extern int prom_getms(void);
 extern void prom_pause(void);

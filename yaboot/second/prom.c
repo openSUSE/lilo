@@ -210,14 +210,6 @@ prom_set_chosen (char *name, void *mem, int len)
      return prom_setprop (prom_chosen, name, mem, len);
 }
 
-int
-prom_get_options (char *name, void *mem, int len)
-{
-     if (prom_options == (void *)-1)
-	  return -1;
-     return prom_getprop (prom_options, name, mem, len);
-}
-
 enum device_type
 prom_get_devtype (char *device)
 {
@@ -597,25 +589,7 @@ prom_unmap (void *phys, void *virt, int size)
 	  call_method_1 ("map", prom_mmu, 4, -1, size, virt, phys);
 }
 
-char *
-prom_getargs ()
-{
-     static char args[256];
-     int l;
-
-     l = prom_get_chosen ("bootargs", args, 255);
-     args[l] = '\0';
-     return args;
-}
 #endif
-
-void
-prom_setargs (char *args)
-{
-     int l = strlen (args)+1;
-     if ((int)call_prom ("setprop", 4, 1, prom_chosen, "bootargs", args, l) != l)
-	  prom_printf ("can't set args\n");
-}
 
 int prom_interpret (char *forth)
 {
