@@ -6,7 +6,7 @@ export LC_COLLATE=POSIX
 
 include Config
 
-VERSION = r$(shell env -i svn info | sed -n "/^Last Changed Rev:[[:blank:]]\+/s@^[^:]\+:[[:blank:]]\+@@p" )
+VERSION = r$(shell rev=`env -i svn info | sed -n "/^Last Changed Rev:[[:blank:]]\+/s@^[^:]\+:[[:blank:]]\+@@p"` ; mod=`env -i svn st | grep -q '^[MAD]' && echo M` ; echo $$rev$$mod )
 # Debug mode (spam/verbose)
 DEBUG = 0
 # make install vars
