@@ -46,7 +46,7 @@ static int file_block_open(struct boot_file_t *file, const struct boot_fspec_t* 
 	
      parts = partitions_lookup(spec->device);
      found = NULL;
-     sprintf(f, "%s%s", spec->directory, spec->filename);
+     sprintf(f, "%s%s", spec->u.b.directory, spec->filename);
      DEBUG_F("filename '%s'\n", f);
 
 #ifdef DEBUG

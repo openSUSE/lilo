@@ -51,11 +51,20 @@ struct boot_fspec_t {
 
 	char *device;
 
-	char *partition;
-	char *directory;
-
-	char *ip_before_filename;
-	char *ip_after_filename;
+	union {
+		struct {
+			char *partition;
+			char *directory;
+		} b;
+		struct {
+			char *ip_before_filename;
+			char *ip_after_filename;
+		} n;
+		struct {
+			char *s1;
+			char *s2;
+		} d;
+	} u;
 
 	char *filename;
 };

@@ -171,7 +171,7 @@ static int of_net_open(struct boot_file_t* file, const struct boot_fspec_t* spec
      DEBUG_ENTER;
      DEBUG_OPEN_NEW;
 
-     sprintf(buffer, "%s:%s,", spec->device, spec->ip_before_filename);
+     sprintf(buffer, "%s:%s,", spec->device, spec->u.n.ip_before_filename);
      p = p + strlen(buffer);
      strcat(buffer, spec->filename);
      while (*p) {
@@ -179,9 +179,9 @@ static int of_net_open(struct boot_file_t* file, const struct boot_fspec_t* spec
 		     *p = '\\';
 	     p++;
      }
-     if (spec->ip_after_filename && strlen(spec->ip_after_filename)) {
+     if (spec->u.n.ip_after_filename && strlen(spec->u.n.ip_after_filename)) {
 	     strcat(buffer, ",");
-	     strcat(buffer, spec->ip_after_filename);
+	     strcat(buffer, spec->u.n.ip_after_filename);
      }
 			
      DEBUG_F("Opening: \"%s\"\n", buffer);

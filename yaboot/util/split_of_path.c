@@ -25,17 +25,26 @@ struct default_device {
 };
 
 struct boot_fspec_t {
-	int part;
+	int	part;		/* Partition number or -1 */
 
 	enum device_type type;
 
 	char *device;
 
-	char *partition;
-	char *directory;
-
-	char *ip_before_filename;
-	char *ip_after_filename;
+	union {
+		struct {
+			char *partition;
+			char *directory;
+		} b;
+		struct {
+			char *ip_before_filename;
+			char *ip_after_filename;
+		} n;
+		struct {
+			char *s1;
+			char *s2;
+		} d;
+	} u;
 
 	char *filename;
 };
@@ -115,13 +124,10 @@ static enum device_type prom_get_devtype(const char *device)
 
 static void print_boot(const struct boot_fspec_t *p) {
 		P(device);
-		P(partition);
-		P(directory);
+		P(u.d.s1);
+		P(u.d.s2);
 		printf("\n");
 		P(filename);
-		printf("\n");
-		P(ip_before_filename);
-		P(ip_after_filename);
 		printf("\n");
 }
 

@@ -19,10 +19,8 @@ void __dump_boot_fspec_t (const char *fn, int l, const struct boot_fspec_t *p)
 	I(part);
 	I(type);
 	S(device);
-	S(partition);
-	S(directory);
-	S(ip_before_filename);
-	S(ip_after_filename);
+	S(u.d.s1);
+	S(u.d.s2);
 	S(filename);
 }
 #undef S
@@ -34,31 +32,31 @@ static void parse_block_device(struct boot_fspec_t *result)
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
-	if (!result->partition)
+	if (!result->u.b.partition)
 		return;
 
-	result->part = strtol(result->partition, &ip, 10);
-	DEBUG_F("part '%d', partition '%s', ip '%s'\n", result->part, result->partition, ip);
+	result->part = strtol(result->u.b.partition, &ip, 10);
+	DEBUG_F("part '%d', partition '%s', ip '%s'\n", result->part, result->u.b.partition, ip);
 	if (result->part)
 		*ip++ = '\0';
 	else {
 		result->part = -1;
-		result->partition = "";
+		result->u.b.partition = "";
 	}
 	if (',' == ip[0])
 		ip++;
-	result->directory = ip;
-	result->filename = strrchr(result->directory, '/');
+	result->u.b.directory = ip;
+	result->filename = strrchr(result->u.b.directory, '/');
 	if (!result->filename)
-		result->filename = strrchr(result->directory, '\\');
+		result->filename = strrchr(result->u.b.directory, '\\');
 	if (result->filename) {
 		memmove(result->filename + 2, result->filename + 1, strlen(result->filename + 1) + 1);
 		result->filename++;
 		result->filename[0] = '\0';
 		result->filename++;
 	} else {
-		result->filename = result->directory;
-		result->directory = "";
+		result->filename = result->u.b.directory;
+		result->u.b.directory = "";
 	}
 }
 
@@ -68,17 +66,17 @@ static void parse_net_device(struct boot_fspec_t *result)
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
-	if (!result->partition)
+	if (!result->u.n.ip_before_filename)
 		return;
 
-	p = result->partition;
+	p = result->u.n.ip_before_filename;
 
 	if (strncmp("bootp", p, 5) == 0) {
 		p = strchr(p, ',');
 		if (!p) {
-			result->partition[5] = ',';
-			result->partition[0] = '\0';
-			goto bootp;
+			result->u.n.ip_before_filename[5] = ',';
+		//	result->u.n.ip_before_filename[0] = '\0';
+			goto out;
 		}
 		p++;
 	}
@@ -96,7 +94,7 @@ static void parse_net_device(struct boot_fspec_t *result)
 	}
 	p = strchr(p, ',');
 	if (!p)
-		goto bootp;
+		goto out;
 	*p = '\0';
 	p++;
 	result->filename = p;
@@ -104,13 +102,10 @@ static void parse_net_device(struct boot_fspec_t *result)
 	if (p) {
 		*p = '\0';
 		p++;
-		result->ip_after_filename = p;
+		result->u.n.ip_after_filename = p;
 	}
-bootp:
-	result->ip_before_filename = result->partition;
-
       out:
-	result->partition = NULL;
+	return;
 }
 
 int parse_device_path(const char *imagepath, struct boot_fspec_t *result)
@@ -123,9 +118,9 @@ int parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 	if (!result->device)
 		return 0;
 	strcpy(result->device, imagepath);
-	result->partition = strchr(result->device, ':');
-	if (result->partition)
-		*result->partition++ = '\0';
+	result->u.d.s1 = strchr(result->device, ':');
+	if (result->u.d.s1)
+		*result->u.d.s1++ = '\0';
 	result->type = prom_get_devtype(result->device);
 	switch (result->type) {
 	case TYPE_BLOCK:
@@ -197,8 +192,8 @@ int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, 
 				if (partition >= 0)
 					sprintf(part, "%d", partition);
 				comma = ",";
-				if (imagepath[0] != '/' && imagepath[0] != '\\' && !d && b->directory)
-					dir = b->directory;
+				if (imagepath[0] != '/' && imagepath[0] != '\\' && !d && b->u.b.directory)
+					dir = b->u.b.directory;
 				len = strlen(dev) + 1 + strlen(part) + 1 + strlen(dir) + strlen(imagepath);
 			}
 			len += 2;
@@ -214,11 +209,11 @@ int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, 
 			if (d)
 				len = strlen(dev) + 1;
 			else {
-				if (b->ip_before_filename)
-					ip_b = b->ip_before_filename;
+				if (b->u.n.ip_before_filename)
+					ip_b = b->u.n.ip_before_filename;
 				len = strlen(dev) + 1 + strlen(ip_b) + 1 + strlen(imagepath);
-				if (b->ip_after_filename)
-					len += 1 + strlen(b->ip_after_filename);
+				if (b->u.n.ip_after_filename)
+					len += 1 + strlen(b->u.n.ip_after_filename);
 			}
 			len += 2;
 			p = malloc(len);
@@ -227,8 +222,8 @@ int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, 
 			if (d)
 				sprintf(p, "%s:%s", dev, imagepath);
 			else {
-				if (b->ip_after_filename)
-					sprintf(p, "%s:%s,%s,%s", dev, ip_b, imagepath, b->ip_after_filename);
+				if (b->u.n.ip_after_filename)
+					sprintf(p, "%s:%s,%s,%s", dev, ip_b, imagepath, b->u.n.ip_after_filename);
 				else
 					sprintf(p, "%s:%s,%s", dev, ip_b, imagepath);
 			}

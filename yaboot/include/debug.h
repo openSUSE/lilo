@@ -35,9 +35,8 @@
                              dev_name, part, part ? part->part_number : -1,\
                              file_name)
 # define DEBUG_OPEN_NEW do { const struct boot_fspec_t *s = spec; \
-				DEBUG_F("dev='%s', part='%s', directory='%s', filename='%s' ipb='%s', ipa='%s'\n",\
-				s->device, s->partition, s->directory, s->filename, \
-				s->ip_before_filename, s->ip_after_filename); \
+				DEBUG_F("dev='%s', s1='%s', s2='%s', filename='%s'\n",\
+				s->device, s->u.d.s1, s->u.d.s2, s->filename); \
 			} while (0)
 # define DEBUG_SLEEP prom_sleep(3)
 #else
