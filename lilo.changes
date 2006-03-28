@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar 28 22:01:34 CEST 2006 - olh@suse.de
+
+- make yaboot output more OF compatible, all hex, no leading 0x
+
+-------------------------------------------------------------------
 Mon Mar 27 22:40:34 CEST 2006 - olh@suse.de
 
 - use malloc buffer for /chosen/bootpath in yaboot

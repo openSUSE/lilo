@@ -158,7 +158,7 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
      /* Initialize OF interface */
      prom_init ((prom_entry) r5);
 
-     prom_printf("\nyaboot starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%08lx;sp: 0x%p)\n",
+     prom_printf("\nyaboot starting: loaded at %p %p (%lx/%lx/%08lx; sp: %p)\n",
 				_start, _end, r3, r4, r5, sp);
 
      /* the executable memrange may not be claimed by firmware */
@@ -168,12 +168,12 @@ yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
      /* Allocate some memory for malloc'ator */
      malloc_base = prom_claim((void *)MALLOCADDR, MALLOCSIZE, 0);
      if (malloc_base == (void *)-1) {
-	  prom_printf("Can't claim malloc buffer (%d bytes at 0x%08x)\n",
+	  prom_printf("Can't claim malloc buffer (%x bytes at %08x)\n",
 		      MALLOCSIZE, MALLOCADDR);
 	  return -1;
      }
      malloc_init(malloc_base, MALLOCSIZE);
-     DEBUG_F("Malloc buffer allocated at %p (%d bytes)\n",
+     DEBUG_F("Malloc buffer allocated at %p (%x bytes)\n",
 	     malloc_base, MALLOCSIZE);
 		
      cpus[0] = 0;
@@ -783,8 +783,8 @@ static void yaboot_text_ui(void)
 		    file.fs->close(&file);
 	       }
 	       if (initrd_base)
-		    prom_printf("ramdisk loaded at %p, size: %lu Kbytes\n",
-				initrd_base, initrd_size >> 10);
+		    prom_printf("ramdisk loaded %08lx @ %p\n",
+				initrd_size, initrd_base);
 	       else {
 		    prom_printf("ramdisk load failed !\n");
 		    prom_pause();
@@ -802,11 +802,9 @@ static void yaboot_text_ui(void)
 
 	  DEBUG_F("Kernel entry point = %p\n", kernel_entry);
 	  DEBUG_F("kernel: arg1 = %p,\n"
-		  "        arg2 = 0x%08lx,\n"
-		  "        prom = %p,\n"
-		  "        arg4 = %d,\n"
-		  "        arg5 = %d\n\n",
-		  initrd_base + loadinfo.load_loc, initrd_size, prom, 0, 0);
+		  "        arg2 = %08lx,\n"
+		  "        prom = %p,\n",
+		  initrd_base + loadinfo.load_loc, initrd_size, prom);
 
 	  DEBUG_F("Entering kernel...\n");
 
@@ -903,7 +901,7 @@ load_elf32(struct boot_file_t *file, loadinfo_t *loadinfo)
 	  prom_printf("Claim error, can't allocate kernel memory\n");
 	  return 0;
      }	
-     prom_printf("Allocated 0x%08lx bytes for executable @ 0x%p\n",
+     prom_printf("Allocated %08lx bytes for executable @ %p\n",
 		     loadinfo->memsize, loadinfo->base);
 
      /* Load the program segments... */
@@ -1019,7 +1017,7 @@ load_elf64(struct boot_file_t *file, loadinfo_t *loadinfo)
 	  prom_printf("Claim error, can't allocate kernel memory\n");
 	  return 0;
      }	
-     prom_printf("Allocated 0x%08lx bytes for kernel @ 0x%p\n",
+     prom_printf("Allocated %08lx bytes for kernel @ %p\n",
 		     loadinfo->memsize, loadinfo->base);
 
 
