@@ -137,6 +137,49 @@ int parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 	return 1;
 }
 
+char *fspec_to_path(const struct boot_fspec_t *input)
+{
+	int len;
+	char part[42], *path;
+
+	if (!input)
+		return NULL;
+	path = NULL;
+	len = strlen(input->device);
+	len += strlen(input->filename);
+	len += 1 + 1 + 1; /* : , \0 */
+	switch (input->type) {
+		case TYPE_BLOCK:
+			part[0] = '\0';
+			if (input->part > 0) {
+				sprintf(part, "%d,", input->part);
+				len += strlen(part);
+			}
+			len += strlen(input->u.b.directory);
+			path = malloc(len);
+			if (path)
+				sprintf(path, "%s:%s%s%s", input->device, part,
+					input->u.b.directory, input->filename);
+			break;
+		case TYPE_NET:
+			len += strlen(input->u.n.ip_before_filename);
+			if (input->u.n.ip_after_filename) {
+				len++;
+				len += strlen(input->u.n.ip_after_filename);
+			}
+			path = malloc(len);
+			if (path)
+				sprintf(path, "%s:%s,%s%s%s", input->device,
+					input->u.n.ip_before_filename, input->filename,
+					input->u.n.ip_after_filename ? "," : "",
+					input->u.n.ip_after_filename ? input->u.n.ip_after_filename : "");
+			break;
+		default:
+			break;
+	}
+	return path;
+}
+
 int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d)
 {
 	enum device_type type;

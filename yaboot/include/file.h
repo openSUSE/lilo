@@ -93,6 +93,7 @@ extern int
 open_file(const struct boot_fspec_t*	spec,
 	  struct boot_file_t*		file);
 
+char *fspec_to_path(const struct boot_fspec_t *input);
 int parse_device_path(const char *imagepath, struct boot_fspec_t *result);
 int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d);
 int set_def_device(const char *dev, const char *partition, struct default_device *def);
