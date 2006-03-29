@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 29 21:19:27 CEST 2006 - olh@suse.de
+
+- dont print filename when yaboot.conf parsing fails
+
+-------------------------------------------------------------------
 Tue Mar 28 22:01:34 CEST 2006 - olh@suse.de
 
 - make yaboot output more OF compatible, all hex, no leading 0x

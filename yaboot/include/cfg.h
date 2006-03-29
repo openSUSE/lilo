@@ -23,7 +23,7 @@
 
 #include "types.h"
 
-extern int	cfg_parse(const char *cfg_file, char *buff, int len, int cpu); 
+extern int	cfg_parse(char *buff, int len, int cpu); 
 extern char*	cfg_get_strg(char *image, char *item);
 extern int	cfg_get_flag(char *image, char *item);
 extern void	cfg_print_images(void);
