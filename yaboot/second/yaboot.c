@@ -315,12 +315,8 @@ static int load_config_file(const struct boot_fspec_t *b)
      prom_printf("Config file '%s' read, %d bytes\n", names[i], sz);
 
      /* Call the parsing code in cfg.c */
-     if (cfg_parse(conf_file, sz, _cpu) < 0) {
-	  prom_printf ("Syntax error or read error config\n");
+     if (cfg_parse(conf_file, sz, _cpu) < 0)
 	  goto bail;
-     }
-
-     DEBUG_F("Config file successfully parsed, %d bytes\n", sz);
 
      /* Now, we do the initialisations stored in the config file */
      p = cfg_get_strg(NULL, "init-code");
