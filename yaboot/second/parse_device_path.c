@@ -144,17 +144,20 @@ char *fspec_to_path(const struct boot_fspec_t *input)
 
 	if (!input)
 		return NULL;
+	dump_boot_fspec_t(input);
 	path = NULL;
 	len = strlen(input->device);
 	len += strlen(input->filename);
 	len += 1 + 1 + 1; /* : , \0 */
 	switch (input->type) {
 		case TYPE_BLOCK:
-			part[0] = '\0';
-			if (input->part > 0) {
+			if (input->part > 0)
 				sprintf(part, "%d,", input->part);
-				len += strlen(part);
+			else {
+				part[0] = ',';
+				part[1] = '\0';
 			}
+			len += strlen(part);
 			len += strlen(input->u.b.directory);
 			path = malloc(len);
 			if (path)
