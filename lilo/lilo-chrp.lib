@@ -85,7 +85,7 @@ function can_yaboot_read () {
     local fs=${_filesystem[$(device_of_file $path)]}
 
     # check for a file system yaboot can handle
-    [[ "$fs" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660) ]] || return 1;
+    [[ "$fs" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]] || return 1;
 
     # return true finally
     return 0
@@ -183,6 +183,12 @@ function running_on_chrp () {
 	error "in config file, boot = $OPTION_BOOT is not a primary partition"
     fi
 
+    # check whether the boot partition is under device mapper control an throw
+    # an error in this case
+    # FIXME: something like that:
+    # if [ -x dmsetup ] && [[ $(dmsetup ls) == *$OPTION_BOOT* ]]; then
+    #     error "$OPTION_BOOT is under device mapper control, unusable"
+    # fi
     echo Boot target is ${OPTION_BOOT}
 
     # check all CONFIG_IMAGE_FILEs whether they are on ext2/ext2/fat/reiserfs
@@ -215,7 +221,6 @@ function running_on_chrp () {
 	     # check whether the image file lies on a file system that is
 	     # readable by yaboot
 	    if [ "$OPTION_FORCEFAT" != "yes" ] \
-		&& is_on_primary "$path_image" \
 		&& can_yaboot_read "$image";
 	    then
 		CONFIG_IMAGE_FILE[$i]="${path_image}"
@@ -246,7 +251,6 @@ function running_on_chrp () {
 	    # check whether the image file lies on a file system that is
 	    # readable by yaboot
 	    if [ "$OPTION_FORCEFAT" != "yes" ] \
-		&& is_on_primary "$path_image" \
 		&& can_yaboot_read "$image";
 	    then
 		CONFIG_IMAGE_INITRD[$i]="${path_image}"
@@ -531,37 +535,7 @@ function running_on_chrp () {
 	cp -v /lib/lilo/chrp/yaboot.chrp boot/yaboot || exit 2
 	cp -v $TEMP/yaboot.conf boot/yaboot.cnf || exit 2
 
-	# copy default image
-	if (( vmlinux_default != 0 )); then
-	    cp -v ${vmlinux_copy[$vmlinux_default]} \
-	      boot/vmlinux.$(printf "%03d" $vmlinux_default) || exit 2
-	    #unset vmlinux_copy[$vmlinux_default]
-	fi
-	if (( initrd_default != 0 )); then
-	    cp -v ${initrd_copy[$initrd_default]} \
-	      boot/initrd.$(printf "%03d" $initrd_default) || exit 2
-	    #unset initrd_copy[$initrd_default]
-	fi
-
-	# copy all images except the default ...
-	for (( i=1; i<=vmlinux_nr; i++ )); do
-	    (( i == vmlinux_default )) && continue
-	    local f="${vmlinux_copy[$i]}"
-	    if [ "$f" ]; then
-		cp -v $f boot/vmlinux.$(printf "%03d" $i) ||
-		warning "Could not copy $f to boot partition $boot_partition"
-	    fi
-	done
-	for (( i=1; i<=initrd_nr; i++ )); do
-	    (( i == initrd_default )) && continue
-	    local f="${initrd_copy[$i]}"
-	    if [ "$f" ]; then
-		cp -v $f boot/initrd.$(printf "%03d" $i) ||
-		warning "Could not copy $f to boot partition $boot_partition"
-	    fi
-	done
-
-	mkdir boot/ppc
+	mkdir boot/ppc || exit 2
 	# interpret /etc/SuSE-release if available
 	# 
 	# file is either like:
@@ -603,8 +577,36 @@ function running_on_chrp () {
 	    echo "        boot &device;:$boot_partnr,yaboot"
 	    echo "    </boot-script>"
 	    echo "</chrp-boot>"
-	} > boot/ppc/bootinfo.txt
-	mkdir boot/ppc/chrp
+	} > boot/ppc/bootinfo.txt || exit 2
+	mkdir boot/ppc/chrp || exit 2
+
+	# copy default image
+	if (( vmlinux_default != 0 )); then
+	    cp -v ${vmlinux_copy[$vmlinux_default]} \
+	      boot/vmlinux.$(printf "%03d" $vmlinux_default) || exit 2
+	fi
+	if (( initrd_default != 0 )); then
+	    cp -v ${initrd_copy[$initrd_default]} \
+	      boot/initrd.$(printf "%03d" $initrd_default) || exit 2
+	fi
+
+	# copy all images except the default ...
+	for (( i=1; i<=vmlinux_nr; i++ )); do
+	    (( i == vmlinux_default )) && continue
+	    local f="${vmlinux_copy[$i]}"
+	    if [ "$f" ]; then
+		cp -v $f boot/vmlinux.$(printf "%03d" $i) ||
+		warning "Could not copy $f to boot partition $boot_partition"
+	    fi
+	done
+	for (( i=1; i<=initrd_nr; i++ )); do
+	    (( i == initrd_default )) && continue
+	    local f="${initrd_copy[$i]}"
+	    if [ "$f" ]; then
+		cp -v $f boot/initrd.$(printf "%03d" $i) ||
+		warning "Could not copy $f to boot partition $boot_partition"
+	    fi
+	done
 	umount boot
     else # of if (( fat_boot == 1 )) 
 	# check for PReP partition and convert $boot_partition if neseccary
