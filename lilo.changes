@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Mon Apr  3 19:55:31 CEST 2006 - jplack@suse.de
+
+New version to 10.1.6 fixes:
+- handle disk full error more gracefully
+- xfs is now an accepted boot fs (#160895)
+- extended partitions can be read be yaboot (#160897)
+- fix for: /proc unmounted, then used
+- lots of yaboot fixes by olh
+
+-------------------------------------------------------------------
 Wed Mar 29 21:19:27 CEST 2006 - olh@suse.de
 
 - dont print filename when yaboot.conf parsing fails
