@@ -53,9 +53,9 @@ STAT_CMD=/usr/bin/stat
 # trap EXIT function
 function clean_environment () {
     cd /
+    [[ $(</proc/mounts) == *$TEMP/boot\ * ]] && umount $TEMP/boot
     [ $_sysfs_mounted ] && umount /sys
     [ $_proc_mounted ] && umount /proc
-    [[ $(</proc/mounts) == *$TEMP/boot\ * ]] && umount $TEMP/boot
     rm -rf $TEMP
 } #end function clean_environment
 
