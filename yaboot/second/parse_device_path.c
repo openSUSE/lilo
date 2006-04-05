@@ -137,7 +137,7 @@ int parse_device_path(const char *imagepath, struct path_description *result)
 	return 1;
 }
 
-char *fspec_to_path(const struct path_description *input)
+char *path_description_to_string(const struct path_description *input)
 {
 	int len;
 	char part[42], *path;

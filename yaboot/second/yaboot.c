@@ -233,7 +233,7 @@ static void print_message_file(const char *filename, const struct path_descripti
 
      result = open_file(&msgfile, &file);
      if (result != FILE_ERR_OK) {
-	  msg = fspec_to_path(&msgfile);
+	  msg = path_description_to_string(&msgfile);
 	  if (msg) {
 		  prom_perror(result, msg);
 		  free(msg);
