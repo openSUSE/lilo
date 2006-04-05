@@ -361,33 +361,30 @@ int parse_file_to_load_path(const char *imagepath, struct path_description *resu
 	return parse_device_path(p, result);
 }
 
-int set_def_device(const char *dev, const char *p, struct default_device *def)
+void set_default_device(const char *dev, const char *partition, struct path_description *default_device)
 {
 	int n;
 	char *endp;
 
-	DEBUG_F("dev '%s' part '%s' def %p\n", dev, p, def);
-	memset(def, 0, sizeof(*def));
-	def->part = -1;
+	DEBUG_F("dev '%s' part '%s'\n", dev, partition);
 
 	if (dev) {
 		endp = strdup(dev);
 		if (!endp)
-			return 0;
-		def->device = endp;
-		endp = strchr(def->device, ':');
+			return;
+		default_device->device = endp;
+		endp = strchr(default_device->device, ':');
 		if (endp)
 			endp[0] = '\0';
-		def->type = prom_get_devtype(def->device);
+		default_device->type = prom_get_devtype(default_device->device);
 	}
 
-	if (p) {
-		n = simple_strtol(p, &endp, 10);
-		if (endp != p && *endp == 0) {
-			if (TYPE_UNSET == def->type)
-				def->type = TYPE_BLOCK;
-			def->part = n;	       
+	if (partition) {
+		n = simple_strtol(partition, &endp, 10);
+		if (endp != partition && *endp == 0) {
+			if (TYPE_UNSET == default_device->type)
+				default_device->type = TYPE_BLOCK;
+			default_device->part = n;	       
 		}
 	}
-	return (dev || p);
 }
