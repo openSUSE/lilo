@@ -24,7 +24,7 @@
    If CHECK is false, crypt KEY and save the result in CRYPTED.
    CRYPTED must have a salt.  */
 extern int md5_password (const char *key, char *crypted, int check);
-extern unsigned char *md5sum(const char *input, int len);
+extern char *md5sum(const char *input, int len);
 
 #define MD5_RESULT_BUFSIZE (16 * 3 + 1)
 #define md5_fill_result_string(result, digest) do { int i; for (i = 0; i < 16; i++) sprintf(result + 2 * i, "%02x", digest[i]); } while(0)

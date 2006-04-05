@@ -133,7 +133,7 @@ of_open(struct boot_file_t* file, const char* dev_name,
 static int of_net_download (unsigned char **buffer, ihandle of_device)
 {
 	int ret = LOAD_BUFFER_TRIES;
-	char *p, *mem = (char *)LOAD_BUFFER_BASE;
+	unsigned char *p, *mem = (unsigned char *)LOAD_BUFFER_BASE;
 	
 	DEBUG_ENTER;
 	

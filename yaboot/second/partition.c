@@ -45,7 +45,7 @@
 
 
 #define MAX_BLOCK_SIZE	2048
-static unsigned char block_buffer[MAX_BLOCK_SIZE];
+static char block_buffer[MAX_BLOCK_SIZE];
 
 static void
 add_new_partition(struct partition_t**	list, int part_number,
@@ -118,7 +118,7 @@ partition_mac_lookup(prom_handle disk,
  * Same function as partition_mac_lookup(), except for fdisk
  * partitioned disks.
  */
-static int msdos_magic_present(unsigned char *buffer) {
+static int msdos_magic_present(char *buffer) {
 	return (buffer[510] == 0x55) && (buffer[511] == 0xaa);
 }
 
@@ -135,7 +135,7 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t** list, un
 	unsigned int partition_start = start;
 	unsigned int partition_size = size;
 	unsigned int offset, length, next;
-	unsigned char buffer[MAX_BLOCK_SIZE];
+	char buffer[MAX_BLOCK_SIZE];
 	struct fdisk_partition *part;
 	while (1) {
 		if (partition_start >= start + size)

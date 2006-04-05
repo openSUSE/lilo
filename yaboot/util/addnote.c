@@ -65,7 +65,7 @@ unsigned int rpanote[N_RPA_DESCR] = {
 
 #define ROUNDUP(len)	(((len) + 3) & ~3)
 
-unsigned char buf[512];
+char buf[512];
 
 #define GET_16BE(off)	((buf[off] << 8) + (buf[(off)+1]))
 #define GET_32BE(off)	((GET_16BE(off) << 16) + GET_16BE((off)+2))

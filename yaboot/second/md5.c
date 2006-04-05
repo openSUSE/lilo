@@ -95,10 +95,10 @@ static const char *b64t =
 
 static UINT4 state[4];
 static unsigned int length;
-static unsigned char buffer[64];
+static char buffer[64];
 
 static void
-md5_transform (const unsigned char block[64])
+md5_transform (const char block[64])
 {
   int i, j;
   UINT4 a,b,c,d,tmp;
@@ -180,7 +180,7 @@ md5_update (const char *input, int inputlen)
   buflen = inputlen;
 }
 
-static unsigned char *
+static char *
 md5_final()
 {
   int i, buflen = length & 63;
@@ -200,7 +200,7 @@ md5_final()
 
   for (i = 0; i < 4; i++)
     state[i] = cpu_to_le32 (state[i]);
-  return (unsigned char *) state;
+  return (char *) state;
 }
 
 #ifdef USE_MD5_PASSWORDS
@@ -217,8 +217,8 @@ md5_password (const char *key, char *crypted, int check)
   char *p; 
   int saltlen;
   int i, n;
-  unsigned char alt_result[16];
-  unsigned char *digest;
+  char alt_result[16];
+  char *digest;
 
   if (check)
     saltlen = strstr (salt, "$") - salt;
@@ -239,7 +239,7 @@ md5_password (const char *key, char *crypted, int check)
   md5_update (key, keylen);
   digest = md5_final ();
   memcpy (alt_result, digest, 16);
-  
+
   md5_init();
   md5_update (key, keylen);
   md5_update (crypted, 3 + saltlen); /* include the $1$ header */
@@ -319,7 +319,7 @@ md5_password (const char *key, char *crypted, int check)
 }
 #endif
 
-unsigned char *md5sum(const char *input, int len) 
+char *md5sum(const char *input, int len) 
 {
   md5_init();
   md5_update(input, len);
@@ -332,7 +332,7 @@ static void
 test (char *buffer, char *expected) 
 {
   char result[MD5_RESULT_BUFSIZE];
-  unsigned char *digest = md5sum(buffer, strlen (buffer));
+  char *digest = md5sum(buffer, strlen (buffer));
 
   md5_fill_result_string(result, digest);
 
