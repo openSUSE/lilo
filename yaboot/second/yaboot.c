@@ -1175,7 +1175,6 @@ setup_display(void)
 
 static int yaboot_main(void)
 {
-     int i;
      char *bootpath;
      if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
 	  stdout_is_screen = 1;
@@ -1185,7 +1184,7 @@ static int yaboot_main(void)
 	bootpath = malloc(BOOTPATH_LEN);
 	if (bootpath) {
 		memset(bootpath, 0, BOOTPATH_LEN);
-		i = prom_get_chosen("bootpath", bootpath, BOOTPATH_LEN - 1);
+		prom_get_chosen("bootpath", bootpath, BOOTPATH_LEN - 1);
 		DEBUG_F("/chosen/bootpath = %s\n", bootpath);
 		if (bootpath[0] == 0) {
 			prom_printf("Couldn't determine boot device\n");
