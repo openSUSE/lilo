@@ -323,21 +323,13 @@ static const char *config_file_names_block[] = {
 	"/etc/yaboot.conf",
 	NULL
 };
-static int load_config_file(const struct path_description *b)
+static int load_config_file(const struct path_description *b, char *conf_file)
 {
-     char *conf_file;
      const char **names;
      struct boot_file_t file;
-     int sz, opened = 0, result = 0;
+     int sz = 0, opened = 0, result = 0;
      int i;
      struct path_description config_fspec;
-
-     /* Allocate a buffer for the config file */
-     conf_file = malloc(CONFIG_FILE_MAX);
-     if (!conf_file) {
-	  prom_printf("Can't alloc config file buffer\n");
-	  goto bail;
-     }
 
      switch (b->type) {
 	case TYPE_NET:
@@ -369,23 +361,13 @@ static int load_config_file(const struct path_description *b)
      /* Read it */
      sz = file.fs->read(&file, CONFIG_FILE_MAX, conf_file);
      file.fs->close(&file);
-     if (sz <= 0) {
+     if (sz <= 0) 
 	  prom_printf("Error, can't read config file\n");
-	  goto bail;
-     }
-     prom_printf("Config file '%s' read, %d bytes\n", names[i], sz);
-
-     /* Call the parsing code in cfg.c */
-     if (!cfg_parse(conf_file, sz, _cpu))
-	  goto bail;
-   
-     result = 1;
+     else
+	  prom_printf("Config file '%s' read, %d bytes\n", names[i], sz);
     
 bail:
-     if (conf_file)
-	  free(conf_file);
-    	
-     return result > 0;
+     return sz;
 }
 
 static void maintabfunc (void)
@@ -1175,6 +1157,8 @@ setup_display(void)
 static int yaboot_main(void)
 {
      char *bootpath;
+     char *conf_file;
+     int sz;
      if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
 	  stdout_is_screen = 1;
 	  setup_display();
@@ -1197,9 +1181,19 @@ static int yaboot_main(void)
 		prom_set_chosen("yaboot,bootpath", bootpath, strlen(bootpath) + 1);
 	}
 
-     useconf = load_config_file(&boot);
+     /* Allocate a buffer for the config file */
+     conf_file = malloc(CONFIG_FILE_MAX);
+     if (!conf_file) {
+	  prom_printf("Can't alloc config file buffer\n");
+	  return -1;
+     }
+
+     sz = load_config_file(&boot, conf_file);
+     if (sz > 0)
+	     useconf = cfg_parse(conf_file, sz, _cpu);
      if (useconf)
 	     process_configfile();
+     free(conf_file);
 
      prom_printf("Welcome to yaboot version " VERSION "\n");
      prom_printf("booted from '%s'\n", bootpath);

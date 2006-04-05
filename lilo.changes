@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr  5 20:13:05 CEST 2006 - olh@suse.de
+
+- move the cfg_parse call out of load_config_file in yaboot
+
+-------------------------------------------------------------------
 Wed Apr  5 19:36:35 CEST 2006 - olh@suse.de
 
 - rename struct boot_fspec_t to path_description in yaboot
