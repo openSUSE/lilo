@@ -233,8 +233,11 @@ static void print_message_file(const char *filename, const struct boot_fspec_t *
 
      result = open_file(&msgfile, &file);
      if (result != FILE_ERR_OK) {
-	  prom_printf("%s:%d,", msgfile.device, msgfile.part);
-	  prom_perror(result, msgfile.filename);
+	  msg = fspec_to_path(&msgfile);
+	  if (msg) {
+		  prom_perror(result, msg);
+		  free(msg);
+	  }
 	  return;
      }
 

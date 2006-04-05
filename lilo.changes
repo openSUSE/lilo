@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr  5 19:27:31 CEST 2006 - olh@suse.de
+
+- improve read error message in print_message_file in yaboot
+
+-------------------------------------------------------------------
 Wed Apr  5 19:19:10 CEST 2006 - olh@suse.de
 
 - fix potential memleak in print_message_file in yaboot
