@@ -101,7 +101,7 @@ static void     setup_display(void);
 
 int useconf;
 static char *password;
-static struct boot_fspec_t boot;
+static struct path_description boot;
 static struct default_device default_device;
 static int _cpu;
 
@@ -222,12 +222,12 @@ check_color_text_ui(char *color)
 #endif /* CONFIG_COLOR_TEXT */
 
 
-static void print_message_file(const char *filename, const struct boot_fspec_t *b, const struct default_device *d)
+static void print_message_file(const char *filename, const struct path_description *b, const struct default_device *d)
 {
      char *msg; 
      int result;
      struct boot_file_t file;
-     struct boot_fspec_t msgfile;
+     struct path_description msgfile;
 
      parse_file_to_load_path(filename, &msgfile, b, d);
 
@@ -323,14 +323,14 @@ static const char *config_file_names_block[] = {
 	"/etc/yaboot.conf",
 	NULL
 };
-static int load_config_file(const struct boot_fspec_t *b)
+static int load_config_file(const struct path_description *b)
 {
      char *conf_file;
      const char **names;
      struct boot_file_t file;
      int sz, opened = 0, result = 0;
      int i;
-     struct boot_fspec_t config_fspec;
+     struct path_description config_fspec;
 
      /* Allocate a buffer for the config file */
      conf_file = malloc(CONFIG_FILE_MAX);

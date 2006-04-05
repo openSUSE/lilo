@@ -55,7 +55,7 @@ static int of_seek(struct boot_file_t* file, unsigned long long newpos);
 static int of_close(struct boot_file_t* file);
 
 
-static int of_net_open(struct boot_file_t* file, const struct boot_fspec_t* spec);
+static int of_net_open(struct boot_file_t* file, const struct path_description* spec);
 static int of_net_read(struct boot_file_t* file, unsigned int size, void* buffer);
 static int of_net_seek(struct boot_file_t* file, unsigned long long newpos);
 
@@ -162,7 +162,7 @@ out:
 	return ret;
 }
 
-static int of_net_open(struct boot_file_t* file, const struct boot_fspec_t* spec)
+static int of_net_open(struct boot_file_t* file, const struct path_description* spec)
 {
      char buffer[1024];
      char *p = buffer;

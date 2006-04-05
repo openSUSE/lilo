@@ -24,7 +24,7 @@ struct default_device {
 	int part;
 };
 
-struct boot_fspec_t {
+struct path_description {
 	int	part;		/* Partition number or -1 */
 
 	enum device_type type;
@@ -122,7 +122,7 @@ static enum device_type prom_get_devtype(const char *device)
 
 #define P(m) printf("\t"#m " '%s' ", p->m);
 
-static void print_boot(const struct boot_fspec_t *p) {
+static void print_boot(const struct path_description *p) {
 		P(device);
 		P(u.d.s1);
 		P(u.d.s2);
@@ -131,11 +131,11 @@ static void print_boot(const struct boot_fspec_t *p) {
 		printf("\n");
 }
 
-static void print_file_to_load(const struct boot_fspec_t *b, const char *p) {
+static void print_file_to_load(const struct path_description *b, const char *p) {
 	int i;
-	struct boot_fspec_t f;
+	struct path_description f;
 	for (i = 0; file_paths[i]; i++) {
-		memset(&f, 0, sizeof(struct boot_fspec_t));
+		memset(&f, 0, sizeof(struct path_description));
 		parse_file_to_load_path(file_paths[i], &f, b, NULL);
 		printf("\tfile %d to load from /chosen/bootpath '%s': '%s'\n", i, p, file_paths[i]);
 		print_boot(&f);
@@ -144,11 +144,11 @@ static void print_file_to_load(const struct boot_fspec_t *b, const char *p) {
 int main(void)
 {
 	int i;
-	struct boot_fspec_t p;
+	struct path_description p;
 
 	current_devtype = TYPE_BLOCK;
 	for (i = 0; block_paths[i]; i++) {
-		memset(&p, 0, sizeof(struct boot_fspec_t));
+		memset(&p, 0, sizeof(struct path_description));
 		parse_device_path(block_paths[i], &p);
 		printf("path %d: '%s'\n", i, block_paths[i]);
 		print_boot(&p);
@@ -157,7 +157,7 @@ int main(void)
 
 	current_devtype = TYPE_NET;
 	for (i = 0; net_paths[i]; i++) {
-		memset(&p, 0, sizeof(struct boot_fspec_t));
+		memset(&p, 0, sizeof(struct path_description));
 		parse_device_path(net_paths[i], &p);
 		printf("path %d: '%s'\n", i, net_paths[i]);
 		print_boot(&p);

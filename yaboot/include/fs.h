@@ -36,7 +36,7 @@ struct fs_t {
 			struct partition_t*	part,
 			const char*		file_name);
 
-	int (*new_open) (struct boot_file_t *file, const struct boot_fspec_t *spec);
+	int (*new_open) (struct boot_file_t *file, const struct path_description *spec);
 			
 	int (*read)(	struct boot_file_t*	file,
 			unsigned int		size,

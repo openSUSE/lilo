@@ -33,7 +33,7 @@
 #include "errors.h"
 
 struct boot_file_t;
-struct boot_fspec_t;
+struct path_description;
 #include "fs.h"
 
 #define FILE_MAX_PATH		1024
@@ -44,7 +44,11 @@ struct default_device {
 	int part;
 };
 
-struct boot_fspec_t {
+/* describes individual parts of a firmware path
+ * block:   <device>:<partition>,<directory>/<filename>
+ * network: <device>:<before_filename>,<filename>,<after_filename>
+ */
+struct path_description {
 	int	part;		/* Partition number or -1 */
 
 	enum device_type type;
@@ -90,14 +94,14 @@ struct boot_file_t {
 };
 
 extern int
-open_file(const struct boot_fspec_t*	spec,
+open_file(const struct path_description*	spec,
 	  struct boot_file_t*		file);
 
-char *fspec_to_path(const struct boot_fspec_t *input);
-int parse_device_path(const char *imagepath, struct boot_fspec_t *result);
-int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d);
+char *fspec_to_path(const struct path_description *input);
+int parse_device_path(const char *imagepath, struct path_description *result);
+int parse_file_to_load_path(const char *imagepath, struct path_description *result, const struct path_description *b, const struct default_device *d);
 int set_def_device(const char *dev, const char *partition, struct default_device *def);
-#define dump_boot_fspec_t(p) do { __dump_boot_fspec_t(__FUNCTION__,__LINE__,p); } while(0)
-void __dump_boot_fspec_t (const char *fn, int l, const struct boot_fspec_t *p);
+#define dump_path_description(p) do { __dump_path_description(__FUNCTION__,__LINE__,p); } while(0)
+void __dump_path_description (const char *fn, int l, const struct path_description *p);
 
 #endif

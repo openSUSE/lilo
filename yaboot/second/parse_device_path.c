@@ -4,14 +4,14 @@
 #include <file.h>
 #include <debug.h>
 #else
-#define dump_boot_fspec_t(p) do { __dump_boot_fspec_t(__FUNCTION__,__LINE__,p); } while(0)
+#define dump_path_description(p) do { __dump_path_description(__FUNCTION__,__LINE__,p); } while(0)
 #endif
 #include <string.h>
 #include <stdlib.h>
 
 #define I(m) DEBUG_F(" %p "#m " '%d' \n", &p->m, p->m);
 #define S(m) DEBUG_F(" %p "#m " %p '%s' \n", &p->m, p->m, p->m ? p->m : "");
-void __dump_boot_fspec_t (const char *fn, int l, const struct boot_fspec_t *p)
+void __dump_path_description (const char *fn, int l, const struct path_description *p)
 {
 	DEBUG_F("called from '%s(%u)' '%p'\n", fn, l, p);
 	if (!p)
@@ -26,7 +26,7 @@ void __dump_boot_fspec_t (const char *fn, int l, const struct boot_fspec_t *p)
 #undef S
 #undef I
 
-static void parse_block_device(struct boot_fspec_t *result)
+static void parse_block_device(struct path_description *result)
 {
 	char *ip;
 #if 0
@@ -60,7 +60,7 @@ static void parse_block_device(struct boot_fspec_t *result)
 	}
 }
 
-static void parse_net_device(struct boot_fspec_t *result)
+static void parse_net_device(struct path_description *result)
 {
 	char *p;
 #if 0
@@ -108,7 +108,7 @@ static void parse_net_device(struct boot_fspec_t *result)
 	return;
 }
 
-int parse_device_path(const char *imagepath, struct boot_fspec_t *result)
+int parse_device_path(const char *imagepath, struct path_description *result)
 {
 	DEBUG_F("imagepath '%s'\n", imagepath);
 	if (!imagepath)
@@ -133,18 +133,18 @@ int parse_device_path(const char *imagepath, struct boot_fspec_t *result)
 		prom_printf("type %d of '%s' not handled\n", result->type, result->device);
 		return 0;
 	}
-	dump_boot_fspec_t(result);
+	dump_path_description(result);
 	return 1;
 }
 
-char *fspec_to_path(const struct boot_fspec_t *input)
+char *fspec_to_path(const struct path_description *input)
 {
 	int len;
 	char part[42], *path;
 
 	if (!input)
 		return NULL;
-	dump_boot_fspec_t(input);
+	dump_path_description(input);
 	path = NULL;
 	len = strlen(input->device);
 	len += strlen(input->filename);
@@ -183,7 +183,7 @@ char *fspec_to_path(const struct boot_fspec_t *input)
 	return path;
 }
 
-int parse_file_to_load_path(const char *imagepath, struct boot_fspec_t *result, const struct boot_fspec_t *b, const struct default_device *d)
+int parse_file_to_load_path(const char *imagepath, struct path_description *result, const struct path_description *b, const struct default_device *d)
 {
 	enum device_type type;
 	char *p, *dev, *comma, *dir, part[42], *ip_b;

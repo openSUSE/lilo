@@ -36,7 +36,7 @@
 #include "errors.h"
 #include "debug.h"
 
-static int file_block_open(struct boot_file_t *file, const struct boot_fspec_t* spec)
+static int file_block_open(struct boot_file_t *file, const struct path_description* spec)
 {
      struct partition_t*	parts;
      struct partition_t*	p;
@@ -90,7 +90,7 @@ done:
 
 static int
 file_net_open(	struct boot_file_t*	file,
-		const struct boot_fspec_t *spec)
+		const struct path_description *spec)
 {
      file->fs = fs_of_netboot;
      return fs_of_netboot->new_open(file, spec);
@@ -129,7 +129,7 @@ static struct fs_t fs_default =
 };
 
 
-int open_file(const struct boot_fspec_t* spec, struct boot_file_t* file)
+int open_file(const struct path_description* spec, struct boot_file_t* file)
 {
      memset(file, 0, sizeof(struct boot_file_t));
      file->fs        = &fs_default;

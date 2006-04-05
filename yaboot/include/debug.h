@@ -34,7 +34,7 @@
 # define DEBUG_OPEN DEBUG_F( "dev=%s, part=0x%p (%d), file_name=%s\n",\
                              dev_name, part, part ? part->part_number : -1,\
                              file_name)
-# define DEBUG_OPEN_NEW do { const struct boot_fspec_t *s = spec; \
+# define DEBUG_OPEN_NEW do { const struct path_description *s = spec; \
 				DEBUG_F("dev='%s', s1='%s', s2='%s', filename='%s'\n",\
 				s->device, s->u.d.s1, s->u.d.s2, s->filename); \
 			} while (0)

@@ -47,8 +47,8 @@
 #include "file.h"
 
 struct boot_param_t {
-	struct boot_fspec_t	kernel;
-	struct boot_fspec_t	rd;
+	struct path_description	kernel;
+	struct path_description	rd;
 
 	char*	args;
 };
