@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr  5 18:52:58 CEST 2006 - olh@suse.de
+
+- move processing of globals in yaboot.conf to separate function
+
+-------------------------------------------------------------------
 Wed Apr  5 15:06:44 CEST 2006 - jplack@suse.de
 
 - add a work around for broken EVMS configuration for SLES10 GA

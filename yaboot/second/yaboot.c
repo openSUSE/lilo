@@ -252,6 +252,68 @@ done:
      file.fs->close(&file);
 }
 
+static void process_configfile(void)
+{
+     char *p;
+#ifndef DEBUG
+     int i;
+#endif
+     /* Now, we do the initialisations stored in the config file */
+     p = cfg_get_strg(NULL, "init-code");
+     if (p)
+	  prom_interpret(p);
+
+     set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), &default_device);
+
+     password = cfg_get_strg(NULL, "password");
+	
+#ifdef CONFIG_COLOR_TEXT
+     p = cfg_get_strg(NULL, "fgcolor");
+     if (p) {
+	  DEBUG_F("fgcolor=%s\n", p);
+	  fgcolor = check_color_text_ui(p);
+	  if (fgcolor == -1) {
+	       prom_printf("Invalid fgcolor: \"%s\".\n", p);
+	  }
+     }
+     p = cfg_get_strg(NULL, "bgcolor");
+     if (p) {
+	  DEBUG_F("bgcolor=%s\n", p);
+	  bgcolor = check_color_text_ui(p);
+	  if (bgcolor == -1)
+	       prom_printf("Invalid bgcolor: \"%s\".\n", p);
+     }
+     if (bgcolor >= 0) {
+	  char temp[64];
+	  sprintf(temp, "%x to background-color", bgcolor); 
+	  prom_interpret(temp); 
+#ifndef DEBUG
+	  prom_printf("\xc\n");
+#endif /* !DEBUG */
+     }
+     if (fgcolor >= 0) {
+	  char temp[64];
+	  sprintf(temp, "%x to foreground-color", fgcolor); 
+	  prom_interpret(temp); 
+     }
+#endif /* CONFIG_COLOR_TEXT */
+
+
+#ifndef DEBUG
+     if (stdout_is_screen)
+	     for(i = 0; i < 10 ; i++)
+		     prom_printf("\n");
+#endif
+
+     p = cfg_get_strg(NULL, "init-message");
+     if (p)
+	  prom_printf("%s\n", p);
+
+     p = cfg_get_strg(NULL, "message");
+     if (p)
+	  print_message_file(p, &boot, &default_device);
+}
+
 static const char *config_file_names_net[] = {
 	"yaboot.conf",
 	NULL
@@ -264,7 +326,7 @@ static const char *config_file_names_block[] = {
 };
 static int load_config_file(const struct boot_fspec_t *b)
 {
-     char *conf_file, *p;
+     char *conf_file;
      const char **names;
      struct boot_file_t file;
      int sz, opened = 0, result = 0;
@@ -317,46 +379,6 @@ static int load_config_file(const struct boot_fspec_t *b)
      /* Call the parsing code in cfg.c */
      if (!cfg_parse(conf_file, sz, _cpu))
 	  goto bail;
-
-     /* Now, we do the initialisations stored in the config file */
-     p = cfg_get_strg(NULL, "init-code");
-     if (p)
-	  prom_interpret(p);
-
-     set_def_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), &default_device);
-
-     password = cfg_get_strg(NULL, "password");
-	
-#ifdef CONFIG_COLOR_TEXT
-     p = cfg_get_strg(NULL, "fgcolor");
-     if (p) {
-	  DEBUG_F("fgcolor=%s\n", p);
-	  fgcolor = check_color_text_ui(p);
-	  if (fgcolor == -1) {
-	       prom_printf("Invalid fgcolor: \"%s\".\n", p);
-	  }
-     }
-     p = cfg_get_strg(NULL, "bgcolor");
-     if (p) {
-	  DEBUG_F("bgcolor=%s\n", p);
-	  bgcolor = check_color_text_ui(p);
-	  if (bgcolor == -1)
-	       prom_printf("Invalid bgcolor: \"%s\".\n", p);
-     }
-     if (bgcolor >= 0) {
-	  char temp[64];
-	  sprintf(temp, "%x to background-color", bgcolor); 
-	  prom_interpret(temp); 
-#ifndef DEBUG
-	  prom_printf("\xc\n");
-#endif /* !DEBUG */
-     }
-     if (fgcolor >= 0) {
-	  char temp[64];
-	  sprintf(temp, "%x to foreground-color", fgcolor); 
-	  prom_interpret(temp); 
-     }
-#endif /* CONFIG_COLOR_TEXT */
    
      result = 1;
     
@@ -1154,7 +1176,6 @@ setup_display(void)
 static int yaboot_main(void)
 {
      int i;
-     char *p;
      char *bootpath;
      if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
 	  stdout_is_screen = 1;
@@ -1179,21 +1200,8 @@ static int yaboot_main(void)
 	}
 
      useconf = load_config_file(&boot);
-
-#ifndef DEBUG
-     if (stdout_is_screen)
-	     for(i = 0; i < 10 ; i++)
-		     prom_printf("\n");
-#endif
-
-     p = cfg_get_strg(NULL, "init-message");
-     if (p)
-	  prom_printf("%s\n", p);
-
-     p = cfg_get_strg(NULL, "message");
-     if (p)
-	  print_message_file(p, &boot, &default_device);
-
+     if (useconf)
+	     process_configfile();
 
      prom_printf("Welcome to yaboot version " VERSION "\n");
      prom_printf("booted from '%s'\n", bootpath);
