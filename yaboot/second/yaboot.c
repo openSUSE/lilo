@@ -239,16 +239,12 @@ static void print_message_file(const char *filename, const struct boot_fspec_t *
      }
 
      msg = malloc(2001);
-     if (!msg)
-	  goto done;
-
-      memset(msg, 0, 2001);
-
-     if (file.fs->read(&file, 2000, msg) <= 0)
-	  goto done;
-     prom_printf("%s", msg);
-     free(msg);
-done:
+     if (msg) {
+	memset(msg, 0, 2001);
+	if (file.fs->read(&file, 2000, msg) > 0)
+	     prom_printf("%s", msg);
+	free(msg);
+     }
      file.fs->close(&file);
 }
 
