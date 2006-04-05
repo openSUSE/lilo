@@ -371,7 +371,10 @@ int set_def_device(const char *dev, const char *p, struct default_device *def)
 	def->part = -1;
 
 	if (dev) {
-		def->device = strdup(dev);
+		endp = strdup(dev);
+		if (!endp)
+			return 0;
+		def->device = endp;
 		endp = strchr(def->device, ':');
 		if (endp)
 			endp[0] = '\0';
