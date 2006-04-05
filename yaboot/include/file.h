@@ -98,6 +98,7 @@ open_file(const struct path_description*	spec,
 	  struct boot_file_t*		file);
 
 char *path_description_to_string(const struct path_description *input);
+int imagepath_to_path_description(const char *imagepath, struct path_description *result, const struct path_description *default_device);
 int parse_device_path(const char *imagepath, struct path_description *result);
 int parse_file_to_load_path(const char *imagepath, struct path_description *result, const struct path_description *b, const struct default_device *d);
 int set_def_device(const char *dev, const char *partition, struct default_device *def);

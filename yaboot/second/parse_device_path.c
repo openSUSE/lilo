@@ -183,6 +183,83 @@ char *path_description_to_string(const struct path_description *input)
 	return path;
 }
 
+int imagepath_to_path_description(const char *imagepath, struct path_description *result, const struct path_description *default_device)
+{
+	char *past_device, *comma, *dir, *pathname;
+	char part[42];
+	int len;
+	DEBUG_F("imagepath '%s'\n", imagepath);
+
+	if (!imagepath)
+		return 0;
+
+	memset(result, 0, sizeof(*result));
+	past_device = strchr(imagepath, ':');
+	if (past_device) {
+		if (strncmp("&device;:", imagepath, 9) != 0)  {
+#if defined(DEBUG) || defined(DEVPATH_TEST)
+			prom_printf("parsing full path '%s'\n", imagepath);
+#endif
+			return parse_device_path(imagepath, result);
+		}
+		past_device++;
+	}
+	comma = dir = "";
+	pathname = NULL;
+	switch (default_device->type) {
+		case TYPE_BLOCK:
+			part[0] = '\0';
+			/* parse_device_path will look for a partition number */
+			if (past_device)
+				len = strlen(default_device->device) + 1 + strlen(past_device);
+			else {
+				if (default_device->part > 0)
+					sprintf(part, "%d", default_device->part);
+				comma = ",";
+				if (imagepath[0] != '/' && imagepath[0] != '\\')
+					dir = default_device->u.b.directory;
+				len = strlen(default_device->device) + 1 + strlen(part) + 1 + strlen(dir) + strlen(imagepath);
+			}
+			len += 2;
+			pathname = malloc(len);
+			if (pathname)
+				sprintf(pathname, "%s:%s%s%s%s", default_device->device, part, comma, dir,
+						past_device ? past_device : imagepath);
+#if defined(DEBUG) || defined(DEVPATH_TEST)
+			prom_printf("parsing block path '%s'\n", pathname);
+#endif
+			break;
+		case TYPE_NET:
+			if (past_device)
+				len = strlen(default_device->device) + 1 + strlen(past_device);
+			else {
+				len = strlen(default_device->device) + 1;
+				len += strlen(default_device->u.n.ip_before_filename) + 1;
+				len += strlen(imagepath);
+				if (default_device->u.n.ip_after_filename) {
+					len += 1 + strlen(default_device->u.n.ip_after_filename);
+					comma = ",";
+				}
+			}
+			len += 2;
+			pathname = malloc(len);
+			if (pathname)
+				sprintf(pathname, "%s:%s,%s%s%s", default_device->device, default_device->u.n.ip_before_filename,
+						past_device ? past_device : imagepath, comma,
+						default_device->u.n.ip_after_filename ? default_device->u.n.ip_after_filename : "");
+#if defined(DEBUG) || defined(DEVPATH_TEST)
+			prom_printf("parsing net path '%s'\n", pathname);
+#endif
+			break;
+		default:
+			;
+	}
+	len = parse_device_path(pathname, result);
+	if (pathname)
+		free(pathname);
+	return len;
+}
+
 int parse_file_to_load_path(const char *imagepath, struct path_description *result, const struct path_description *b, const struct default_device *d)
 {
 	enum device_type type;

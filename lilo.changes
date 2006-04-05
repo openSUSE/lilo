@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr  5 23:08:32 CEST 2006 - olh@suse.de
+
+- add new imagepath_to_path_description() to yaboot,
+  will replace parse_file_to_load_path()
+
+-------------------------------------------------------------------
 Wed Apr  5 20:13:05 CEST 2006 - olh@suse.de
 
 - move the cfg_parse call out of load_config_file in yaboot
