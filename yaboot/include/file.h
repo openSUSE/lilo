@@ -100,7 +100,6 @@ open_file(const struct path_description*	spec,
 char *path_description_to_string(const struct path_description *input);
 int imagepath_to_path_description(const char *imagepath, struct path_description *result, const struct path_description *default_device);
 int parse_device_path(const char *imagepath, struct path_description *result);
-int parse_file_to_load_path(const char *imagepath, struct path_description *result, const struct path_description *b, const struct default_device *d);
 void set_default_device(const char *dev, const char *partition, struct path_description *default_device);
 #define dump_path_description(p) do { __dump_path_description(__FUNCTION__,__LINE__,p); } while(0)
 void __dump_path_description (const char *fn, int l, const struct path_description *p);
