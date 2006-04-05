@@ -531,6 +531,17 @@ function running_on_chrp () {
 	mkfs.msdos $MKDOSFS $boot_partition || exit 2
 	cd $TEMP
 	mkdir -p boot || exit 2
+set -x
+# HACK for broken EVMS configuration
+# remove this after SLES10 GA
+{
+# dmsetup remove kernelname of device $boot_partition
+bootpartkernelname=${boot_partition#/dev/} #this is only a guess
+if [[ $(dmsetup ls) == *${bootpartkernelname}* ]]; this
+    dmsetup remove ${bootpartkernelname} || exit 2
+fi
+}
+set +x
 	mount $boot_partition boot || exit 2
 	cp -v /lib/lilo/chrp/yaboot.chrp boot/yaboot || exit 2
 	cp -v $TEMP/yaboot.conf boot/yaboot.cnf || exit 2
