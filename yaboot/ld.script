@@ -25,6 +25,12 @@ SECTIONS
 		__got2_end = .;
 	}
 	_edata = .;
+	_yaboot_conf_start = .;
+	.yaboot.conf :
+	{
+		*(.yaboot.conf)
+	}
+	_yaboot_conf_end = .;
 	. = ALIGN(16);
 	__bss_start = .;
 	.bss	:

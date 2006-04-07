@@ -143,6 +143,8 @@ static int bgcolor;
 extern char __bss_start[];
 extern char _start[];
 extern char _end[];
+extern char _yaboot_conf_start[];
+extern char _yaboot_conf_end[];
 
 int
 yaboot_start (unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
@@ -1247,8 +1249,16 @@ static int yaboot_main(void)
 
      if (configfile)
 	     sz = load_config_file(configfile, conf_file_buf, &default_device);
-     else
-	     sz = find_and_load_config_file(&default_device, conf_file_buf);
+     else {
+	     sz = (int)(_yaboot_conf_end - _yaboot_conf_start);
+	     if (sz) {
+		     if (sz > CONFIG_FILE_MAX)
+			     sz = CONFIG_FILE_MAX -1 ;
+		     memcpy(conf_file_buf, _yaboot_conf_start, sz);
+		     configfile = "built-in";
+	     } else
+		     sz = find_and_load_config_file(&default_device, conf_file_buf);
+     }
      if (sz > 0)
 	     useconf = cfg_parse(conf_file_buf, sz, _cpu);
      if (useconf)

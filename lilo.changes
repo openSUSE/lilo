@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Apr  7 23:11:36 CEST 2006 - olh@suse.de
+
+- add script to relink yaboot at runtime to link a yaboot.conf
+  into the yaboot binary.
+  required for disks with more than one root partition
+
+-------------------------------------------------------------------
 Fri Apr  7 22:41:50 CEST 2006 - olh@suse.de
 
 - use ld.script to link yaboot
