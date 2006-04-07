@@ -1,11 +1,11 @@
 #include "asm/ppc_asm.tmpl"
 #include "asm/processor.h"
 
-_GLOBAL(_start)
+_GLOBAL(_yaboot_start)
 	lis	r9,_start@h
 	ori	r9,r9,_start@l
-	lis	r6,etext@ha
-	addi	r6,r6,etext@l
+	lis	r6,_etext@ha
+	addi	r6,r6,_etext@l
 1:	dcbf	r0,r9
 	icbi	r0,r9
 	addi	r9,r9,0x20

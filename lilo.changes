@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr  7 22:41:50 CEST 2006 - olh@suse.de
+
+- use ld.script to link yaboot
+
+-------------------------------------------------------------------
 Fri Apr  7 21:59:37 CEST 2006 - olh@suse.de
 
 - add an conf= bootoption to yaboot to specify a path to a configfile

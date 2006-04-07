@@ -67,7 +67,7 @@ endif
 
 # Link flags
 #
-LFLAGS = -Ttext $(TEXTADDR) -Bstatic 
+LFLAGS =
 
 # Libraries
 #
@@ -107,14 +107,40 @@ endif
 CC		:= $(CROSS)gcc -m32
 LD		:= $(CROSS)ld -m elf32ppc
 AS		:= $(CROSS)as -a32
+AR		:= $(CROSS)ar
+RANLIB		:= $(CROSS)ranlib
 OBJCOPY		:= $(CROSS)objcopy
 
-lgcc = `$(CC) -print-libgcc-file-name`
+lgcc = $(shell $(CC) -print-libgcc-file-name)
+lgcc_objects = _ashldi3.o _udivdi3.o _umoddi3.o _moddi3.o _divdi3.o _lshrdi3.o
+lext2_objects = openfs.o closefs.o namei.o io_manager.o swapfs.o lookup.o freefs.o inode.o bb_inode.o read_bb.o badblocks.o dir_iterate.o block.o ind_block.o dirblock.o
 
 all yaboot: second/yaboot md5test
 
-second/yaboot: $(OBJS) util/addnote
-	$(LD) $(LFLAGS) $(OBJS) $(LLIBS) $(lgcc) -o $@
+second/empty.c:
+	rm -f $@
+	echo '' > $@
+
+second/empty.o: second/empty.c
+
+second/yaboot.a: $(lgcc) $(OBJS) $(LLIBS)
+	rm -fv $@ $@.~ ; \
+		rm -rf $$$$ ; \
+		mkdir $$$$ ; \
+		cd $$$$ ; \
+		ar x $(lgcc) ; \
+		$(AR) cru ../$@.~ $(lgcc_objects) ; \
+		rm *.o ; \
+		ar x ../lib/libext2fs.a ; \
+		ar ru ../$@.~ $(lext2_objects) ; \
+		cd .. ; \
+		rm -rf $$$$
+	$(AR) ru $@.~ $(OBJS)
+	$(RANLIB) $@.~
+	mv -f $@.~ $@
+
+second/yaboot: $(OBJS) util/addnote ld.script second/yaboot.a second/empty.o
+	$(LD) -T ld.script $(LFLAGS) second/empty.o second/crt0.o second/yaboot.a -o $@
 	chmod -x $@
 	cp $@ $@.chrp
 	util/addnote $@.chrp
@@ -174,6 +200,8 @@ clean:
 	rm -f second/yaboot util/addnote util/elfextract $(OBJS)
 	rm -f second/yaboot.debug
 	rm -f second/yaboot.chrp
+	rm -f second/yaboot.a
+	rm -f second/empty.c second/emtpy.o
 	rm -f util/split_of_path
 	rm -f tags
 	rm -f md5test

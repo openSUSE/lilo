@@ -1,0 +1,36 @@
+/* $Id$ */
+OUTPUT_ARCH(powerpc)
+ENTRY(_yaboot_start)
+SECTIONS
+{
+	. = (2*1024*1024);
+	_start = .;
+	.text	:
+	{
+		*(.text)
+		*(.fixup)
+		__relocate_start = .;
+		*(.relocate_code)
+		__relocate_end = .;
+	}
+	_etext = .;
+	. = ALIGN(16);
+	.data	:
+	{
+		*(.data*)
+		*(.sdata*)
+		*(.rodata*)
+		__got2_start = .;
+		*(.got2)
+		__got2_end = .;
+	}
+	_edata = .;
+	. = ALIGN(16);
+	__bss_start = .;
+	.bss	:
+	{
+		*(.bss)
+		*(.sbss)
+	}
+	_end = .;
+}
