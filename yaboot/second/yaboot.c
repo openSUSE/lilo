@@ -322,7 +322,7 @@ static const char *config_file_names_block[] = {
 	"/etc/yaboot.conf",
 	NULL
 };
-static int load_config_file(const struct path_description *b, char *conf_file_buf)
+static int find_and_load_config_file(const struct path_description *b, char *conf_file_buf)
 {
      const char **names;
      struct boot_file_t file;
@@ -1185,7 +1185,7 @@ static int yaboot_main(void)
 	  return -1;
      }
 
-     sz = load_config_file(&default_device, conf_file_buf);
+     sz = find_and_load_config_file(&default_device, conf_file_buf);
      if (sz > 0)
 	     useconf = cfg_parse(conf_file_buf, sz, _cpu);
      if (useconf)
