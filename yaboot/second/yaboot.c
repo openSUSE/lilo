@@ -322,7 +322,7 @@ static const char *config_file_names_block[] = {
 	"/etc/yaboot.conf",
 	NULL
 };
-static int load_config_file(const struct path_description *b, char *conf_file)
+static int load_config_file(const struct path_description *b, char *conf_file_buf)
 {
      const char **names;
      struct boot_file_t file;
@@ -358,7 +358,7 @@ static int load_config_file(const struct path_description *b, char *conf_file)
 	     goto bail;
 
      /* Read it */
-     sz = file.fs->read(&file, CONFIG_FILE_MAX, conf_file);
+     sz = file.fs->read(&file, CONFIG_FILE_MAX, conf_file_buf);
      file.fs->close(&file);
      if (sz <= 0) 
 	  prom_printf("Error, can't read config file\n");
@@ -1154,7 +1154,7 @@ setup_display(void)
 static int yaboot_main(void)
 {
      char *bootpath;
-     char *conf_file;
+     char *conf_file_buf;
      int sz;
      if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
 	  stdout_is_screen = 1;
@@ -1179,18 +1179,18 @@ static int yaboot_main(void)
 	}
 
      /* Allocate a buffer for the config file */
-     conf_file = malloc(CONFIG_FILE_MAX);
-     if (!conf_file) {
+     conf_file_buf = malloc(CONFIG_FILE_MAX);
+     if (!conf_file_buf) {
 	  prom_printf("Can't alloc config file buffer\n");
 	  return -1;
      }
 
-     sz = load_config_file(&default_device, conf_file);
+     sz = load_config_file(&default_device, conf_file_buf);
      if (sz > 0)
-	     useconf = cfg_parse(conf_file, sz, _cpu);
+	     useconf = cfg_parse(conf_file_buf, sz, _cpu);
      if (useconf)
 	     process_configfile();
-     free(conf_file);
+     free(conf_file_buf);
 
      prom_printf("Welcome to yaboot version " VERSION "\n");
      prom_printf("booted from '%s'\n", bootpath);
