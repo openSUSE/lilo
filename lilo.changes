@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr  7 18:21:17 CEST 2006 - olh@suse.de
+
+- fix typo in last lilo-chrp.lib  change
+
+-------------------------------------------------------------------
 Wed Apr  5 23:20:25 CEST 2006 - olh@suse.de
 
 - use one global default_device in yaboot

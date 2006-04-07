@@ -537,7 +537,7 @@ set -x
 {
 # dmsetup remove kernelname of device $boot_partition
 bootpartkernelname=${boot_partition#/dev/} #this is only a guess
-if [[ $(dmsetup ls) == *${bootpartkernelname}* ]]; this
+if [[ $(dmsetup ls) == *${bootpartkernelname}* ]]; then
     dmsetup remove ${bootpartkernelname} || exit 2
 fi
 }
