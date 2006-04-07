@@ -369,6 +369,25 @@ bail:
      return sz;
 }
 
+static int load_config_file(const char *configfile, char *conf_file_buf, const struct path_description *b)
+{
+     int sz = 0;
+     struct boot_file_t file;
+     struct path_description config_fspec;
+
+     if (imagepath_to_path_description(configfile, &config_fspec, b)) {
+	     if (open_file(&config_fspec, &file) == FILE_ERR_OK) {
+		     sz = file.fs->read(&file, CONFIG_FILE_MAX, conf_file_buf);
+		     file.fs->close(&file);
+		     if (sz <= 0) 
+			  prom_printf("Error, can't read config file\n");
+		     else
+			  prom_printf("Config file '%s' read, %d bytes\n", configfile, sz);
+	     }
+     }
+     return sz;
+}
+
 static void maintabfunc (void)
 {
      if (useconf) {
@@ -1151,10 +1170,38 @@ setup_display(void)
 #endif /* CONFIG_SET_COLORMAP */
 }
 
+static const char conf_token[] = "conf=";
+static char *check_manual_config_filepath(char *bootargs)
+{
+	char *c2, *c1 = strstr(bootargs, conf_token);
+	if (!c1)
+		return NULL;
+	do {
+		c1 += strlen(conf_token);
+		c2 = strstr(c1, conf_token);
+		if (!c2)
+			break;
+		c2 += strlen(conf_token);
+		c1 = strstr(c2, conf_token);
+	} while (c1);
+	if (!c1)
+		c1 = c2;
+	else
+		c2 = c1;
+	while (*c2) {
+		if (' ' == *c2) {
+			*c2 = '\0';
+			break;
+		}
+		c2++;
+	}
+	return *c1 ? c1 : NULL;
+}
+
 static int yaboot_main(void)
 {
-     char *bootpath;
-     char *conf_file_buf;
+     char *bootpath, *bootargs;
+     char *conf_file_buf, *configfile = NULL;
      int sz;
      if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
 	  stdout_is_screen = 1;
@@ -1178,6 +1225,19 @@ static int yaboot_main(void)
 		prom_set_chosen("yaboot,bootpath", bootpath, strlen(bootpath) + 1);
 	}
 
+	bootargs = malloc(BOOTPATH_LEN);
+	if (bootargs) {
+		memset(bootargs, 0, BOOTPATH_LEN);
+		prom_get_chosen("bootargs", bootargs, BOOTPATH_LEN - 1);
+		DEBUG_F("/chosen/bootargs = '%s'\n", bootargs);
+		if (bootargs[0]) {
+			prom_set_chosen("yaboot,bootargs", bootargs, strlen(bootargs) + 1);
+			configfile = check_manual_config_filepath(bootargs);
+			if (!imagepath_to_path_description(configfile, &default_device, &default_device))
+				configfile = NULL;
+		}
+	}
+
      /* Allocate a buffer for the config file */
      conf_file_buf = malloc(CONFIG_FILE_MAX);
      if (!conf_file_buf) {
@@ -1185,7 +1245,10 @@ static int yaboot_main(void)
 	  return -1;
      }
 
-     sz = find_and_load_config_file(&default_device, conf_file_buf);
+     if (configfile)
+	     sz = load_config_file(configfile, conf_file_buf, &default_device);
+     else
+	     sz = find_and_load_config_file(&default_device, conf_file_buf);
      if (sz > 0)
 	     useconf = cfg_parse(conf_file_buf, sz, _cpu);
      if (useconf)
@@ -1194,7 +1257,10 @@ static int yaboot_main(void)
 
      prom_printf("Welcome to yaboot version " VERSION "\n");
      prom_printf("booted from '%s'\n", bootpath);
+     if (configfile && sz > 0)
+	     prom_printf("Using configfile '%s'\n", configfile);
      prom_printf("Enter \"help\" to get some basic usage information\n");
+     free(bootargs);
      free(bootpath);
 
      /* brain damage. censored. */

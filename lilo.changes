@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr  7 21:59:37 CEST 2006 - olh@suse.de
+
+- add an conf= bootoption to yaboot to specify a path to a configfile
+
+-------------------------------------------------------------------
 Fri Apr  7 18:21:17 CEST 2006 - olh@suse.de
 
 - fix typo in last lilo-chrp.lib  change
