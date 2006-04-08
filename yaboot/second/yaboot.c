@@ -579,8 +579,6 @@ static int get_params(struct boot_param_t* params)
 	       imagename = cfg_get_default();
 	  if (imagename)
 	       prom_printf("%s", imagename);
-	  if (params->args)
-	       prom_printf(" %s", params->args);
 	  prom_printf("\n");
      } else if (!singlekey) {
 	  cmdedit(maintabfunc, 0);
