@@ -1,9 +1,9 @@
 .\" Hey Emacs! This file is -*- nroff -*- source.
 .\"
-.TH YABOOT 8 "21 November 2001" "GNU/Linux PowerPC" "System Manager's Manual"
+.TH YABOOT 8 "21 November 2006" "Linux PowerPC" "System Manager's Manual"
 .SH NAME
 .B yaboot
-\- PowerMac OpenFirmware boot loader
+\- PowerPC OpenFirmware boot loader
 .SH SYNOPSIS
 .B Yaboot
 is an OpenFirmware ELF executable that bootstraps the Linux kernel.
@@ -26,19 +26,19 @@ ATA hard disk.  If you have a SCSI disk, then you might execute
 \fByaboot\fR with this command:
 .I boot /pci@80000000/pci-bridge@d/ADPT,2930CU@2/@1:2,yaboot
 This path will vary depending on what kind of SCSI host adapter you
-have. For a more detailed explanation of OpenFirmware's [disgusting]
+have. For a more detailed explanation of OpenFirmware's
 paths, see man \fBbootstrap\fR(8).  On IBM hardware \fByaboot\fR is
 directly copied to the \fBbootstrap\fR(8) partition raw, without any
 filesystem.  OpenFirmare will boot from a type 0x41 PReP Boot parition
 marked bootable, this must contain \fByaboot\fR.  On IBM hardware the
 config file is read directly from the root filesystem.  On PowerMac
 hardware it must be present on the \fBbootstrap\fR(8) partition but
-.BR ybin (8)
+.BR lilo (8)
 will take care of that.
 
 Fortunately you do not normally have to execute \fByaboot\fR manually.
 If you have partitioned your disk with a \fBbootstrap\fR(8) partition
-and used \fBybin\fR(8) to install \fByaboot\fR then you will not have
+and used \fBlilo\fR(8) to install \fByaboot\fR then you will not have
 to execute \fByaboot\fR yourself.  (If this does not work you can also
 set the \fIboot-device\fR variable in OpenFirmware to have it boot
 automatically, see man \fBbootstrap\fR(8).)
@@ -53,12 +53,12 @@ command and enter only the pathname.  (See EXAMPLES below)
 
 When booting an image (either as a predefined label or absolute path)
 any arguments are passed to the image.  For example:
-.I boot: linux root=/dev/hda3
-which would pass the argument \fIroot=/dev/hda3\fR to the kernel.
+.I boot: linux root=/dev/hda3 init=/bin/bash
+which would pass the argument \fIroot=/dev/hda3 init=/bin/bash\fR to the kernel.
 
 .B yaboot
 should preferably be installed on a dedicated \fBbootstrap\fR(8)
-partition (type Apple_Bootstrap for PowerMacs, type 0x41 PReP Boot for
+partition (type Apple_HFS for PowerMacs, type 0x41 PReP Boot for
 IBM hardware).  This allows the partition to be modified in such a way
 that OpenFirmare will load \fByaboot\fR or a boot menu automatically
 with a default OF configuration. If \fByaboot\fR cannot be installed
@@ -66,12 +66,12 @@ on a \fBbootstrap\fR(8) partition it can be installed on the root of a
 MacOS boot partition instead.  \fByaboot\fR however should not be
 installed in a subdirectory of the MacOS filesystem as this is less
 reliable and more difficult to execute from OpenFirmware.  See the
-\fBybin\fR(8) man page for more details on installing \fByaboot\fR
-(\fBybin\fR(8) is a utility for installing \fByaboot\fR with minimal
+\fBlilo\fR(8) man page for more details on installing \fByaboot\fR
+(\fBlilo\fR(8) is a utility for installing \fByaboot\fR with minimal
 difficulty).
 
 The \fByaboot.conf\fR(5) file must be next to the yaboot executable on
-the \fBbootstrap\fR(8) partition.  \fBybin\fR(8) will take care of this.
+the \fBbootstrap\fR(8) partition.  \fBlilo\fR(8) will take care of this.
 
 OpenFirmware may be accessed by holding down the \fIcommand, option,
 o, f\fR keys immediately upon power-up.
@@ -82,16 +82,55 @@ the \fIcommand, option, p, r\fR keys while cold booting.
 If you have G4 hardware then your OpenFirmware may already have a
 graphical boot selector built in.  This selector can be accessed by
 holding down the option key when booting the machine.  You should see
-a screen with buttons for each bootable partition.  The current
-version (included with \fBybin\fR(8) 0.13) of ofboot includes a
+a screen with buttons for each bootable partition.  \fBlilo\fR(8) includes a
 badge icon, the button with a penguin icon is your \fBbootstrap\fR(8)
 partition.  Thanks to Nicholas Humfrey for creating the Badge icon.
 
 The \fBbootstrap\fR(8) need not and
 .B should not
 be mounted anywhere on your filesystem, especially not on top of /boot.  \fBYaboot\fR is able
-to load the kernels from the ext2fs root partition so that is where
+to load the kernels from the root partition so that is where
 they should be kept.
+
+.SH YABOOT CODE FLOW
+Once yaboot starts, it will first align the stackpointer to 16 byte. PowerMacs
+may give an unaligned stack depending on the size and layout of the yaboot ELF binary.
+Then the OpenFirmware client interface will be initialized, by finding the stdin/stdout
+devices. After that, yaboot tries to find out if the machine it is running on
+is 32bit or 64bit. This is required to support the image[32bit]=/image[64bi]= feature.
+
+Next it will look for the device path where yaboot was loaded from, and if any
+options were passed to yaboot. This info is found in the /chosen/bootpath and 
+/chosen/bootargs nodes. This info is used to decide where to look for the config file.
+Unless the OpenFirmware path to a configuration file is specified via the conf= option,
+yaboot will look for the file at the same place where it was loaded from. If bootpath
+contains a partition and/or directory, the config file is expected in the same location.
+If the bootpath describes just a whole disk, yaboot will look for readable partitions
+on this drive.
+
+It will search starting from the last to the first readable partition. This way
+of searching will not work if the drive contains more than one root partition
+with an /etc/yaboot.conf file.
+To point yaboot to the correct partition with the configuration file, either use
+the conf= option or use the make_yaboot.sh script located in /lib/lilo/scripts.
+The script will encapsulate a config file in the ELF binary, and yaboot will not
+search for a config file on the drive. The conf= option will override the included
+configfile.
+
+Once the configuration file is read and parsed, a \fIboot:\fR prompt will be presented.
+After a configureable timeout, yaboot will load and start the kernel which was
+configured as default.
+
+Pressing \fB<TAB>\fR here will show the list of configured kernels and the timer
+is stopped. Also, pressing any key will stop the timer. To load the default image,
+just press \fB<RETURN>\fR. To boot some other image, type its name and press
+\fB<RETURN>\fR.
+Additional kernel options can be specified after the image name.
+
+If you want to boot some file which is not listed in the configuration file,
+type its full OpenFirmware path name. As a shortcut for the device where yaboot
+was loaded from, use \fB&device;\fR.
+
 .SH EXAMPLES
 boot \fByaboot\fR from internal ATA disk, partition 2:
 
@@ -114,7 +153,18 @@ Adaptec 2930 Host adapter (from \fByaboot's\fR \fIboot:\fR prompt):
 .I /pci@80000000/pci-bridge@d/ADPT,2930CU@2/@2:3,/vmlinux
 .SH FILES
 .nf
-/etc/yaboot.conf \- boot loader configuration file
+search order for config files on block devices:
+.nf
+yaboot.cnf \- config file, typically found on iso9660 and FAT16
+.nf
+yaboot.conf \- config file, typically found of HFS partitions
+.nf
+/etc/yaboot.conf \- config file, found on Linux root partition
+.nf
+
+search order for config files on network devices:
+.nf
+yaboot.conf \- config file on the TFTP server
 .fi
 .SH BUGS
 OpenFirmware
@@ -124,8 +174,8 @@ This man page was written by Ethan Benson <erbenson@alaska.net>.
 .B yaboot
 was written by Benjamin Herrenschmidt <benh@kernel.crashing.org>.
 .SH REPORTING BUGS
-Bugs in \fByaboot\fR should be reported to Ethan Benson <erbenson@alaska.net>
+Bugs in \fByaboot\fR should be reported to <olaf@suse.de>
 .SH SEE ALSO
 .BR bootstrap (8),
 .BR yaboot.conf (5),
-.BR ybin (8).
+.BR lilo (8).
