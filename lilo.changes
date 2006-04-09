@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Apr  9 23:30:48 CEST 2006 - olh@suse.de
+
+- provide manpages for yaboot, yaboot.conf and boostrap
+
+-------------------------------------------------------------------
 Fri Apr  7 23:11:36 CEST 2006 - olh@suse.de
 
 - add script to relink yaboot at runtime to link a yaboot.conf
