@@ -26,7 +26,7 @@
 ##     append = "hwinfo=-cdrom 3 desktop"
 ##
 
-## requires    fdisk   parted  stat
+## requires    fdisk   parted  stat tr
 
 
 # Language kills all parsing effort
@@ -37,6 +37,7 @@ CONFIG_LILO_CONF=/etc/lilo.conf
 SHOW_OF_PATH="/bin/show_of_path.sh --quiet"
 DEFAULT_BOOTFOLDER=suseboot
 TEMP="${TMPDIR:-/tmp}/ppc_lilo"
+MACHINE=
 
 shopt -s extglob
 
@@ -314,29 +315,110 @@ function fsize() { # get file size in blocks
     fi
 }
 
+find_interrupt_controller_property() {
+	# to be called with "/proc/device-tree" as entry directory
+	for f in "$1"/*
+	do
+		if test -L "$f"
+		then
+			continue
+		fi
+		if test -d "$f"
+		then
+			find_interrupt_controller_property "$f"
+			if test "$?" = "1"
+			then
+				return 1
+			fi
+		fi
+		if test -f "$f"
+		then
+			if test "${f##*/}" = "interrupt-controller"
+			then
+				return 1
+			fi
+		fi
+	done
+	return 0
+}
 
 function check_arch () {
-    # check for the current ppc subarch
-    while read line; do
-	case "$line" in
-	  *MacRISC*)	MACHINE="pmac" ;;
-	  *CHRP*)	MACHINE="chrp" ;;
-	  *PReP*)	MACHINE="prep" ;;
-	  *iSeries*)	MACHINE="iseries" ;;
-	esac
-    done < /proc/cpuinfo
-    
-    if [ "$MACHINE" = "pmac" ] ; then
-	if [ -f /proc/device-tree/openprom*/model ] ; then
-	    echo `cat /proc/device-tree/openprom*/model` > $TEMP/openprom_model
-	    while read openfirmware ofversion; do
-		case "$openfirmware" in
-		  iMac,1|OpenFirmware)	MACHINE="pmac_new" ;;
-		  Open) 		MACHINE="pmac_old" ;;
-		esac
-	    done < $TEMP/openprom_model
+	# check for the current ppc subarch
+	# this function set the global MACHINE to either
+	# * iseries
+	# * pmac_new
+	# * pmac_old
+	# * chrp
+	# * pegasos
+	# * prep
+	# or nothing at all if the boardtype is not recognized
+	# 
+	local prop
+	local board_type
+
+	#
+	if test -d /proc/iSeries
+	then
+		board_type="iseries"
 	fi
-    fi
+	#
+	if test -z "$board_type"
+	then
+		if test -f /proc/device-tree/compatible
+		then
+			prop="`tr '\0' '\n' < /proc/device-tree/compatible`"
+		else
+			read prop < /proc/device-tree/model
+		fi
+		: prop $prop
+		case "$prop" in
+			*MacRISC*)
+				board_type=pmac
+				;;
+			*Power\ Macintosh*)
+				board_type=pmac
+				;;
+			IBM,*)
+				board_type=chrp
+				;;
+			Momentum,Maple-D)
+				board_type=chrp
+				;;
+			Momentum,Maple-L)
+				board_type=chrp
+				;;
+			Momentum,Maple)
+				board_type=chrp
+				;;
+			Pegasos2)
+				board_type=pegasos
+				;;
+		esac
+		if test "$board_type" = "pmac"
+		then
+			# PowerMacs with an "interrupt-controller" property are all NewWorld
+			if find_interrupt_controller_property /proc/device-tree
+			then
+				board_type=pmac_old
+			else
+				board_type=pmac_new
+			fi
+		fi
+	fi
+	#
+	if test -z "$board_type"
+	then
+		if grep -wq PReP /proc/cpuinfo
+		then
+			board_type=prep
+		fi
+	fi
+	if test -z "$board_type"
+	then
+		MACHINE=
+	else
+		MACHINE="$board_type"
+	fi
 } #end function check_arch
 
 
