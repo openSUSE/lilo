@@ -62,8 +62,22 @@ function clean_environment () {
 
 
 function Usage() {
-    # TODO: print a usage message that makes sense ...
-    echo "Usage: lilo <currently no options supported>"
+       cat  <<EOHELP
+lilo for PowerPC @VERSION@
+configures the Linux Loader on a few different PowerPC board types,
+based on the configuration file /etc/lilo.conf.
+This includes IBM RS/6000 and pSeries models, IBM legacy iSeries,
+Apple PowerMacs (OldWorld and NewWorld) and older PReP based boards.
+
+Known options are:
+    --quiet         sets an internal variable ;-)
+    --debug | -d    sets another internal variable ;-)
+    --get-arch      returns the board type lilo is running on
+                    known values are:
+		    iseries chrp pmac_new pmac_old pegasos
+    --version | -v  displays the version number
+    --help          displays this help text
+EOHELP
 }
 
 
@@ -440,6 +454,11 @@ while [ "$1" ]; do case "$1" in
        ;;
     --version|-v)
        echo "lilo for PowerPC @VERSION@"
+       exit 0
+       ;;
+    --help)
+       Usage
+       exit 0
        ;;
 
     *)
