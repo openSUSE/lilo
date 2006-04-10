@@ -44,10 +44,8 @@ submit:	.submitted
 	touch --reference=lilo.spec lilo/lilo.new ; \
 	mv -v lilo lilo-$$lv ; \
 	tar cfj lilo-$$lv.tar.bz2 lilo-$$lv ; \
-	mv lilo.spec lilo.spec.in ; \
-	sed "s/^Version:.*/Version: $$lv/" < lilo.spec.in > lilo.spec ; \
-	mv lilo.spec lilo.spec.in ; \
-	sed "s/^%define yaboot_vers.*/%define yaboot_vers $$yv/" < lilo.spec.in > lilo.spec ; \
+	sed -i "s/^Version:.*/Version: $$lv/" lilo.spec ; \
+	sed -i "s/^%define yaboot_vers.*/%define yaboot_vers $$yv/" lilo.spec ; \
 	rm -rf version Makefile lilo-$$lv lilo.spec.in \
 	yaboot-$$yv ; \
 	pwd ; \
