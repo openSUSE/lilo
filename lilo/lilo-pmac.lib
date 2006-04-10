@@ -93,7 +93,7 @@ function running_on_pmac_new () {
 	if [ -f "${CONFIG_IMAGE_FILE[$i]}" ]; then
 	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_FILE[$i]} | grep -v /pci[0-9])
 	fi
-	if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
+	if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
 	    CONFIG_IMAGE_PATH[$i]="copy"
 	else
 	    CONFIG_IMAGE_PATH[$i]=$FILE_PATH
@@ -101,7 +101,7 @@ function running_on_pmac_new () {
 	unset FILE_PATH
 	if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then 
 	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_INITRD[$i]} | grep -v /pci[0-9])
-	    if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
+	    if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
         	CONFIG_IMAGE_INITRDPATH[$i]="copy"
 	    else
 		CONFIG_IMAGE_INITRDPATH[$i]=$FILE_PATH
@@ -110,7 +110,7 @@ function running_on_pmac_new () {
 	unset FILE_PATH
 	if [ -n "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
 	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
-	    if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
+	    if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
 		CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
 	    else
 		CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
@@ -120,7 +120,7 @@ function running_on_pmac_new () {
 	    if [ -f $sysmap ]; then
 		CONFIG_IMAGE_SYSMAP[$i]=$sysmap
 		FILE_PATH=$(get_of_path ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
-		if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" -o "$COPY_BOOT_FILES" = "true" ] ; then
+		if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
 		    CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
 		else
 		    CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH

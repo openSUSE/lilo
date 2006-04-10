@@ -317,11 +317,8 @@ function fsize() { # get file size in blocks
 
 function check_arch () {
     # check for the current ppc subarch
-    unset COPY_BOOT_FILES
     while read line; do
 	case "$line" in
-	  #		dont force copy on new macs until yaboot is fixed
-	  #		*MacRISC2*)	MACHINE="pmac" ; COPY_BOOT_FILES="true" ;;
 	  *MacRISC*)	MACHINE="pmac" ;;
 	  *CHRP*)	MACHINE="chrp" ;;
 	  *PReP*)	MACHINE="prep" ;;
