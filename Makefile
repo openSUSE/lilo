@@ -39,6 +39,9 @@ submit:	.submitted
 	sed -i "/^VERSION/s@^.*@VERSION = $$yv@" yaboot/Makefile ; \
 	mv -v yaboot yaboot-$$yv ; \
 	tar cfj yaboot-$$yv.tar.bz2 yaboot-$$yv ; \
+	touch --reference=lilo/lilo.new lilo.spec ; \
+	sed -i "s:@VERSION@:$$lv:" lilo/lilo.new ; \
+	touch --reference=lilo.spec lilo/lilo.new ; \
 	mv -v lilo lilo-$$lv ; \
 	tar cfj lilo-$$lv.tar.bz2 lilo-$$lv ; \
 	mv lilo.spec lilo.spec.in ; \

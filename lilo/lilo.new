@@ -438,6 +438,9 @@ while [ "$1" ]; do case "$1" in
     --get-arch)
        get_arch=1
        ;;
+    --version|-v)
+       echo "lilo for PowerPC @VERSION@"
+       ;;
 
     *)
         echo 1>&2 "lilo: Option \"$1\" not supported"

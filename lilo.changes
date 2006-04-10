@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Apr 10 14:53:33 CEST 2006 - olh@suse.de
+
+- add an option --version|-v to lilo
+
+-------------------------------------------------------------------
 Mon Apr 10 14:38:35 CEST 2006 - olh@suse.de
 
 - remove dead yast1 option --lilo-rootdrive from lilo script
