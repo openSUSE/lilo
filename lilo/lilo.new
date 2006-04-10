@@ -429,18 +429,6 @@ function check_arch () {
 #  parse options
 #
 while [ "$1" ]; do case "$1" in
-    #--lilo-rootdrive)
-    #    if ! [ "$2" ]; then
-    #	    echo "lilo: no rootdrive given on command line"
-    #	    Usage;
-    #	    exit 1;
-    #	fi
-    #	
-    #   LILO_ROOTDRIVE=true
-    #   shift
-    #   SHOW_OF_PATH="$SHOW_OF_PATH --lilo-rootdrive $1"
-    #   shift
-    #   ;;
     --quiet|-q)
        quietmode=1
        ;;

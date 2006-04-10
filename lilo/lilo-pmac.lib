@@ -10,10 +10,6 @@ HOME=$TEMP	# make hmount et al. happy
 
 function running_on_pmac_old () {
     echo running on pmac_old
-    if [ "$LILO_ROOTDRIVE" = true ] ; then
-	echo "do nothing on oldworld with --lilo-rootdrive ..."
-	exit 0
-    fi
 
     echo "generating $TEMP/miboot.conf ..."
     echo
