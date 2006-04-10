@@ -45,7 +45,7 @@ struct default_device {
 };
 
 /* describes individual parts of a firmware path
- * block:   <device>:<partition>,<directory>/<filename>
+ * block:   <device>:<partition>,<directory/><filename>
  * network: <device>:<before_filename>,<filename>,<after_filename>
  */
 struct path_description {
