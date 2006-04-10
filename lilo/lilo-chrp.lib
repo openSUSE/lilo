@@ -221,6 +221,7 @@ function running_on_chrp () {
 	     # check whether the image file lies on a file system that is
 	     # readable by yaboot
 	    if [ "$OPTION_FORCEFAT" != "yes" ] \
+		&& [ "$path_image" ] \
 		&& can_yaboot_read "$image";
 	    then
 		CONFIG_IMAGE_FILE[$i]="${path_image}"
@@ -251,6 +252,7 @@ function running_on_chrp () {
 	    # check whether the image file lies on a file system that is
 	    # readable by yaboot
 	    if [ "$OPTION_FORCEFAT" != "yes" ] \
+		&& [ "$path_image" ] \
 		&& can_yaboot_read "$image";
 	    then
 		CONFIG_IMAGE_INITRD[$i]="${path_image}"
