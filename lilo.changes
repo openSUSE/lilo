@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 18 23:14:00 CEST 2006 - olh@suse.de
+
+- some fixes for yaboot.conf man page, document image[XXbit]=
+
+-------------------------------------------------------------------
 Mon Apr 10 23:38:12 CEST 2006 - olh@suse.de
 
 - provide a lilo.conf manpage

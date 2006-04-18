@@ -136,8 +136,7 @@ The following global options are recognized:
 .TP
 .TP
 .BI "default=" name
-Uses the specified image as the default boot image. If `default' is omitted,
-the image appearing first in the configuration file is used.
+Uses the specified image as the default boot image.
 .TP
 .BI "message=" message_filename
 Specifies a file containing a message that is displayed before the
@@ -162,7 +161,8 @@ to set permissions on
 .TP
 .BI "timeout=" tsecs
 Sets a timeout (in tenths of a second) for keyboard input. If no key is
-pressed for the specified time, the first image is automatically booted.
+pressed for the specified time, either the image specified as \fIdefault=\fR
+or the first listed image is automatically booted.
 .TP
 .BI "init-code=" string
 Specifies that \fByaboot\fR(8) should call OpenFirmware to
@@ -192,11 +192,17 @@ the respective kernel images and will be used also for the arbitrary
 images specified on the input line and not mentioned in the
 configuration file (unless overridden by input line options).
 .SH "PER-IMAGE SECTIONS"
-A per-image section starts with either a line
+A per-image section starts with a line
 
   \fBimage=\fP\fIfilename\fP
 
-(for booting from files)
+An image= section which should be looked at only when yaboot runs on a
+32bit or 64bit cpu can be specified with this syntax:
+
+  \fBimage[32bit]=\fP\flfilename\fP
+
+  \fBimage[64bit]=\fP\flfilename\fP
+
 From the \fIimage\fP line on until next \fIimage\fP line are variable
 assignments and flags for this image's section. The following options
 and flags are recognized:
@@ -312,18 +318,10 @@ image=/boot/vmlinux.old
 	read-only
 
 .fi
-.SH NOTES
-The format defined in this man page will not work with versions of
-\fByaboot\fR(8) older then 0.6.  The color options only work with
-yaboot 1.0 and later. 
-.SH BUGS
-Some
-.B yaboot
-options may not be implemented fully.
 .SH AUTHORS
 This man page was derived from \fBsilo.conf\fR(5) written by Jakub
 Jelinek and the SparcLinux team, and modified for
-\fByaboot\fR(8)/\fBybin\fR(8) by Ethan Benson.
+\fByaboot\fR(8) by Ethan Benson.
 .P
 \fByaboot\fR(8) was written by Benjamin Herrenschmidt <benh@kernel.crashing.org>.
 .SH SEE ALSO
