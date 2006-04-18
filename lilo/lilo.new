@@ -649,8 +649,7 @@ function parse_config_file () {
 		fi
 		;;
 	    sysmap)
-		[ "$CONFIG_PARSE_HASIMAGE" ] || error 8
-		CONFIG_IMAGE_SYSMAP[$CONFIG_IMAGE_COUNT]=$value
+		echo "sysmap= is not required anymore, remove it from your lilo.conf file"
 		;;
 	    initrd)
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
@@ -696,9 +695,6 @@ function check_config_file () {
 	fi
 	if [ ! -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
 	    error "initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
-	fi
-	if [ ! -f ${CONFIG_IMAGE_SYSMAP[$i]} ] ; then
-	    error "sysmap = ${CONFIG_IMAGE_SYSMAP[$i]} ist not a regular file"
 	fi
     done
     

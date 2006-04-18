@@ -408,7 +408,6 @@ function running_on_chrp () {
 	    fi
 	    [ "${CONFIG_IMAGE_ROOT[$i]}"   ] && echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
 	    [ "${CONFIG_IMAGE_APPEND[$i]}" ] && echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
-	    [ "${CONFIG_IMAGE_SYSMAP[$i]}" ] && echo "    sysmap = ${CONFIG_IMAGE_SYSMAP[$i]}"
 	    if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
 		echo -n "    initrd = "
 		strip_device_partnr "${CONFIG_IMAGE_INITRD[$i]}" $boot_device $boot_partnr

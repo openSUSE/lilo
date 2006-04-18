@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr 18 23:22:15 CEST 2006 - olh@suse.de
+
+- remove dead sysmap= code from lilo
+
+-------------------------------------------------------------------
 Tue Apr 18 23:14:00 CEST 2006 - olh@suse.de
 
 - some fixes for yaboot.conf man page, document image[XXbit]=

@@ -90,7 +90,6 @@ CONFIG cf_image[] =
      {cft_flag, "initrd-prompt", NULL},
      {cft_strg, "initrd-size", NULL},
      {cft_flag, "novideo", NULL},
-     {cft_strg, "sysmap", NULL}, /* ignored */
      {cft_end, NULL, NULL}};
 
 static char flag_set;

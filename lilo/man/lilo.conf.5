@@ -65,9 +65,6 @@ gives the image section a name. This name can be used in yaboot and in the defau
 .B initrd=
 specifies the initrd filename to be used.
 .TP
-.B sysmap=
-specifies a System.map file, useful for the xmon kernel debugger. yaboot ignores this option because xmon uses kallsyms since kernel 2.6.13.
-.TP
 .B copy
 forces the kernel and initrd to be copied to the HFS partition. This is required when the kernel and initrd resides on a filesystem not readable by yaboot.
 .TP

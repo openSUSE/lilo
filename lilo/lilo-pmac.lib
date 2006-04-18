@@ -104,25 +104,6 @@ function running_on_pmac_new () {
 	    fi
 	fi
 	unset FILE_PATH
-	if [ -n "${CONFIG_IMAGE_SYSMAP[$i]}" ] ; then 
-	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
-	    if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
-		CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
-	    else
-		CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
-	    fi
-	else
-	    local sysmap="/lib/modules/`get_kernel_version ${CONFIG_IMAGE_FILE[$i]}`/System.map"
-	    if [ -f $sysmap ]; then
-		CONFIG_IMAGE_SYSMAP[$i]=$sysmap
-		FILE_PATH=$(get_of_path ${CONFIG_IMAGE_SYSMAP[$i]}|grep -v /pci[0-9])
-		if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
-		    CONFIG_IMAGE_SYSMAPPATH[$i]="copy"
-		else
-		    CONFIG_IMAGE_SYSMAPPATH[$i]=$FILE_PATH
-		fi
-	    fi
-	fi
     done
 
     # starting the work
@@ -156,13 +137,6 @@ function running_on_pmac_new () {
 	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
 	    test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
-	    if [ "${CONFIG_IMAGE_SYSMAP[$i]}" ]; then
-		if [ "${CONFIG_IMAGE_SYSMAPPATH[$i]}" = "copy" ] ; then
-		    echo "    sysmap = `basename ${CONFIG_IMAGE_SYSMAP[$i]}`" 
-		else 
-		    echo "    sysmap = ${CONFIG_IMAGE_SYSMAPPATH[$i]}" 
-		fi
-	    fi
 
 	    if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
 		if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
@@ -292,10 +266,6 @@ function running_on_pmac_new () {
 	test -z "${CONFIG_IMAGE_INITRD[$i]}" || (
 	if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
 	    hcopy ${CONFIG_IMAGE_INITRD[$i]} :`basename ${CONFIG_IMAGE_INITRD[$i]}`
-	fi )
-	test -z "${CONFIG_IMAGE_SYSMAP[$i]}" || (
-	if [ "${CONFIG_IMAGE_SYSMAPPATH[$i]}" = "copy" ] ; then
-	    hcopy ${CONFIG_IMAGE_SYSMAP[$i]} :`basename ${CONFIG_IMAGE_SYSMAP[$i]}`
 	fi )
     done
     hpwd
