@@ -60,6 +60,8 @@ mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
+mkdir -p $RPM_BUILD_ROOT%{_mandir}/man8
+mkdir -p $RPM_BUILD_ROOT%{_mandir}/man5
 cd lilo.ppc
 chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
@@ -75,6 +77,7 @@ cp -av System.bin $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av os-badge-icon $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av README* $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av COPYING $RPM_BUILD_ROOT%{_docdir}/lilo/
+cp -av man/lilo.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5
 cd bootheader
 make install DESTDIR=$RPM_BUILD_ROOT
 cd ..
@@ -86,8 +89,6 @@ cp -av crt0.o $RPM_BUILD_ROOT/lib/lilo/chrp/yaboot.crt0.o
 cp -av ld.script $RPM_BUILD_ROOT/lib/lilo/chrp/yaboot.ld.script
 cp -av yaboot.a $RPM_BUILD_ROOT/lib/lilo/chrp/
 cp -av make_yaboot.sh $RPM_BUILD_ROOT/lib/lilo/scripts/
-mkdir -p $RPM_BUILD_ROOT%{_mandir}/man8
-mkdir -p $RPM_BUILD_ROOT%{_mandir}/man5
 cp -av man/bootstrap.8 man/yaboot.8 $RPM_BUILD_ROOT%{_mandir}/man8
 cp -av man/yaboot.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5
 cd ..

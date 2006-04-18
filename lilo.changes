@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Apr 10 23:38:12 CEST 2006 - olh@suse.de
+
+- provide a lilo.conf manpage
+
+-------------------------------------------------------------------
 Mon Apr 10 16:04:58 CEST 2006 - jplack@suse.de
 
 - copy image/initrd if of_path is empty/invalid (#164540)
