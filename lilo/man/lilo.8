@@ -1,0 +1,85 @@
+.\" $Id$ \"
+.\" vim: syntax=nroff
+.TH lilo 8
+.SH NAME
+\fBlilo\fR \- configure the Linux Loader for PowerPC
+.SH DESCRIPTION
+.BR lilo (8)
+will generate a bootloader configuration suitable for PowerPC board type it runs on.
+It uses the configuration file \fB/etc/lilo.conf(5)\fR,
+which has a syntax is similar to the i386 variant.
+
+The requirements for the various board (or better: firmware) types supported by SuSE Linux
+differ. Each one needs a different way to load the Linux kernel.
+lilo currently knows about CHRP (Apple PowerMacs, IBM RS/6000 and pSeries systems), IBM legacy
+iSeries and older Motorola/IBM PReP systems. CHRP based systems use the \fByaboot(5)\fR bootloader
+to load the Linux kernel from a block device or via network. iSeries and PReP systems load
+a single binary blob and execute it, they do not have a bootloader with a user interface.
+
+.SH Booting on CHRP
+CHRP based systems use Open Firmware to initialize the hardware and load an operating system.
+Apple and IBM use slightly different implementations of the Open Firmware standard. IBM systems
+run in real mode with MMU off, the ELF boot binary must have an ELF program header section \fBNOTE\fR.
+Apple systems run in virtual mode, and unfortunately the ELF program header needed for IBM systems
+makes the PowerMacs very very very unhappy.
+
+Pegasos machines use also Open Firmware, but some implementation details differ from the IBM
+and Apple behaviour. Thats why yaboot does currently not run properly. lilo does currently not
+know about this board type.
+
+On CHRP, yaboot is used as bootloader. lilo parses the config file and generates a suitable configuration
+file \fByaboot.conf\fR. This file will be either written to the root filesystem of your Linux installation,
+or it will be copied to a HFS or FAT partition where yaboot will find and load it. Optionally,
+the Open Fimrware NVRAM variable \fBboot-device\fR will be configured properly to automatically load
+yaboot from the correct hard disk.
+
+
+.SH Booting on iSeries
+IBM legacy iSeries are the pre-POWER4 systems with OS/400 as host operatin system.
+Linux runs as a guest "application" on OS/400.
+The kernel can be either loaded as a \fB*STMF\fR (stream file),
+from a \fBkernel slot\fR or from a \fB0x41 PReP boot partition\fR on a virtual disk.
+Use one or more \fIboot=\fR lines on \fB/etc/lilo.conf(5)\fR to specify the target.
+It is not possible to modify the source of the kernel from the Linux side, all changes
+must be made inside OS/400 (with the \fBwrkcfgsts *nws\fR command). The only exception
+is is booting from a slot. A kernel which is written to and activated in a special /proc/iSeries/
+file will remain active as long as the partition is in VARY ON state.
+
+Use \fIboot=B\fR to specify \fB/proc/iSeries/mf/B/vmlinux\fR as source for the Linux kernel.
+lilo will write the image specified in default= to this file and activate it with \fB/proc/iSeries/mf/side\fR.
+After a reboot in Linux, the kernel will be active. Once the partition is shutdown and in VARY OFF
+state, the location specified as IPL source will be used to load the kernel after a VARY ON command.
+Possible values for slot names are \fBA\fR and \fBB\fR.
+
+Use \fIboot=/dev/iseries/vda\fR to specify a virtual disk with an 0x41 PReP boot partition. OS/400 will look for
+the first disk partition of that type and load its content if the IPL source is \fB*NWSTG\fR.
+
+Use \fIboot=/some/filename\fR to generate an IPL streamfile. This file must be transfered manually
+to the OS/400 side. Its absolute path name on the OS/400 side must be entered if the IPL source
+is \fB*STMF\fR.
+
+Linux kernel command line options must be provided via OS/400 if the IPL source is *STMF or *NWSTG.
+If the IPL source is a kernel slot, then the command line can be updated only via \fB/proc/iSeries/mf/B/cmdline\fR.
+
+.SH Booting on PReP
+Older PReP systems can only boot one binary file from harddisk, CD or via network. They do not provide
+callbacks into firmware to implement some kind of bootloader. lilo will generated a usable zImage
+and place it in a 0x41 PReP boot partition on a disk specified in the \fIboot=\fR option in \fB/etc/lilo.conf(5)\fR.
+The zImage will also contain a preconfigured kernel commandline with the contents specified in the \fIappend=\fR
+option. This commandline can be editied during boot.
+
+Note: Due to some kernel changes, PReP systems do currently not boot with kernels 2.6.15 and later. You have
+to build your own custom kernel with ARCH=ppc. Support for PReP will be reenabled later.
+
+.SH AUTHORS
+.B lilo
+was written by Olaf Hering <olh@suse.de>. It is now maintained and improved further by Joachim Plack <jplack@suse.de>
+.SH REPORTING BUGS
+Bugs in \fBlilo\fR should be reported to <olaf@suse.de>
+.SH SEE ALSO
+.BR lilo.conf (5),
+.BR mkzimage (8),
+.BR mkzimage_cmdline (8),
+.BR bootstrap (8),
+.BR yaboot (8),
+.BR yaboot.conf (5)
