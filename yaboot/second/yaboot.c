@@ -1271,7 +1271,6 @@ static int yaboot_main(void)
      free(bootargs);
      free(bootpath);
 
-     /* brain damage. censored. */
 
      yaboot_text_ui();
 	
