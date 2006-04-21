@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr 21 15:58:28 CEST 2006 - olh@suse.de
+
+- fix cross references in mkzimage man page
+
+-------------------------------------------------------------------
 Wed Apr 19 00:59:43 CEST 2006 - olh@suse.de
 
 - add a lilo manpage
