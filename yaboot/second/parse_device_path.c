@@ -216,7 +216,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 				if (default_device->part > 0)
 					sprintf(part, "%d", default_device->part);
 				comma = ",";
-				if (imagepath[0] != '/' && imagepath[0] != '\\')
+				if (imagepath[0] != '/' && imagepath[0] != '\\' && default_device->u.b.directory)
 					dir = default_device->u.b.directory;
 				len = strlen(default_device->device) + 1 + strlen(part) + 1 + strlen(dir) + strlen(imagepath);
 			}

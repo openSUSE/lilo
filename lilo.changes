@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Apr 23 20:23:13 CEST 2006 - olh@suse.de
+
+- fix strlen(NULL) in imagepath_to_path_description in yaboot
+
+-------------------------------------------------------------------
 Fri Apr 21 15:58:28 CEST 2006 - olh@suse.de
 
 - fix cross references in mkzimage man page
