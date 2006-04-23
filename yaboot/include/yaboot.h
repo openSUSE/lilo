@@ -54,7 +54,5 @@ struct boot_param_t {
 };
 
 extern int useconf;
-extern char *bootpath;
-extern int bootpartition;
 
 #endif
