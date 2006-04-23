@@ -75,7 +75,7 @@ static void parse_net_device(struct path_description *result)
 		p = strchr(p, ',');
 		if (!p) {
 			result->u.n.ip_before_filename[5] = ',';
-		//	result->u.n.ip_before_filename[0] = '\0';
+			result->u.n.ip_before_filename[6] = '\0';
 			goto out;
 		}
 		p++;

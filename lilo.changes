@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Apr 23 21:09:50 CEST 2006 - olh@suse.de
+
+- fix unterminated string in enet:bootp bootpath handling in yaboot
+
+-------------------------------------------------------------------
 Sun Apr 23 20:23:13 CEST 2006 - olh@suse.de
 
 - fix strlen(NULL) in imagepath_to_path_description in yaboot
