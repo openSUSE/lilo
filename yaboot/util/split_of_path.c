@@ -136,7 +136,7 @@ static void print_file_to_load(const struct path_description *b, const char *p) 
 	struct path_description f;
 	for (i = 0; file_paths[i]; i++) {
 		memset(&f, 0, sizeof(struct path_description));
-		parse_file_to_load_path(file_paths[i], &f, b, NULL);
+		imagepath_to_path_description(file_paths[i], &f, b);
 		printf("\tfile %d to load from /chosen/bootpath '%s': '%s'\n", i, p, file_paths[i]);
 		print_boot(&f);
 	}
