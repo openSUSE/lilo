@@ -25,6 +25,12 @@
 
 
 
+enum disk_label {
+	LABEL_MAC,
+	LABEL_MSDOS,
+	LABEL_AMIGA,
+	LABEL_ISO9660,
+};
 
 struct partition_t {
 	struct partition_t*	next;
@@ -32,6 +38,7 @@ struct partition_t {
 	unsigned long  		part_start; /* In blocks */
 	unsigned long  		part_size; /* In blocks */
 	unsigned short		blocksize;
+	enum disk_label		label;
 	int			sys_ind; /* fs type */
 };
 

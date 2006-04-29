@@ -50,6 +50,7 @@ static char block_buffer[MAX_BLOCK_SIZE];
 static void
 add_new_partition(struct partition_t**	list, int part_number,
 		  unsigned long part_start, unsigned long part_size,
+		  enum disk_label label,
 		  unsigned short part_blocksize, int sys_ind)
 {
      struct partition_t*	part;
@@ -60,6 +61,7 @@ add_new_partition(struct partition_t**	list, int part_number,
      part->part_start = part_start;
      part->part_size = part_size;
      part->blocksize = part_blocksize;
+     part->label = label;
      part->sys_ind = sys_ind;
 
      /* Tack this entry onto the list */
@@ -115,6 +117,7 @@ partition_mac_lookup(prom_handle disk,
 		    block, /* partition number */
 		    part->start_block + part->data_start, /* start */
 		    part->data_count, /* size */
+		    LABEL_MAC,
 		    ptable_block_size,
 		    0);
      }
@@ -167,7 +170,7 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t** list, un
 				if (next + length > partition_start + partition_size)
 					continue;
 			}
-			add_new_partition(list, partition, next, length, 512, part->sys_ind);
+			add_new_partition(list, partition, next, length, LABEL_MSDOS, 512, part->sys_ind);
 			partition++;
 		}
 		part -= 4;
@@ -195,7 +198,7 @@ partition_fdisk_lookup(prom_handle disk,
 
      for (partition=1; partition <= 4 ;partition++, part++) {
 	if (msdos_is_linux_partition(part->sys_ind))
-		add_new_partition(list, partition, le32_to_cpu(part->start), le32_to_cpu(part->size), 512, part->sys_ind);
+		add_new_partition(list, partition, le32_to_cpu(part->start), le32_to_cpu(part->size), LABEL_MSDOS, 512, part->sys_ind);
 	else if (msdos_is_extended_partition(part->sys_ind))
 		msdos_parse_extended(disk, list, le32_to_cpu(part->start), le32_to_cpu(part->size));
      }
@@ -335,6 +338,7 @@ partition_amiga_lookup(prom_handle disk,
 		    partition, /* partition number */
 		    blockspercyl * amiga_block[AMIGA_PART_LOWCYL], /* start */
 		    blockspercyl * (amiga_block[AMIGA_PART_HIGHCYL] - amiga_block[AMIGA_PART_LOWCYL] + 1), /* size */
+		    LABEL_AMIGA,
 		    prom_blksize,
 		    0 );
 	}
@@ -382,6 +386,7 @@ partitions_lookup(const char *device)
 			    0,
 			    iso_root_block,
 			    0,
+			    LABEL_ISO9660,
 			    prom_blksize,
 			    0);
 	  prom_printf("ISO9660 disk\n");
