@@ -72,6 +72,12 @@ add_new_partition(struct partition_t**	list, int part_number,
  * I have to check if it's true. If it's not, then things will get
  * a bit more complicated
  */
+static int mac_magic_present(char *block_buffer)
+{
+	struct mac_driver_desc *desc = (struct mac_driver_desc *)block_buffer;
+	return desc->signature == MAC_DRIVER_MAGIC;
+}
+
 static void
 partition_mac_lookup(prom_handle disk,
                       struct partition_t** list )
@@ -338,7 +344,6 @@ struct partition_t*
 partitions_lookup(const char *device)
 {
      ihandle	disk;
-     struct mac_driver_desc *desc = (struct mac_driver_desc *)block_buffer;
      struct partition_t* list = NULL;
      unsigned int prom_blksize, iso_root_block;
 	
@@ -366,7 +371,7 @@ partitions_lookup(const char *device)
 	  prom_printf("Can't read boot blocks\n");
 	  goto bail;
      }	
-     if (desc->signature == MAC_DRIVER_MAGIC) {
+     if (mac_magic_present(block_buffer)) {
 	  /* pdisk partition format */
 	  partition_mac_lookup(disk, &list);
      } else if (msdos_magic_present(block_buffer)) {
