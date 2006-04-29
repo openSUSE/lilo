@@ -93,8 +93,8 @@ of_open(struct boot_file_t* file, const char* dev_name,
      strcat(buffer, ":");
      if (part) {
 	  char pn[12];
-	  if (part->sys_ind == LINUX_RAID) {
-		  DEBUG_F("skipping because partition is marked LINUX_RAID\n");
+	  if (part->label == LABEL_MSDOS && part->sys_ind != MSDOS_FAT16) {
+		  prom_printf("skipping partition %d, type is not FAT16\n", part->part_number);
 		  DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
 		  return FILE_ERR_BAD_FSYS;
 	  }

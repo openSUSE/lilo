@@ -22,6 +22,7 @@
 #define ACTIVE_FLAG     0x80
 
 #define EXTENDED        0x05
+#define MSDOS_FAT16	0x06
 #define WIN98_EXTENDED  0x0f
 #define LINUX_PARTITION 0x81
 #define LINUX_SWAP      0x82
