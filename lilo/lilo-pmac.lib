@@ -276,11 +276,6 @@ function running_on_pmac_new () {
 	NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
 	echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
 	nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
-	if [ "$(nvsetenv boot-file)" != "boot-file=" ] ; then
-	    echo "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
-	    nvsetenv boot-file
-	    nvsetenv boot-file ""
-	fi
     fi
 }
 

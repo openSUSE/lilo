@@ -703,11 +703,6 @@ set +x
 	done
 	nvsetenv boot-device "$boot_path ${bootdevice[*]}"
 
-	if [ "$(nvsetenv boot-file)" != "boot-file=" ]; then
-	    warning "old boot-file (contains addition OF boot args for kernel, but breaks yaboot):"
-	    nvsetenv boot-file >&2
-	    nvsetenv boot-file ""
-	fi
     else
 	warning "boot path not set to boot linux as requested" \
 		"please add '$boot_path' somewhere to your boot path manually"
