@@ -666,15 +666,21 @@ static int get_params(struct boot_param_t* params)
 	  return 0;
      }
 
-     if (useconf) {
-	  p = cfg_get_strg(label, "initrd");
-	  if (p && *p) {
-	       DEBUG_F("Parsing initrd path <%s>\n", p);
-	       if (!imagepath_to_path_description(p, &params->rd, &img_def_device)) {
-		       prom_printf("%s: Unable to parse\n", p);
-		    return 0;
-	       }
-	  }
+     p = strstr(params->args, "initrd=");
+     if (p) {
+	     p = strdup(p + sizeof("initrd=") - 1);
+	     if (p) {
+		q = strchr(p, ' ');
+		if (q)
+			*q = '\0';
+	     }
+     } else if (useconf)
+	     p = cfg_get_strg(label, "initrd");
+
+     if (p && *p) {
+	     DEBUG_F("Parsing initrd path <%s>\n", p);
+	     if (!imagepath_to_path_description(p, &params->rd, &img_def_device))
+		     prom_printf("%s: Unable to parse\n", p);
      }
      return 0;
 }
