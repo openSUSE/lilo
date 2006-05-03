@@ -713,8 +713,6 @@ static void yaboot_text_ui(void)
     	
 	  if (get_params(&params))
 	       return;
-	  if (!params.kernel.filename)
-	       continue;
 	
 	  prom_printf("Please wait, loading kernel...\n");
 
