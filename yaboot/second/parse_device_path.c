@@ -234,7 +234,9 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 				len = strlen(default_device->device) + 1 + strlen(past_device);
 			else {
 				len = strlen(default_device->device) + 1;
-				len += strlen(default_device->u.n.ip_before_filename) + 1;
+				if (default_device->u.n.ip_before_filename)
+					len += strlen(default_device->u.n.ip_before_filename);
+				len++;
 				len += strlen(imagepath);
 				if (default_device->u.n.ip_after_filename) {
 					len += 1 + strlen(default_device->u.n.ip_after_filename);
@@ -244,7 +246,8 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 			len += 2;
 			pathname = malloc(len);
 			if (pathname)
-				sprintf(pathname, "%s:%s,%s%s%s", default_device->device, default_device->u.n.ip_before_filename,
+				sprintf(pathname, "%s:%s,%s%s%s", default_device->device,
+						default_device->u.n.ip_before_filename ? default_device->u.n.ip_before_filename : "",
 						past_device ? past_device : imagepath, comma,
 						default_device->u.n.ip_after_filename ? default_device->u.n.ip_after_filename : "");
 #if defined(DEBUG) || defined(DEVPATH_TEST)

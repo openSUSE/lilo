@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May  3 19:33:32 CEST 2006 - olh@suse.de
+
+- parse net path properly in yaboot on pseries, there is usually
+  nothing after the device part. avoid operations on NULL pointer
+
+-------------------------------------------------------------------
 Wed May  3 19:03:26 CEST 2006 - olh@suse.de
 
 - initrd= can now be specified on the yaboot boot: prompt (100213)
