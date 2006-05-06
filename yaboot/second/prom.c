@@ -361,9 +361,9 @@ static const char newline_indent[] = "\r\n\t";
 static void prom_putnewline(prom_handle file)
 {
 	if (stdout_is_screen)
-		call_prom("write", 3, 1, file, newline_indent, sizeof(newline_indent));
+		call_prom("write", 3, 1, file, newline_indent, sizeof(newline_indent) - 1);
 	else
-		call_prom("write", 3, 1, file, newline, sizeof(newline));
+		call_prom("write", 3, 1, file, newline, sizeof(newline) - 1);
 }
 
 void prom_putchar(char c)

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat May  6 15:03:39 CEST 2006 - olh@suse.de
+
+- do not print a NUL char after every newline in yaboot
+
+-------------------------------------------------------------------
 Wed May  3 19:36:24 CEST 2006 - olh@suse.de
 
 - let yaboot start vmlinux download even if no filename is specified
