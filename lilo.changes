@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri May 12 14:37:08 CEST 2006 - jplack@suse.de
+
+- Mark Emulex FC HBA/0xFD00 as tested (#163786)
+
+-------------------------------------------------------------------
 Sat May  6 15:03:39 CEST 2006 - olh@suse.de
 
 - do not print a NUL char after every newline in yaboot
