@@ -704,6 +704,7 @@ static void yaboot_text_ui(void)
      loadinfo_t          loadinfo;
      void                *initrd_more,*initrd_want;
      unsigned long       initrd_read;
+     char *msg;
     
      loadinfo.load_loc = 0;
 
@@ -718,8 +719,11 @@ static void yaboot_text_ui(void)
 
 	  result = open_file(&params.kernel, &file);
 	  if (result != FILE_ERR_OK) {
-	       prom_printf("%s:%d,", params.kernel.device, params.kernel.part);
-	       prom_perror(result, params.kernel.filename);
+	       msg = path_description_to_string(&params.kernel);
+	       if (msg) {
+		       prom_perror(result, msg);
+		       free(msg);
+	       }
 	       continue;
 	  }
 
@@ -759,8 +763,11 @@ static void yaboot_text_ui(void)
 	       prom_printf("Loading ramdisk...\n");
 	       result = open_file(&params.rd, &file);
 	       if (result != FILE_ERR_OK) {
-		    prom_printf("%s:%d,", params.rd.device, params.rd.part);
-		    prom_perror(result, params.rd.filename);
+		    msg = path_description_to_string(&params.rd);
+		    if (msg) {
+			    prom_perror(result, msg);
+			    free(msg);
+		    }
 	       }
 	       else {
 #define INITRD_CHUNKSIZE 0x400000
