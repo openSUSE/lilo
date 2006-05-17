@@ -717,9 +717,9 @@ static void yaboot_text_ui(void)
 	
 	  prom_printf("Please wait, loading kernel...\n");
 
+	  msg = path_description_to_string(&params.kernel);
 	  result = open_file(&params.kernel, &file);
 	  if (result != FILE_ERR_OK) {
-	       msg = path_description_to_string(&params.kernel);
 	       if (msg) {
 		       prom_perror(result, msg);
 		       free(msg);
@@ -754,6 +754,10 @@ static void yaboot_text_ui(void)
 	       continue;
 	  }
 	  file.fs->close(&file);
+	  if (msg) {
+		  prom_set_chosen ("yaboot,image", msg, strlen(msg) + 1);
+		  free(msg);
+	  }
 
 	  /* If ramdisk, load it (only if booting a vmlinux).  For now, we
 	   * can't tell the size it will be so we claim an arbitrary amount
@@ -761,9 +765,9 @@ static void yaboot_text_ui(void)
 	   */
 	  if (params.rd.filename) {
 	       prom_printf("Loading ramdisk...\n");
+	       msg = path_description_to_string(&params.rd);
 	       result = open_file(&params.rd, &file);
 	       if (result != FILE_ERR_OK) {
-		    msg = path_description_to_string(&params.rd);
 		    if (msg) {
 			    prom_perror(result, msg);
 			    free(msg);
@@ -808,10 +812,14 @@ static void yaboot_text_ui(void)
 		    }
 		    file.fs->close(&file);
 	       }
-	       if (initrd_base)
-		    prom_printf("ramdisk loaded %08lx @ %p\n",
-				initrd_size, initrd_base);
-	       else {
+	       if (initrd_base) {
+			if (msg) {
+				prom_set_chosen ("yaboot,initrd", msg, strlen(msg) + 1);
+				free(msg);
+			}
+			prom_printf("ramdisk loaded %08lx @ %p\n", initrd_size, initrd_base);
+
+	       } else {
 		    prom_printf("ramdisk load failed !\n");
 		    prom_pause();
 	       }

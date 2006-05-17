@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed May 17 20:33:36 CEST 2006 - olh@suse.de
+
+- record vmlinux/initrd in /chosen/yaboot,image and yaboot,initrd
+
+-------------------------------------------------------------------
 Wed May 17 19:14:05 CEST 2006 - olh@suse.de
 
 - number logical msdos partitions correctly in yaboot
