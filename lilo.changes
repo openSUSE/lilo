@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed May 17 19:14:05 CEST 2006 - olh@suse.de
+
+- number logical msdos partitions correctly in yaboot
+  if there is more than one logical partition, only the first one 
+  was considered because the loop was exited early
+
+-------------------------------------------------------------------
 Fri May 12 14:37:08 CEST 2006 - jplack@suse.de
 
 - Mark Emulex FC HBA/0xFD00 as tested (#163786)

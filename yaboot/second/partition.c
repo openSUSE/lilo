@@ -160,8 +160,6 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t** list, un
 			next = partition_start + offset;
 			if (!le32_to_cpu(part->size) || msdos_is_extended_partition(part->sys_ind))
 				continue;
-			if (!msdos_is_linux_partition(part->sys_ind))
-				break;
 			if (i >= 2) {
 				if (offset + length > partition_size)
 					continue;
@@ -170,7 +168,8 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t** list, un
 				if (next + length > partition_start + partition_size)
 					continue;
 			}
-			add_new_partition(list, partition, next, length, LABEL_MSDOS, 512, part->sys_ind);
+			if (msdos_is_linux_partition(part->sys_ind))
+				add_new_partition(list, partition, next, length, LABEL_MSDOS, 512, part->sys_ind);
 			partition++;
 		}
 		part -= 4;
