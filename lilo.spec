@@ -79,6 +79,7 @@ cp -av README* $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av COPYING $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av man/lilo.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5
 cp -av man/lilo.8 $RPM_BUILD_ROOT%{_mandir}/man8
+cp -av man/show_of_path.sh.8 $RPM_BUILD_ROOT%{_mandir}/man8
 cd bootheader
 make install DESTDIR=$RPM_BUILD_ROOT
 cd ..

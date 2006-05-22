@@ -1,0 +1,26 @@
+.\" $Id$ \"
+.\" vim: syntax=nroff
+.TH show_of_path.sh 8
+.SH NAME
+\fBshow_of_path.sh\fR \- construct an OpenFirmware device path
+.SH SYNOPSIS
+\fBshow_of_path.sh\fR [filename]
+.SH DESCRIPTION
+.BR show_of_path.sh (8)
+generates an OpenFirmware device path for the given filename. If a block device node is specified, the path for the device behind this node will be generated. When called without options, the path for / will be generated. This path is used by the OpenFirmware itself to load the bootloader, and by \fByaboot(8)\fR to load files specified in \fByaboot.conf(5)\fR. 
+
+\fBshow_of_path.sh\fR does a stat on the given file to get the major:minor pair. Then this pair is searched in \fBdev\fR files below /sys/block/. If the main block device has a \fIdevice\fR symlink, this symlink is followed to get to the real hardware backing the block device. If no device symlink exists, the block device is most likely a "virtual" device like loop, lvm, software raid or device-mapper based. Neither OpenFirmware nor yaboot can do anything with such devices. The full path name of the directory where the \fIdevice\fR symlink points to is used to make assumptions about the hardware bus type and the topology on the bus. Then a file named \fBdevspec\fR is searched in the parent directories. Its content is the OpenFirmware path to the hardware controller. A copy of the firmware device tree is stored in \fB/proc/device-tree\fR, the \fBdevspec\fR content can be appended to get to the directory of device node. A few properties exist there which are used to construct the final path.
+
+Currently all on-board SCSI and IDE controllers, Emulex and Qlogic fibrechannel controllers and Apple PowerMac firewire controllers are supported. Paths to network devices are not supported, use the "\fBbootlist(8)\fR -m normal eth0" command to set the boot-device on IBM pSeries systems.
+
+.SH AUTHORS
+.B show_of_path.sh
+was written by Olaf Hering <olh@suse.de>. It is now maintained and improved further by Joachim Plack <jplack@suse.de>
+.SH REPORTING BUGS
+Bugs in \fBshow_of_path.sh\fR should be reported to <olaf@suse.de>
+.SH SEE ALSO
+.BR lilo (8),
+.BR lilo.conf (5),
+.BR bootstrap (8),
+.BR yaboot (8),
+.BR yaboot.conf (5)
