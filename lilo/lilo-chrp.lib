@@ -270,6 +270,29 @@ function running_on_chrp () {
 	    unset CONFIG_IMAGE_INITRD[$i]
 	fi
     done # for (( i=1; i<=CONFIG_IMAGE_COUNT ...
+    #
+    # same for global initrd option
+    if [ "$OPTION_INITRD" ]; then
+	if [ -f "$OPTION_INITRD" ]; then
+	    local path_image=$(get_of_path $OPTION_INITRD)
+	    # check whether the initrd file lies on a file system that is
+	    # readable by yaboot
+	    if [ "$OPTION_FORCEFAT" != "yes" ] \
+		&& [ "$path_image" ] \
+		&& can_yaboot_read "$OPTION_INITRD";
+	    then
+		OPTION_INITRD="${path_image}"
+	    else
+		# image file needs to be copied to the boot device which has to
+		# be a FAT file system and be large enough to hold all data
+		let initrd_nr++
+		initrd_copy[$initrd_nr]="$OPTION_INITRD"
+		OPTION_INITRD=$(printf "initrd.%03d\n" $initrd_nr)
+	    fi
+	else
+	    error "global initrd file '$OPTION_INITRD' not found"
+	fi
+    fi
 
     # now determine whether we could boot from a PReP partition or whether we
     # should better fall back to booting from a FAT partition
@@ -392,7 +415,10 @@ function running_on_chrp () {
 	fi
 	[ "$OPTION_ROOT"    ] && echo "root = $OPTION_ROOT"
 	[ "$OPTION_APPEND"  ] && echo "append = \"$OPTION_APPEND\""
-	[ "$OPTION_INITRD"  ] && echo "initrd = $OPTION_INITRD"
+	if [ "$OPTION_INITRD"  ]; then
+	    echo -n "initrd = "
+	    strip_device_partnr "$OPTION_INITRD" $boot_device $boot_partnr
+	fi
 
 	echo "# image section"
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
