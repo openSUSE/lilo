@@ -1,5 +1,6 @@
 # $Id$
 SUBMIT_DIR=/work/src/done/PPC
+SUBMIT_DIR2=/work/src/done/SLES10
 BUILD=/work/src/bin/build
 BUILD_DIST=ppc
 BUILD_ROOT=/abuild/buildsystem.$$HOST.$$LOGNAME
@@ -52,7 +53,6 @@ submit:	.submitted
 	ls -la ; \
 	if /work/src/bin/check_if_valid_source_dir; then cd -; echo $$tmpdir > $@; else exit 1 ; fi
 
-
 .built:	.exportdir
 	@rm -f .submitted
 	@echo "Trying to compile lilo package under $$(<.exportdir)"
@@ -64,6 +64,10 @@ submit:	.submitted
 	@select s in submit abort;do [ "$$s" == submit ] && break || exit 1; done
 	cp -av $$(<.exportdir) $(SUBMIT_DIR)
 	@cd $(SUBMIT_DIR)/$(PKG); distmail
+ifneq ($(SUBMIT_DIR2),)
+	cp -av $$(<.exportdir) $(SUBMIT_DIR2)
+	@cd $(SUBMIT_DIR2)/$(PKG); distmail
+endif  
 	@touch $@
 
 clean:
