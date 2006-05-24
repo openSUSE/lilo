@@ -329,7 +329,7 @@ function fsize() { # get file size in blocks
     fi
 }
 
-find_interrupt_controller_property() {
+function find_interrupt_controller_property() {
 	# to be called with "/proc/device-tree" as entry directory
 	for f in "$1"/*
 	do
@@ -419,20 +419,27 @@ function check_arch () {
 			fi
 		fi
 	fi
-	#
-	if test -z "$board_type"
-	then
-		if grep -wq PReP /proc/cpuinfo
-		then
-			board_type=prep
-		fi
+
+	if [ -z "$board_type" ]; then
+	    case $(</proc/cpuinfo) in
+		*PReP*)
+		    board_type=prep
+		    ;;
+		*CHRP*)
+		    board_type=chrp
+		    ;;
+	    esac
 	fi
-	if test -z "$board_type"
-	then
-		MACHINE=
-	else
-		MACHINE="$board_type"
+	if [ -z "$board_type" ]; then
+	    case $(</proc/device-tree/device-type) in
+		chrp)
+		    board_type=chrp
+		    ;;
+	    esac
 	fi
+		
+	MACHINE="$board_type"
+
 } #end function check_arch
 
 
