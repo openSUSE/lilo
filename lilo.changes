@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jun 12 14:30:03 CEST 2006 - jplack@suse.de
+
+- added sas support on Power6, patch by Brian King (#183466)
+- bump version to 10.1.14
+
+-------------------------------------------------------------------
 Wed May 24 16:31:04 CEST 2006 - jplack@suse.de
 
 - do enhance detection for sub-architecture (#177314)
