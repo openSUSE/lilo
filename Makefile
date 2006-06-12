@@ -5,6 +5,7 @@ BUILD=/work/src/bin/build
 BUILD_DIST=ppc
 BUILD_ROOT=/abuild/buildsystem.$$HOST.$$LOGNAME
 BUILD_DIR=$(BUILD_ROOT)/usr/src/packages/RPMS
+PKG=lilo
 
 
 .PHONY:	export build submit rpm clean
