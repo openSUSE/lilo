@@ -98,6 +98,11 @@ of_open(struct boot_file_t* file, const char* dev_name,
 		  DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
 		  return FILE_ERR_BAD_FSYS;
 	  }
+	  if (part->label == LABEL_AMIGA) {
+		  prom_printf("skipping partition %d, firmware will not read it correctly\n", part->part_number);
+		  DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
+		  return FILE_ERR_BAD_FSYS;
+	  }
 	  sprintf(pn, "%d", part->part_number);
 	  strcat(buffer, pn);
      }

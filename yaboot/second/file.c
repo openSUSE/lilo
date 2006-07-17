@@ -75,11 +75,13 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 #endif						
      }
 
+     if (parts && parts->label == LABEL_MAC) {
      /* Note: we don't skip when found is NULL since we can, in some
       * cases, let OF figure out a default partition.
       */
      DEBUG_F( "Using OF defaults.. (found = %p)\n", found );
      file->fs = fs_open(file, spec->device, found, f);
+     }
 
 done:
      if (parts)
