@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 17 11:08:41 CEST 2006 - olh@suse.de
+
+- handle pegasos return value -2 from read stdin in yaboot
+
+-------------------------------------------------------------------
 Mon Jun 12 14:30:03 CEST 2006 - jplack@suse.de
 
 - added sas support on Power6, patch by Brian King (#183466)

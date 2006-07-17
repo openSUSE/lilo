@@ -340,7 +340,14 @@ int prom_getchar()
 	char c[4];
 	int a;
 
-	while ((a = (int)call_prom("read", 3, 1, prom_stdin, c, 4)) == 0) ;
+	while (1) {
+		a = (int)call_prom("read", 3, 1, prom_stdin, c, 4);
+		/* pegasos firmware returns -2 after second key was pressed
+		 * maybe thats correct according to the standard, maybe not
+		 */
+		if (a && a != -2)
+			break;
+	}
 	if (a == -1)
 		prom_abort("EOF on console\n");
 	if (a == 3 && c[0] == '\e' && c[1] == '[')
