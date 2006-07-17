@@ -340,16 +340,13 @@ int prom_getchar()
 	char c[4];
 	int a;
 
+	memset(c, 0, sizeof(c));
 	while (1) {
 		a = (int)call_prom("read", 3, 1, prom_stdin, c, 4);
-		/* pegasos firmware returns -2 after second key was pressed
-		 * maybe thats correct according to the standard, maybe not
-		 */
-		if (a && a != -2)
+		/* if ret val is zero or negative, the read operation did not succeed.*/
+		if (a > 0)
 			break;
 	}
-	if (a == -1)
-		prom_abort("EOF on console\n");
 	if (a == 3 && c[0] == '\e' && c[1] == '[')
 		return 0x100 | c[2];
 	return c[0];
