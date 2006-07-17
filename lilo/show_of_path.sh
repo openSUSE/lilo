@@ -314,6 +314,13 @@ if [ -f devspec ] ; then
 	sas*)
 	    file_storage_type=sas
 	    ;;
+	spi)
+	    # pegasos firmware starts to count partitions at zero instead of 1
+	    file_storage_type=ide
+	    if [ "$file_partition" ]; then
+		file_partition=$(( file_partition - 1 ))
+	    fi
+	    ;;
 	ide|ata)
 	    # TODO
 	    # check for right file-storage_type == ide ??

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 17 14:25:49 CEST 2006 - olh@suse.de
+
+- handle IDE device_type spi on pegasos in show_of_path.sh
+
+-------------------------------------------------------------------
 Mon Jul 17 14:12:27 CEST 2006 - olh@suse.de
 
 - do not use the firmware filesystem driver in yaboot unless
