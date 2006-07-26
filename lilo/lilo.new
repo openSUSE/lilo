@@ -431,7 +431,7 @@ function check_arch () {
 	    esac
 	fi
 	if [ -z "$board_type" ]; then
-	    case $(</proc/device-tree/device-type) in
+	    case $(</proc/device-tree/device_type) in
 		chrp)
 		    board_type=chrp
 		    ;;

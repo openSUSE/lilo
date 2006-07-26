@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul 26 11:03:38 CEST 2006 - olh@suse.de
+
+- read /proc/device-tree/device_type instead of device-type (#177314)
+
+-------------------------------------------------------------------
 Mon Jul 17 14:25:49 CEST 2006 - olh@suse.de
 
 - handle IDE device_type spi on pegasos in show_of_path.sh
