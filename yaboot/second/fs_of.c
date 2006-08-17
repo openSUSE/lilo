@@ -48,36 +48,6 @@
 #define LOAD_BUFFER_SIZE (12*1024*1024)
 #define LOAD_BUFFER_TRIES 42
 
-static int of_open(struct boot_file_t* file, const char* dev_name,
-		   struct partition_t* part, const char* file_name);
-static int of_read(struct boot_file_t* file, unsigned int size, void* buffer);
-static int of_seek(struct boot_file_t* file, unsigned long long newpos);
-static int of_close(struct boot_file_t* file);
-
-
-static int of_net_open(struct boot_file_t* file, const struct path_description* spec);
-static int of_net_read(struct boot_file_t* file, unsigned int size, void* buffer);
-static int of_net_seek(struct boot_file_t* file, unsigned long long newpos);
-
-
-struct fs_t of_filesystem =
-{
-	.name = "built-in",
-	.open = of_open,
-	.read = of_read,
-	.seek = of_seek,
-	.close = of_close
-};
-
-struct fs_t of_net_filesystem =
-{
-	.name = "built-in network",
-	.new_open = of_net_open,
-	.read = of_net_read,
-	.seek = of_net_seek,
-	.close = of_close
-};
-
 static int
 of_open(struct boot_file_t* file, const char* dev_name,
 	struct partition_t* part, const char* file_name)
@@ -276,6 +246,25 @@ of_close(struct boot_file_t* file)
      DEBUG_LEAVE(0);	
      return 0;
 }
+
+struct fs_t of_filesystem =
+{
+	.name = "built-in",
+	.open = of_open,
+	.read = of_read,
+	.seek = of_seek,
+	.close = of_close
+};
+
+struct fs_t of_net_filesystem =
+{
+	.name = "built-in network",
+	.new_open = of_net_open,
+	.read = of_net_read,
+	.seek = of_net_seek,
+	.close = of_close
+};
+
 
 /* 
  * Local variables:

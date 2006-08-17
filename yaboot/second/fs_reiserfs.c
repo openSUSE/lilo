@@ -31,23 +31,6 @@
 #include "debug.h"
 #include "reiserfs/reiserfs.h"
 
-/* Exported in struct fs_t */
-static int reiserfs_open( struct boot_file_t *file, const char *dev_name,
-			  struct partition_t *part, const char *file_name );
-static int reiserfs_read( struct boot_file_t *file, unsigned int size,
-
-			  void *buffer );
-static int reiserfs_seek( struct boot_file_t *file, unsigned long long newpos );
-static int reiserfs_close( struct boot_file_t *file );
-
-struct fs_t reiserfs_filesystem = {
-     .name = "reiserfs",
-     .open = reiserfs_open,
-     .read = reiserfs_read,
-     .seek = reiserfs_seek,
-     .close = reiserfs_close
-};
-
 static int reiserfs_read_super( void );
 static int reiserfs_open_file( char *dirname );
 static int reiserfs_read_data( char *buf, __u32 len );
@@ -1066,6 +1049,14 @@ uniqueness2type (__u32 uniqueness)
      }
      return TYPE_ANY;
 }
+
+struct fs_t reiserfs_filesystem = {
+     .name = "reiserfs",
+     .open = reiserfs_open,
+     .read = reiserfs_read,
+     .seek = reiserfs_seek,
+     .close = reiserfs_close
+};
 
 /* 
  * Local variables:

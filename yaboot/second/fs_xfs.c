@@ -37,21 +37,6 @@ static int xfs_mount (void);
 static int xfs_read_data (char *buf, int len);
 static int xfs_dir (char *dirname);
 
-/* Exported in struct fs_t */
-static int xfs_open(struct boot_file_t *file, const char *dev_name,
-		    struct partition_t *part, const char *file_name);
-static int xfs_read(struct boot_file_t *file, unsigned int size, void *buffer);
-static int xfs_seek(struct boot_file_t *file, unsigned long long newpos);
-static int xfs_close(struct boot_file_t *file);
-
-struct fs_t xfs_filesystem = {
-	.name = "xfs",
-	.open = xfs_open,
-	.read = xfs_read,
-	.seek = xfs_seek,
-	.close = xfs_close
-};
-
 static struct boot_file_t *xfs_file;
 static char FSYS_BUF[32768];
 static uint64_t partition_offset;
@@ -779,6 +764,14 @@ xfs_dir (char *dirname)
 		}
 	}
 }
+
+struct fs_t xfs_filesystem = {
+	.name = "xfs",
+	.open = xfs_open,
+	.read = xfs_read,
+	.seek = xfs_seek,
+	.close = xfs_close
+};
 
 /* 
  * Local variables:

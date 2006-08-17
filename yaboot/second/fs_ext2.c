@@ -43,49 +43,7 @@
 typedef int FILE;
 #include "linux/ext2_fs.h"
 #include "ext2fs/ext2fs.h"
-
-static int ext2_open(	struct boot_file_t*	file,
-			const char*		dev_name,
-			struct partition_t*	part,
-			const char*		file_name);
-static int ext2_read(	struct boot_file_t*	file,
-			unsigned int		size,
-			void*			buffer);
-static int ext2_seek(	struct boot_file_t*	file,
-			unsigned long long	newpos);
-static int ext2_close(	struct boot_file_t*	file);
-
-struct fs_t ext2_filesystem =
-{
-	.name = "ext2",
-	.open = ext2_open,
-	.read = ext2_read,
-	.seek = ext2_seek,
-	.close = ext2_close
-};
-
-/* IO manager structure for the ext2 library */
- 
-static errcode_t linux_open (const char *name, int flags, io_channel * channel);
-static errcode_t linux_close (io_channel channel);
-static errcode_t linux_set_blksize (io_channel channel, int blksize);
-static errcode_t linux_read_blk (io_channel channel, unsigned long block, int count, void *data);
-static errcode_t linux_write_blk (io_channel channel, unsigned long block, int count, const void *data);
-static errcode_t linux_flush (io_channel channel);
-
-static struct struct_io_manager struct_linux_manager =
-{
-     .magic = EXT2_ET_MAGIC_IO_MANAGER,
-     .name = "linux I/O Manager",
-     .open = linux_open,
-     .close = linux_close,
-     .set_blksize = linux_set_blksize,
-     .read_blk = linux_read_blk,
-     .write_blk = linux_write_blk,
-     .flush = linux_flush,
-};
-
-static io_manager linux_io_manager = &struct_linux_manager;
+static io_manager linux_io_manager;
 
 /* Currently, we have a mess between what is in the file structure
  * and what is stored globally here. I'll clean this up later
@@ -619,6 +577,29 @@ static errcode_t linux_flush (io_channel channel)
 {
      return 0;
 }
+
+static struct struct_io_manager struct_linux_manager =
+{
+     .magic = EXT2_ET_MAGIC_IO_MANAGER,
+     .name = "linux I/O Manager",
+     .open = linux_open,
+     .close = linux_close,
+     .set_blksize = linux_set_blksize,
+     .read_blk = linux_read_blk,
+     .write_blk = linux_write_blk,
+     .flush = linux_flush,
+};
+
+static io_manager linux_io_manager = &struct_linux_manager;
+
+struct fs_t ext2_filesystem =
+{
+	.name = "ext2",
+	.open = ext2_open,
+	.read = ext2_read,
+	.seek = ext2_seek,
+	.close = ext2_close
+};
 
 /* 
  * Local variables:
