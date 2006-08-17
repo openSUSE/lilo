@@ -2,7 +2,6 @@
 #define _LINUX_ELF_H
 
 #include <types.h>
-#include <asm/elf.h>
 
 /* 32-bit ELF base types. */
 typedef __u32	Elf32_Addr;
@@ -586,22 +585,5 @@ typedef struct elf64_note {
   Elf32_Word n_descsz;	/* Content size */
   Elf32_Word n_type;	/* Content type */
 } Elf64_Nhdr;
-
-#if ELF_CLASS == ELFCLASS32
-
-extern Elf32_Dyn _DYNAMIC [];
-#define elfhdr		elf32_hdr
-#define elf_phdr	elf32_phdr
-#define elf_note	elf32_note
-
-#else
-
-extern Elf64_Dyn _DYNAMIC [];
-#define elfhdr		elf64_hdr
-#define elf_phdr	elf64_phdr
-#define elf_note	elf64_note
-
-#endif
-
 
 #endif /* _LINUX_ELF_H */
