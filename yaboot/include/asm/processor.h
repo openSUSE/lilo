@@ -47,10 +47,6 @@
 #define FPSCR_FX        (1<<31)
 #define FPSCR_FEX       (1<<30)
 
-#define _GLOBAL(n)\
-	.globl n;\
-n:
-
 #define	TBRU	269	/* Time base Upper/Lower (Reading) */
 #define	TBRL	268
 #define TBWU	284	/* Time base Upper/Lower (Writing) */
