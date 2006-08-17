@@ -43,6 +43,5 @@ typedef		__u64		u_int64_t;
 typedef		__s64		int64_t;
 
 typedef unsigned int ino_t;
-typedef __u64 loff_t;
 
 #endif

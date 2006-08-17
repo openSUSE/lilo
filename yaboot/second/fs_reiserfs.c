@@ -1029,7 +1029,7 @@ offset_v2_k_type( struct offset_v2 *v2 )
      return tmp.offset_v2.k_type;
 }
  
-inline loff_t
+inline u64
 offset_v2_k_offset( struct offset_v2 *v2 )
 {
      offset_v2_esafe_overlay tmp = *(offset_v2_esafe_overlay *)v2;
