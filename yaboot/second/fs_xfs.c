@@ -39,7 +39,7 @@ static int xfs_dir (char *dirname);
 
 static struct boot_file_t *xfs_file;
 static char FSYS_BUF[32768];
-static uint64_t partition_offset;
+static u64 partition_offset;
 static int errnum;
 
 static int
@@ -54,7 +54,7 @@ xfs_open(struct boot_file_t *file, const char *dev_name,
 	if (part)
 	{
 		DEBUG_F("Determining offset for partition %d\n", part->part_number);
-		partition_offset = ((uint64_t) part->part_start) * part->blocksize;
+		partition_offset = ((u64) part->part_start) * part->blocksize;
 		DEBUG_F("%Lu = %lu * %hu\n", partition_offset,
 			part->part_start,
 			part->blocksize);
@@ -130,10 +130,10 @@ xfs_close(struct boot_file_t *file)
 }
 
 static int
-read_disk_block(struct boot_file_t *file, uint64_t block, int start,
+read_disk_block(struct boot_file_t *file, u64 block, int start,
 		int length, void *buf)
 {
-	uint64_t pos = block * 512;
+	u64 pos = block * 512;
 	pos += partition_offset + start;
 	DEBUG_F("Reading %d bytes, starting at block %Lu, disk offset %Lu\n",
 		length, block, pos);

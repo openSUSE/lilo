@@ -59,7 +59,7 @@ reiserfs_open( struct boot_file_t *file, const char *dev_name,
      if (part)
      {
 	  DEBUG_F( "Determining offset for partition %d\n", part->part_number );
-	  INFO->partition_offset = ((uint64_t)part->part_start) * part->blocksize;
+	  INFO->partition_offset = ((u64)part->part_start) * part->blocksize;
 	  DEBUG_F( "%Lu = %lu * %hu\n", INFO->partition_offset,
 		   part->part_start,
 		   part->blocksize );
