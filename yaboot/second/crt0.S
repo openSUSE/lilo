@@ -1,5 +1,4 @@
 #include "asm/ppc_asm.tmpl"
-#include "asm/processor.h"
 
 _GLOBAL(_yaboot_start)
 	lis	r9,_start@h

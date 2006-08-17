@@ -31,7 +31,6 @@
 #include "string.h"
 #include "types.h"
 #include "ctype.h"
-#include "asm/processor.h"
 #include "errors.h"
 #include "debug.h"
 
