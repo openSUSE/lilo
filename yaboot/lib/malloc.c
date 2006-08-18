@@ -58,6 +58,7 @@ void *malloc(unsigned int size)
 	malloc_ptr += size + sizeof(int);
 	last_alloc = caddr;
 	malloc_ptr = (char *)((((unsigned int)malloc_ptr) + 3) & (~3));
+	memset(caddr, 'Z', size);
 	return caddr;
 }
 
