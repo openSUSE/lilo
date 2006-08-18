@@ -36,53 +36,53 @@ extern int useconf;
 
 void cmdinit()
 {
-    cbuff[0] = 0;
-    passwdbuff[0] = 0;
+	cbuff[0] = 0;
+	passwdbuff[0] = 0;
 }
 
-void cmdedit (void (*tabfunc) (void), int password)
+void cmdedit(void (*tabfunc) (void), int password)
 {
-     int x, c;
-     char *buff = password ? passwdbuff : cbuff;
-     for (x = 0; x < CMD_LENG - 1; x++) {
-	  if (buff[x] == 0)
-	       break;
-	  else if (password)
-	       prom_printf("*");
-     }
-     if (!password)
-	  prom_printf(buff, x);
-     
-     for (;;) {
-	  c = prom_getchar ();
-	  if (c == -1)
-	       break;
-	  if (c == '\n' || c == '\r') {
-	       break;
-	  }
-	  if (c == '\t' && !x && tabfunc)
-	       (*tabfunc) ();
-	  if (c == '\b' || c == 0x7F) {
-	       if (x > 0) {
-		    --x;
-		    buff[x] = 0;
-		    prom_printf("\b \b");
-	       }
-	  } else if ((c & 0xE0) != 0) {
-	       if (x < CMD_LENG - 1) {
-		    buff[x] = c;
-		    buff[x + 1] = 0;
-		    if (password)
-			 prom_printf("*");
-		    else
-			 prom_printf(buff + x);
-		    x++;
-	       }
-	       if (x == 1 && !password && useconf) {
-		    if (cfg_get_flag (cbuff, "single-key"))
-			 break;
-	       }
-	  }
-     }
-     buff[x] = 0;
+	int x, c;
+	char *buff = password ? passwdbuff : cbuff;
+	for (x = 0; x < CMD_LENG - 1; x++) {
+		if (buff[x] == 0)
+			break;
+		else if (password)
+			prom_printf("*");
+	}
+	if (!password)
+		prom_printf(buff, x);
+
+	for (;;) {
+		c = prom_getchar();
+		if (c == -1)
+			break;
+		if (c == '\n' || c == '\r') {
+			break;
+		}
+		if (c == '\t' && !x && tabfunc)
+			(*tabfunc) ();
+		if (c == '\b' || c == 0x7F) {
+			if (x > 0) {
+				--x;
+				buff[x] = 0;
+				prom_printf("\b \b");
+			}
+		} else if ((c & 0xE0) != 0) {
+			if (x < CMD_LENG - 1) {
+				buff[x] = c;
+				buff[x + 1] = 0;
+				if (password)
+					prom_printf("*");
+				else
+					prom_printf(buff + x);
+				x++;
+			}
+			if (x == 1 && !password && useconf) {
+				if (cfg_get_flag(cbuff, "single-key"))
+					break;
+			}
+		}
+	}
+	buff[x] = 0;
 }

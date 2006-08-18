@@ -36,117 +36,106 @@
 #include "errors.h"
 #include "debug.h"
 
-static int file_block_open(struct boot_file_t *file, const struct path_description* spec)
+static int file_block_open(struct boot_file_t *file, const struct path_description *spec)
 {
-     struct partition_t*	parts;
-     struct partition_t*	p;
-     struct partition_t*	found;
-     char f[1024];
-     int partition = spec->part;
-	
-     parts = partitions_lookup(spec->device);
-     found = NULL;
-     sprintf(f, "%s%s", spec->u.b.directory, spec->filename);
-     DEBUG_F("filename '%s'\n", f);
+	struct partition_t *parts;
+	struct partition_t *p;
+	struct partition_t *found;
+	char f[1024];
+	int partition = spec->part;
+
+	parts = partitions_lookup(spec->device);
+	found = NULL;
+	sprintf(f, "%s%s", spec->u.b.directory, spec->filename);
+	DEBUG_F("filename '%s'\n", f);
 
 #ifdef DEBUG
-     if (parts)
-	  prom_printf("partitions:\n");
-     else
-	  prom_printf("no partitions found.\n");
+	if (parts)
+		prom_printf("partitions:\n");
+	else
+		prom_printf("no partitions found.\n");
 #endif
-     for (p = parts; p && !found; p=p->next) {
-	  DEBUG_F("number: %02d, start: %08lx, length: %08lx\n",
-		  p->part_number, p->part_start, p->part_size );
-	  if (partition == -1) {
-	       file->fs = fs_open(file, spec->device, p, f);
-	       if (file->fs == NULL || fserrorno != FILE_ERR_OK)
-		    continue;
-	       else {
-		    partition = p->part_number;
-		    goto done;
-	       }
-	  }
-	  if ((partition >= 0) && (partition == p->part_number))
-	       found = p;
+	for (p = parts; p && !found; p = p->next) {
+		DEBUG_F("number: %02d, start: %08lx, length: %08lx\n", p->part_number, p->part_start, p->part_size);
+		if (partition == -1) {
+			file->fs = fs_open(file, spec->device, p, f);
+			if (file->fs == NULL || fserrorno != FILE_ERR_OK)
+				continue;
+			else {
+				partition = p->part_number;
+				goto done;
+			}
+		}
+		if ((partition >= 0) && (partition == p->part_number))
+			found = p;
 #ifdef DEBUG
-	  if (found)
-	       prom_printf(" (match)\n");
-#endif						
-     }
+		if (found)
+			prom_printf(" (match)\n");
+#endif
+	}
 
-     if (parts && parts->label == LABEL_MAC) {
-     /* Note: we don't skip when found is NULL since we can, in some
-      * cases, let OF figure out a default partition.
-      */
-     DEBUG_F( "Using OF defaults.. (found = %p)\n", found );
-     file->fs = fs_open(file, spec->device, found, f);
-     }
+	if (parts && parts->label == LABEL_MAC) {
+		/* Note: we don't skip when found is NULL since we can, in some
+		 * cases, let OF figure out a default partition.
+		 */
+		DEBUG_F("Using OF defaults.. (found = %p)\n", found);
+		file->fs = fs_open(file, spec->device, found, f);
+	}
 
-done:
-     if (parts)
-	  partitions_free(parts);
+      done:
+	if (parts)
+		partitions_free(parts);
 
-     return fserrorno;
+	return fserrorno;
 }
 
-static int
-file_net_open(	struct boot_file_t*	file,
-		const struct path_description *spec)
+static int file_net_open(struct boot_file_t *file, const struct path_description *spec)
 {
-     file->fs = fs_of_netboot;
-     return fs_of_netboot->new_open(file, spec);
+	file->fs = fs_of_netboot;
+	return fs_of_netboot->new_open(file, spec);
 }
 
-static int
-default_read(	struct boot_file_t*	file,
-		unsigned int		size,
-		void*			buffer)
+static int default_read(struct boot_file_t *file, unsigned int size, void *buffer)
 {
-     prom_printf("WARNING ! default_read called !\n");
-     return FILE_ERR_EOF;
+	prom_printf("WARNING ! default_read called !\n");
+	return FILE_ERR_EOF;
 }
 
-static int
-default_seek(	struct boot_file_t*	file,
-		unsigned long long	newpos)
+static int default_seek(struct boot_file_t *file, unsigned long long newpos)
 {
-     prom_printf("WARNING ! default_seek called !\n");
-     return FILE_ERR_EOF;
+	prom_printf("WARNING ! default_seek called !\n");
+	return FILE_ERR_EOF;
 }
 
-static int
-default_close(	struct boot_file_t*	file)
+static int default_close(struct boot_file_t *file)
 {
-     prom_printf("WARNING ! default_close called !\n");
-     return FILE_ERR_OK;
+	prom_printf("WARNING ! default_close called !\n");
+	return FILE_ERR_OK;
 }
 
-static struct fs_t fs_default =
-{
+static struct fs_t fs_default = {
 	.name = "defaults",
 	.read = default_read,
 	.seek = default_seek,
 	.close = default_close
 };
 
-
-int open_file(const struct path_description* spec, struct boot_file_t* file)
+int open_file(const struct path_description *spec, struct boot_file_t *file)
 {
-     memset(file, 0, sizeof(struct boot_file_t));
-     file->fs        = &fs_default;
-     file->dev_type = prom_get_devtype(spec->device);
+	memset(file, 0, sizeof(struct boot_file_t));
+	file->fs = &fs_default;
+	file->dev_type = prom_get_devtype(spec->device);
 
-     switch(file->dev_type) {
-     case TYPE_BLOCK:
-	  DEBUG_F("device is a block device\n");
-	  return file_block_open(file, spec);
-     case TYPE_NET:
-	  DEBUG_F("device is a network device\n");
-	  return file_net_open(file, spec);
-     default:
-	  return FILE_ERR_BADDEV;
-     }
+	switch (file->dev_type) {
+	case TYPE_BLOCK:
+		DEBUG_F("device is a block device\n");
+		return file_block_open(file, spec);
+	case TYPE_NET:
+		DEBUG_F("device is a network device\n");
+		return file_net_open(file, spec);
+	default:
+		return FILE_ERR_BADDEV;
+	}
 }
 
 /* 

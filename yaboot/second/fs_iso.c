@@ -28,38 +28,27 @@
 #include "fs.h"
 #include "errors.h"
 
-static int
-iso_open(	struct boot_file_t*	file,
-		const char*		dev_name,
-		struct partition_t*	part,
-		const char*		file_name)
+static int iso_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
-     return FILE_ERR_BAD_FSYS;
+	return FILE_ERR_BAD_FSYS;
 }
 
-static int
-iso_read(	struct boot_file_t*	file,
-		unsigned int		size,
-		void*			buffer)
+static int iso_read(struct boot_file_t *file, unsigned int size, void *buffer)
 {
-     return FILE_ERR_BAD_FSYS;
+	return FILE_ERR_BAD_FSYS;
 }
 
-static int
-iso_seek(	struct boot_file_t*	file,
-		unsigned long long	newpos)
+static int iso_seek(struct boot_file_t *file, unsigned long long newpos)
 {
-     return FILE_ERR_BAD_FSYS;
+	return FILE_ERR_BAD_FSYS;
 }
 
-static int
-iso_close(	struct boot_file_t*	file)
+static int iso_close(struct boot_file_t *file)
 {
-     return 0;
+	return 0;
 }
 
-struct fs_t iso_filesystem =
-{
+struct fs_t iso_filesystem = {
 	.name = "iso9660",
 	.open = iso_open,
 	.read = iso_read,

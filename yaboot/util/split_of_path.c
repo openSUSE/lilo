@@ -25,7 +25,7 @@ struct default_device {
 };
 
 struct path_description {
-	int	part;		/* Partition number or -1 */
+	int part;		/* Partition number or -1 */
 
 	enum device_type type;
 
@@ -122,16 +122,18 @@ static enum device_type prom_get_devtype(const char *device)
 
 #define P(m) printf("\t"#m " '%s' ", p->m);
 
-static void print_boot(const struct path_description *p) {
-		P(device);
-		P(u.d.s1);
-		P(u.d.s2);
-		printf("\n");
-		P(filename);
-		printf("\n");
+static void print_boot(const struct path_description *p)
+{
+	P(device);
+	P(u.d.s1);
+	P(u.d.s2);
+	printf("\n");
+	P(filename);
+	printf("\n");
 }
 
-static void print_file_to_load(const struct path_description *b, const char *p) {
+static void print_file_to_load(const struct path_description *b, const char *p)
+{
 	int i;
 	struct path_description f;
 	for (i = 0; file_paths[i]; i++) {

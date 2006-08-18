@@ -48,70 +48,67 @@
 #define LOAD_BUFFER_SIZE (12*1024*1024)
 #define LOAD_BUFFER_TRIES 42
 
-static int
-of_open(struct boot_file_t* file, const char* dev_name,
-	struct partition_t* part, const char* file_name)
+static int of_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
-     static char	buffer[1024];
-     char               *filename;
-     char               *p;
-	
-     DEBUG_ENTER;
-     DEBUG_OPEN;
+	static char buffer[1024];
+	char *filename;
+	char *p;
 
-     strncpy(buffer, dev_name, 768);
-     strcat(buffer, ":");
-     if (part) {
-	  char pn[12];
-	  if (part->label == LABEL_MSDOS && part->sys_ind != MSDOS_FAT16) {
-		  prom_printf("skipping partition %d, type is not FAT16\n", part->part_number);
-		  DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
-		  return FILE_ERR_BAD_FSYS;
-	  }
-	  if (part->label == LABEL_AMIGA) {
-		  prom_printf("skipping partition %d, firmware will not read it correctly\n", part->part_number);
-		  DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
-		  return FILE_ERR_BAD_FSYS;
-	  }
-	  sprintf(pn, "%d", part->part_number);
-	  strcat(buffer, pn);
-     }
-     if (file_name && strlen(file_name)) {
-	  if (part)
-	       strcat(buffer, ",");
-	  filename = strdup(file_name);
-	  for (p = filename; *p; p++)
-	       if (*p == '/') 
-		    *p = '\\';
-	  strcat(buffer, filename);
-	  free(filename);
-     }
+	DEBUG_ENTER;
+	DEBUG_OPEN;
 
-     DEBUG_F("opening: \"%s\"\n", buffer);
+	strncpy(buffer, dev_name, 768);
+	strcat(buffer, ":");
+	if (part) {
+		char pn[12];
+		if (part->label == LABEL_MSDOS && part->sys_ind != MSDOS_FAT16) {
+			prom_printf("skipping partition %d, type is not FAT16\n", part->part_number);
+			DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
+			return FILE_ERR_BAD_FSYS;
+		}
+		if (part->label == LABEL_AMIGA) {
+			prom_printf("skipping partition %d, firmware will not read it correctly\n", part->part_number);
+			DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
+			return FILE_ERR_BAD_FSYS;
+		}
+		sprintf(pn, "%d", part->part_number);
+		strcat(buffer, pn);
+	}
+	if (file_name && strlen(file_name)) {
+		if (part)
+			strcat(buffer, ",");
+		filename = strdup(file_name);
+		for (p = filename; *p; p++)
+			if (*p == '/')
+				*p = '\\';
+		strcat(buffer, filename);
+		free(filename);
+	}
 
-     file->of_device = prom_open(buffer);
+	DEBUG_F("opening: \"%s\"\n", buffer);
 
-     DEBUG_F("file->of_device = %p\n", file->of_device);
+	file->of_device = prom_open(buffer);
 
-     file->pos = 0;
-     file->buffer = NULL;
-     if ((file->of_device == PROM_INVALID_HANDLE) || (file->of_device == 0))
-     {
-	  DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
-	  return FILE_ERR_BAD_FSYS;
-     }
-	
-     DEBUG_LEAVE(FILE_ERR_OK);
-     return FILE_ERR_OK;
+	DEBUG_F("file->of_device = %p\n", file->of_device);
+
+	file->pos = 0;
+	file->buffer = NULL;
+	if ((file->of_device == PROM_INVALID_HANDLE) || (file->of_device == 0)) {
+		DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
+		return FILE_ERR_BAD_FSYS;
+	}
+
+	DEBUG_LEAVE(FILE_ERR_OK);
+	return FILE_ERR_OK;
 }
 
-static int of_net_download (unsigned char **buffer, ihandle of_device)
+static int of_net_download(unsigned char **buffer, ihandle of_device)
 {
 	int ret = LOAD_BUFFER_TRIES;
 	unsigned char *p, *mem = (unsigned char *)LOAD_BUFFER_BASE;
-	
+
 	DEBUG_ENTER;
-	
+
 	do {
 		p = prom_claim(mem, LOAD_BUFFER_SIZE, 0);
 		if (p == mem)
@@ -120,7 +117,7 @@ static int of_net_download (unsigned char **buffer, ihandle of_device)
 	} while (--ret);
 	if (0 == ret) {
 		prom_printf("Can't claim memory for TFTP download (%08x @ %08x-%08x)\n",
-				LOAD_BUFFER_SIZE, LOAD_BUFFER_BASE, LOAD_BUFFER_BASE+(LOAD_BUFFER_TRIES*1024*1024));
+			    LOAD_BUFFER_SIZE, LOAD_BUFFER_BASE, LOAD_BUFFER_BASE + (LOAD_BUFFER_TRIES * 1024 * 1024));
 		ret = FILE_IOERR;
 		goto out;
 	}
@@ -132,123 +129,116 @@ static int of_net_download (unsigned char **buffer, ihandle of_device)
 		*buffer = p;
 	else
 		prom_release(p, LOAD_BUFFER_SIZE);
-out:
+      out:
 	DEBUG_LEAVE_F(ret);
 	return ret;
 }
 
-static int of_net_open(struct boot_file_t* file, const struct path_description* spec)
+static int of_net_open(struct boot_file_t *file, const struct path_description *spec)
 {
-     char buffer[1024];
-     char *p = buffer;
-     int ret;
+	char buffer[1024];
+	char *p = buffer;
+	int ret;
 
-     DEBUG_ENTER;
-     DEBUG_OPEN_NEW;
+	DEBUG_ENTER;
+	DEBUG_OPEN_NEW;
 
-     sprintf(buffer, "%s:%s,", spec->device, spec->u.n.ip_before_filename);
-     p = p + strlen(buffer);
-     strcat(buffer, spec->filename);
-     while (*p) {
-	     if (*p == '/')
-		     *p = '\\';
-	     p++;
-     }
-     if (spec->u.n.ip_after_filename && strlen(spec->u.n.ip_after_filename)) {
-	     strcat(buffer, ",");
-	     strcat(buffer, spec->u.n.ip_after_filename);
-     }
-			
-     DEBUG_F("Opening: \"%s\"\n", buffer);
+	sprintf(buffer, "%s:%s,", spec->device, spec->u.n.ip_before_filename);
+	p = p + strlen(buffer);
+	strcat(buffer, spec->filename);
+	while (*p) {
+		if (*p == '/')
+			*p = '\\';
+		p++;
+	}
+	if (spec->u.n.ip_after_filename && strlen(spec->u.n.ip_after_filename)) {
+		strcat(buffer, ",");
+		strcat(buffer, spec->u.n.ip_after_filename);
+	}
 
-     file->of_device = prom_open(buffer);
+	DEBUG_F("Opening: \"%s\"\n", buffer);
 
-     DEBUG_F("file->of_device = %p\n", file->of_device);
+	file->of_device = prom_open(buffer);
 
-     file->pos = 0;
-     if ((file->of_device == PROM_INVALID_HANDLE) || (file->of_device == 0))
-     {
-	  ret = FILE_ERR_BAD_FSYS;
-	  goto out;
-     }
+	DEBUG_F("file->of_device = %p\n", file->of_device);
 
-     ret = FILE_ERR_OK;
+	file->pos = 0;
+	if ((file->of_device == PROM_INVALID_HANDLE) || (file->of_device == 0)) {
+		ret = FILE_ERR_BAD_FSYS;
+		goto out;
+	}
 
-     if (file->buffer == NULL) {
-	     ret = of_net_download(&file->buffer, file->of_device);
-	     if (ret > 0) {
-		     file->len = ret;
-		     ret = FILE_ERR_OK;
-	     } else {
-		     prom_printf("download failed: %d\n", ret);
-		     ret = FILE_IOERR;
-	     }
-     }
+	ret = FILE_ERR_OK;
 
-out:
-     DEBUG_LEAVE_F(ret);
-     return ret;
+	if (file->buffer == NULL) {
+		ret = of_net_download(&file->buffer, file->of_device);
+		if (ret > 0) {
+			file->len = ret;
+			ret = FILE_ERR_OK;
+		} else {
+			prom_printf("download failed: %d\n", ret);
+			ret = FILE_IOERR;
+		}
+	}
+
+      out:
+	DEBUG_LEAVE_F(ret);
+	return ret;
 }
 
-static int
-of_read(struct boot_file_t* file, unsigned int size, void* buffer)
+static int of_read(struct boot_file_t *file, unsigned int size, void *buffer)
 {
-     unsigned int count;
-	
-     count = prom_read(file->of_device, buffer, size);
-     file->pos += count;
-     return count;
+	unsigned int count;
+
+	count = prom_read(file->of_device, buffer, size);
+	file->pos += count;
+	return count;
 }
 
-static int
-of_net_read(struct boot_file_t* file, unsigned int size, void* buffer)
+static int of_net_read(struct boot_file_t *file, unsigned int size, void *buffer)
 {
-     unsigned int count, av;
-	
-     av = file->len - file->pos;
-     count = size > av ? av : size; 
-     memcpy(buffer, file->buffer + file->pos, count);
-     file->pos += count;
-     return count;
+	unsigned int count, av;
+
+	av = file->len - file->pos;
+	count = size > av ? av : size;
+	memcpy(buffer, file->buffer + file->pos, count);
+	file->pos += count;
+	return count;
 }
 
-static int
-of_seek(struct boot_file_t* file, unsigned long long newpos)
+static int of_seek(struct boot_file_t *file, unsigned long long newpos)
 {
-     if (prom_seek(file->of_device, newpos)) {
-	  file->pos = newpos;
-	  return FILE_ERR_OK;
-     }
-		
-     return FILE_CANT_SEEK;
+	if (prom_seek(file->of_device, newpos)) {
+		file->pos = newpos;
+		return FILE_ERR_OK;
+	}
+
+	return FILE_CANT_SEEK;
 }
 
-static int
-of_net_seek(struct boot_file_t* file, unsigned long long newpos)
+static int of_net_seek(struct boot_file_t *file, unsigned long long newpos)
 {
-     file->pos = (newpos > file->len) ? file->len : newpos;
-     return FILE_ERR_OK;
+	file->pos = (newpos > file->len) ? file->len : newpos;
+	return FILE_ERR_OK;
 }
 
-static int
-of_close(struct boot_file_t* file)
+static int of_close(struct boot_file_t *file)
 {
 
-     DEBUG_ENTER;
-     DEBUG_F("<@%p>\n", file->of_device);
+	DEBUG_ENTER;
+	DEBUG_F("<@%p>\n", file->of_device);
 
-     if (file->buffer) {
-	  prom_release(file->buffer, LOAD_BUFFER_SIZE);
-     }
-     prom_close(file->of_device);
-     DEBUG_F("of_close called\n");
+	if (file->buffer) {
+		prom_release(file->buffer, LOAD_BUFFER_SIZE);
+	}
+	prom_close(file->of_device);
+	DEBUG_F("of_close called\n");
 
-     DEBUG_LEAVE(0);	
-     return 0;
+	DEBUG_LEAVE(0);
+	return 0;
 }
 
-struct fs_t of_filesystem =
-{
+struct fs_t of_filesystem = {
 	.name = "built-in",
 	.open = of_open,
 	.read = of_read,
@@ -256,15 +246,13 @@ struct fs_t of_filesystem =
 	.close = of_close
 };
 
-struct fs_t of_net_filesystem =
-{
+struct fs_t of_net_filesystem = {
 	.name = "built-in network",
 	.new_open = of_net_open,
 	.read = of_net_read,
 	.seek = of_net_seek,
 	.close = of_close
 };
-
 
 /* 
  * Local variables:

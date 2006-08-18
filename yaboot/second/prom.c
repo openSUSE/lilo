@@ -342,7 +342,7 @@ int prom_getchar()
 	memset(c, 0, sizeof(c));
 	while (1) {
 		a = (int)call_prom("read", 3, 1, prom_stdin, c, 4);
-		/* if ret val is zero or negative, the read operation did not succeed.*/
+		/* if ret val is zero or negative, the read operation did not succeed. */
 		if (a > 0)
 			break;
 	}

@@ -24,7 +24,7 @@
 #include "string.h"
 
 /* Imported functions */
-extern void prom_printf (char *fmt, ...);
+extern void prom_printf(char *fmt, ...);
 
 static char *malloc_ptr;
 static char *malloc_top;
@@ -43,71 +43,71 @@ void malloc_dispose(void)
 	last_alloc = NULL;
 }
 
-void *malloc (unsigned int size)
+void *malloc(unsigned int size)
 {
-    char *caddr;
+	char *caddr;
 
-    if (!malloc_ptr)
-    	return NULL;
-    if ((malloc_ptr + size + sizeof(int)) > malloc_top) {
-	prom_printf("malloc failed\n");
-    	return NULL;
-    }
-    *(int *)malloc_ptr = size;
-    caddr = malloc_ptr + sizeof(int);
-    malloc_ptr += size + sizeof(int);
-    last_alloc = caddr;
-    malloc_ptr = (char *) ((((unsigned int) malloc_ptr) + 3) & (~3));
-    return caddr;
+	if (!malloc_ptr)
+		return NULL;
+	if ((malloc_ptr + size + sizeof(int)) > malloc_top) {
+		prom_printf("malloc failed\n");
+		return NULL;
+	}
+	*(int *)malloc_ptr = size;
+	caddr = malloc_ptr + sizeof(int);
+	malloc_ptr += size + sizeof(int);
+	last_alloc = caddr;
+	malloc_ptr = (char *)((((unsigned int)malloc_ptr) + 3) & (~3));
+	return caddr;
 }
 
 void *realloc(void *ptr, unsigned int size)
 {
-    char *caddr, *oaddr = ptr;
+	char *caddr, *oaddr = ptr;
 
-    if (!malloc_ptr)
-    	return NULL;
-    if (oaddr == last_alloc) {
-	if (oaddr + size > malloc_top) {
-		prom_printf("realloc failed\n");
+	if (!malloc_ptr)
 		return NULL;
+	if (oaddr == last_alloc) {
+		if (oaddr + size > malloc_top) {
+			prom_printf("realloc failed\n");
+			return NULL;
+		}
+		*(int *)(oaddr - sizeof(int)) = size;
+		malloc_ptr = oaddr + size;
+		return oaddr;
 	}
-	*(int *)(oaddr - sizeof(int)) = size;
-	malloc_ptr = oaddr + size;
-	return oaddr;
-    }
-    caddr = malloc(size);
-    if (caddr != 0 && oaddr != 0)
-	memcpy(caddr, oaddr, *(int *)(oaddr - sizeof(int)));
-    return caddr;
+	caddr = malloc(size);
+	if (caddr != 0 && oaddr != 0)
+		memcpy(caddr, oaddr, *(int *)(oaddr - sizeof(int)));
+	return caddr;
 }
 
-void free (void *m)
+void free(void *m)
 {
-    if (!malloc_ptr)
-    	return;
-    if (m == last_alloc)
-	malloc_ptr = (char *) last_alloc - sizeof(int);
+	if (!malloc_ptr)
+		return;
+	if (m == last_alloc)
+		malloc_ptr = (char *)last_alloc - sizeof(int);
 }
 
-void mark (void **ptr)
+void mark(void **ptr)
 {
-    if (!malloc_ptr)
-    	return;
-    *ptr = (void *) malloc_ptr;
+	if (!malloc_ptr)
+		return;
+	*ptr = (void *)malloc_ptr;
 }
 
-void release (void *ptr)
+void release(void *ptr)
 {
-    if (!malloc_ptr)
-    	return;
-    malloc_ptr = (char *) ptr;
+	if (!malloc_ptr)
+		return;
+	malloc_ptr = (char *)ptr;
 }
 
 char *strdup(char const *str)
 {
-    char *p = malloc(strlen(str) + 1);
-    if (p)
-	 strcpy(p, str);
-    return p;
+	char *p = malloc(strlen(str) + 1);
+	if (p)
+		strcpy(p, str);
+	return p;
 }

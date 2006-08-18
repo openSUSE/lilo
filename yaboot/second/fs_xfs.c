@@ -33,42 +33,34 @@
 
 #define SECTOR_BITS 9
 
-static int xfs_mount (void);
-static int xfs_read_data (char *buf, int len);
-static int xfs_dir (char *dirname);
+static int xfs_mount(void);
+static int xfs_read_data(char *buf, int len);
+static int xfs_dir(char *dirname);
 
 static struct boot_file_t *xfs_file;
 static char FSYS_BUF[32768];
 static u64 partition_offset;
 static int errnum;
 
-static int
-xfs_open(struct boot_file_t *file, const char *dev_name,
-	 struct partition_t *part, const char *file_name)
+static int xfs_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
 	static char buffer[1024];
 
 	DEBUG_ENTER;
 	DEBUG_OPEN;
 
-	if (part)
-	{
+	if (part) {
 		DEBUG_F("Determining offset for partition %d\n", part->part_number);
 		partition_offset = ((u64) part->part_start) * part->blocksize;
-		DEBUG_F("%Lu = %lu * %hu\n", partition_offset,
-			part->part_start,
-			part->blocksize);
-	}
-	else
+		DEBUG_F("%Lu = %lu * %hu\n", partition_offset, part->part_start, part->blocksize);
+	} else
 		partition_offset = 0;
 
-	sprintf(buffer, "%s:%d", dev_name, 0); /* 0 is full disk in OF */
-	DEBUG_F("Trying to open dev_name=%s; filename=%s; partition offset=%Lu\n",
-		buffer, file_name, partition_offset);
+	sprintf(buffer, "%s:%d", dev_name, 0);	/* 0 is full disk in OF */
+	DEBUG_F("Trying to open dev_name=%s; filename=%s; partition offset=%Lu\n", buffer, file_name, partition_offset);
 	file->of_device = prom_open(buffer);
 
-	if (file->of_device == PROM_INVALID_HANDLE || file->of_device == NULL)
-	{
+	if (file->of_device == PROM_INVALID_HANDLE || file->of_device == NULL) {
 		DEBUG_F("Can't open device %p\n", file->of_device);
 		DEBUG_LEAVE(FILE_ERR_BADDEV);
 		return FILE_ERR_BADDEV;
@@ -77,9 +69,8 @@ xfs_open(struct boot_file_t *file, const char *dev_name,
 	DEBUG_F("%p was successfully opened\n", file->of_device);
 
 	xfs_file = file;
-    
-	if (xfs_mount() != 1)
-	{
+
+	if (xfs_mount() != 1) {
 		DEBUG_F("Couldn't open XFS @ %s/%Lu\n", buffer, partition_offset);
 		prom_close(file->of_device);
 		DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
@@ -88,11 +79,10 @@ xfs_open(struct boot_file_t *file, const char *dev_name,
 	}
 
 	DEBUG_F("Attempting to open %s\n", file_name);
-	strcpy(buffer, file_name); /* xfs_dir modifies argument */
-	if(!xfs_dir(buffer))
-	{
+	strcpy(buffer, file_name);	/* xfs_dir modifies argument */
+	if (!xfs_dir(buffer)) {
 		DEBUG_F("xfs_dir() failed. errnum = %d\n", errnum);
-		prom_close( file->of_device );
+		prom_close(file->of_device);
 		DEBUG_LEAVE_F(errnum);
 		DEBUG_SLEEP;
 		return errnum;
@@ -104,24 +94,20 @@ xfs_open(struct boot_file_t *file, const char *dev_name,
 	return FILE_ERR_OK;
 }
 
-static int
-xfs_read(struct boot_file_t *file, unsigned int size, void *buffer)
+static int xfs_read(struct boot_file_t *file, unsigned int size, void *buffer)
 {
 	return xfs_read_data(buffer, size);
 }
 
-static int
-xfs_seek(struct boot_file_t *file, unsigned long long newpos)
+static int xfs_seek(struct boot_file_t *file, unsigned long long newpos)
 {
 	file->pos = newpos;
 	return FILE_ERR_OK;
 }
 
-static int
-xfs_close(struct boot_file_t *file)
+static int xfs_close(struct boot_file_t *file)
 {
-	if(file->of_device)
-	{
+	if (file->of_device) {
 		prom_close(file->of_device);
 		file->of_device = 0;
 		DEBUG_F("xfs_close called\n");
@@ -129,14 +115,11 @@ xfs_close(struct boot_file_t *file)
 	return FILE_ERR_OK;
 }
 
-static int
-read_disk_block(struct boot_file_t *file, u64 block, int start,
-		int length, void *buf)
+static int read_disk_block(struct boot_file_t *file, u64 block, int start, int length, void *buf)
 {
 	u64 pos = block * 512;
 	pos += partition_offset + start;
-	DEBUG_F("Reading %d bytes, starting at block %Lu, disk offset %Lu\n",
-		length, block, pos);
+	DEBUG_F("Reading %d bytes, starting at block %Lu, disk offset %Lu\n", length, block, pos);
 	if (!prom_seek(file->of_device, pos)) {
 		DEBUG_F("prom_seek failed\n");
 		return 0;
@@ -194,26 +177,22 @@ static struct xfs_info xfs;
 #define	XFS_INO_AGINO_BITS	(xfs.agblklog + xfs.inopblog)
 #define	XFS_INO_AGNO_BITS	xfs.agnolog
 
-static inline xfs_agblock_t
-agino2agbno (xfs_agino_t agino)
+static inline xfs_agblock_t agino2agbno(xfs_agino_t agino)
 {
 	return agino >> XFS_INO_OFFSET_BITS;
 }
 
-static inline xfs_agnumber_t
-ino2agno (xfs_ino_t ino)
+static inline xfs_agnumber_t ino2agno(xfs_ino_t ino)
 {
 	return ino >> XFS_INO_AGINO_BITS;
 }
 
-static inline xfs_agino_t
-ino2agino (xfs_ino_t ino)
+static inline xfs_agino_t ino2agino(xfs_ino_t ino)
 {
 	return ino & XFS_INO_MASK(XFS_INO_AGINO_BITS);
 }
 
-static inline int
-ino2offset (xfs_ino_t ino)
+static inline int ino2offset(xfs_ino_t ino)
 {
 	return ino & XFS_INO_MASK(XFS_INO_OFFSET_BITS);
 }
@@ -223,67 +202,60 @@ ino2offset (xfs_ino_t ino)
 #define le32(x) (x)
 #define le64(x) (x)
 
-static xfs_fsblock_t
-xt_start (xfs_bmbt_rec_32_t *r)
+static xfs_fsblock_t xt_start(xfs_bmbt_rec_32_t * r)
 {
-	return (((xfs_fsblock_t)(le32 (r->l1) & mask32lo(9))) << 43) | 
-	       (((xfs_fsblock_t)le32 (r->l2)) << 11) |
-	       (((xfs_fsblock_t)le32 (r->l3)) >> 21);
+	return (((xfs_fsblock_t) (le32(r->l1) & mask32lo(9))) << 43) |
+	    (((xfs_fsblock_t) le32(r->l2)) << 11) | (((xfs_fsblock_t) le32(r->l3)) >> 21);
 }
 
-static xfs_fileoff_t
-xt_offset (xfs_bmbt_rec_32_t *r)
+static xfs_fileoff_t xt_offset(xfs_bmbt_rec_32_t * r)
 {
-	return (((xfs_fileoff_t)le32 (r->l0) &
-		mask32lo(31)) << 23) |
-		(((xfs_fileoff_t)le32 (r->l1)) >> 9);
+	return (((xfs_fileoff_t) le32(r->l0) & mask32lo(31)) << 23) | (((xfs_fileoff_t) le32(r->l1)) >> 9);
 }
 
-static xfs_filblks_t
-xt_len (xfs_bmbt_rec_32_t *r)
+static xfs_filblks_t xt_len(xfs_bmbt_rec_32_t * r)
 {
 	return le32(r->l3) & mask32lo(21);
 }
 
 static const char xfs_highbit[256] = {
-       -1, 0, 1, 1, 2, 2, 2, 2,			/* 00 .. 07 */
-	3, 3, 3, 3, 3, 3, 3, 3,			/* 08 .. 0f */
-	4, 4, 4, 4, 4, 4, 4, 4,			/* 10 .. 17 */
-	4, 4, 4, 4, 4, 4, 4, 4,			/* 18 .. 1f */
-	5, 5, 5, 5, 5, 5, 5, 5,			/* 20 .. 27 */
-	5, 5, 5, 5, 5, 5, 5, 5,			/* 28 .. 2f */
-	5, 5, 5, 5, 5, 5, 5, 5,			/* 30 .. 37 */
-	5, 5, 5, 5, 5, 5, 5, 5,			/* 38 .. 3f */
-	6, 6, 6, 6, 6, 6, 6, 6,			/* 40 .. 47 */
-	6, 6, 6, 6, 6, 6, 6, 6,			/* 48 .. 4f */
-	6, 6, 6, 6, 6, 6, 6, 6,			/* 50 .. 57 */
-	6, 6, 6, 6, 6, 6, 6, 6,			/* 58 .. 5f */
-	6, 6, 6, 6, 6, 6, 6, 6,			/* 60 .. 67 */
-	6, 6, 6, 6, 6, 6, 6, 6,			/* 68 .. 6f */
-	6, 6, 6, 6, 6, 6, 6, 6,			/* 70 .. 77 */
-	6, 6, 6, 6, 6, 6, 6, 6,			/* 78 .. 7f */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* 80 .. 87 */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* 88 .. 8f */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* 90 .. 97 */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* 98 .. 9f */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* a0 .. a7 */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* a8 .. af */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* b0 .. b7 */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* b8 .. bf */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* c0 .. c7 */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* c8 .. cf */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* d0 .. d7 */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* d8 .. df */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* e0 .. e7 */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* e8 .. ef */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* f0 .. f7 */
-	7, 7, 7, 7, 7, 7, 7, 7,			/* f8 .. ff */
+	-1, 0, 1, 1, 2, 2, 2, 2,	/* 00 .. 07 */
+	3, 3, 3, 3, 3, 3, 3, 3,	/* 08 .. 0f */
+	4, 4, 4, 4, 4, 4, 4, 4,	/* 10 .. 17 */
+	4, 4, 4, 4, 4, 4, 4, 4,	/* 18 .. 1f */
+	5, 5, 5, 5, 5, 5, 5, 5,	/* 20 .. 27 */
+	5, 5, 5, 5, 5, 5, 5, 5,	/* 28 .. 2f */
+	5, 5, 5, 5, 5, 5, 5, 5,	/* 30 .. 37 */
+	5, 5, 5, 5, 5, 5, 5, 5,	/* 38 .. 3f */
+	6, 6, 6, 6, 6, 6, 6, 6,	/* 40 .. 47 */
+	6, 6, 6, 6, 6, 6, 6, 6,	/* 48 .. 4f */
+	6, 6, 6, 6, 6, 6, 6, 6,	/* 50 .. 57 */
+	6, 6, 6, 6, 6, 6, 6, 6,	/* 58 .. 5f */
+	6, 6, 6, 6, 6, 6, 6, 6,	/* 60 .. 67 */
+	6, 6, 6, 6, 6, 6, 6, 6,	/* 68 .. 6f */
+	6, 6, 6, 6, 6, 6, 6, 6,	/* 70 .. 77 */
+	6, 6, 6, 6, 6, 6, 6, 6,	/* 78 .. 7f */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* 80 .. 87 */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* 88 .. 8f */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* 90 .. 97 */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* 98 .. 9f */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* a0 .. a7 */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* a8 .. af */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* b0 .. b7 */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* b8 .. bf */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* c0 .. c7 */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* c8 .. cf */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* d0 .. d7 */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* d8 .. df */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* e0 .. e7 */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* e8 .. ef */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* f0 .. f7 */
+	7, 7, 7, 7, 7, 7, 7, 7,	/* f8 .. ff */
 };
 
-static int
-xfs_highbit32(__uint32_t v)
+static int xfs_highbit32(__uint32_t v)
 {
-	int		i;
+	int i;
 
 	if (v & 0xffff0000)
 		if (v & 0xff000000)
@@ -300,37 +272,30 @@ xfs_highbit32(__uint32_t v)
 	return i + xfs_highbit[(v >> i) & 0xff];
 }
 
-static int
-isinxt (xfs_fileoff_t key, xfs_fileoff_t offset, xfs_filblks_t len)
+static int isinxt(xfs_fileoff_t key, xfs_fileoff_t offset, xfs_filblks_t len)
 {
 	return (key >= offset) ? (key < offset + len ? 1 : 0) : 0;
 }
 
-static xfs_daddr_t
-agb2daddr (xfs_agnumber_t agno, xfs_agblock_t agbno)
+static xfs_daddr_t agb2daddr(xfs_agnumber_t agno, xfs_agblock_t agbno)
 {
-	return ((xfs_fsblock_t)agno*xfs.agblocks + agbno) << xfs.bdlog;
+	return ((xfs_fsblock_t) agno * xfs.agblocks + agbno) << xfs.bdlog;
 }
 
-static xfs_daddr_t
-fsb2daddr (xfs_fsblock_t fsbno)
+static xfs_daddr_t fsb2daddr(xfs_fsblock_t fsbno)
 {
-	return agb2daddr ((xfs_agnumber_t)(fsbno >> xfs.agblklog),
-			 (xfs_agblock_t)(fsbno & mask32lo(xfs.agblklog)));
+	return agb2daddr((xfs_agnumber_t) (fsbno >> xfs.agblklog), (xfs_agblock_t) (fsbno & mask32lo(xfs.agblklog)));
 }
 
-static inline int
-btroot_maxrecs (void)
+static inline int btroot_maxrecs(void)
 {
 	int tmp = icore.di_forkoff ? (icore.di_forkoff << 3) : xfs.isize;
 
 	return (tmp - sizeof(xfs_bmdr_block_t) -
-		(int)((char *)&inode->di_u - (char*)inode)) /
-		(sizeof (xfs_bmbt_key_t) + sizeof (xfs_bmbt_ptr_t));
+		(int)((char *)&inode->di_u - (char *)inode)) / (sizeof(xfs_bmbt_key_t) + sizeof(xfs_bmbt_ptr_t));
 }
 
-static int
-di_read (xfs_ino_t ino)
+static int di_read(xfs_ino_t ino)
 {
 	xfs_agino_t agino;
 	xfs_agnumber_t agno;
@@ -338,23 +303,22 @@ di_read (xfs_ino_t ino)
 	xfs_daddr_t daddr;
 	int offset;
 
-	agno = ino2agno (ino);
-	agino = ino2agino (ino);
-	agbno = agino2agbno (agino);
-	offset = ino2offset (ino);
-	daddr = agb2daddr (agno, agbno);
+	agno = ino2agno(ino);
+	agino = ino2agino(ino);
+	agbno = agino2agbno(agino);
+	offset = ino2offset(ino);
+	daddr = agb2daddr(agno, agbno);
 
-	read_disk_block(xfs_file, daddr, offset*xfs.isize, xfs.isize, (char *)inode);
+	read_disk_block(xfs_file, daddr, offset * xfs.isize, xfs.isize, (char *)inode);
 
 	xfs.ptr0 = *(xfs_bmbt_ptr_t *)
-		    (inode->di_u.di_c + sizeof(xfs_bmdr_block_t)
-		    + btroot_maxrecs ()*sizeof(xfs_bmbt_key_t));
+	    (inode->di_u.di_c + sizeof(xfs_bmdr_block_t)
+	     + btroot_maxrecs() * sizeof(xfs_bmbt_key_t));
 
 	return 1;
 }
 
-static void
-init_extents (void)
+static void init_extents(void)
 {
 	xfs_bmbt_ptr_t ptr0;
 	xfs_btree_lblock_t h;
@@ -362,28 +326,25 @@ init_extents (void)
 	switch (icore.di_format) {
 	case XFS_DINODE_FMT_EXTENTS:
 		xfs.xt = inode->di_u.di_bmx;
-		xfs.nextents = le32 (icore.di_nextents);
+		xfs.nextents = le32(icore.di_nextents);
 		break;
 	case XFS_DINODE_FMT_BTREE:
 		ptr0 = xfs.ptr0;
 		for (;;) {
-			xfs.daddr = fsb2daddr (le64(ptr0));
-			read_disk_block(xfs_file, xfs.daddr, 0,
-					sizeof(xfs_btree_lblock_t), (char *)&h);
+			xfs.daddr = fsb2daddr(le64(ptr0));
+			read_disk_block(xfs_file, xfs.daddr, 0, sizeof(xfs_btree_lblock_t), (char *)&h);
 			if (!h.bb_level) {
 				xfs.nextents = le16(h.bb_numrecs);
-				xfs.next = fsb2daddr (le64(h.bb_leftsib));
+				xfs.next = fsb2daddr(le64(h.bb_leftsib));
 				xfs.fpos = sizeof(xfs_btree_block_t);
 				return;
 			}
-			read_disk_block(xfs_file, xfs.daddr, xfs.btnode_ptr0_off,
-				 sizeof(xfs_bmbt_ptr_t), (char *)&ptr0);
+			read_disk_block(xfs_file, xfs.daddr, xfs.btnode_ptr0_off, sizeof(xfs_bmbt_ptr_t), (char *)&ptr0);
 		}
 	}
 }
 
-static xad_t *
-next_extent (void)
+static xad_t *next_extent(void)
 {
 	static xad_t xad;
 
@@ -398,24 +359,22 @@ next_extent (void)
 			if (xfs.next == 0)
 				return NULL;
 			xfs.daddr = xfs.next;
-			read_disk_block(xfs_file, xfs.daddr, 0,
-					sizeof(xfs_btree_lblock_t), (char *)&h);
+			read_disk_block(xfs_file, xfs.daddr, 0, sizeof(xfs_btree_lblock_t), (char *)&h);
 			xfs.nextents = le16(h.bb_numrecs);
-			xfs.next = fsb2daddr (le64(h.bb_leftsib));
+			xfs.next = fsb2daddr(le64(h.bb_leftsib));
 			xfs.fpos = sizeof(xfs_btree_block_t);
 		}
 		/* Yeah, I know that's slow, but I really don't care */
-		read_disk_block(xfs_file, xfs.daddr, xfs.fpos,
-				sizeof(xfs_bmbt_rec_t), filebuf);
-		xfs.xt = (xfs_bmbt_rec_32_t *)filebuf;
+		read_disk_block(xfs_file, xfs.daddr, xfs.fpos, sizeof(xfs_bmbt_rec_t), filebuf);
+		xfs.xt = (xfs_bmbt_rec_32_t *) filebuf;
 		xfs.fpos += sizeof(xfs_bmbt_rec_32_t);
 		break;
 	default:
 		return NULL;
 	}
-	xad.offset = xt_offset (xfs.xt);
-	xad.start = xt_start (xfs.xt);
-	xad.len = xt_len (xfs.xt);
+	xad.offset = xt_offset(xfs.xt);
+	xad.start = xt_start(xfs.xt);
+	xad.len = xt_len(xfs.xt);
 	++xfs.xt;
 	--xfs.nextents;
 
@@ -425,52 +384,46 @@ next_extent (void)
 /*
  * Name lies - the function reads only first 100 bytes
  */
-static void
-xfs_dabread (void)
+static void xfs_dabread(void)
 {
 	xad_t *xad;
 	xfs_fileoff_t offset;;
 
-	init_extents ();
-	while ((xad = next_extent ())) {
+	init_extents();
+	while ((xad = next_extent())) {
 		offset = xad->offset;
-		if (isinxt (xfs.dablk, offset, xad->len)) {
-			read_disk_block(xfs_file, fsb2daddr (xad->start + xfs.dablk - offset),
-					0, 100, dirbuf);
+		if (isinxt(xfs.dablk, offset, xad->len)) {
+			read_disk_block(xfs_file, fsb2daddr(xad->start + xfs.dablk - offset), 0, 100, dirbuf);
 			break;
 		}
 	}
 }
 
-static inline xfs_ino_t
-sf_ino (char *sfe, int namelen)
+static inline xfs_ino_t sf_ino(char *sfe, int namelen)
 {
 	void *p = sfe + namelen + 3;
 
 	return (xfs.i8param == 0)
-		? le64(*(xfs_ino_t *)p) : le32(*(__uint32_t *)p);
+	    ? le64(*(xfs_ino_t *) p) : le32(*(__uint32_t *) p);
 }
 
-static inline xfs_ino_t
-sf_parent_ino (void)
+static inline xfs_ino_t sf_parent_ino(void)
 {
 	return (xfs.i8param == 0)
-		? le64(*(xfs_ino_t *)(&inode->di_u.di_dir2sf.hdr.parent))
-		: le32(*(__uint32_t *)(&inode->di_u.di_dir2sf.hdr.parent));
+	    ? le64(*(xfs_ino_t *) (&inode->di_u.di_dir2sf.hdr.parent))
+	    : le32(*(__uint32_t *) (&inode->di_u.di_dir2sf.hdr.parent));
 }
 
-static inline int
-roundup8 (int n)
+static inline int roundup8(int n)
 {
-	return ((n+7)&~7);
+	return ((n + 7) & ~7);
 }
 
-static char *
-next_dentry (xfs_ino_t *ino)
+static char *next_dentry(xfs_ino_t * ino)
 {
 	int namelen = 1;
 	int toread;
-	static char *usual[2] = {".", ".."};
+	static char *usual[2] = { ".", ".." };
 	static xfs_dir2_sf_entry_t *sfe;
 	char *name = usual[0];
 
@@ -478,10 +431,10 @@ next_dentry (xfs_ino_t *ino)
 		if (xfs.forw == 0)
 			return NULL;
 		xfs.dablk = xfs.forw;
-		xfs_dabread ();
+		xfs_dabread();
 #define h	((xfs_dir2_leaf_hdr_t *)dirbuf)
-		xfs.dirmax = le16 (h->count) - le16 (h->stale);
-		xfs.forw = le32 (h->info.forw);
+		xfs.dirmax = le16(h->count) - le16(h->stale);
+		xfs.forw = le32(h->info.forw);
 #undef h
 		xfs.dirpos = 0;
 	}
@@ -493,20 +446,19 @@ next_dentry (xfs_ino_t *ino)
 			*ino = 0;
 			break;
 		case -1:
-			*ino = sf_parent_ino ();
+			*ino = sf_parent_ino();
 			++name;
 			++namelen;
 			sfe = (xfs_dir2_sf_entry_t *)
-				(inode->di_u.di_c 
-				 + sizeof(xfs_dir2_sf_hdr_t)
-				 - xfs.i8param);
+			    (inode->di_u.di_c + sizeof(xfs_dir2_sf_hdr_t)
+			     - xfs.i8param);
 			break;
 		default:
 			namelen = sfe->namelen;
-			*ino = sf_ino ((char *)sfe, namelen);
+			*ino = sf_ino((char *)sfe, namelen);
 			name = (char *)sfe->name;
 			sfe = (xfs_dir2_sf_entry_t *)
-				  ((char *)sfe + namelen + 11 - xfs.i8param);
+			    ((char *)sfe + namelen + 11 - xfs.i8param);
 		}
 		break;
 	case XFS_DINODE_FMT_BTREE:
@@ -518,22 +470,22 @@ next_dentry (xfs_ino_t *ino)
 				xfs_file->pos &= ~(xfs.dirbsize - 1);
 				xfs_file->pos |= xfs.blkoff;
 			}
-			xfs_read_data (dirbuf, 4);
+			xfs_read_data(dirbuf, 4);
 			xfs.blkoff += 4;
 			if (dau->unused.freetag == XFS_DIR2_DATA_FREE_TAG) {
-				toread = roundup8 (le16(dau->unused.length)) - 4;
+				toread = roundup8(le16(dau->unused.length)) - 4;
 				xfs.blkoff += toread;
 				xfs_file->pos += toread;
 				continue;
 			}
 			break;
 		}
-		xfs_read_data ((char *)dirbuf + 4, 5);
-		*ino = le64 (dau->entry.inumber);
+		xfs_read_data((char *)dirbuf + 4, 5);
+		*ino = le64(dau->entry.inumber);
 		namelen = dau->entry.namelen;
 #undef dau
-		toread = roundup8 (namelen + 11) - 9;
-		xfs_read_data (dirbuf, toread);
+		toread = roundup8(namelen + 11) - 9;
+		xfs_read_data(dirbuf, toread);
 		name = (char *)dirbuf;
 		xfs.blkoff += toread + 5;
 		break;
@@ -544,8 +496,7 @@ next_dentry (xfs_ino_t *ino)
 	return name;
 }
 
-static char *
-first_dentry (xfs_ino_t *ino)
+static char *first_dentry(xfs_ino_t * ino)
 {
 	xfs.forw = 0;
 	switch (icore.di_format) {
@@ -557,27 +508,27 @@ first_dentry (xfs_ino_t *ino)
 	case XFS_DINODE_FMT_EXTENTS:
 	case XFS_DINODE_FMT_BTREE:
 		xfs_file->pos = 0;
-		xfs_file->len = le64 (icore.di_size);
-		xfs_read_data (dirbuf, sizeof(xfs_dir2_data_hdr_t));
-		if (((xfs_dir2_data_hdr_t *)dirbuf)->magic == le32(XFS_DIR2_BLOCK_MAGIC)) {
+		xfs_file->len = le64(icore.di_size);
+		xfs_read_data(dirbuf, sizeof(xfs_dir2_data_hdr_t));
+		if (((xfs_dir2_data_hdr_t *) dirbuf)->magic == le32(XFS_DIR2_BLOCK_MAGIC)) {
 #define tail		((xfs_dir2_block_tail_t *)dirbuf)
 			xfs_file->pos = xfs.dirbsize - sizeof(*tail);
-			xfs_read_data (dirbuf, sizeof(*tail));
-			xfs.dirmax = le32 (tail->count) - le32 (tail->stale);
+			xfs_read_data(dirbuf, sizeof(*tail));
+			xfs.dirmax = le32(tail->count) - le32(tail->stale);
 #undef tail
 		} else {
 			xfs.dablk = (1ULL << 35) >> xfs.blklog;
 #define h		((xfs_dir2_leaf_hdr_t *)dirbuf)
 #define n		((xfs_da_intnode_t *)dirbuf)
 			for (;;) {
-				xfs_dabread ();
+				xfs_dabread();
 				if ((n->hdr.info.magic == le16(XFS_DIR2_LEAFN_MAGIC))
 				    || (n->hdr.info.magic == le16(XFS_DIR2_LEAF1_MAGIC))) {
-					xfs.dirmax = le16 (h->count) - le16 (h->stale);
-					xfs.forw = le32 (h->info.forw);
+					xfs.dirmax = le16(h->count) - le16(h->stale);
+					xfs.forw = le32(h->info.forw);
 					break;
 				}
-				xfs.dablk = le32 (n->btree[0].before);
+				xfs.dablk = le32(n->btree[0].before);
 			}
 #undef n
 #undef h
@@ -587,11 +538,10 @@ first_dentry (xfs_ino_t *ino)
 		xfs.dirpos = 0;
 		break;
 	}
-	return next_dentry (ino);
+	return next_dentry(ino);
 }
 
-static int
-xfs_mount (void)
+static int xfs_mount(void)
 {
 	xfs_sb_t super;
 
@@ -606,29 +556,26 @@ xfs_mount (void)
 		return 0;
 	}
 
-	xfs.bsize = le32 (super.sb_blocksize);
+	xfs.bsize = le32(super.sb_blocksize);
 	xfs.blklog = super.sb_blocklog;
 	xfs.bdlog = xfs.blklog - SECTOR_BITS;
-	xfs.rootino = le64 (super.sb_rootino);
-	xfs.isize = le16 (super.sb_inodesize);
-	xfs.agblocks = le32 (super.sb_agblocks);
+	xfs.rootino = le64(super.sb_rootino);
+	xfs.isize = le16(super.sb_inodesize);
+	xfs.agblocks = le32(super.sb_agblocks);
 	xfs.dirblklog = super.sb_dirblklog;
 	xfs.dirbsize = xfs.bsize << super.sb_dirblklog;
 
 	xfs.inopblog = super.sb_inopblog;
 	xfs.agblklog = super.sb_agblklog;
-	xfs.agnolog = xfs_highbit32 (le32 (super.sb_agcount) - 1) + 1;
+	xfs.agnolog = xfs_highbit32(le32(super.sb_agcount) - 1) + 1;
 
-	xfs.btnode_ptr0_off =
-		((xfs.bsize - sizeof(xfs_btree_block_t)) /
-		(sizeof (xfs_bmbt_key_t) + sizeof (xfs_bmbt_ptr_t)))
-		 * sizeof(xfs_bmbt_key_t) + sizeof(xfs_btree_block_t);
+	xfs.btnode_ptr0_off = ((xfs.bsize - sizeof(xfs_btree_block_t)) / (sizeof(xfs_bmbt_key_t) + sizeof(xfs_bmbt_ptr_t)))
+	    * sizeof(xfs_bmbt_key_t) + sizeof(xfs_btree_block_t);
 
 	return 1;
 }
 
-static int
-xfs_read_data (char *buf, int len)
+static int xfs_read_data(char *buf, int len)
 {
 	xad_t *xad;
 	xfs_fileoff_t endofprev, endofcur, offset;
@@ -647,23 +594,22 @@ xfs_read_data (char *buf, int len)
 	else
 		endpos = xfs_file->pos + len;
 	lenght = endpos - startpos;
-	endofprev = (xfs_fileoff_t)-1;
-	init_extents ();
-	while (lenght > 0 && (xad = next_extent ())) {
+	endofprev = (xfs_fileoff_t) - 1;
+	init_extents();
+	while (lenght > 0 && (xad = next_extent())) {
 		offset = xad->offset;
 		xadlen = xad->len;
-		if (isinxt (xfs_file->pos >> xfs.blklog, offset, xadlen)) {
-			endofcur = (offset + xadlen) << xfs.blklog; 
+		if (isinxt(xfs_file->pos >> xfs.blklog, offset, xadlen)) {
+			endofcur = (offset + xadlen) << xfs.blklog;
 			toread = (endofcur >= endpos)
-				  ? lenght : (endofcur - xfs_file->pos);
-			read_disk_block(xfs_file, fsb2daddr (xad->start),
-					xfs_file->pos - (offset << xfs.blklog), toread, buf);
+			    ? lenght : (endofcur - xfs_file->pos);
+			read_disk_block(xfs_file, fsb2daddr(xad->start), xfs_file->pos - (offset << xfs.blklog), toread, buf);
 			buf += toread;
 			lenght -= toread;
 			xfs_file->pos += toread;
 		} else if (offset > endofprev) {
 			toread = ((offset << xfs.blklog) >= endpos)
-				  ? lenght : ((offset - endofprev) << xfs.blklog);
+			    ? lenght : ((offset - endofprev) << xfs.blklog);
 			lenght -= toread;
 			xfs_file->pos += toread;
 			for (; toread; toread--) {
@@ -671,14 +617,13 @@ xfs_read_data (char *buf, int len)
 			}
 			continue;
 		}
-		endofprev = offset + xadlen; 
+		endofprev = offset + xadlen;
 	}
 
 	return xfs_file->pos - startpos;
 }
 
-static int
-xfs_dir (char *dirname)
+static int xfs_dir(char *dirname)
 {
 	xfs_ino_t ino, parent_ino, new_ino;
 	xfs_fsize_t di_size;
@@ -692,9 +637,9 @@ xfs_dir (char *dirname)
 	parent_ino = ino = xfs.rootino;
 	link_count = 0;
 	for (;;) {
-		di_read (ino);
-		di_size = le64 (icore.di_size);
-		di_mode = le16 (icore.di_mode);
+		di_read(ino);
+		di_size = le64(icore.di_size);
+		di_mode = le16(icore.di_mode);
 
 		DEBUG_F("di_mode: %o\n", di_mode);
 		if ((di_mode & IFMT) == IFLNK) {
@@ -706,7 +651,7 @@ xfs_dir (char *dirname)
 			if (di_size < xfs.bsize - 1) {
 				xfs_file->pos = 0;
 				xfs_file->len = di_size;
-				n = xfs_read_data (linkbuf, xfs_file->len);
+				n = xfs_read_data(linkbuf, xfs_file->len);
 			} else {
 				errnum = FILE_ERR_LENGTH;
 				DEBUG_LEAVE(FILE_ERR_LENGTH);
@@ -714,14 +659,14 @@ xfs_dir (char *dirname)
 			}
 
 			ino = (linkbuf[0] == '/') ? xfs.rootino : parent_ino;
-			while (n < (xfs.bsize - 1) && (linkbuf[n++] = *dirname++));
+			while (n < (xfs.bsize - 1) && (linkbuf[n++] = *dirname++)) ;
 			linkbuf[n] = 0;
 			dirname = linkbuf;
 			continue;
 		}
 
 		DEBUG_F("*dirname: %s\n", dirname);
-		if (!*dirname || isspace (*dirname)) {
+		if (!*dirname || isspace(*dirname)) {
 			if ((di_mode & IFMT) != IFREG) {
 				errnum = FILE_ERR_BAD_TYPE;
 				DEBUG_LEAVE(FILE_ERR_BAD_TYPE);
@@ -739,22 +684,22 @@ xfs_dir (char *dirname)
 			return 0;
 		}
 
-		for (; *dirname == '/'; dirname++);
+		for (; *dirname == '/'; dirname++) ;
 
-		for (rest = dirname; (ch = *rest) && !isspace (ch) && ch != '/'; rest++);
+		for (rest = dirname; (ch = *rest) && !isspace(ch) && ch != '/'; rest++) ;
 		*rest = 0;
 
-		name = first_dentry (&new_ino);
+		name = first_dentry(&new_ino);
 		for (;;) {
 			cmp = (!*dirname) ? -1 : strcmp(dirname, name);
 			if (cmp == 0) {
 				parent_ino = ino;
 				if (new_ino)
 					ino = new_ino;
-		        	*(dirname = rest) = ch;
+				*(dirname = rest) = ch;
 				break;
 			}
-			name = next_dentry (&new_ino);
+			name = next_dentry(&new_ino);
 			if (name == NULL) {
 				errnum = FILE_ERR_NOTFOUND;
 				DEBUG_LEAVE(FILE_ERR_NOTFOUND);

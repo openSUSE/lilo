@@ -14,16 +14,15 @@
 #include <string.h>
 #include <ctype.h>
 
-
 /**
  * simple_strtoul - convert a string to an unsigned long
  * @cp: The start of the string
  * @endp: A pointer to the end of the parsed string will be placed here
  * @base: The number base to use
  */
-unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
+unsigned long simple_strtoul(const char *cp, char **endp, unsigned int base)
 {
-	unsigned long result = 0,value;
+	unsigned long result = 0, value;
 
 	if (!base) {
 		base = 10;
@@ -36,9 +35,8 @@ unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
 			}
 		}
 	}
-	while (isxdigit(*cp) &&
-	       (value = isdigit(*cp) ? *cp-'0' : toupper(*cp)-'A'+10) < base) {
-		result = result*base + value;
+	while (isxdigit(*cp) && (value = isdigit(*cp) ? *cp - '0' : toupper(*cp) - 'A' + 10) < base) {
+		result = result * base + value;
 		cp++;
 	}
 	if (endp)
@@ -52,11 +50,11 @@ unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
  * @endp: A pointer to the end of the parsed string will be placed here
  * @base: The number base to use
  */
-long simple_strtol(const char *cp,char **endp,unsigned int base)
+long simple_strtol(const char *cp, char **endp, unsigned int base)
 {
-	if(*cp=='-')
-		return -simple_strtoul(cp+1,endp,base);
-	return simple_strtoul(cp,endp,base);
+	if (*cp == '-')
+		return -simple_strtoul(cp + 1, endp, base);
+	return simple_strtoul(cp, endp, base);
 }
 
 /**
@@ -65,9 +63,9 @@ long simple_strtol(const char *cp,char **endp,unsigned int base)
  * @endp: A pointer to the end of the parsed string will be placed here
  * @base: The number base to use
  */
-unsigned long long simple_strtoull(const char *cp,char **endp,unsigned int base)
+unsigned long long simple_strtoull(const char *cp, char **endp, unsigned int base)
 {
-	unsigned long long result = 0,value;
+	unsigned long long result = 0, value;
 
 	if (!base) {
 		base = 10;
@@ -80,9 +78,9 @@ unsigned long long simple_strtoull(const char *cp,char **endp,unsigned int base)
 			}
 		}
 	}
-	while (isxdigit(*cp) && (value = isdigit(*cp) ? *cp-'0' : (islower(*cp)
-	    ? toupper(*cp) : *cp)-'A'+10) < base) {
-		result = result*base + value;
+	while (isxdigit(*cp) && (value = isdigit(*cp) ? *cp - '0' : (islower(*cp)
+								     ? toupper(*cp) : *cp) - 'A' + 10) < base) {
+		result = result * base + value;
 		cp++;
 	}
 	if (endp)
@@ -96,19 +94,19 @@ unsigned long long simple_strtoull(const char *cp,char **endp,unsigned int base)
  * @endp: A pointer to the end of the parsed string will be placed here
  * @base: The number base to use
  */
-long long simple_strtoll(const char *cp,char **endp,unsigned int base)
+long long simple_strtoll(const char *cp, char **endp, unsigned int base)
 {
-	if(*cp=='-')
-		return -simple_strtoull(cp+1,endp,base);
-	return simple_strtoull(cp,endp,base);
+	if (*cp == '-')
+		return -simple_strtoull(cp + 1, endp, base);
+	return simple_strtoull(cp, endp, base);
 }
 
 static int skip_atoi(const char **s)
 {
-	int i=0;
+	int i = 0;
 
 	while (isdigit(**s))
-		i = i*10 + *((*s)++) - '0';
+		i = i * 10 + *((*s)++) - '0';
 	return i;
 }
 
@@ -120,10 +118,10 @@ static int skip_atoi(const char **s)
 #define SPECIAL	32		/* 0x */
 #define LARGE	64		/* use 'ABCDEF' instead of 'abcdef' */
 
-static char * number(char * str, long long num, int base, int size, int precision, int type)
+static char *number(char *str, long long num, int base, int size, int precision, int type)
 {
-	char c,sign,tmp[66];
-	const char *digits="0123456789abcdefghijklmnopqrstuvwxyz";
+	char c, sign, tmp[66];
+	const char *digits = "0123456789abcdefghijklmnopqrstuvwxyz";
 	int i;
 
 	if (type & LARGE)
@@ -155,25 +153,25 @@ static char * number(char * str, long long num, int base, int size, int precisio
 	}
 	i = 0;
 	if (num == 0)
-		tmp[i++]='0';
-	else while (num != 0)
-        {
-                int t = ((long long) num) % (unsigned int) base;
-		tmp[i++] = digits[t];
-                num = ((long long) num) / (unsigned int) base;
-        }
+		tmp[i++] = '0';
+	else
+		while (num != 0) {
+			int t = ((long long)num) % (unsigned int)base;
+			tmp[i++] = digits[t];
+			num = ((long long)num) / (unsigned int)base;
+		}
 	if (i > precision)
 		precision = i;
 	size -= precision;
-	if (!(type&(ZEROPAD+LEFT)))
-		while(size-->0)
+	if (!(type & (ZEROPAD + LEFT)))
+		while (size-- > 0)
 			*str++ = ' ';
 	if (sign)
 		*str++ = sign;
 	if (type & SPECIAL) {
-		if (base==8)
+		if (base == 8)
 			*str++ = '0';
-		else if (base==16) {
+		else if (base == 16) {
 			*str++ = '0';
 			*str++ = digits[33];
 		}
@@ -204,7 +202,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 	int len;
 	unsigned long long num;
 	int i, base;
-	char * str;
+	char *str;
 	const char *s;
 
 	int flags;		/* flags to number() */
@@ -213,28 +211,37 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 	int precision;		/* min. # of digits for integers; max
 				   number of chars for from string */
 	int qualifier;		/* 'h', 'l', or 'L' for integer fields */
-	                        /* 'z' support added 23/7/1999 S.H.    */
-				/* 'z' changed to 'Z' --davidm 1/25/99 */
+	/* 'z' support added 23/7/1999 S.H.    */
+	/* 'z' changed to 'Z' --davidm 1/25/99 */
 
-
-	for (str=buf ; *fmt ; ++fmt) {
+	for (str = buf; *fmt; ++fmt) {
 		if (*fmt != '%') {
 			*str++ = *fmt;
 			continue;
 		}
-			
+
 		/* process flags */
 		flags = 0;
-		repeat:
-			++fmt;		/* this also skips first '%' */
-			switch (*fmt) {
-				case '-': flags |= LEFT; goto repeat;
-				case '+': flags |= PLUS; goto repeat;
-				case ' ': flags |= SPACE; goto repeat;
-				case '#': flags |= SPECIAL; goto repeat;
-				case '0': flags |= ZEROPAD; goto repeat;
-				}
-		
+	      repeat:
+		++fmt;		/* this also skips first '%' */
+		switch (*fmt) {
+		case '-':
+			flags |= LEFT;
+			goto repeat;
+		case '+':
+			flags |= PLUS;
+			goto repeat;
+		case ' ':
+			flags |= SPACE;
+			goto repeat;
+		case '#':
+			flags |= SPECIAL;
+			goto repeat;
+		case '0':
+			flags |= ZEROPAD;
+			goto repeat;
+		}
+
 		/* get field width */
 		field_width = -1;
 		if (isdigit(*fmt))
@@ -252,7 +259,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		/* get the precision */
 		precision = -1;
 		if (*fmt == '.') {
-			++fmt;	
+			++fmt;
 			if (isdigit(*fmt))
 				precision = skip_atoi(&fmt);
 			else if (*fmt == '*') {
@@ -266,7 +273,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 
 		/* get the conversion qualifier */
 		qualifier = -1;
-		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L' || *fmt =='Z') {
+		if (*fmt == 'h' || *fmt == 'l' || *fmt == 'L' || *fmt == 'Z') {
 			qualifier = *fmt;
 			++fmt;
 		}
@@ -279,7 +286,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 			if (!(flags & LEFT))
 				while (--field_width > 0)
 					*str++ = ' ';
-			*str++ = (unsigned char) va_arg(args, int);
+			*str++ = (unsigned char)va_arg(args, int);
 			while (--field_width > 0)
 				*str++ = ' ';
 			continue;
@@ -302,24 +309,21 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 
 		case 'p':
 			if (field_width == -1) {
-				field_width = 2*sizeof(void *);
+				field_width = 2 * sizeof(void *);
 				flags |= ZEROPAD;
 			}
-			str = number(str,
-				(unsigned long) va_arg(args, void *), 16,
-				field_width, precision, flags);
+			str = number(str, (unsigned long)va_arg(args, void *), 16, field_width, precision, flags);
 			continue;
-
 
 		case 'n':
 			if (qualifier == 'l') {
-				long * ip = va_arg(args, long *);
+				long *ip = va_arg(args, long *);
 				*ip = (str - buf);
 			} else if (qualifier == 'Z') {
-				size_t * ip = va_arg(args, size_t *);
+				size_t *ip = va_arg(args, size_t *);
 				*ip = (str - buf);
 			} else {
-				int * ip = va_arg(args, int *);
+				int *ip = va_arg(args, int *);
 				*ip = (str - buf);
 			}
 			continue;
@@ -328,7 +332,7 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 			*str++ = '%';
 			continue;
 
-		/* integer number formats - set up the flags and "break" */
+			/* integer number formats - set up the flags and "break" */
 		case 'o':
 			base = 8;
 			break;
@@ -355,27 +359,27 @@ int vsprintf(char *buf, const char *fmt, va_list args)
 		}
 		if (qualifier == 'L') {
 			num = va_arg(args, unsigned long long);
-                        if( flags & SIGN)
-                                num = (signed long long) num;
-                } else if (qualifier == 'l') {
+			if (flags & SIGN)
+				num = (signed long long)num;
+		} else if (qualifier == 'l') {
 			num = va_arg(args, unsigned long);
 			if (flags & SIGN)
-				num = (signed long) num;
+				num = (signed long)num;
 		} else if (qualifier == 'Z') {
 			num = va_arg(args, size_t);
 		} else if (qualifier == 'h') {
-			num = (unsigned short) va_arg(args, int);
+			num = (unsigned short)va_arg(args, int);
 			if (flags & SIGN)
-				num = (signed short) num;
+				num = (signed short)num;
 		} else {
 			num = va_arg(args, unsigned int);
 			if (flags & SIGN)
-				num = (signed int) num;
+				num = (signed int)num;
 		}
 		str = number(str, num, base, field_width, precision, flags);
 	}
 	*str = '\0';
-	return str-buf;
+	return str - buf;
 }
 
 /**
@@ -384,13 +388,13 @@ int vsprintf(char *buf, const char *fmt, va_list args)
  * @fmt: The format string to use
  * @...: Arguments for the format string
  */
-int sprintf(char * buf, const char *fmt, ...)
+int sprintf(char *buf, const char *fmt, ...)
 {
 	va_list args;
 	int i;
 
 	va_start(args, fmt);
-	i=vsprintf(buf,fmt,args);
+	i = vsprintf(buf, fmt, args);
 	va_end(args);
 	return i;
 }

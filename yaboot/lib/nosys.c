@@ -1,5 +1,5 @@
 /* we got no time */
 long time()
 {
-    return 0;
+	return 0;
 }

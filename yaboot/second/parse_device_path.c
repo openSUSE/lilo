@@ -11,7 +11,7 @@
 
 #define I(m) DEBUG_F(" %p "#m " '%d' \n", &p->m, p->m);
 #define S(m) DEBUG_F(" %p "#m " %p '%s' \n", &p->m, p->m, p->m ? p->m : "");
-void __dump_path_description (const char *fn, int l, const struct path_description *p)
+void __dump_path_description(const char *fn, int l, const struct path_description *p)
 {
 	DEBUG_F("called from '%s(%u)' '%p'\n", fn, l, p);
 	if (!p)
@@ -23,6 +23,7 @@ void __dump_path_description (const char *fn, int l, const struct path_descripti
 	S(u.d.s2);
 	S(filename);
 }
+
 #undef S
 #undef I
 
@@ -148,42 +149,42 @@ char *path_description_to_string(const struct path_description *input)
 	path = NULL;
 	len = strlen(input->device);
 	len += strlen(input->filename);
-	len += 1 + 1 + 1; /* : , \0 */
+	len += 1 + 1 + 1;	/* : , \0 */
 	switch (input->type) {
-		case TYPE_BLOCK:
-			if (input->part > 0)
-				sprintf(part, "%d,", input->part);
-			else {
-				part[0] = ',';
-				part[1] = '\0';
-			}
-			len += strlen(part);
-			len += strlen(input->u.b.directory);
-			path = malloc(len);
-			if (path)
-				sprintf(path, "%s:%s%s%s", input->device, part,
-					input->u.b.directory, input->filename);
-			break;
-		case TYPE_NET:
-			len += strlen(input->u.n.ip_before_filename);
-			if (input->u.n.ip_after_filename) {
-				len++;
-				len += strlen(input->u.n.ip_after_filename);
-			}
-			path = malloc(len);
-			if (path)
-				sprintf(path, "%s:%s,%s%s%s", input->device,
-					input->u.n.ip_before_filename, input->filename,
-					input->u.n.ip_after_filename ? "," : "",
-					input->u.n.ip_after_filename ? input->u.n.ip_after_filename : "");
-			break;
-		default:
-			break;
+	case TYPE_BLOCK:
+		if (input->part > 0)
+			sprintf(part, "%d,", input->part);
+		else {
+			part[0] = ',';
+			part[1] = '\0';
+		}
+		len += strlen(part);
+		len += strlen(input->u.b.directory);
+		path = malloc(len);
+		if (path)
+			sprintf(path, "%s:%s%s%s", input->device, part, input->u.b.directory, input->filename);
+		break;
+	case TYPE_NET:
+		len += strlen(input->u.n.ip_before_filename);
+		if (input->u.n.ip_after_filename) {
+			len++;
+			len += strlen(input->u.n.ip_after_filename);
+		}
+		path = malloc(len);
+		if (path)
+			sprintf(path, "%s:%s,%s%s%s", input->device,
+				input->u.n.ip_before_filename, input->filename,
+				input->u.n.ip_after_filename ? "," : "",
+				input->u.n.ip_after_filename ? input->u.n.ip_after_filename : "");
+		break;
+	default:
+		break;
 	}
 	return path;
 }
 
-int imagepath_to_path_description(const char *imagepath, struct path_description *result, const struct path_description *default_device)
+int imagepath_to_path_description(const char *imagepath, struct path_description *result,
+				  const struct path_description *default_device)
 {
 	char *past_device, *comma, *dir, *pathname;
 	char part[42];
@@ -196,7 +197,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 	memset(result, 0, sizeof(*result));
 	past_device = strchr(imagepath, ':');
 	if (past_device) {
-		if (strncmp("&device;:", imagepath, 9) != 0)  {
+		if (strncmp("&device;:", imagepath, 9) != 0) {
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 			prom_printf("parsing full path '%s'\n", imagepath);
 #endif
@@ -207,55 +208,55 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 	comma = dir = "";
 	pathname = NULL;
 	switch (default_device->type) {
-		case TYPE_BLOCK:
-			part[0] = '\0';
-			/* parse_device_path will look for a partition number */
-			if (past_device)
-				len = strlen(default_device->device) + 1 + strlen(past_device);
-			else {
-				if (default_device->part > 0)
-					sprintf(part, "%d", default_device->part);
+	case TYPE_BLOCK:
+		part[0] = '\0';
+		/* parse_device_path will look for a partition number */
+		if (past_device)
+			len = strlen(default_device->device) + 1 + strlen(past_device);
+		else {
+			if (default_device->part > 0)
+				sprintf(part, "%d", default_device->part);
+			comma = ",";
+			if (imagepath[0] != '/' && imagepath[0] != '\\' && default_device->u.b.directory)
+				dir = default_device->u.b.directory;
+			len = strlen(default_device->device) + 1 + strlen(part) + 1 + strlen(dir) + strlen(imagepath);
+		}
+		len += 2;
+		pathname = malloc(len);
+		if (pathname)
+			sprintf(pathname, "%s:%s%s%s%s", default_device->device, part, comma, dir,
+				past_device ? past_device : imagepath);
+#if defined(DEBUG) || defined(DEVPATH_TEST)
+		prom_printf("parsing block path '%s'\n", pathname);
+#endif
+		break;
+	case TYPE_NET:
+		if (past_device)
+			len = strlen(default_device->device) + 1 + strlen(past_device);
+		else {
+			len = strlen(default_device->device) + 1;
+			if (default_device->u.n.ip_before_filename)
+				len += strlen(default_device->u.n.ip_before_filename);
+			len++;
+			len += strlen(imagepath);
+			if (default_device->u.n.ip_after_filename) {
+				len += 1 + strlen(default_device->u.n.ip_after_filename);
 				comma = ",";
-				if (imagepath[0] != '/' && imagepath[0] != '\\' && default_device->u.b.directory)
-					dir = default_device->u.b.directory;
-				len = strlen(default_device->device) + 1 + strlen(part) + 1 + strlen(dir) + strlen(imagepath);
 			}
-			len += 2;
-			pathname = malloc(len);
-			if (pathname)
-				sprintf(pathname, "%s:%s%s%s%s", default_device->device, part, comma, dir,
-						past_device ? past_device : imagepath);
+		}
+		len += 2;
+		pathname = malloc(len);
+		if (pathname)
+			sprintf(pathname, "%s:%s,%s%s%s", default_device->device,
+				default_device->u.n.ip_before_filename ? default_device->u.n.ip_before_filename : "",
+				past_device ? past_device : imagepath, comma,
+				default_device->u.n.ip_after_filename ? default_device->u.n.ip_after_filename : "");
 #if defined(DEBUG) || defined(DEVPATH_TEST)
-			prom_printf("parsing block path '%s'\n", pathname);
+		prom_printf("parsing net path '%s'\n", pathname);
 #endif
-			break;
-		case TYPE_NET:
-			if (past_device)
-				len = strlen(default_device->device) + 1 + strlen(past_device);
-			else {
-				len = strlen(default_device->device) + 1;
-				if (default_device->u.n.ip_before_filename)
-					len += strlen(default_device->u.n.ip_before_filename);
-				len++;
-				len += strlen(imagepath);
-				if (default_device->u.n.ip_after_filename) {
-					len += 1 + strlen(default_device->u.n.ip_after_filename);
-					comma = ",";
-				}
-			}
-			len += 2;
-			pathname = malloc(len);
-			if (pathname)
-				sprintf(pathname, "%s:%s,%s%s%s", default_device->device,
-						default_device->u.n.ip_before_filename ? default_device->u.n.ip_before_filename : "",
-						past_device ? past_device : imagepath, comma,
-						default_device->u.n.ip_after_filename ? default_device->u.n.ip_after_filename : "");
-#if defined(DEBUG) || defined(DEVPATH_TEST)
-			prom_printf("parsing net path '%s'\n", pathname);
-#endif
-			break;
-		default:
-			;
+		break;
+	default:
+		;
 	}
 	len = parse_device_path(pathname, result);
 	if (pathname)
@@ -286,7 +287,7 @@ void set_default_device(const char *dev, const char *partition, struct path_desc
 		if (endp != partition && *endp == 0) {
 			if (TYPE_UNSET == default_device->type)
 				default_device->type = TYPE_BLOCK;
-			default_device->part = n;	       
+			default_device->part = n;
 		}
 	}
 }

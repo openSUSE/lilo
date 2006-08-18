@@ -26,115 +26,115 @@
 
 #include "ctype.h"
 
-int strtol (nptr, endptr, base)
+int strtol(nptr, endptr, base)
 const char *nptr;
 char **endptr;
 int base;
 {
-    int negative;
-    register unsigned int cutoff;
-    register unsigned int cutlim;
-    register unsigned int i;
-    register const char *s;
-    register unsigned char c;
-    const char *save, *end;
-    int overflow;
+	int negative;
+	register unsigned int cutoff;
+	register unsigned int cutlim;
+	register unsigned int i;
+	register const char *s;
+	register unsigned char c;
+	const char *save, *end;
+	int overflow;
 
-    if (base < 0 || base == 1 || base > 36)
-	base = 10;
+	if (base < 0 || base == 1 || base > 36)
+		base = 10;
 
-    save = s = nptr;
+	save = s = nptr;
 
-    /* Skip white space.  */
-    while (((unsigned char) *s) <= 32 && *s)
-	++s;
-    if (*s == '\0')
-	goto noconv;
+	/* Skip white space.  */
+	while (((unsigned char)*s) <= 32 && *s)
+		++s;
+	if (*s == '\0')
+		goto noconv;
 
-    /* Check for a sign.  */
-    if (*s == '-') {
-	negative = 1;
-	++s;
-    } else if (*s == '+') {
-	negative = 0;
-	++s;
-    } else
-	negative = 0;
-
-    if ((base == 16 && s[0] == '0' && (s[1] == 'X')) || (s[1] == 'x'))
-	s += 2;
-
-    /* If BASE is zero, figure it out ourselves.  */
-    if (base == 0) {
-	if (*s == '0') {
-	    if (s[1] == 'X' || s[1] == 'x') {
-		s += 2;
-		base = 16;
-	    } else
-		base = 8;
+	/* Check for a sign.  */
+	if (*s == '-') {
+		negative = 1;
+		++s;
+	} else if (*s == '+') {
+		negative = 0;
+		++s;
 	} else
-	    base = 10;
-    }
+		negative = 0;
 
-    /* Save the pointer so we can check later if anything happened.  */
-    save = s;
+	if ((base == 16 && s[0] == '0' && (s[1] == 'X')) || (s[1] == 'x'))
+		s += 2;
 
-    end = 0;
-
-    cutoff = 0x7FFFFFFF / (unsigned int) base;
-    cutlim = 0x7FFFFFFF % (unsigned int) base;
-
-    overflow = 0;
-    i = 0;
-    for (c = *s; c != '\0'; c = *++s) {
-	if (s == end)
-	    break;
-	if (c >= '0' && c <= '9')
-	    c -= '0';
-	else if (c >= 'A' && c <= 'Z')
-	    c = c - 'A' + 10;
-	else if (c >= 'a' && c <= 'z')
-	    c = c - 'a' + 10;
-	else
-	    break;
-	if (c >= base)
-	    break;
-	/* Check for overflow.  */
-	if (i > cutoff || (i == cutoff && c > cutlim))
-	    overflow = 1;
-	else {
-	    i *= (unsigned int) base;
-	    i += c;
+	/* If BASE is zero, figure it out ourselves.  */
+	if (base == 0) {
+		if (*s == '0') {
+			if (s[1] == 'X' || s[1] == 'x') {
+				s += 2;
+				base = 16;
+			} else
+				base = 8;
+		} else
+			base = 10;
 	}
-    }
 
-    /* Check if anything actually happened.  */
-    if (s == save)
-	goto noconv;
+	/* Save the pointer so we can check later if anything happened.  */
+	save = s;
 
-    /* Store in ENDPTR the address of one character
-       past the last character we converted.  */
-    if (endptr)
-	*endptr = (char *) s;
+	end = 0;
 
-    if (overflow)
-	return negative ? (int) 0x80000000 : (int) 0x7FFFFFFF;
+	cutoff = 0x7FFFFFFF / (unsigned int)base;
+	cutlim = 0x7FFFFFFF % (unsigned int)base;
 
-    /* Return the result of the appropriate sign.  */
-    return (negative ? -i : i);
+	overflow = 0;
+	i = 0;
+	for (c = *s; c != '\0'; c = *++s) {
+		if (s == end)
+			break;
+		if (c >= '0' && c <= '9')
+			c -= '0';
+		else if (c >= 'A' && c <= 'Z')
+			c = c - 'A' + 10;
+		else if (c >= 'a' && c <= 'z')
+			c = c - 'a' + 10;
+		else
+			break;
+		if (c >= base)
+			break;
+		/* Check for overflow.  */
+		if (i > cutoff || (i == cutoff && c > cutlim))
+			overflow = 1;
+		else {
+			i *= (unsigned int)base;
+			i += c;
+		}
+	}
 
-  noconv:
-    /* We must handle a special case here: the base is 0 or 16 and the
-       first two characters and '0' and 'x', but the rest are no
-       hexadecimal digits.  This is no error case.  We return 0 and
-       ENDPTR points to the `x`.  */
-    if (endptr) {
-	if (save - nptr >= 2 && tolower (save[-1]) == 'x' && save[-2] == '0')
-	    *endptr = (char *) &save[-1];
-	else
-	    /*  There was no number to convert.  */
-	    *endptr = (char *) nptr;
-    }
+	/* Check if anything actually happened.  */
+	if (s == save)
+		goto noconv;
 
-    return 0L;
+	/* Store in ENDPTR the address of one character
+	   past the last character we converted.  */
+	if (endptr)
+		*endptr = (char *)s;
+
+	if (overflow)
+		return negative ? (int)0x80000000 : (int)0x7FFFFFFF;
+
+	/* Return the result of the appropriate sign.  */
+	return (negative ? -i : i);
+
+      noconv:
+	/* We must handle a special case here: the base is 0 or 16 and the
+	   first two characters and '0' and 'x', but the rest are no
+	   hexadecimal digits.  This is no error case.  We return 0 and
+	   ENDPTR points to the `x`.  */
+	if (endptr) {
+		if (save - nptr >= 2 && tolower(save[-1]) == 'x' && save[-2] == '0')
+			*endptr = (char *)&save[-1];
+		else
+			/*  There was no number to convert.  */
+			*endptr = (char *)nptr;
+	}
+
+	return 0L;
 }
