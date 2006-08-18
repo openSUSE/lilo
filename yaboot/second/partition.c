@@ -390,6 +390,6 @@ void partitions_free(struct partition_t *list)
 /* 
  * Local variables:
  * c-file-style: "k&r"
- * c-basic-offset: 5
+ * c-basic-offset: 8
  * End:
  */

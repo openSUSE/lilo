@@ -59,6 +59,6 @@ struct fs_t iso_filesystem = {
 /* 
  * Local variables:
  * c-file-style: "k&r"
- * c-basic-offset: 5
+ * c-basic-offset: 8
  * End:
  */

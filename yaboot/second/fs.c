@@ -69,6 +69,6 @@ const struct fs_t *fs_open(struct boot_file_t *file, const char *dev_name, struc
 /* 
  * Local variables:
  * c-file-style: "k&r"
- * c-basic-offset: 5
+ * c-basic-offset: 8
  * End:
  */
