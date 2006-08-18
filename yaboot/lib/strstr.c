@@ -32,9 +32,7 @@ typedef unsigned chartype;
 
 #undef strstr
 
-char *strstr(phaystack, pneedle)
-const char *phaystack;
-const char *pneedle;
+char *strstr(const char *phaystack, const char *pneedle)
 {
 	register const unsigned char *haystack, *needle;
 	register chartype b, c;

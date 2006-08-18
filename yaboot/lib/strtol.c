@@ -26,10 +26,7 @@
 
 #include "ctype.h"
 
-int strtol(nptr, endptr, base)
-const char *nptr;
-char **endptr;
-int base;
+int strtol(const char *nptr, char **endptr, int base)
 {
 	int negative;
 	register unsigned int cutoff;
