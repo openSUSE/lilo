@@ -40,52 +40,31 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 {
 	struct partition_t *parts;
 	struct partition_t *p;
-	struct partition_t *found;
 	char f[1024];
 	int partition = spec->part;
 
 	parts = partitions_lookup(spec->device);
-	found = NULL;
 	sprintf(f, "%s%s", spec->u.b.directory, spec->filename);
 	DEBUG_F("filename '%s'\n", f);
-
+	fserrorno = FILE_ERR_BADDEV;
+	if (parts) {
 #ifdef DEBUG
-	if (parts)
 		prom_printf("partitions:\n");
+#endif
+		for (p = parts; p; p = p->next) {
+			DEBUG_F("#%02d, start: %08lx, length: %08lx\n", p->part_number, p->part_start, p->part_size);
+			if (partition == -1 || partition == p->part_number) {
+				file->fs = fs_open(file, spec->device, p, f);
+				if (file->fs && fserrorno == FILE_ERR_OK)
+					break;
+			}
+		}
+		partitions_free(parts);
+	}
+#ifdef DEBUG
 	else
 		prom_printf("no partitions found.\n");
 #endif
-	for (p = parts; p && !found; p = p->next) {
-		DEBUG_F("number: %02d, start: %08lx, length: %08lx\n", p->part_number, p->part_start, p->part_size);
-		if (partition == -1) {
-			file->fs = fs_open(file, spec->device, p, f);
-			if (file->fs == NULL || fserrorno != FILE_ERR_OK)
-				continue;
-			else {
-				partition = p->part_number;
-				goto done;
-			}
-		}
-		if ((partition >= 0) && (partition == p->part_number))
-			found = p;
-#ifdef DEBUG
-		if (found)
-			prom_printf(" (match)\n");
-#endif
-	}
-
-	if (parts && parts->label == LABEL_MAC) {
-		/* Note: we don't skip when found is NULL since we can, in some
-		 * cases, let OF figure out a default partition.
-		 */
-		DEBUG_F("Using OF defaults.. (found = %p)\n", found);
-		file->fs = fs_open(file, spec->device, found, f);
-	}
-
-      done:
-	if (parts)
-		partitions_free(parts);
-
 	return fserrorno;
 }
 
