@@ -81,7 +81,7 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 {
 	int result = 0;
 	int error = FILE_ERR_NOTFOUND;
-	static char buffer[1024];
+	char buffer[1024];
 	int ofopened = 0;
 
 	DEBUG_ENTER;
@@ -111,8 +111,7 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	DEBUG_F("partition offset: %Lu\n", doff);
 
 	/* Open the OF device for the entire disk */
-	strncpy(buffer, dev_name, 1020);
-	strcat(buffer, ":0");
+	sprintf(buffer, "%s:0", dev_name);
 
 	DEBUG_F("<%s>\n", buffer);
 

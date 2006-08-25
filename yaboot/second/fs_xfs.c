@@ -44,7 +44,7 @@ static int errnum;
 
 static int xfs_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
-	static char buffer[1024];
+	char buffer[1024];
 
 	DEBUG_ENTER;
 	DEBUG_OPEN;
@@ -56,7 +56,7 @@ static int xfs_open(struct boot_file_t *file, const char *dev_name, struct parti
 	} else
 		partition_offset = 0;
 
-	sprintf(buffer, "%s:%d", dev_name, 0);	/* 0 is full disk in OF */
+	sprintf(buffer, "%s:0", dev_name);	/* 0 is full disk in OF */
 	DEBUG_F("Trying to open dev_name=%s; filename=%s; partition offset=%Lu\n", buffer, file_name, partition_offset);
 	file->of_device = prom_open(buffer);
 

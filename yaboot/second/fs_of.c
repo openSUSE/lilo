@@ -50,17 +50,13 @@
 
 static int of_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
-	static char buffer[1024];
-	char *filename;
+	char buffer[1024], pn[11 + 1 + 1];
 	char *p;
 
 	DEBUG_ENTER;
 	DEBUG_OPEN;
 
-	strncpy(buffer, dev_name, 768);
-	strcat(buffer, ":");
 	if (part) {
-		char pn[12];
 		if (part->label == LABEL_MSDOS && part->sys_ind != MSDOS_FAT16) {
 			prom_printf("skipping partition %d, type is not FAT16\n", part->part_number);
 			DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
@@ -71,18 +67,15 @@ static int of_open(struct boot_file_t *file, const char *dev_name, struct partit
 			DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
 			return FILE_ERR_BAD_FSYS;
 		}
-		sprintf(pn, "%d", part->part_number);
-		strcat(buffer, pn);
-	}
-	if (file_name && strlen(file_name)) {
-		if (part)
-			strcat(buffer, ",");
-		filename = strdup(file_name);
-		for (p = filename; *p; p++)
+		sprintf(pn, "%d%s", part->part_number, (file_name && *file_name) ? "," : "");
+	} else
+		pn[0] = '\0';
+	sprintf(buffer, "%s:%s%s", dev_name, pn, (file_name && *file_name) ? file_name : "");
+	p = strchr(buffer, ':');
+	if (p) {
+		for (p++; *p; p++)
 			if (*p == '/')
 				*p = '\\';
-		strcat(buffer, filename);
-		free(filename);
 	}
 
 	DEBUG_F("opening: \"%s\"\n", buffer);
