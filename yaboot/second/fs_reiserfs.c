@@ -59,7 +59,7 @@ static int reiserfs_open(struct boot_file_t *file, const char *dev_name, struct 
 	} else
 		INFO->partition_offset = 0;
 
-	sprintf(buffer, "%s:%d", dev_name, 0);	/* 0 is full disk in OF */
+	sprintf(buffer, "%s:0", dev_name);	/* 0 is full disk in OF */
 	file->of_device = prom_open(buffer);
 	DEBUG_F("Trying to open dev_name=%s; filename=%s; partition offset=%Lu\n", buffer, file_name, INFO->partition_offset);
 
