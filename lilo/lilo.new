@@ -218,7 +218,7 @@ if (( PVERSION > 1006022 )); then
     }
     function parted_print(){
 	local device=$1
-	$PARTED "$device" unit s print
+	$PARTED "$device" unit s print | sed '/^[[:blank:]]\+[0-9]/s@^[[:blank:]]\+@@'
     }
 
 else
