@@ -32,7 +32,7 @@ CROSS =
 
 # The flags for the yaboot binary.
 #
-YBCFLAGS = -Os $(CFLAGS) -nostdinc -Wall -isystem `gcc -print-file-name=include`
+YBCFLAGS = -Os $(CFLAGS) -msoft-float -fno-builtin -nostdinc -Wall -isystem `gcc -print-file-name=include`
 YBCFLAGS += -g
 YBCFLAGS += -DVERSION=\"${VERSION}\"	#"
 YBCFLAGS += -DTEXTADDR=$(TEXTADDR)
@@ -89,7 +89,7 @@ OBJS = second/crt0.o second/yaboot.o second/cache.o second/prom.o second/file.o 
 	second/cputable.o \
 	second/parse_device_path.o \
 	second/fs_of.o second/fs_ext2.o second/fs_iso.o second/iso_util.o \
-	lib/nosys.o lib/string.o lib/strtol.o lib/vsprintf.o lib/ctype.o lib/malloc.o lib/strstr.o
+	lib/nosys.o lib/misc.o lib/string.o lib/strtol.o lib/vsprintf.o lib/ctype.o lib/malloc.o lib/strstr.o
 
 ifeq ($(USE_MD5_PASSWORDS),y)
 OBJS += second/md5.o
@@ -111,8 +111,6 @@ AR		:= $(CROSS)ar
 RANLIB		:= $(CROSS)ranlib
 OBJCOPY		:= $(CROSS)objcopy
 
-lgcc = $(shell $(CC) -print-libgcc-file-name)
-lgcc_objects = _ashldi3.o _udivdi3.o _umoddi3.o _moddi3.o _divdi3.o _lshrdi3.o
 lext2_objects = openfs.o closefs.o namei.o io_manager.o swapfs.o lookup.o freefs.o inode.o bb_inode.o read_bb.o badblocks.o dir_iterate.o block.o ind_block.o dirblock.o
 
 all yaboot: second/yaboot md5test
@@ -123,14 +121,11 @@ second/empty.c:
 
 second/empty.o: second/empty.c
 
-second/yaboot.a: $(lgcc) $(OBJS) $(LLIBS)
+second/yaboot.a: $(OBJS) $(LLIBS)
 	rm -fv $@ $@.~ ; \
 		rm -rf $$$$ ; \
 		mkdir $$$$ ; \
 		cd $$$$ ; \
-		ar x $(lgcc) ; \
-		$(AR) cru ../$@.~ $(lgcc_objects) ; \
-		rm *.o ; \
 		ar x ../lib/libext2fs.a ; \
 		ar ru ../$@.~ $(lext2_objects) ; \
 		cd .. ; \

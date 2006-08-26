@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug 26 14:42:18 CEST 2006 - olh@suse.de
+
+- add asm libgcc functions to remove libgcc.a usage
+
+-------------------------------------------------------------------
 Sat Aug 26 12:22:58 CEST 2006 - olh@suse.de
 
 - change static buffers to dynamically allocated ones in yaboot_text_ui
