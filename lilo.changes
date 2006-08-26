@@ -2,6 +2,7 @@
 Sat Aug 26 18:06:06 CEST 2006 - olh@suse.de
 
 - introduce lilo.conf option optional to skip unavailable kernels
+  (202072)
 
 -------------------------------------------------------------------
 Sat Aug 26 17:05:35 CEST 2006 - olh@suse.de
