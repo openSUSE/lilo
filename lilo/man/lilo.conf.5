@@ -22,6 +22,9 @@ The kernel slot name can be either A, B or C.
 .B activate
 this option will tell lilo to update the OpenFirmware \fBboot-device\fR variable with the full OpenFirmware path pointing to the device specified in \fBboot=\fR. If this option is missing, the system may not boot.
 .TP
+.B no-os-chooser
+this option will tell lilo to use yaboot as boot file instead of a Forth script named \fBos-chooser\fR. The OpenFirmware driver in the nVidia graphics card as shipped with Apple G5 systems will crash if there is no monitor attached. This happens because the Forth script calls the OPEN method to initialize the screen. The same crash happens if one holds down the Apple + Option + o + f keys during boot to get to the OpenFirmware prompt. Oddly enough, it does not happen if one holds down the Option key to get to the graphical bootselector. If this option is missing if no monitor is attached, the system may not boot.
+.TP
 .B clone
 does something wich is not yet documented in this man page
 .TP

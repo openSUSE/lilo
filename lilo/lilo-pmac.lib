@@ -245,18 +245,23 @@ function running_on_pmac_new () {
     hmkdir $HFS_BOOTFOLDER 2>/dev/null
     hattrib -b $HFS_BOOTFOLDER
     hcd $HFS_BOOTFOLDER
-    hcopy $TEMP/os-chooser :os-chooser
     hcopy $TEMP/yaboot.conf :yaboot.conf
     hcopy /lib/lilo/pmac/yaboot :yaboot
     hcopy /lib/lilo/pmac/Finder.bin :Finder
     hcopy /lib/lilo/pmac/System.bin :System
-    hattrib -t tbxi -c chrp os-chooser
     hattrib -t BINA -c UNIX "Mac OS Rom" 2>/dev/null
     hattrib -t BINA -c UNIX "install"    2>/dev/null
     hattrib -t FNDR -c MACS Finder
     hattrib -t zsys -c MACS System
     hattrib -t TEXT -c "R*ch" yaboot.conf
-    hattrib -t BINA -c UNIX yaboot
+    if [ "$OPTION_NO_OS_CHOOSER" = "yes" ] ; then
+	hattrib -t tbxi -c chrp yaboot
+	hattrib -t TEXT -c "R*ch" os-chooser 2>/dev/null
+    else
+	hcopy $TEMP/os-chooser :os-chooser
+	hattrib -t BINA -c UNIX yaboot
+	hattrib -t tbxi -c chrp os-chooser
+    fi
     
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue

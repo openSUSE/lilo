@@ -519,6 +519,7 @@ function parse_config_file () {
     # OPTION_OTHER contains the MacOS partition
     # OPTION_BOOTFOLDER contains the MacOS folder with the bootstuff
     # OPTION_ACTIVATE is a flag whether or not the boot partition must be set active in OF
+    # OPTION_NO_OS_CHOOSER is a flag whether or not the bootfile will be a Forth script or yaboot itself
     # OPTION_TIMEOUT contains the timeout variable in seconds
     # OPTION_DEFAULT contains the default label
     # OPTION_ROOT contains the global or local root= device
@@ -581,6 +582,10 @@ function parse_config_file () {
 	    activate)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
 		OPTION_ACTIVATE="yes"
+		;;
+	    no-os-chooser)
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		OPTION_NO_OS_CHOOSER="yes"
 		;;
 	    force_fat)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
