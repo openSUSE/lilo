@@ -32,6 +32,7 @@ function running_on_pmac_old () {
 	echo
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	    test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+	    test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	    echo "image = ${HFS_BOOTFOLDER}:`basename ${CONFIG_IMAGE_FILE[$i]}`"
 	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
@@ -64,6 +65,7 @@ function running_on_pmac_old () {
     
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	hcopy ${CONFIG_IMAGE_FILE[$i]} :`basename ${CONFIG_IMAGE_FILE[$i]}`
 	if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
 	    hcopy ${CONFIG_IMAGE_INITRD[$i]} :`basename ${CONFIG_IMAGE_INITRD[$i]}`
@@ -83,6 +85,7 @@ function running_on_pmac_new () {
     # build the pathnames, copy the files to bootfolder if / is not bootable
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	test -z ${CONFIG_IMAGE_FILE[$i]} && continue
+	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	unset FILE_PATH
 
 	# check if the file is a real file
@@ -128,6 +131,7 @@ function running_on_pmac_new () {
 
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	    [ "${CONFIG_IMAGE_OTHER[$i]}" ] &&  continue
+	    test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	    if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
 		echo "image = `basename ${CONFIG_IMAGE_FILE[$i]}`"
 	    else
@@ -265,6 +269,7 @@ function running_on_pmac_new () {
     
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
 	    hcopy ${CONFIG_IMAGE_FILE[$i]} :`basename ${CONFIG_IMAGE_FILE[$i]}`
 	fi

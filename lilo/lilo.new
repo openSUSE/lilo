@@ -530,6 +530,7 @@ function parse_config_file () {
     # CONFIG_IMAGE_FILE array contains the kernel image for a section
     # CONFIG_IMAGE_OTHER array contains the device of MacOS
     # CONFIG_IMAGE_COPY array contains copy flag for images on macs
+    # CONFIG_IMAGE_OPTIONAL array contains flag about image/initrd availibility
     # CONFIG_IMAGE_COUNT is a simple counter of image sections
     declare option
     local separator value
@@ -619,6 +620,7 @@ function parse_config_file () {
 		CONFIG_PARSE_HASIMAGE=true
 		let CONFIG_IMAGE_COUNT++
 		CONFIG_IMAGE_FILE[$CONFIG_IMAGE_COUNT]=$value
+		CONFIG_IMAGE_OPTIONAL[$CONFIG_IMAGE_COUNT]="no"
 		;;
 	    other)
 		# check if previous image section has a label
@@ -644,6 +646,10 @@ function parse_config_file () {
 	    copy)
 		[ "$CONFIG_PARSE_HASIMAGE" ] || error 8
 		CONFIG_IMAGE_COPY[$CONFIG_IMAGE_COUNT]="true"
+		;;
+	    optional)
+		[ "$CONFIG_PARSE_HASIMAGE" ] || error 8
+		CONFIG_IMAGE_OPTIONAL[$CONFIG_IMAGE_COUNT]="yes"
 		;;
 	    label)
 		[ "$CONFIG_PARSE_HASIMAGE" ] || error 8
@@ -703,10 +709,20 @@ function check_config_file () {
     
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	if [ ! -f ${CONFIG_IMAGE_FILE[$i]} ] ; then
-	    error "image = ${CONFIG_IMAGE_FILE[$i]} ist not a regular file"
+	    if [ ${CONFIG_IMAGE_OPTIONAL[$i]} = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
+		error   "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]} ist not a regular file"
+	    else
+		warning "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]} ist not a regular file"
+		CONFIG_IMAGE_OPTIONAL[$i]="skip"
+	    fi
 	fi
 	if [ ! -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
-	    error "initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
+	    if [ ${CONFIG_IMAGE_OPTIONAL[$i]} = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
+		error   "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
+	    else
+		warning "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
+		CONFIG_IMAGE_OPTIONAL[$i]="skip"
+	    fi
 	fi
     done
     

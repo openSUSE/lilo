@@ -206,6 +206,7 @@ function running_on_chrp () {
     # check whether any image or initrd needs relocation to a FAT boot partition
     #
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	if [ "${CONFIG_IMAGE_OTHER[$i]}" ]; then
 	    warning "There is no chain loader support for yaboot yet" \ 
 	    "Entry 'other = ${CONFIG_IMAGE_OTHER[$i]}' ignored"
@@ -423,6 +424,7 @@ function running_on_chrp () {
 	echo "# image section"
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	    [ "${CONFIG_IMAGE_OTHER[$i]}" ] && continue
+	    [ "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" ] && continue
 	    [ "${CONFIG_IMAGE_FILE[$i]}"  ] || continue
 
 	    echo -n "image = "

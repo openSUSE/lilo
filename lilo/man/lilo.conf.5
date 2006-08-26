@@ -71,6 +71,10 @@ specifies the initrd filename to be used.
 .B copy
 forces the kernel and initrd to be copied to the HFS partition. This is required when the kernel and initrd resides on a filesystem not readable by yaboot.
 .TP
+.B optional
+Omit the image if it or its initrd is not available.
+This is useful to specify test kernels that are not always present.
+.TP
 .SH SEE ALSO
 .BR lilo.conf (5),
 .BR mkzimage (8),

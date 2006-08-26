@@ -13,6 +13,7 @@ function running_on_iseries () {
     if [ ! -z "$OPTION_DEFAULT" ] ; then
 	# find the default= line
 	for ((i=1; i<=CONFIG_IMAGE_COUNT; i++)); do
+	    test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	    if [ "$OPTION_DEFAULT" =  "${CONFIG_IMAGE_LABEL[$i]}" ] ; then
 		ISERIES_IMAGE="${CONFIG_IMAGE_FILE[$i]}" 
 		if [ -n "$OPTION_APPEND" ] ; then
