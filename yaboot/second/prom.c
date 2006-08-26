@@ -52,6 +52,7 @@ struct prom_args {
 };
 
 static char ptype[32];
+static char printf_buf[2048];
 static int nc, ncmax;
 
 void *call_prom(const char *service, int nargs, int nret, ...)
@@ -392,14 +393,12 @@ void prom_puts(prom_handle file, char *s)
 
 static void prom_vfprintf(prom_handle file, const char *fmt, va_list ap)
 {
-	static char printf_buf[2048];
 	vsprintf(printf_buf, fmt, ap);
 	prom_puts(file, printf_buf);
 }
 
 void prom_vprintf(const char *fmt, va_list ap)
 {
-	static char printf_buf[2048];
 	vsprintf(printf_buf, fmt, ap);
 	prom_puts(prom_stdout, printf_buf);
 }
