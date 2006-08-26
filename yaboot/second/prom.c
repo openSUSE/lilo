@@ -41,7 +41,7 @@ prom_entry prom;
 ihandle prom_stdin, prom_stdout;
 int stdout_is_screen;
 
-static ihandle prom_mem, prom_mmu;
+static ihandle prom_mmu;
 static ihandle prom_chosen, prom_options;
 
 struct prom_args {
@@ -238,8 +238,6 @@ void prom_init(prom_entry pp)
 		prom_exit();
 	if (prom_get_chosen("stdin", &prom_stdin, sizeof(prom_stdin)) <= 0)
 		prom_abort("\nCan't open stdin");
-	if (prom_get_chosen("memory", &prom_mem, sizeof(prom_mem)) <= 0)
-		prom_abort("\nCan't get mem handle");
 	if (prom_get_chosen("mmu", &prom_mmu, sizeof(prom_mmu)) <= 0)
 		prom_abort("\nCan't get mmu handle");
 }

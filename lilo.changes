@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug 26 11:30:28 CEST 2006 - olh@suse.de
+
+- remove unused /chosen/memory usage from yaboot
+
+-------------------------------------------------------------------
 Sat Aug 26 11:28:45 CEST 2006 - olh@suse.de
 
 - merge fs.c into file.c in yaboot
