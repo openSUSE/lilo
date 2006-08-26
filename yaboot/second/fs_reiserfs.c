@@ -44,7 +44,7 @@ static int errnum;
 
 static int reiserfs_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
-	static char buffer[1024];
+	char buffer[1024];
 
 	DEBUG_ENTER;
 	DEBUG_OPEN;
