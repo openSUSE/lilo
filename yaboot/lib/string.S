@@ -142,6 +142,7 @@ memset:
 	bdnz	8b
 	blr
 
+#if 0
 	.globl	bcopy
 bcopy:
 	mr	r6,r3
@@ -151,10 +152,10 @@ bcopy:
 
 	.globl __bzero
 __bzero:
-        mr r5, r4
-        li r4, 0
-        b memset
-
+	mr r5, r4
+	li r4, 0
+	b memset
+#endif
 	.globl	memmove
 memmove:
 	cmplw	0,r3,r4
