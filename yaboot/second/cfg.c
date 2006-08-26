@@ -43,9 +43,9 @@ typedef struct {
 #define MAX_VAR_NAME MAX_TOKEN
 #define EOF -1
 
-static char *archimage;
-static char image_64bit[] = "image[64bit]";
-static char image_32bit[] = "image[32bit]";
+static const char *archimage;
+static const char image_64bit[] = "image[64bit]";
+static const char image_32bit[] = "image[32bit]";
 static int reuse_prev_image;
 CONFIG cf_options[] = {
 	{cft_strg, "device", NULL},
