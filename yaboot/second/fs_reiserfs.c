@@ -52,12 +52,9 @@ static int reiserfs_open(struct boot_file_t *file, const char *dev_name, struct 
 	memset(INFO, 0, sizeof(struct reiserfs_state));
 	INFO->file = file;
 
-	if (part) {
-		DEBUG_F("Determining offset for partition %d\n", part->part_number);
-		INFO->partition_offset = ((u64) part->part_start) * part->blocksize;
-		DEBUG_F("%Lu = %lu * %hu\n", INFO->partition_offset, part->part_start, part->blocksize);
-	} else
-		INFO->partition_offset = 0;
+	DEBUG_F("Determining offset for partition %d\n", part->part_number);
+	INFO->partition_offset = ((u64) part->part_start) * part->blocksize;
+	DEBUG_F("%Lu = %lu * %hu\n", INFO->partition_offset, part->part_start, part->blocksize);
 
 	sprintf(buffer, "%s:0", dev_name);	/* 0 is full disk in OF */
 	file->of_device = prom_open(buffer);

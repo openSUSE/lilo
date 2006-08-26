@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug 26 12:04:37 CEST 2006 - olh@suse.de
+
+- fs_t->open is always called with a valid partition in yaboot
+
+-------------------------------------------------------------------
 Sat Aug 26 11:44:36 CEST 2006 - olh@suse.de
 
 - use a shared printf_buf for prom_v{f,}printf in yaboot

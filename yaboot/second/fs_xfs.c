@@ -49,12 +49,9 @@ static int xfs_open(struct boot_file_t *file, const char *dev_name, struct parti
 	DEBUG_ENTER;
 	DEBUG_OPEN;
 
-	if (part) {
-		DEBUG_F("Determining offset for partition %d\n", part->part_number);
-		partition_offset = ((u64) part->part_start) * part->blocksize;
-		DEBUG_F("%Lu = %lu * %hu\n", partition_offset, part->part_start, part->blocksize);
-	} else
-		partition_offset = 0;
+	DEBUG_F("Determining offset for partition %d\n", part->part_number);
+	partition_offset = ((u64) part->part_start) * part->blocksize;
+	DEBUG_F("%Lu = %lu * %hu\n", partition_offset, part->part_start, part->blocksize);
 
 	sprintf(buffer, "%s:0", dev_name);	/* 0 is full disk in OF */
 	DEBUG_F("Trying to open dev_name=%s; filename=%s; partition offset=%Lu\n", buffer, file_name, partition_offset);
