@@ -697,12 +697,12 @@ static void word_split(char **linep, char **paramsp)
 		*paramsp = p;
 }
 
+static char *make_params_buffer;
 static char *make_params(char *label, char *params)
 {
 	char *p, *q;
-	static char buffer[2048];
 
-	q = buffer;
+	q = make_params_buffer;
 	*q = 0;
 
 	p = cfg_get_strg(label, "literal");
@@ -714,7 +714,7 @@ static char *make_params(char *label, char *params)
 				*q++ = ' ';
 			strcpy(q, params);
 		}
-		return buffer;
+		return make_params_buffer;
 	}
 
 	p = cfg_get_strg(label, "root");
@@ -761,7 +761,7 @@ static char *make_params(char *label, char *params)
 	if (params)
 		strcpy(q, params);
 
-	return buffer;
+	return make_params_buffer;
 }
 
 static void check_password(char *str)
@@ -966,7 +966,7 @@ static void yaboot_text_ui(void)
 
 	struct boot_file_t file;
 	int result;
-	static struct boot_param_t params;
+	struct boot_param_t params;
 	void *claim_base;
 	void *initrd_base;
 	unsigned long initrd_size;
@@ -976,6 +976,9 @@ static void yaboot_text_ui(void)
 	unsigned long initrd_read;
 	char *msg;
 
+	make_params_buffer = malloc(2048);
+	if (!make_params_buffer)
+		return;
 	loadinfo.load_loc = 0;
 
 	for (;;) {
