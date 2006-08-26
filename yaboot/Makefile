@@ -85,7 +85,7 @@ HOSTCFLAGS = -O1 -g $(CFLAGS) -Wall -W
 ## End of configuration section
 
 OBJS = second/crt0.o second/yaboot.o second/cache.o second/prom.o second/file.o \
-	second/partition.o second/fs.o second/cfg.o second/setjmp.o second/cmdline.o \
+	second/partition.o second/cfg.o second/setjmp.o second/cmdline.o \
 	second/cputable.o \
 	second/parse_device_path.o \
 	second/fs_of.o second/fs_ext2.o second/fs_iso.o second/iso_util.o \

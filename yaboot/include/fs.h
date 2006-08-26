@@ -26,32 +26,14 @@
 #include "partition.h"
 #include "file.h"
 
-extern int fserrorno;
-
 struct fs_t {
-	const char* name;
+	const char *name;
 
-	int (*open)(	struct boot_file_t*	file,
-			const char*		dev_name,
-			struct partition_t*	part,
-			const char*		file_name);
-
-	int (*new_open) (struct boot_file_t *file, const struct path_description *spec);
-			
-	int (*read)(	struct boot_file_t*	file,
-			unsigned int		size,
-			void*			buffer);
-				
-	int (*seek)(	struct boot_file_t*	file,
-			unsigned long long	newpos);
-					
-	int (*close)(	struct boot_file_t*	file);
+	int (*open) (struct boot_file_t * file, const char *dev_name, struct partition_t * part, const char *file_name);
+	int (*new_open) (struct boot_file_t * file, const struct path_description * spec);
+	int (*read) (struct boot_file_t * file, unsigned int size, void *buffer);
+	int (*seek) (struct boot_file_t * file, unsigned long long newpos);
+	int (*close) (struct boot_file_t * file);
 };
-
-extern const struct fs_t *fs_of;
-extern const struct fs_t *fs_of_netboot;
-
-const struct fs_t *fs_open(struct boot_file_t *file, const char *dev_name,
-			  struct partition_t *part, const char *file_name);
 
 #endif

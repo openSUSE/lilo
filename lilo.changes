@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Aug 26 11:28:45 CEST 2006 - olh@suse.de
+
+- merge fs.c into file.c in yaboot
+
+-------------------------------------------------------------------
 Fri Aug 25 23:32:23 CEST 2006 - olh@suse.de
 
 - fix and simplify the filesystem detection in yaboot in file_block_open

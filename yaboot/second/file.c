@@ -35,6 +35,43 @@
 #include "fs.h"
 #include "errors.h"
 #include "debug.h"
+#include "stdlib.h"
+#include "fs.h"
+#include "errors.h"
+
+extern const struct fs_t of_filesystem;
+extern const struct fs_t of_net_filesystem;
+extern const struct fs_t ext2_filesystem;
+
+/* Configurable filesystems */
+extern const struct fs_t xfs_filesystem;
+extern const struct fs_t reiserfs_filesystem;
+
+static int fserrorno;
+/* Filesystem handlers yaboot knows about */
+static const struct fs_t *block_filesystems[] = {
+	&ext2_filesystem,
+#ifdef CONFIG_FS_XFS
+	&xfs_filesystem,
+#endif
+#ifdef CONFIG_FS_REISERFS
+	&reiserfs_filesystem,
+#endif
+	&of_filesystem,		/* HFS/HFS+, ISO9660, UDF, UFS */
+	NULL
+};
+
+static const struct fs_t *fs_of_netboot = &of_net_filesystem;
+
+static const struct fs_t *fs_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
+{
+	const struct fs_t **fs;
+	for (fs = block_filesystems; *fs; fs++)
+		if ((fserrorno = (*fs)->open(file, dev_name, part, file_name)) != FILE_ERR_BAD_FSYS)
+			break;
+
+	return *fs;
+}
 
 static int file_block_open(struct boot_file_t *file, const struct path_description *spec)
 {

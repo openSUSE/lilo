@@ -72,16 +72,6 @@ second/file.o: \
 	include/errors.h \
 	include/debug.h
 
-second/fs.o: \
-	second/fs.c \
-	include/stdlib.h \
-	include/fs.h \
-	include/partition.h \
-	include/types.h \
-	include/prom.h \
-	include/file.h \
-	include/errors.h
-
 second/fs_ext2.o: \
 	second/fs_ext2.c \
 	include/ctype.h \
