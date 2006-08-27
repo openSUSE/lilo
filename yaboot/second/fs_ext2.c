@@ -91,10 +91,6 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 		DEBUG_LEAVE(FILE_ERR_FSBUSY);
 		return FILE_ERR_FSBUSY;
 	}
-	if (file->dev_type != TYPE_BLOCK) {
-		DEBUG_LEAVE(FILE_ERR_BADDEV);
-		return FILE_ERR_BADDEV;
-	}
 
 	fs = NULL;
 
