@@ -596,9 +596,6 @@ function parse_config_file () {
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
 		OPTION_FORCE="yes"
 		;;
-	    progressbar)
-		# do nothing
-		;;
 	    bootfolder)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
 		OPTION_BOOTFOLDER=":${value}"
