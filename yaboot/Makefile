@@ -19,8 +19,6 @@ GETROOT = fakeroot
 # We use fixed addresses to avoid overlap when relocating
 # and other trouble with initrd
 
-# Load the bootstrap at 2Mb
-TEXTADDR	= 0x200000
 # Malloc block at 3Mb -> 4Mb
 MALLOCADDR	= 0x300000
 MALLOCSIZE	= 0x100000
@@ -36,7 +34,6 @@ YBCFLAGS = -Os $(CFLAGS) -msoft-float -fno-builtin -nostdinc -Wall -isystem `gcc
 YBCFLAGS += -g
 YBCFLAGS += -mcpu=powerpc
 YBCFLAGS += -DVERSION=\"${VERSION}\"	#"
-YBCFLAGS += -DTEXTADDR=$(TEXTADDR)
 YBCFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
 YBCFLAGS += -I ./include
 ifneq ($(DEBUG),0)
