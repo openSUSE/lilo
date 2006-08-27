@@ -47,7 +47,6 @@ extern const struct fs_t ext2_filesystem;
 extern const struct fs_t xfs_filesystem;
 extern const struct fs_t reiserfs_filesystem;
 
-static int fserrorno;
 /* Filesystem handlers yaboot knows about */
 static const struct fs_t *block_filesystems[] = {
 	&ext2_filesystem,
@@ -63,14 +62,15 @@ static const struct fs_t *block_filesystems[] = {
 
 static const struct fs_t *fs_of_netboot = &of_net_filesystem;
 
-static const struct fs_t *fs_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
+static int fs_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
 	const struct fs_t **fs;
 	for (fs = block_filesystems; *fs; fs++)
-		if ((fserrorno = (*fs)->open(file, dev_name, part, file_name)) != FILE_ERR_BAD_FSYS)
-			break;
-
-	return *fs;
+		if ((*fs)->open(file, dev_name, part, file_name) == FILE_ERR_OK) {
+			file->fs = *fs;
+			return 1;
+		}
+	return 0;
 }
 
 static int file_block_open(struct boot_file_t *file, const struct path_description *spec)
@@ -78,6 +78,7 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 	struct partition_t *parts;
 	struct partition_t *p;
 	char f[1024];
+	int fserrorno;
 	int partition = spec->part;
 
 	parts = partitions_lookup(spec->device);
@@ -91,9 +92,10 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 		for (p = parts; p; p = p->next) {
 			DEBUG_F("#%02d, start: %08lx, length: %08lx\n", p->part_number, p->part_start, p->part_size);
 			if (partition == -1 || partition == p->part_number) {
-				file->fs = fs_open(file, spec->device, p, f);
-				if (file->fs && fserrorno == FILE_ERR_OK)
+				if (fs_open(file, spec->device, p, f)) {
+					fserrorno = FILE_ERR_OK;
 					break;
+				}
 			}
 		}
 		partitions_free(parts);
