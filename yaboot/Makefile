@@ -34,6 +34,7 @@ CROSS =
 #
 YBCFLAGS = -Os $(CFLAGS) -msoft-float -fno-builtin -nostdinc -Wall -isystem `gcc -print-file-name=include`
 YBCFLAGS += -g
+YBCFLAGS += -mcpu=powerpc
 YBCFLAGS += -DVERSION=\"${VERSION}\"	#"
 YBCFLAGS += -DTEXTADDR=$(TEXTADDR)
 YBCFLAGS += -DMALLOCADDR=$(MALLOCADDR) -DMALLOCSIZE=$(MALLOCSIZE)
