@@ -95,19 +95,19 @@ static int check_elf32(void *p)
 	printf("PPC32 ELF file:\n");
 	printf("e_ehsize    0x%08x\n", elf32->e_ehsize);
 	printf("e_phentsize 0x%08x\n", elf32->e_phentsize);
-	printf("e_phnum     0x%08lx\n", elf32->e_phnum);
-	printf("e_shentsize 0x%08lx\n", elf32->e_shentsize);
-	printf("e_shnum     0x%08lx\n", elf32->e_shnum);
-	printf("e_shstrndx  0x%08lx\n", elf32->e_shstrndx);
+	printf("e_phnum     0x%08x\n", elf32->e_phnum);
+	printf("e_shentsize 0x%08x\n", elf32->e_shentsize);
+	printf("e_shnum     0x%08x\n", elf32->e_shnum);
+	printf("e_shstrndx  0x%08x\n", elf32->e_shstrndx);
 
 	printf("p_type   0x%08x\n", elf32ph->p_type);
 	printf("p_flags  0x%08x\n", elf32ph->p_flags);
-	printf("p_offset 0x%08lx\n", elf32ph->p_offset);
-	printf("p_vaddr  0x%08lx\n", elf32ph->p_vaddr);
-	printf("p_paddr  0x%08lx\n", elf32ph->p_paddr);
-	printf("p_filesz 0x%08lx\n", elf32ph->p_filesz);
-	printf("p_memsz  0x%08lx\n", elf32ph->p_memsz);
-	printf("p_align  0x%08lx\n", elf32ph->p_align);
+	printf("p_offset 0x%08x\n", elf32ph->p_offset);
+	printf("p_vaddr  0x%08x\n", elf32ph->p_vaddr);
+	printf("p_paddr  0x%08x\n", elf32ph->p_paddr);
+	printf("p_filesz 0x%08x\n", elf32ph->p_filesz);
+	printf("p_memsz  0x%08x\n", elf32ph->p_memsz);
+	printf("p_align  0x%08x\n", elf32ph->p_align);
 #endif
 
 	return 32;
@@ -295,7 +295,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	flush_cache((void *)vmlinux.addr, vmlinux.memsize);
 
 	kernel_entry = (kernel_entry_t) (vmlinux.addr + vmlinux.offset);
-	printf( "entering kernel at 0x%08x(%x/%x/%08x)\n",
+	printf( "entering kernel at 0x%p(%lx/%lx/%p)\n",
 			kernel_entry, a1, a2, promptr);
 	kernel_entry(a1, a2, promptr, NULL);
 

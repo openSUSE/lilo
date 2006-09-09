@@ -63,12 +63,12 @@ int gunzip(unsigned long dest, int destlen,
 	int len;
 	printf("uncompressing %s ", what);
 #ifdef DEBUG
-	printf("(0x%08lx:0x%08lx <- 0x%08lx:0x%08lx)...",
+	printf("(0x%08lx:0x%08x <- 0x%08lx:0x%08x)...",
 	       dest, destlen, src, srclen);
 #endif
 	len = srclen;
 	do_gunzip((void *)dest, destlen, (unsigned char *)src, &len);
-	printf("done. (0x%08lx bytes)\n", len);
+	printf("done. (0x%08x bytes)\n", len);
 	return len;
 }
 

@@ -245,7 +245,7 @@ static int __kbdreset(void)
 			return 3;
 	if ((c = inb(KBDATAP)) != 0x55)
 	{
-		printf("Keyboard self test failed - result:", c);
+		printf("Keyboard self test failed - result: %02x", c);
 	}
 	/* Enable interrupts and keyboard controller */
 	t = 20000;
