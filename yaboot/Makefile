@@ -67,6 +67,15 @@ endif
 #
 LFLAGS =
 
+cc-option-yn = $(shell if $(CC) $(CFLAGS) $(1) -S -o /dev/null -xc /dev/null \
+		> /dev/null 2>&1; then echo "y"; else echo "n"; fi;)
+HAS_BIARCH := $(call cc-option-yn, -m32)
+ifeq ($(HAS_BIARCH),y)
+YBCFLAGS	+= -m32
+LFLAGS		+= -m elf32ppc
+endif
+
+
 # Libraries
 #
 LLIBS = lib/libext2fs.a
@@ -102,9 +111,8 @@ OBJS += second/fs_reiserfs.o
 endif
 
 # compilation
-CC		:= $(CROSS)gcc -m32
-LD		:= $(CROSS)ld -m elf32ppc
-AS		:= $(CROSS)as -a32
+CC		:= $(CROSS)gcc
+LD		:= $(CROSS)ld
 AR		:= $(CROSS)ar
 RANLIB		:= $(CROSS)ranlib
 OBJCOPY		:= $(CROSS)objcopy

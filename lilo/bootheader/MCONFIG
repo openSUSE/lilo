@@ -23,9 +23,16 @@ ARCH    = $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ -e s/arm.*/
 CC	= $(CROSS)gcc
 LD      = $(CROSS)ld
 INCLUDE = -I$(SRCROOT)/include
+
+cc-option = $(shell if $(CC) $(CFLAGS) $(1) -S -o /dev/null -xc /dev/null \
+		> /dev/null 2>&1; then echo "$(1)"; else echo "$(2)"; fi ;)
+
+HAS_BIARCH := $(call cc-option, -m32)
+
 REQFLAGS = $(ARCHREQFLAGS) \
            -nostdinc -isystem $(shell $(CC) -print-file-name=include) \
-           -fno-builtin -m32 -fomit-frame-pointer \
+	   $(HAS_BIARCH) \
+           -fno-builtin -fomit-frame-pointer \
 	   -msoft-float \
 	   -Os \
 	   -fPIC \
