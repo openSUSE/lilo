@@ -212,7 +212,7 @@ int md5_password(const char *key, char *crypted, int check)
 	char *p;
 	int saltlen;
 	int i, n;
-	unsigned char alt_result[16];
+	char alt_result[16];
 	unsigned char *digest;
 
 	if (check)
