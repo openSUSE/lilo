@@ -122,7 +122,7 @@ exit 0
 %attr(644,root,root) /lib/lilo/*/*.a
 %attr(644,root,root) %config /lib/lilo/*/*ld.script*
 %attr(644,root,root) /lib/lilo/lilo-*.lib
-%attr(644,root,root) /lib/lilo/chrp/yaboot.*
+%attr(644,root,root) /lib/lilo/chrp/yaboot.chrp*
 %attr(755,root,root) %config /lib/lilo/chrp/firmware_status.chrp*
 %attr(755,root,root) %config /lib/lilo/scripts/*.sh
 %attr(755,root,root) /lib/lilo/utils/*
