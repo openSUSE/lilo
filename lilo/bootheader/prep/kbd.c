@@ -295,7 +295,7 @@ static void kbdreset(void)
 	int ret = __kbdreset();
 
 	if (ret)
-		printf("__kbdreset failed: 0x%x", ret);
+		printf("__kbdreset failed: %x", ret);
 }
 
 /* We have to actually read the keyboard when CRT_tstc is called,

@@ -428,17 +428,17 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 
 	printf("SuSE Linux zImage.prep starting\n");
 	if (promptr)
-		printf("Open Firmware: 0x%p\n", promptr);
+		printf("Open Firmware: %p\n", promptr);
 
-	printf("stack at:      0x%p 0x%p\n", sp, old_sp);
+	printf("stack at:      %p %p\n", sp, old_sp);
 	/*
 	 * Reveal where we were loaded at and where we
 	 * were relocated to.
 	 */
-	printf("loaded at:     0x%08lx 0x%08lx\n", load_addr,
+	printf("loaded at:     %08lx %08lx\n", load_addr,
 	       (load_addr + (4 * num_words)));
 	if (load_addr != (unsigned long)_start)
-		printf("relocated to:  0x%p 0x%p\n", _start,
+		printf("relocated to:  %p %p\n", _start,
 		       (_start + (4 * num_words)));
 
 	/*
@@ -455,11 +455,11 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 	 * The zImage and initrd will be between start and _end, so they've
 	 * already been moved once.  We're good to go now. -- Tom
 	 */
-	printf("zimage at:     0x%08lx 0x%08lx\n",
+	printf("zimage at:     %08lx %08lx\n",
 	       zimage_start, zimage_size + zimage_start);
 
 	if (initrd_size)
-		printf("initrd at:     0x%p 0x%p\n",
+		printf("initrd at:     %p %p\n",
 		       _initrd_start, _initrd_end);
 
 	if (!no_keyb_present)
@@ -487,12 +487,12 @@ struct bi_record *decompress_kernel(unsigned long load_addr, int num_words,
 					    + (2 << 20) - 1, (2 << 20));
 			memmove((void *)initrd_loc, &_initrd_start,
 				initrd_size);
-			printf("initrd moved: 0x%08lx 0x%08lx\n", initrd_loc,
+			printf("initrd moved: %08lx %08lx\n", initrd_loc,
 			       initrd_loc + initrd_size);
 		}
 	}
 
-	printf("birecs @ 0x%p\n", rec);
+	printf("birecs @ %p\n", rec);
 	bootinfo_init(rec);
 	if (TotalMemory)
 		bootinfo_append(BI_MEMSIZE, sizeof(int), (void *)&TotalMemory);
@@ -536,12 +536,12 @@ load_kernel(unsigned long load_addr, int num_words, unsigned long cksum,
 
 		p = of1275_claim(load_addr, (unsigned long)(&_end) - load_addr, 0);
 		if ((unsigned long)p != load_addr)
-			printf("claim 0x%08lx@0x%08lx returned 0x%p\n",
+			printf("claim %08lx@%08lx returned %p\n",
 				(unsigned long)(&_end) - load_addr,
 				load_addr, p);
 
 		vmlinux_buf = (unsigned long)of1275_claim (_ALIGN_UP((unsigned long)(&_end),1*1024*1024), VMLINUX_SIZE, 0);
-		printf("vmlinux buffer @ 0x%08lx\n", vmlinux_buf);
+		printf("vmlinux buffer @ %08lx\n", vmlinux_buf);
 		of1275_instance_to_path(stdin, tmp, sizeof(tmp));
 		printf("stdin  '%s'\n", tmp);
 		of1275_getprop(of1275_instance_to_package(stdin), "device_type", tmp, sizeof(tmp));

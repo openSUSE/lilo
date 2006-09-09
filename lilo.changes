@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Sep  9 09:48:50 CEST 2006 - olh@suse.de
+
+- remove 0x prefix from debug output in bootheader
+
+-------------------------------------------------------------------
 Sat Sep  9 09:43:27 CEST 2006 - olh@suse.de
 
 - fix printf format strings in bootheader

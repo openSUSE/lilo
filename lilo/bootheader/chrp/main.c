@@ -93,21 +93,21 @@ static int check_elf32(void *p)
 
 #ifdef DEBUG
 	printf("PPC32 ELF file:\n");
-	printf("e_ehsize    0x%08x\n", elf32->e_ehsize);
-	printf("e_phentsize 0x%08x\n", elf32->e_phentsize);
-	printf("e_phnum     0x%08x\n", elf32->e_phnum);
-	printf("e_shentsize 0x%08x\n", elf32->e_shentsize);
-	printf("e_shnum     0x%08x\n", elf32->e_shnum);
-	printf("e_shstrndx  0x%08x\n", elf32->e_shstrndx);
+	printf("e_ehsize    %08x\n", elf32->e_ehsize);
+	printf("e_phentsize %08x\n", elf32->e_phentsize);
+	printf("e_phnum     %08x\n", elf32->e_phnum);
+	printf("e_shentsize %08x\n", elf32->e_shentsize);
+	printf("e_shnum     %08x\n", elf32->e_shnum);
+	printf("e_shstrndx  %08x\n", elf32->e_shstrndx);
 
-	printf("p_type   0x%08x\n", elf32ph->p_type);
-	printf("p_flags  0x%08x\n", elf32ph->p_flags);
-	printf("p_offset 0x%08x\n", elf32ph->p_offset);
-	printf("p_vaddr  0x%08x\n", elf32ph->p_vaddr);
-	printf("p_paddr  0x%08x\n", elf32ph->p_paddr);
-	printf("p_filesz 0x%08x\n", elf32ph->p_filesz);
-	printf("p_memsz  0x%08x\n", elf32ph->p_memsz);
-	printf("p_align  0x%08x\n", elf32ph->p_align);
+	printf("p_type   %08x\n", elf32ph->p_type);
+	printf("p_flags  %08x\n", elf32ph->p_flags);
+	printf("p_offset %08x\n", elf32ph->p_offset);
+	printf("p_vaddr  %08x\n", elf32ph->p_vaddr);
+	printf("p_paddr  %08x\n", elf32ph->p_paddr);
+	printf("p_filesz %08x\n", elf32ph->p_filesz);
+	printf("p_memsz  %08x\n", elf32ph->p_memsz);
+	printf("p_align  %08x\n", elf32ph->p_align);
 #endif
 
 	return 32;
@@ -140,15 +140,15 @@ static int check_elf64(void *p)
 
 #ifdef DEBUG
 	printf("PPC64 ELF file, ph %d\n", i);
-	printf("p_type   0x%08x\n", elf64ph->p_type);
-	printf("p_flags  0x%08x\n", elf64ph->p_flags);
-	printf("p_offset 0x%016llx\n", elf64ph->p_offset);
-	printf("p_vaddr  0x%016llx\n", elf64ph->p_vaddr);
-	printf("p_paddr  0x%016llx\n", elf64ph->p_paddr);
-	printf("p_filesz 0x%016llx\n", elf64ph->p_filesz);
-	printf("p_memsz  0x%016llx\n", elf64ph->p_memsz);
-	printf("p_align  0x%016llx\n", elf64ph->p_align);
-	printf("... skipping 0x%08lx bytes of ELF header\n",
+	printf("p_type   %08x\n", elf64ph->p_type);
+	printf("p_flags  %08x\n", elf64ph->p_flags);
+	printf("p_offset %016llx\n", elf64ph->p_offset);
+	printf("p_vaddr  %016llx\n", elf64ph->p_vaddr);
+	printf("p_paddr  %016llx\n", elf64ph->p_paddr);
+	printf("p_filesz %016llx\n", elf64ph->p_filesz);
+	printf("p_memsz  %016llx\n", elf64ph->p_memsz);
+	printf("p_align  %016llx\n", elf64ph->p_align);
+	printf("... skipping %08lx bytes of ELF header\n",
 	       (unsigned long)elf64ph->p_offset);
 #endif
 
@@ -163,7 +163,7 @@ static unsigned long try_claim(unsigned long size)
 
 	for (; claim_base < RAM_END; claim_base += 0x100000) {
 #ifdef DEBUG
-		printf("    trying: 0x%08lx\n", claim_base);
+		printf("    trying: %08lx\n", claim_base);
 #endif
 		addr = (unsigned long)of1275_claim(claim_base, size, 0);
 		if ((void *)addr != (void *)-1)
@@ -186,7 +186,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 
 	of1275_prominit(promptr);
 
-	printf("\nSuSE Linux zImage starting: loaded at 0x%p-0x%p (0x%lx/0x%lx/0x%p; sp: 0x%p)\n",
+	printf("\nSuSE Linux zImage starting: loaded at %p-%p (%lx/%lx/%p; sp: %p)\n",
 	       _coff_start, _end, a1, a2, promptr, sp);
 
 	/* Maple firmware returns memory which is still in use for message passing
@@ -243,7 +243,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	if (vmlinux.addr == 0)
 		abort("Can't allocate memory for kernel image !\n");
 
-	printf("Allocated 0x%08lx bytes for kernel @ 0x%08lx\n",
+	printf("Allocated %08lx bytes for kernel @ %08lx\n",
 	       vmlinux.memsize, vmlinux.addr);
 
 	/*
@@ -256,15 +256,15 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 		if (initrd.addr == 0)
 			abort
 			    ("Can't allocate memory for initial ramdisk !\n");
-		printf("Allocated 0x%08lx bytes for initrd @ 0x%08lx\n",
+		printf("Allocated %08lx bytes for initrd @ %08lx\n",
 		       initrd.size, initrd.addr);
 		a1 = initrd.addr;
 		a2 = initrd.size;
 #ifdef DEBUG
 		printf
-		    ("initial ramdisk moving 0x%08lx <- 0x%08lx (0x%08lx bytes)\n",
+		    ("initial ramdisk moving %08lx <- %08lx (%08lx bytes)\n",
 		     initrd.addr, (unsigned long)_initrd_start, initrd.size);
-		printf("initrd head: 0x%08lx\n",
+		printf("initrd head: %08lx\n",
 		       *((unsigned long *)_initrd_start));
 #endif
 		memmove((void *)initrd.addr, (void *)_initrd_start,
@@ -295,7 +295,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	flush_cache((void *)vmlinux.addr, vmlinux.memsize);
 
 	kernel_entry = (kernel_entry_t) (vmlinux.addr + vmlinux.offset);
-	printf( "entering kernel at 0x%p(%lx/%lx/%p)\n",
+	printf( "entering kernel at %p(%lx/%lx/%p)\n",
 			kernel_entry, a1, a2, promptr);
 	kernel_entry(a1, a2, promptr, NULL);
 

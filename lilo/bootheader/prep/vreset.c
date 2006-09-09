@@ -440,7 +440,7 @@ static void printslots(void)
 		printf("Slot: %d, Addr: %x, Vendor: %08x, Class: %08x\n",
 		       i, pslot->config_addr, pslot->regs[0], pslot->regs[2]);
 #else
-		printf("PCI Slot: 0x%02x Vendor ID: %04x\n", i, PCIVendor(i));
+		printf("PCI Slot: %02x Vendor ID: %04x\n", i, PCIVendor(i));
 #endif
 	}
 }
