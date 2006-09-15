@@ -192,7 +192,7 @@ static int find_and_load_config_file(const struct path_description *b, char *con
 {
 	const char **names;
 	struct boot_file_t file;
-	int sz = 0, opened = 0, result = 0;
+	int sz = 0, opened = 0, result;
 	int i;
 	struct path_description config_fspec;
 
