@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 15 15:00:42 CEST 2006 - olh@suse.de
+
+- yaboot_start never returns, update functions to return void
+
+-------------------------------------------------------------------
 Mon Sep 11 14:21:15 CEST 2006 - jplack@suse.de
 
 - change option no-os-chooser to no_os_chooser to be consistend

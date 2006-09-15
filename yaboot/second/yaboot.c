@@ -1118,7 +1118,7 @@ static void yaboot_text_ui(void)
 	}
 }
 
-static int yaboot_main(void)
+static void yaboot_main(void)
 {
 	char *bootpath, *bootargs;
 	char *conf_file_buf, *configfile = NULL;
@@ -1135,12 +1135,12 @@ static int yaboot_main(void)
 		DEBUG_F("/chosen/bootpath = %s\n", bootpath);
 		if (bootpath[0] == 0) {
 			prom_printf("Couldn't determine boot device\n");
-			return -1;
+			return;
 		}
 
 		if (!parse_device_path(bootpath, &default_device)) {
 			prom_printf("%s: Unable to parse\n", bootpath);
-			return -1;
+			return;
 		}
 		prom_set_chosen("yaboot,bootpath", bootpath, strlen(bootpath) + 1);
 	}
@@ -1162,7 +1162,7 @@ static int yaboot_main(void)
 	conf_file_buf = malloc(CONFIG_FILE_MAX);
 	if (!conf_file_buf) {
 		prom_printf("Can't alloc config file buffer\n");
-		return -1;
+		return;
 	}
 
 	if (configfile)
@@ -1194,12 +1194,10 @@ static int yaboot_main(void)
 	yaboot_text_ui();
 
 	prom_printf("Bye.\n");
-	return 0;
 }
 
-int yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
+void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
 {
-	int result;
 	void *malloc_base;
 	prom_handle cpus[1];
 
@@ -1219,7 +1217,7 @@ int yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
 	malloc_base = prom_claim((void *)MALLOCADDR, MALLOCSIZE, 0);
 	if (malloc_base == (void *)-1) {
 		prom_printf("Can't claim malloc buffer (%x bytes at %08x)\n", MALLOCSIZE, MALLOCADDR);
-		return -1;
+		goto exit;
 	}
 	malloc_init(malloc_base, MALLOCSIZE);
 	DEBUG_F("Malloc buffer allocated at %p (%x bytes)\n", malloc_base, MALLOCSIZE);
@@ -1231,24 +1229,19 @@ int yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp)
 			_cpu = 64;
 		else
 			_cpu = identify_cpu();
-	} else
-		return -1;
 
-	DEBUG_F("Running on %d-bit\n", _cpu);
-
-	/* Call out main */
-	result = yaboot_main();
+		DEBUG_F("Running on %d-bit\n", _cpu);
+		yaboot_main();
+	}
 
 	/* Get rid of malloc pool */
 	malloc_dispose();
 	prom_release(malloc_base, MALLOCSIZE);
-	DEBUG_F("Malloc buffer released. Exiting with code %d\n", result);
 
+      exit:
 	/* Return to OF */
-	prom_exit();
-
-	return result;
-
+	while (1)
+		prom_exit();
 }
 
 /* 
