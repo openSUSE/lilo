@@ -85,18 +85,15 @@ static void partition_mac_lookup(prom_handle disk, struct partition_t **list)
 	struct mac_partition *part = (struct mac_partition *)block_buffer;
 	unsigned short ptable_block_size = ((struct mac_driver_desc *)block_buffer)->block_size;
 
+	DEBUG_F("\n");
 	map_size = 1;
 	for (block = 1; block < map_size + 1; block++) {
 		if (prom_readblocks(disk, block, 1, block_buffer) != 1) {
 			prom_printf("Can't read partition %d\n", block);
 			break;
 		}
-		if (part->signature != MAC_PARTITION_MAGIC) {
-#if 0
-			prom_printf("Wrong partition %d signature\n", block);
-#endif
+		if (part->signature != MAC_PARTITION_MAGIC)
 			break;
-		}
 		if (block == 1)
 			map_size = part->map_count;
 
@@ -138,6 +135,7 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t **list, un
 	unsigned int offset, length, next;
 	char buffer[MAX_BLOCK_SIZE];
 	struct fdisk_partition *part;
+	DEBUG_F("\n");
 	while (1) {
 		if (partition_start >= start + size)
 			return;
@@ -184,6 +182,7 @@ static void partition_fdisk_lookup(prom_handle disk, struct partition_t **list)
 	 */
 	struct fdisk_partition *part = (struct fdisk_partition *)(block_buffer + 0x1be);
 
+	DEBUG_F("\n");
 	for (partition = 1; partition <= 4; partition++, part++) {
 		if (msdos_is_linux_partition(part->sys_ind))
 			add_new_partition(list, partition, le32_to_cpu(part->start), le32_to_cpu(part->size), LABEL_MSDOS, 512,
@@ -203,6 +202,7 @@ static int identify_iso_fs(ihandle device, unsigned int *iso_root_block)
 {
 	int block;
 
+	DEBUG_F("\n");
 	for (block = 16; block < 100; block++) {
 		struct iso_volume_descriptor *vdp;
 
@@ -281,6 +281,7 @@ static void partition_amiga_lookup(prom_handle disk, unsigned int prom_blksize, 
 	int checksum;
 	int i;
 
+	DEBUG_F("\n");
 	blockspercyl = amiga_block[AMIGA_SECT] * amiga_block[AMIGA_HEADS];
 	possible = amiga_block[AMIGA_RDBLIMIT] / 32 + 1;
 
