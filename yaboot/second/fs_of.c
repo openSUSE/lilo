@@ -56,17 +56,22 @@ static int of_open(struct boot_file_t *file, const char *dev_name, struct partit
 	DEBUG_ENTER;
 	DEBUG_OPEN;
 
-	if (part->label == LABEL_MSDOS && part->sys_ind != MSDOS_FAT16) {
-		prom_printf("skipping partition %d, type is not FAT16\n", part->part_number);
-		DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
-		return FILE_ERR_BAD_FSYS;
+	if (part) {
+		if (part->label == LABEL_MSDOS && part->sys_ind != MSDOS_FAT16) {
+			prom_printf("skipping partition %d, type is not FAT16\n", part->part_number);
+			DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
+			return FILE_ERR_BAD_FSYS;
+		}
+		if (part->label == LABEL_AMIGA) {
+			prom_printf("skipping partition %d, firmware will not read it correctly\n", part->part_number);
+			DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
+			return FILE_ERR_BAD_FSYS;
+		}
+		sprintf(pn, "%d%s", part->part_number, (file_name && *file_name) ? "," : "");
+	} else {
+		/* boot iso images have a msdos or mac partition table, but no usable partition will be found */
+		pn[0] = '\0';
 	}
-	if (part->label == LABEL_AMIGA) {
-		prom_printf("skipping partition %d, firmware will not read it correctly\n", part->part_number);
-		DEBUG_LEAVE(FILE_ERR_BAD_FSYS);
-		return FILE_ERR_BAD_FSYS;
-	}
-	sprintf(pn, "%d%s", part->part_number, (file_name && *file_name) ? "," : "");
 	sprintf(buffer, "%s:%s%s", dev_name, pn, (file_name && *file_name) ? file_name : "");
 	p = strchr(buffer, ':');
 	if (p) {

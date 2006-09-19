@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Sep 19 21:28:26 CEST 2006 - olh@suse.de
+
+- the filesystem detection update broke CD booting, handle the case
+  when no usable partitions were found by using the OF driver (206774)
+
+-------------------------------------------------------------------
 Fri Sep 15 15:00:42 CEST 2006 - olh@suse.de
 
 - yaboot_start never returns, update functions to return void

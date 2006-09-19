@@ -99,11 +99,14 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 			}
 		}
 		partitions_free(parts);
-	}
+	} else {
 #ifdef DEBUG
-	else
 		prom_printf("no partitions found.\n");
 #endif
+		fserrorno = of_filesystem.open(file, spec->device, NULL, f);
+		if (fserrorno == FILE_ERR_OK)
+			file->fs = &of_filesystem;
+	}
 	return fserrorno;
 }
 
