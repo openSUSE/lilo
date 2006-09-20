@@ -95,7 +95,7 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	fs = NULL;
 
 	/* We don't care too much about the device block size since we run
-	 * thru the deblocker. We may have to change that is we plan to be
+	 * thru the deblocker. We may have to change that if we plan to be
 	 * compatible with older versions of OF
 	 */
 	bs = 1024;
