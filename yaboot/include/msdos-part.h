@@ -1,5 +1,5 @@
 /*
- *  fdisk-part.h - Structure of fdisk partition table
+ *  msdos-part.h - Structure of msdos partition table
  *
  *  Copyright (C) 2000 Peter Bergner
  *                2000 David Engebretsen
@@ -30,7 +30,7 @@
 #define LINUX_EXTENDED  0x85
 #define LINUX_RAID      0xfd
 
-struct fdisk_partition {
+struct msdos_partition {
 	unsigned char boot_ind;         /* 0x80 - active */
 	unsigned char head;             /* starting head */
 	unsigned char sector;           /* starting sector */

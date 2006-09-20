@@ -109,7 +109,7 @@ static void partition_mac_lookup(prom_handle disk, struct partition_t **list)
 }
 
 /* 
- * Same function as partition_mac_lookup(), except for fdisk
+ * Same function as partition_mac_lookup(), except for msdos
  * partitioned disks.
  */
 static int msdos_magic_present(char *buffer)
@@ -134,7 +134,7 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t **list, un
 	unsigned int partition_size = size;
 	unsigned int offset, length, next;
 	char buffer[MAX_BLOCK_SIZE];
-	struct fdisk_partition *part;
+	struct msdos_partition *part;
 	DEBUG_F("\n");
 	while (1) {
 		if (partition_start >= start + size)
@@ -143,7 +143,7 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t **list, un
 			return;
 		if (!msdos_magic_present(buffer))
 			return;
-		part = (struct fdisk_partition *)(buffer + 0x1be);
+		part = (struct msdos_partition *)(buffer + 0x1be);
 		for (i = 0; i < 4; i++, part++) {
 			offset = le32_to_cpu(part->start);
 			length = le32_to_cpu(part->size);
@@ -173,14 +173,14 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t **list, un
 	}
 }
 
-static void partition_fdisk_lookup(prom_handle disk, struct partition_t **list)
+static void partition_msdos_lookup(prom_handle disk, struct partition_t **list)
 {
 	int partition;
 
-	/* fdisk partition tables start at offset 0x1be
+	/* msdos partition tables start at offset 0x1be
 	 * from byte 0 of the boot drive.
 	 */
-	struct fdisk_partition *part = (struct fdisk_partition *)(block_buffer + 0x1be);
+	struct msdos_partition *part = (struct msdos_partition *)(block_buffer + 0x1be);
 
 	DEBUG_F("\n");
 	for (partition = 1; partition <= 4; partition++, part++) {
@@ -357,8 +357,8 @@ struct partition_t *partitions_lookup(const char *device)
 		/* pdisk partition format */
 		partition_mac_lookup(disk, &list);
 	} else if (msdos_magic_present(block_buffer)) {
-		/* fdisk partition format */
-		partition_fdisk_lookup(disk, &list);
+		/* msdos partition format */
+		partition_msdos_lookup(disk, &list);
 	} else if (prom_blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
 		add_new_partition(&list, 0, iso_root_block, 0, LABEL_ISO9660, prom_blksize, 0);
 		prom_printf("ISO9660 disk\n");
