@@ -39,7 +39,7 @@
 #include "prom.h"
 #include "string.h"
 #include "partition.h"
-#include "fdisk-part.h"
+#include "msdos-part.h"
 #include "fs.h"
 #include "errors.h"
 #include "debug.h"

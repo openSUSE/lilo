@@ -32,7 +32,7 @@
 #include "stddef.h"
 #include "stdlib.h"
 #include "mac-part.h"
-#include "fdisk-part.h"
+#include "msdos-part.h"
 #include "amiga-part.h"
 #include "partition.h"
 #include "prom.h"

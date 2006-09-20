@@ -111,7 +111,7 @@ second/fs_of.o: \
 	include/file.h \
 	include/prom.h \
 	include/fs.h \
-	include/fdisk-part.h \
+	include/msdos-part.h \
 	include/partition.h \
 	include/string.h \
 	include/errors.h \
@@ -163,7 +163,7 @@ second/partition.o: \
 	include/stdlib.h \
 	include/amiga-part.h \
 	include/mac-part.h \
-	include/fdisk-part.h \
+	include/msdos-part.h \
 	include/partition.h \
 	include/prom.h \
 	include/string.h \
