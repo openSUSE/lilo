@@ -26,21 +26,21 @@
 struct mac_partition {
     __u16	signature;	/* expected to be MAC_PARTITION_MAGIC */
     __u16	res1;
-    __u32	map_count;	/* # blocks in partition map */
-    __u32	start_block;	/* absolute starting block # of partition */
-    __u32	block_count;	/* number of blocks in partition */
+    u32	map_count;	/* # blocks in partition map */
+    u32	start_block;	/* absolute starting block # of partition */
+    u32	block_count;	/* number of blocks in partition */
     char	name[32];	/* partition name */
     char	type[32];	/* string type description */
-    __u32	data_start;	/* rel block # of first data block */
-    __u32	data_count;	/* number of data blocks */
-    __u32	status;		/* partition status */
-    __u32	boot_start;	/* logical start block no. of bootstrap */
-    __u32	boot_size;	/* no. of bytes in bootstrap */
-    __u32	boot_load;	/* bootstrap load address in memory */
-    __u32	boot_load2;	/* reserved for extension of boot_load */
-    __u32	boot_entry;	/* entry point address for bootstrap */
-    __u32	boot_entry2;	/* reserved for extension of boot_entry */
-    __u32	boot_cksum;
+    u32	data_start;	/* rel block # of first data block */
+    u32	data_count;	/* number of data blocks */
+    u32	status;		/* partition status */
+    u32	boot_start;	/* logical start block no. of bootstrap */
+    u32	boot_size;	/* no. of bytes in bootstrap */
+    u32	boot_load;	/* bootstrap load address in memory */
+    u32	boot_load2;	/* reserved for extension of boot_load */
+    u32	boot_entry;	/* entry point address for bootstrap */
+    u32	boot_entry2;	/* reserved for extension of boot_entry */
+    u32	boot_cksum;
     char	processor[16];	/* name of processor that boot is for */
 };
 
@@ -53,6 +53,6 @@ struct mac_partition {
 struct mac_driver_desc {
     __u16	signature;	/* expected to be MAC_DRIVER_MAGIC */
     __u16	block_size;
-    __u32	block_count;
+    u32	block_count;
     /* ... more stuff */
 };

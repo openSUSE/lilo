@@ -33,7 +33,7 @@
 
 static int reiserfs_read_super(void);
 static int reiserfs_open_file(char *dirname);
-static int reiserfs_read_data(char *buf, __u32 len);
+static int reiserfs_read_data(char *buf, u32 len);
 
 static struct reiserfs_state reiserfs;
 static struct reiserfs_state *INFO = &reiserfs;
@@ -112,7 +112,7 @@ static int reiserfs_close(struct boot_file_t *file)
 	return FILE_ERR_OK;
 }
 
-static __inline__ __u32 reiserfs_log2(__u32 word)
+static __inline__ u32 reiserfs_log2(u32 word)
 {
 	int i = 0;
 	while (word && (word & (1 << ++i)) == 0) ;
@@ -124,7 +124,7 @@ static __inline__ int is_power_of_two(unsigned long word)
 	return (word & -word) == word;
 }
 
-static int read_disk_block(struct boot_file_t *file, __u32 block, __u32 start, __u32 length, void *buf)
+static int read_disk_block(struct boot_file_t *file, u32 block, u32 start, u32 length, void *buf)
 {
 	__u16 fs_blocksize = INFO->blocksize == 0 ? REISERFS_OLD_BLOCKSIZE : INFO->blocksize;
 	unsigned long long pos = (unsigned long long)block * (unsigned long long)fs_blocksize;
@@ -137,7 +137,7 @@ static int read_disk_block(struct boot_file_t *file, __u32 block, __u32 start, _
 	return prom_read(file->of_device, buf, length);
 }
 
-static int journal_read(__u32 block, __u32 len, char *buffer)
+static int journal_read(u32 block, u32 len, char *buffer)
 {
 	return read_disk_block(INFO->file, (INFO->journal_block + block), 0, len, buffer);
 }
@@ -146,13 +146,13 @@ static int journal_read(__u32 block, __u32 len, char *buffer)
  * account.  If the block nr is in the journal, the block from the
  * journal taken.  
  */
-static int block_read(__u32 blockNr, __u32 start, __u32 len, char *buffer)
+static int block_read(u32 blockNr, u32 start, u32 len, char *buffer)
 {
-	__u32 transactions = INFO->journal_transactions;
-	__u32 desc_block = INFO->journal_first_desc;
-	__u32 journal_mask = INFO->journal_block_count - 1;
-	__u32 translatedNr = blockNr;
-	__u32 *journal_table = JOURNAL_START;
+	u32 transactions = INFO->journal_transactions;
+	u32 desc_block = INFO->journal_first_desc;
+	u32 journal_mask = INFO->journal_block_count - 1;
+	u32 translatedNr = blockNr;
+	u32 *journal_table = JOURNAL_START;
 
 //    DEBUG_F( "block_read( %u, %u, %u, ..)\n", blockNr, start, len );
 
@@ -226,11 +226,11 @@ static int journal_init(void)
 	struct reiserfs_journal_header header;
 	struct reiserfs_journal_desc desc;
 	struct reiserfs_journal_commit commit;
-	__u32 block_count = INFO->journal_block_count;
-	__u32 desc_block;
-	__u32 commit_block;
-	__u32 next_trans_id;
-	__u32 *journal_table = JOURNAL_START;
+	u32 block_count = INFO->journal_block_count;
+	u32 desc_block;
+	u32 commit_block;
+	u32 next_trans_id;
+	u32 *journal_table = JOURNAL_START;
 
 	journal_read(block_count, sizeof(header), (char *)&header);
 	desc_block = le32_to_cpu(header.j_first_unflushed_offset);
@@ -331,7 +331,7 @@ static int reiserfs_read_super(void)
 		if (strcmp(REISER2FS_SUPER_MAGIC_STRING, super.s_magic) != 0 &&
 		    strcmp(REISERFS_SUPER_MAGIC_STRING, super.s_magic) != 0) {
 			/* pre journaling super block - untested */
-			if (strcmp(REISERFS_SUPER_MAGIC_STRING, (char *)((__u32) & super + 20)) != 0)
+			if (strcmp(REISERFS_SUPER_MAGIC_STRING, (char *)((u32) & super + 20)) != 0)
 				return 0;
 
 			super.s_blocksize = cpu_to_le16(REISERFS_OLD_BLOCKSIZE);
@@ -431,7 +431,7 @@ static int reiserfs_read_super(void)
 /* Read in the node at the current path and depth into the node cache.
  * You must set INFO->blocks[depth] before.
  */
-static char *read_tree_node(__u32 blockNr, __u16 depth)
+static char *read_tree_node(u32 blockNr, __u16 depth)
 {
 	char *cache = CACHE(depth);
 	int num_cached = INFO->cached_slots;
@@ -554,7 +554,7 @@ static int next_key(void)
  *   the searched key.
  * side effects: messes around with the cache.
  */
-static int search_stat(__u32 dir_id, __u32 objectid)
+static int search_stat(u32 dir_id, u32 objectid)
 {
 	char *cache;
 	int depth;
@@ -619,11 +619,11 @@ static int search_stat(__u32 dir_id, __u32 objectid)
 	return 0;
 }
 
-static int reiserfs_read_data(char *buf, __u32 len)
+static int reiserfs_read_data(char *buf, u32 len)
 {
-	__u32 blocksize;
-	__u32 offset;
-	__u32 to_read;
+	u32 blocksize;
+	u32 offset;
+	u32 to_read;
 	char *prev_buf = buf;
 	errnum = 0;
 
@@ -657,7 +657,7 @@ static int reiserfs_read_data(char *buf, __u32 len)
 			blocksize = (blocksize >> 2) << INFO->blocksize_shift;
 
 			while (offset < blocksize) {
-				__u32 blocknr = le32_to_cpu(((__u32 *)
+				u32 blocknr = le32_to_cpu(((u32 *)
 							     INFO->current_item)[offset >> INFO->blocksize_shift]);
 
 				int blk_offset = offset & (INFO->blocksize - 1);
@@ -704,7 +704,7 @@ static int reiserfs_open_file(char *dirname)
 {
 	struct reiserfs_de_head *de_head;
 	char *rest, ch;
-	__u32 dir_id, objectid, parent_dir_id = 0, parent_objectid = 0;
+	u32 dir_id, objectid, parent_dir_id = 0, parent_objectid = 0;
 
 	char linkbuf[PATH_MAX];	/* buffer for following symbolic links */
 	int link_count = 0;
@@ -886,7 +886,7 @@ inline u64 offset_v2_k_offset(struct offset_v2 * v2)
 }
 #endif
 
-inline int uniqueness2type(__u32 uniqueness)
+inline int uniqueness2type(u32 uniqueness)
 {
 	switch (uniqueness) {
 	case V1_SD_UNIQUENESS:

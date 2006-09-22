@@ -4,11 +4,11 @@
 #include <types.h>
 
 /* 32-bit ELF base types. */
-typedef __u32	Elf32_Addr;
+typedef u32	Elf32_Addr;
 typedef __u16	Elf32_Half;
-typedef __u32	Elf32_Off;
+typedef u32	Elf32_Off;
 typedef __s32	Elf32_Sword;
-typedef __u32	Elf32_Word;
+typedef u32	Elf32_Word;
 
 /* 64-bit ELF base types. */
 typedef __u64	Elf64_Addr;
