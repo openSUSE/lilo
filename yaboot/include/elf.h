@@ -13,7 +13,7 @@ typedef u32	Elf32_Word;
 /* 64-bit ELF base types. */
 typedef __u64	Elf64_Addr;
 typedef __u16	Elf64_Half;
-typedef __s16	Elf64_SHalf;
+typedef s16	Elf64_SHalf;
 typedef __u64	Elf64_Off;
 typedef __s64	Elf64_Sword;
 typedef __u64	Elf64_Word;

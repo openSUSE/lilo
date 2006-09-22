@@ -81,7 +81,7 @@ struct ext2_super_block {
 	u32 s_mtime;		/* Mount time */
 	u32 s_wtime;		/* Write time */
 	__u16 s_mnt_count;	/* Mount count */
-	__s16 s_max_mnt_count;	/* Maximal mount count */
+	s16 s_max_mnt_count;	/* Maximal mount count */
 	__u16 s_magic;		/* Magic signature */
 	__u16 s_state;		/* File system state */
 	__u16 s_errors;		/* Behaviour when detecting errors */

@@ -4,7 +4,6 @@
 typedef __signed__ char __s8;
 typedef unsigned char __u8;
 
-typedef __signed__ short __s16;
 typedef unsigned short __u16;
 
 
