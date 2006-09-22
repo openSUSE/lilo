@@ -19,6 +19,5 @@ typedef unsigned long long u64;
 
 #define BITS_PER_LONG 32
 
-typedef unsigned int ino_t;
 
 #endif

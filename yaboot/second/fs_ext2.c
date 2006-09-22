@@ -51,7 +51,7 @@ static io_manager linux_io_manager;
 static int opened;		/* We can't open twice ! */
 static unsigned int bs;		/* Blocksize */
 static unsigned long long doff;	/* Byte offset where partition starts */
-static ino_t root, cwd;
+static u32 root, cwd;
 static ext2_filsys fs;
 static struct boot_file_t *cur_file;
 static char *block_buffer;
