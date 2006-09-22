@@ -83,7 +83,6 @@ second/fs_ext2.o: \
 	include/string.h \
 	include/errors.h \
 	include/debug.h \
-	include/linux/types.h \
 	include/ext2fs.h \
 	include/stdlib.h
 
@@ -163,7 +162,6 @@ second/partition.o: \
 	include/prom.h \
 	include/string.h \
 	include/linux/iso_fs.h \
-	include/linux/types.h \
 	include/debug.h \
 	include/errors.h
 
