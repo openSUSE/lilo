@@ -37,7 +37,7 @@
 #include "partition.h"
 #include "prom.h"
 #include "string.h"
-#include "linux/iso_fs.h"
+#include "iso_fs.h"
 #include "debug.h"
 #include "errors.h"
 #include "byteorder.h"
