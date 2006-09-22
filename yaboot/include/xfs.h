@@ -33,7 +33,6 @@
  */
 
 #ifndef _BITS_TYPES_H
-typedef signed char	__int8_t;
 typedef short		__int16_t;
 typedef unsigned short	__uint16_t;
 typedef int		__int32_t;
@@ -486,8 +485,8 @@ typedef struct xfs_dinode_core
 {
 	__uint16_t	di_magic;	/* inode magic # = XFS_DINODE_MAGIC */
 	__uint16_t	di_mode;	/* mode and type of file */
-	__int8_t	di_version;	/* inode version */
-	__int8_t	di_format;	/* format of di_c data */
+	s8	di_version;	/* inode version */
+	s8	di_format;	/* format of di_c data */
 	__uint16_t	di_onlink;	/* old number of links to file */
 	__uint32_t	di_uid;		/* owner's user id */
 	__uint32_t	di_gid;		/* owner's group id */
@@ -503,7 +502,7 @@ typedef struct xfs_dinode_core
 	xfs_extnum_t	di_nextents;	/* number of extents in data fork */
 	xfs_aextnum_t	di_anextents;	/* number of extents in attribute fork*/
 	u8	di_forkoff;	/* attr fork offs, <<3 for 64b align */
-	__int8_t	di_aformat;	/* format of attr fork's data */
+	s8	di_aformat;	/* format of attr fork's data */
 	__uint32_t	di_dmevmask;	/* DMIG event mask */
 	__uint16_t	di_dmstate;	/* DMIG state info */
 	__uint16_t	di_flags;	/* random flags, XFS_DIFLAG_... */
