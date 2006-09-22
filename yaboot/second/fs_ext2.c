@@ -63,7 +63,7 @@ static unsigned long read_last_logical;
 static unsigned long read_total;
 static unsigned long read_max;
 static struct boot_file_t *read_cur_file;
-static errcode_t read_result;
+static long read_result;
 static char *read_buffer;
 
 static int read_dump_range(void);
@@ -365,7 +365,7 @@ static int read_iterator(ext2_filsys fs, blk_t * blocknr, int lg_block, void *pr
 
 static int ext2_read(struct boot_file_t *file, unsigned int size, void *buffer)
 {
-	errcode_t retval;
+	long retval;
 
 #ifdef FAST_VERSION
 	if (!opened)
@@ -473,7 +473,7 @@ static int ext2_close(struct boot_file_t *file)
 	return 0;
 }
 
-static errcode_t linux_open(const char *name, int flags, io_channel * channel)
+static long linux_open(const char *name, int flags, io_channel * channel)
 {
 	io_channel io;
 
@@ -495,13 +495,13 @@ static errcode_t linux_open(const char *name, int flags, io_channel * channel)
 	return 0;
 }
 
-static errcode_t linux_close(io_channel channel)
+static long linux_close(io_channel channel)
 {
 	free(channel);
 	return 0;
 }
 
-static errcode_t linux_set_blksize(io_channel channel, int blksize)
+static long linux_set_blksize(io_channel channel, int blksize)
 {
 	channel->block_size = bs = blksize;
 	if (block_buffer) {
@@ -511,7 +511,7 @@ static errcode_t linux_set_blksize(io_channel channel, int blksize)
 	return 0;
 }
 
-static errcode_t linux_read_blk(io_channel channel, unsigned long block, int count, void *data)
+static long linux_read_blk(io_channel channel, unsigned long block, int count, void *data)
 {
 	int size, size_read;
 	unsigned long long tempb;
@@ -530,12 +530,12 @@ static errcode_t linux_read_blk(io_channel channel, unsigned long block, int cou
 	return 0;
 }
 
-static errcode_t linux_write_blk(io_channel channel, unsigned long block, int count, const void *data)
+static long linux_write_blk(io_channel channel, unsigned long block, int count, const void *data)
 {
 	return 0;
 }
 
-static errcode_t linux_flush(io_channel channel)
+static long linux_flush(io_channel channel)
 {
 	return 0;
 }

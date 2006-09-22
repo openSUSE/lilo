@@ -1,4 +1,4 @@
-typedef long errcode_t;
+#include <types.h>
 
 typedef __u32		dgrp_t;
 typedef __u32		ext2_ino_t;
@@ -209,24 +209,24 @@ struct ext2_inode {
 	} osd2;				/* OS dependent 2 */
 };
 struct struct_io_channel {
-	errcode_t	magic;
+	long	magic;
 	io_manager	manager;
 	char		*name;
 	int		block_size;
-	errcode_t	(*read_error)(io_channel channel,
+	long	(*read_error)(io_channel channel,
 				      unsigned long block,
 				      int count,
 				      void *data,
 				      size_t size,
 				      int actual_bytes_read,
-				      errcode_t	error);
-	errcode_t	(*write_error)(io_channel channel,
+				      long	error);
+	long	(*write_error)(io_channel channel,
 				       unsigned long block,
 				       int count,
 				       const void *data,
 				       size_t size,
 				       int actual_bytes_written,
-				       errcode_t error);
+				       long error);
 	int		refcount;
 	int		flags;
 	int		reserved[14];
@@ -234,24 +234,24 @@ struct struct_io_channel {
 	void		*app_data;
 };
 struct struct_io_manager {
-	errcode_t magic;
+	long magic;
 	const char *name;
-	errcode_t (*open)(const char *name, int flags, io_channel *channel);
-	errcode_t (*close)(io_channel channel);
-	errcode_t (*set_blksize)(io_channel channel, int blksize);
-	errcode_t (*read_blk)(io_channel channel, unsigned long block,
+	long (*open)(const char *name, int flags, io_channel *channel);
+	long (*close)(io_channel channel);
+	long (*set_blksize)(io_channel channel, int blksize);
+	long (*read_blk)(io_channel channel, unsigned long block,
 			      int count, void *data);
-	errcode_t (*write_blk)(io_channel channel, unsigned long block,
+	long (*write_blk)(io_channel channel, unsigned long block,
 			       int count, const void *data);
-	errcode_t (*flush)(io_channel channel);
-	errcode_t (*write_byte)(io_channel channel, unsigned long offset,
+	long (*flush)(io_channel channel);
+	long (*write_byte)(io_channel channel, unsigned long offset,
 				int count, const void *data);
-	errcode_t (*set_option)(io_channel channel, const char *option, 
+	long (*set_option)(io_channel channel, const char *option, 
 				const char *arg);
 	int		reserved[14];
 };
 struct struct_ext2_filsys {
-	errcode_t			magic;
+	long			magic;
 	io_channel			io;
 	int				flags;
 	char *				device_name;
@@ -264,12 +264,12 @@ struct struct_ext2_filsys {
 	int				inode_blocks_per_group;
 	ext2fs_inode_bitmap		inode_map;
 	ext2fs_block_bitmap		block_map;
-	errcode_t (*get_blocks)(ext2_filsys fs, ext2_ino_t ino, blk_t *blocks);
-	errcode_t (*check_directory)(ext2_filsys fs, ext2_ino_t ino);
-	errcode_t (*write_bitmaps)(ext2_filsys fs);
-	errcode_t (*read_inode)(ext2_filsys fs, ext2_ino_t ino,
+	long (*get_blocks)(ext2_filsys fs, ext2_ino_t ino, blk_t *blocks);
+	long (*check_directory)(ext2_filsys fs, ext2_ino_t ino);
+	long (*write_bitmaps)(ext2_filsys fs);
+	long (*read_inode)(ext2_filsys fs, ext2_ino_t ino,
 				struct ext2_inode *inode);
-	errcode_t (*write_inode)(ext2_filsys fs, ext2_ino_t ino,
+	long (*write_inode)(ext2_filsys fs, ext2_ino_t ino,
 				struct ext2_inode *inode);
 	ext2_badblocks_list		badblocks;
 	ext2_dblist			dblist;
@@ -294,17 +294,17 @@ struct struct_ext2_filsys {
 	io_channel			image_io;
 };
 struct ext2fs_struct_generic_bitmap {
-	errcode_t	magic;
+	long	magic;
 	ext2_filsys 	fs;
 	__u32		start, end;
 	__u32		real_end;
 	char	*	description;
 	char	*	bitmap;
-	errcode_t	base_error_code;
+	long	base_error_code;
 	__u32		reserved[7];
 };
 #define io_channel_read_blk(c,b,n,d)	((c)->manager->read_blk((c),b,n,d))
-extern errcode_t ext2fs_block_iterate(ext2_filsys fs,
+extern long ext2fs_block_iterate(ext2_filsys fs,
 				      ext2_ino_t	ino,
 				      int	flags,
 				      char *block_buf,
@@ -313,9 +313,9 @@ extern errcode_t ext2fs_block_iterate(ext2_filsys fs,
 						  int	blockcnt,
 						  void	*priv_data),
 				      void *priv_data);
-extern errcode_t ext2fs_open(const char *name, int flags, int superblock,
+extern long ext2fs_open(const char *name, int flags, int superblock,
 			     unsigned int block_size, io_manager manager,
 			     ext2_filsys *ret_fs);
-extern errcode_t ext2fs_close(ext2_filsys fs);
-errcode_t ext2fs_namei_follow(ext2_filsys fs, ext2_ino_t root, ext2_ino_t cwd,
+extern long ext2fs_close(ext2_filsys fs);
+long ext2fs_namei_follow(ext2_filsys fs, ext2_ino_t root, ext2_ino_t cwd,
 			      const char *name, ext2_ino_t *inode);
