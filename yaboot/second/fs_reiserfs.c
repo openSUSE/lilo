@@ -29,7 +29,7 @@
 #include "fs.h"
 #include "errors.h"
 #include "debug.h"
-#include "reiserfs/reiserfs.h"
+#include "reiserfs.h"
 
 static int reiserfs_read_super(void);
 static int reiserfs_open_file(char *dirname);

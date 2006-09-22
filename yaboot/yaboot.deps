@@ -124,7 +124,7 @@ second/fs_reiserfs.o: \
 	include/file.h \
 	include/errors.h \
 	include/debug.h \
-	include/reiserfs/reiserfs.h \
+	include/reiserfs.h \
 	include/byteorder.h \
 	include/swab.h
 
