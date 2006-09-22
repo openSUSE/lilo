@@ -33,14 +33,13 @@
  */
 
 #ifndef _BITS_TYPES_H
-typedef long long	__int64_t;
 typedef unsigned long long __uint64_t;
 #endif
 
 typedef __uint64_t	xfs_ino_t;
 typedef	u32	xfs_agino_t;
-typedef __int64_t	xfs_daddr_t;
-typedef __int64_t	xfs_off_t;
+typedef s64	xfs_daddr_t;
+typedef s64	xfs_off_t;
 typedef u8	uuid_t[16];
 
 
@@ -51,7 +50,7 @@ typedef	u32	xfs_extlen_t;	/* extent length in blocks */
 typedef	u32	xfs_agnumber_t;	/* allocation group number */
 typedef s32	xfs_extnum_t;	/* # of extents in a file */
 typedef s16	xfs_aextnum_t;	/* # extents in an attribute fork */
-typedef	__int64_t	xfs_fsize_t;	/* bytes in a file */
+typedef	s64	xfs_fsize_t;	/* bytes in a file */
 
 typedef	u32	xfs_dablk_t;	/* dir/attr block number (in file) */
 typedef	u32	xfs_dahash_t;	/* dir/attr hash value */
