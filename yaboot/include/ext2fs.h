@@ -74,7 +74,7 @@ struct ext2_super_block {
 	u32 s_free_inodes_count;	/* Free inodes count */
 	u32 s_first_data_block;	/* First Data Block */
 	u32 s_log_block_size;	/* Block size */
-	__s32 s_log_frag_size;	/* Fragment size */
+	s32 s_log_frag_size;	/* Fragment size */
 	u32 s_blocks_per_group;	/* # Blocks per group */
 	u32 s_frags_per_group;	/* # Fragments per group */
 	u32 s_inodes_per_group;	/* # Inodes per group */

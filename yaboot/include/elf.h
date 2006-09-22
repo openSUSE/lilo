@@ -7,7 +7,7 @@
 typedef u32	Elf32_Addr;
 typedef __u16	Elf32_Half;
 typedef u32	Elf32_Off;
-typedef __s32	Elf32_Sword;
+typedef s32	Elf32_Sword;
 typedef u32	Elf32_Word;
 
 /* 64-bit ELF base types. */
@@ -425,11 +425,11 @@ typedef struct elf64_hdr {
   unsigned char	e_ident[16];		/* ELF "magic number" */
   Elf64_SHalf e_type;
   Elf64_Half e_machine;
-  __s32 e_version;
+  s32 e_version;
   Elf64_Addr e_entry;		/* Entry point virtual address */
   Elf64_Off e_phoff;		/* Program header table file offset */
   Elf64_Off e_shoff;		/* Section header table file offset */
-  __s32 e_flags;
+  s32 e_flags;
   Elf64_SHalf e_ehsize;
   Elf64_SHalf e_phentsize;
   Elf64_SHalf e_phnum;
@@ -456,8 +456,8 @@ typedef struct elf32_phdr{
 } Elf32_Phdr;
 
 typedef struct elf64_phdr {
-  __s32 p_type;
-  __s32 p_flags;
+  s32 p_type;
+  s32 p_flags;
   Elf64_Off p_offset;		/* Segment file offset */
   Elf64_Addr p_vaddr;		/* Segment virtual address */
   Elf64_Addr p_paddr;		/* Segment physical address */
