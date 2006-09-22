@@ -33,7 +33,6 @@
  */
 
 #ifndef _BITS_TYPES_H
-typedef unsigned short	__uint16_t;
 typedef int		__int32_t;
 typedef unsigned int	__uint32_t;
 typedef long long	__int64_t;
@@ -95,10 +94,10 @@ typedef struct xfs_sb
 	xfs_agnumber_t	sb_agcount;	/* number of allocation groups */
 	xfs_extlen_t	sb_rbmblocks;	/* number of rt bitmap blocks */
 	xfs_extlen_t	sb_logblocks;	/* number of log blocks */
-	__uint16_t	sb_versionnum;	/* header version == XFS_SB_VERSION */
-	__uint16_t	sb_sectsize;	/* volume sector size, bytes */
-	__uint16_t	sb_inodesize;	/* inode size, bytes */
-	__uint16_t	sb_inopblock;	/* inodes per block */
+	u16	sb_versionnum;	/* header version == XFS_SB_VERSION */
+	u16	sb_sectsize;	/* volume sector size, bytes */
+	u16	sb_inodesize;	/* inode size, bytes */
+	u16	sb_inopblock;	/* inodes per block */
 	char		sb_fname[12];	/* file system name */
 	u8	sb_blocklog;	/* log2 of sb_blocksize */
 	u8	sb_sectlog;	/* log2 of sb_sectsize */
@@ -123,7 +122,7 @@ typedef struct xfs_sb
 	 */
 	xfs_ino_t	sb_uquotino;	/* user quota inode */
 	xfs_ino_t	sb_gquotino;	/* group quota inode */
-	__uint16_t	sb_qflags;	/* quota flags */
+	u16	sb_qflags;	/* quota flags */
 	u8	sb_flags;	/* misc. flags */
 	u8	sb_shared_vn;	/* shared version number */
 	xfs_extlen_t	sb_inoalignmt;	/* inode chunk alignment, fsblocks */
@@ -142,8 +141,8 @@ typedef struct xfs_sb
 typedef struct xfs_btree_lblock
 {
 	__uint32_t	bb_magic;	/* magic number for block type */
-	__uint16_t	bb_level;	/* 0 is a leaf */
-	__uint16_t	bb_numrecs;	/* current # of data records */
+	u16	bb_level;	/* 0 is a leaf */
+	u16	bb_numrecs;	/* current # of data records */
 	xfs_dfsbno_t	bb_leftsib;	/* left sibling block or NULLDFSBNO */
 	xfs_dfsbno_t	bb_rightsib;	/* right sibling block or NULLDFSBNO */
 } xfs_btree_lblock_t;
@@ -154,8 +153,8 @@ typedef struct xfs_btree_lblock
 typedef struct xfs_btree_hdr
 {
 	__uint32_t	bb_magic;	/* magic number for block type */
-	__uint16_t	bb_level;	/* 0 is a leaf */
-	__uint16_t	bb_numrecs;	/* current # of data records */
+	u16	bb_level;	/* 0 is a leaf */
+	u16	bb_numrecs;	/* current # of data records */
 } xfs_btree_hdr_t;
 
 typedef struct xfs_btree_block
@@ -180,8 +179,8 @@ typedef struct xfs_btree_block
  */
 typedef struct xfs_bmdr_block
 {
-	__uint16_t	bb_level;	/* 0 is a leaf */
-	__uint16_t	bb_numrecs;	/* current # of data records */
+	u16	bb_level;	/* 0 is a leaf */
+	u16	bb_numrecs;	/* current # of data records */
 } xfs_bmdr_block_t;
 
 /*
@@ -249,7 +248,7 @@ typedef	struct xfs_btree_lblock xfs_bmbt_block_t;
 /*
  * Byte offset in data block and shortform entry.
  */
-typedef	__uint16_t	xfs_dir2_data_off_t;
+typedef	u16	xfs_dir2_data_off_t;
 
 /*
  * Byte offset in a directory.
@@ -273,8 +272,8 @@ typedef	xfs_off_t		xfs_dir2_off_t;
 typedef struct xfs_da_blkinfo {
 	xfs_dablk_t forw;			/* previous block in list */
 	xfs_dablk_t back;			/* following block in list */
-	__uint16_t magic;			/* validity check on block */
-	__uint16_t pad;				/* unused */
+	u16 magic;			/* validity check on block */
+	u16 pad;				/* unused */
 } xfs_da_blkinfo_t;
 
 /*
@@ -290,8 +289,8 @@ typedef struct xfs_da_blkinfo {
 typedef struct xfs_da_intnode {
 	struct xfs_da_node_hdr {	/* constant-structure header block */
 		xfs_da_blkinfo_t info;	/* block type, links, etc. */
-		__uint16_t count;	/* count of active entries */
-		__uint16_t level;	/* level above leaves (leaf == 0) */
+		u16 count;	/* count of active entries */
+		u16 level;	/* level above leaves (leaf == 0) */
 	} hdr;
 	struct xfs_da_node_entry {
 		xfs_dahash_t hashval;	/* hash value for this descendant */
@@ -352,7 +351,7 @@ typedef struct xfs_dir2_data_entry {
  * Tag appears as the last 2 bytes.
  */
 typedef struct xfs_dir2_data_unused {
-	__uint16_t		freetag;	/* XFS_DIR2_DATA_FREE_TAG */
+	u16		freetag;	/* XFS_DIR2_DATA_FREE_TAG */
 	xfs_dir2_data_off_t	length;		/* total free length */
 						/* variable offset */
 	xfs_dir2_data_off_t	tag;		/* starting offset of us */
@@ -374,8 +373,8 @@ typedef union {
  */
 typedef struct xfs_dir2_leaf_hdr {
 	xfs_da_blkinfo_t	info;		/* header for da routines */
-	__uint16_t		count;		/* count of entries */
-	__uint16_t		stale;		/* count of stale entries */
+	u16		count;		/* count of entries */
+	u16		stale;		/* count of stale entries */
 } xfs_dir2_leaf_hdr_t;
 
 
@@ -482,15 +481,15 @@ typedef struct xfs_timestamp {
  */
 typedef struct xfs_dinode_core
 {
-	__uint16_t	di_magic;	/* inode magic # = XFS_DINODE_MAGIC */
-	__uint16_t	di_mode;	/* mode and type of file */
+	u16	di_magic;	/* inode magic # = XFS_DINODE_MAGIC */
+	u16	di_mode;	/* mode and type of file */
 	s8	di_version;	/* inode version */
 	s8	di_format;	/* format of di_c data */
-	__uint16_t	di_onlink;	/* old number of links to file */
+	u16	di_onlink;	/* old number of links to file */
 	__uint32_t	di_uid;		/* owner's user id */
 	__uint32_t	di_gid;		/* owner's group id */
 	__uint32_t	di_nlink;	/* number of links to file */
-	__uint16_t	di_projid;	/* owner's project id */
+	u16	di_projid;	/* owner's project id */
 	u8	di_pad[10];	/* unused, zeroed space */
 	xfs_timestamp_t	di_atime;	/* time last accessed */
 	xfs_timestamp_t	di_mtime;	/* time last modified */
@@ -503,8 +502,8 @@ typedef struct xfs_dinode_core
 	u8	di_forkoff;	/* attr fork offs, <<3 for 64b align */
 	s8	di_aformat;	/* format of attr fork's data */
 	__uint32_t	di_dmevmask;	/* DMIG event mask */
-	__uint16_t	di_dmstate;	/* DMIG state info */
-	__uint16_t	di_flags;	/* random flags, XFS_DIFLAG_... */
+	u16	di_dmstate;	/* DMIG state info */
+	u16	di_flags;	/* random flags, XFS_DIFLAG_... */
 	__uint32_t	di_gen;		/* generation number */
 } xfs_dinode_core_t;
 
