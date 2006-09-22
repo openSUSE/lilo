@@ -138,7 +138,7 @@ second/fs_xfs.o: \
 	include/partition.h \
 	include/prom.h \
 	include/file.h \
-	include/xfs/xfs.h \
+	include/xfs.h \
 	include/errors.h \
 	include/debug.h
 

@@ -27,7 +27,7 @@
 #include "string.h"
 #include "stdlib.h"
 #include "fs.h"
-#include "xfs/xfs.h"
+#include "xfs.h"
 #include "errors.h"
 #include "debug.h"
 
