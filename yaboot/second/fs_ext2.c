@@ -67,7 +67,7 @@ static long read_result;
 static char *read_buffer;
 
 static int read_dump_range(void);
-static int read_iterator(ext2_filsys fs, blk_t * blocknr, int lg_block, void *private);
+static int read_iterator(ext2_filsys fs, u32 * blocknr, int lg_block, void *private);
 #else				/* FAST_VERSION */
 static struct ext2_inode cur_inode;
 #endif				/* FAST_VERSION */
@@ -248,7 +248,7 @@ static int read_dump_range(void)
 	return (read_max == 0) ? BLOCK_ABORT : 0;
 }
 
-static int read_iterator(ext2_filsys fs, blk_t * blocknr, int lg_block, void *private)
+static int read_iterator(ext2_filsys fs, u32 * blocknr, int lg_block, void *private)
 {
 #ifdef VERBOSE_DEBUG
 	DEBUG_F("read_it: p_bloc: 0x%x, l_bloc: 0x%x, f_pos: 0x%Lx, rng_pos: 0x%lx   ",
@@ -407,8 +407,8 @@ static int ext2_read(struct boot_file_t *file, unsigned int size, void *buffer)
 	DEBUG_F("ext_read() from pos 0x%x, size: 0x%x\n", file->pos, size);
 
 	while (size) {
-		blk_t fblock = file->pos / bs;
-		blk_t pblock;
+		u32 fblock = file->pos / bs;
+		u32 pblock;
 		unsigned int blkorig, s, b;
 
 		pblock = 0;

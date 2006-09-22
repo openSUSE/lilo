@@ -2,7 +2,6 @@
 
 typedef __u32		dgrp_t;
 typedef __u32		ext2_ino_t;
-typedef __u32		blk_t;
 
 
 #define EXT2_ET_MAGIC_IO_CHANNEL                 (2133571333L)
@@ -264,7 +263,7 @@ struct struct_ext2_filsys {
 	int				inode_blocks_per_group;
 	ext2fs_inode_bitmap		inode_map;
 	ext2fs_block_bitmap		block_map;
-	long (*get_blocks)(ext2_filsys fs, ext2_ino_t ino, blk_t *blocks);
+	long (*get_blocks)(ext2_filsys fs, ext2_ino_t ino, u32 *blocks);
 	long (*check_directory)(ext2_filsys fs, ext2_ino_t ino);
 	long (*write_bitmaps)(ext2_filsys fs);
 	long (*read_inode)(ext2_filsys fs, ext2_ino_t ino,
@@ -309,7 +308,7 @@ extern long ext2fs_block_iterate(ext2_filsys fs,
 				      int	flags,
 				      char *block_buf,
 				      int (*func)(ext2_filsys fs,
-						  blk_t	*blocknr,
+						  u32	*blocknr,
 						  int	blockcnt,
 						  void	*priv_data),
 				      void *priv_data);
