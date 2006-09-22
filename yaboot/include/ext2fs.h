@@ -1,7 +1,6 @@
 #include <types.h>
 
 typedef __u32		dgrp_t;
-typedef __u32		ext2_ino_t;
 
 
 #define EXT2_ET_MAGIC_IO_CHANNEL                 (2133571333L)
@@ -263,12 +262,12 @@ struct struct_ext2_filsys {
 	int				inode_blocks_per_group;
 	ext2fs_inode_bitmap		inode_map;
 	ext2fs_block_bitmap		block_map;
-	long (*get_blocks)(ext2_filsys fs, ext2_ino_t ino, u32 *blocks);
-	long (*check_directory)(ext2_filsys fs, ext2_ino_t ino);
+	long (*get_blocks)(ext2_filsys fs, u32 ino, u32 *blocks);
+	long (*check_directory)(ext2_filsys fs, u32 ino);
 	long (*write_bitmaps)(ext2_filsys fs);
-	long (*read_inode)(ext2_filsys fs, ext2_ino_t ino,
+	long (*read_inode)(ext2_filsys fs, u32 ino,
 				struct ext2_inode *inode);
-	long (*write_inode)(ext2_filsys fs, ext2_ino_t ino,
+	long (*write_inode)(ext2_filsys fs, u32 ino,
 				struct ext2_inode *inode);
 	ext2_badblocks_list		badblocks;
 	ext2_dblist			dblist;
@@ -304,7 +303,7 @@ struct ext2fs_struct_generic_bitmap {
 };
 #define io_channel_read_blk(c,b,n,d)	((c)->manager->read_blk((c),b,n,d))
 extern long ext2fs_block_iterate(ext2_filsys fs,
-				      ext2_ino_t	ino,
+				      u32	ino,
 				      int	flags,
 				      char *block_buf,
 				      int (*func)(ext2_filsys fs,
@@ -316,5 +315,5 @@ extern long ext2fs_open(const char *name, int flags, int superblock,
 			     unsigned int block_size, io_manager manager,
 			     ext2_filsys *ret_fs);
 extern long ext2fs_close(ext2_filsys fs);
-long ext2fs_namei_follow(ext2_filsys fs, ext2_ino_t root, ext2_ino_t cwd,
-			      const char *name, ext2_ino_t *inode);
+long ext2fs_namei_follow(ext2_filsys fs, u32 root, u32 cwd,
+			      const char *name, u32 *inode);
