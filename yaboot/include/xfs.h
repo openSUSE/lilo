@@ -32,138 +32,130 @@
  * http://oss.sgi.com/projects/GenInfo/SGIGPLNoticeExplan/
  */
 
-
-typedef u64	xfs_ino_t;
-typedef	u32	xfs_agino_t;
-typedef s64	xfs_daddr_t;
-typedef s64	xfs_off_t;
-typedef u8	uuid_t[16];
-
+typedef u64 xfs_ino_t;
+typedef u32 xfs_agino_t;
+typedef s64 xfs_daddr_t;
+typedef s64 xfs_off_t;
+typedef u8 uuid_t[16];
 
 /* those are from xfs_types.h */
 
-typedef u32	xfs_agblock_t;	/* blockno in alloc. group */
-typedef	u32	xfs_extlen_t;	/* extent length in blocks */
-typedef	u32	xfs_agnumber_t;	/* allocation group number */
-typedef s32	xfs_extnum_t;	/* # of extents in a file */
-typedef s16	xfs_aextnum_t;	/* # extents in an attribute fork */
-typedef	s64	xfs_fsize_t;	/* bytes in a file */
+typedef u32 xfs_agblock_t;	/* blockno in alloc. group */
+typedef u32 xfs_extlen_t;	/* extent length in blocks */
+typedef u32 xfs_agnumber_t;	/* allocation group number */
+typedef s32 xfs_extnum_t;	/* # of extents in a file */
+typedef s16 xfs_aextnum_t;	/* # extents in an attribute fork */
+typedef s64 xfs_fsize_t;	/* bytes in a file */
 
-typedef	u32	xfs_dablk_t;	/* dir/attr block number (in file) */
-typedef	u32	xfs_dahash_t;	/* dir/attr hash value */
+typedef u32 xfs_dablk_t;	/* dir/attr block number (in file) */
+typedef u32 xfs_dahash_t;	/* dir/attr hash value */
 
 /*
  * Disk based types:
  */
-typedef u64	xfs_dfsbno_t;	/* blockno in filesystem (agno|agbno) */
-typedef u64	xfs_drfsbno_t;	/* blockno in filesystem (raw) */
-typedef	u64	xfs_drtbno_t;	/* extent (block) in realtime area */
-typedef	u64	xfs_dfiloff_t;	/* block number in a file */
+typedef u64 xfs_dfsbno_t;	/* blockno in filesystem (agno|agbno) */
+typedef u64 xfs_drfsbno_t;	/* blockno in filesystem (raw) */
+typedef u64 xfs_drtbno_t;	/* extent (block) in realtime area */
+typedef u64 xfs_dfiloff_t;	/* block number in a file */
 
-typedef	u64	xfs_fsblock_t;	/* blockno in filesystem (agno|agbno) */
-typedef	u64	xfs_fileoff_t;	/* block number in a file */
-typedef	u64	xfs_filblks_t;	/* number of blocks in a file */
-
+typedef u64 xfs_fsblock_t;	/* blockno in filesystem (agno|agbno) */
+typedef u64 xfs_fileoff_t;	/* block number in a file */
+typedef u64 xfs_filblks_t;	/* number of blocks in a file */
 
 /* those are from xfs_sb.h */
 
-#define	XFS_SB_MAGIC		0x58465342	/* 'XFSB'*/
-#define	XFS_SB_VERSION_4	4		/* 6.2+ - bitmask version */
+#define	XFS_SB_MAGIC		0x58465342	/* 'XFSB' */
+#define	XFS_SB_VERSION_4	4	/* 6.2+ - bitmask version */
 #define	XFS_SB_VERSION_NUMBITS	0x000f
 
-typedef struct xfs_sb
-{
-	u32	sb_magicnum;	/* magic number == XFS_SB_MAGIC */
-	u32	sb_blocksize;	/* logical block size, bytes */
-	xfs_drfsbno_t	sb_dblocks;	/* number of data blocks */
-	xfs_drfsbno_t	sb_rblocks;	/* number of realtime blocks */
-	xfs_drtbno_t	sb_rextents;	/* number of realtime extents */
-	uuid_t		sb_uuid;	/* file system unique id */
-	xfs_dfsbno_t	sb_logstart;	/* starting block of log if internal */
-	xfs_ino_t	sb_rootino;	/* root inode number */
-	xfs_ino_t	sb_rbmino;	/* bitmap inode for realtime extents */
-	xfs_ino_t	sb_rsumino;	/* summary inode for rt bitmap */
-	xfs_agblock_t	sb_rextsize;	/* realtime extent size, blocks */
-	xfs_agblock_t	sb_agblocks;	/* size of an allocation group */
-	xfs_agnumber_t	sb_agcount;	/* number of allocation groups */
-	xfs_extlen_t	sb_rbmblocks;	/* number of rt bitmap blocks */
-	xfs_extlen_t	sb_logblocks;	/* number of log blocks */
-	u16	sb_versionnum;	/* header version == XFS_SB_VERSION */
-	u16	sb_sectsize;	/* volume sector size, bytes */
-	u16	sb_inodesize;	/* inode size, bytes */
-	u16	sb_inopblock;	/* inodes per block */
-	char		sb_fname[12];	/* file system name */
-	u8	sb_blocklog;	/* log2 of sb_blocksize */
-	u8	sb_sectlog;	/* log2 of sb_sectsize */
-	u8	sb_inodelog;	/* log2 of sb_inodesize */
-	u8	sb_inopblog;	/* log2 of sb_inopblock */
-	u8	sb_agblklog;	/* log2 of sb_agblocks (rounded up) */
-	u8	sb_rextslog;	/* log2 of sb_rextents */
-	u8	sb_inprogress;	/* mkfs is in progress, don't mount */
-	u8	sb_imax_pct;	/* max % of fs for inode space */
-					/* statistics */
+typedef struct xfs_sb {
+	u32 sb_magicnum;	/* magic number == XFS_SB_MAGIC */
+	u32 sb_blocksize;	/* logical block size, bytes */
+	xfs_drfsbno_t sb_dblocks;	/* number of data blocks */
+	xfs_drfsbno_t sb_rblocks;	/* number of realtime blocks */
+	xfs_drtbno_t sb_rextents;	/* number of realtime extents */
+	uuid_t sb_uuid;		/* file system unique id */
+	xfs_dfsbno_t sb_logstart;	/* starting block of log if internal */
+	xfs_ino_t sb_rootino;	/* root inode number */
+	xfs_ino_t sb_rbmino;	/* bitmap inode for realtime extents */
+	xfs_ino_t sb_rsumino;	/* summary inode for rt bitmap */
+	xfs_agblock_t sb_rextsize;	/* realtime extent size, blocks */
+	xfs_agblock_t sb_agblocks;	/* size of an allocation group */
+	xfs_agnumber_t sb_agcount;	/* number of allocation groups */
+	xfs_extlen_t sb_rbmblocks;	/* number of rt bitmap blocks */
+	xfs_extlen_t sb_logblocks;	/* number of log blocks */
+	u16 sb_versionnum;	/* header version == XFS_SB_VERSION */
+	u16 sb_sectsize;	/* volume sector size, bytes */
+	u16 sb_inodesize;	/* inode size, bytes */
+	u16 sb_inopblock;	/* inodes per block */
+	char sb_fname[12];	/* file system name */
+	u8 sb_blocklog;		/* log2 of sb_blocksize */
+	u8 sb_sectlog;		/* log2 of sb_sectsize */
+	u8 sb_inodelog;		/* log2 of sb_inodesize */
+	u8 sb_inopblog;		/* log2 of sb_inopblock */
+	u8 sb_agblklog;		/* log2 of sb_agblocks (rounded up) */
+	u8 sb_rextslog;		/* log2 of sb_rextents */
+	u8 sb_inprogress;	/* mkfs is in progress, don't mount */
+	u8 sb_imax_pct;		/* max % of fs for inode space */
+	/* statistics */
 	/*
 	 * These fields must remain contiguous.  If you really
 	 * want to change their layout, make sure you fix the
 	 * code in xfs_trans_apply_sb_deltas().
 	 */
-	u64	sb_icount;	/* allocated inodes */
-	u64	sb_ifree;	/* free inodes */
-	u64	sb_fdblocks;	/* free data blocks */
-	u64	sb_frextents;	/* free realtime extents */
+	u64 sb_icount;		/* allocated inodes */
+	u64 sb_ifree;		/* free inodes */
+	u64 sb_fdblocks;	/* free data blocks */
+	u64 sb_frextents;	/* free realtime extents */
 	/*
 	 * End contiguous fields.
 	 */
-	xfs_ino_t	sb_uquotino;	/* user quota inode */
-	xfs_ino_t	sb_gquotino;	/* group quota inode */
-	u16	sb_qflags;	/* quota flags */
-	u8	sb_flags;	/* misc. flags */
-	u8	sb_shared_vn;	/* shared version number */
-	xfs_extlen_t	sb_inoalignmt;	/* inode chunk alignment, fsblocks */
-	u32	sb_unit;	/* stripe or raid unit */
-	u32	sb_width;	/* stripe or raid width */	
-	u8	sb_dirblklog;	/* log2 of dir block size (fsbs) */
-        u8       sb_dummy[7];    /* padding */
+	xfs_ino_t sb_uquotino;	/* user quota inode */
+	xfs_ino_t sb_gquotino;	/* group quota inode */
+	u16 sb_qflags;		/* quota flags */
+	u8 sb_flags;		/* misc. flags */
+	u8 sb_shared_vn;	/* shared version number */
+	xfs_extlen_t sb_inoalignmt;	/* inode chunk alignment, fsblocks */
+	u32 sb_unit;		/* stripe or raid unit */
+	u32 sb_width;		/* stripe or raid width */
+	u8 sb_dirblklog;	/* log2 of dir block size (fsbs) */
+	u8 sb_dummy[7];		/* padding */
 } xfs_sb_t;
-
 
 /* those are from xfs_btree.h */
 
 /*
  * Long form header: bmap btrees.
  */
-typedef struct xfs_btree_lblock
-{
-	u32	bb_magic;	/* magic number for block type */
-	u16	bb_level;	/* 0 is a leaf */
-	u16	bb_numrecs;	/* current # of data records */
-	xfs_dfsbno_t	bb_leftsib;	/* left sibling block or NULLDFSBNO */
-	xfs_dfsbno_t	bb_rightsib;	/* right sibling block or NULLDFSBNO */
+typedef struct xfs_btree_lblock {
+	u32 bb_magic;		/* magic number for block type */
+	u16 bb_level;		/* 0 is a leaf */
+	u16 bb_numrecs;		/* current # of data records */
+	xfs_dfsbno_t bb_leftsib;	/* left sibling block or NULLDFSBNO */
+	xfs_dfsbno_t bb_rightsib;	/* right sibling block or NULLDFSBNO */
 } xfs_btree_lblock_t;
 
 /*
  * Combined header and structure, used by common code.
  */
-typedef struct xfs_btree_hdr
-{
-	u32	bb_magic;	/* magic number for block type */
-	u16	bb_level;	/* 0 is a leaf */
-	u16	bb_numrecs;	/* current # of data records */
+typedef struct xfs_btree_hdr {
+	u32 bb_magic;		/* magic number for block type */
+	u16 bb_level;		/* 0 is a leaf */
+	u16 bb_numrecs;		/* current # of data records */
 } xfs_btree_hdr_t;
 
-typedef struct xfs_btree_block
-{
-	xfs_btree_hdr_t	bb_h;		/* header */
-	union		{
-		struct	{
-			xfs_agblock_t	bb_leftsib;
-			xfs_agblock_t	bb_rightsib;
-		}	s;		/* short form pointers */
-		struct	{
-			xfs_dfsbno_t	bb_leftsib;
-			xfs_dfsbno_t	bb_rightsib;
-		}	l;		/* long form pointers */
-	}		bb_u;		/* rest */
+typedef struct xfs_btree_block {
+	xfs_btree_hdr_t bb_h;	/* header */
+	union {
+		struct {
+			xfs_agblock_t bb_leftsib;
+			xfs_agblock_t bb_rightsib;
+		} s;		/* short form pointers */
+		struct {
+			xfs_dfsbno_t bb_leftsib;
+			xfs_dfsbno_t bb_rightsib;
+		} l;		/* long form pointers */
+	} bb_u;			/* rest */
 } xfs_btree_block_t;
 
 /* those are from xfs_bmap_btree.h */
@@ -171,10 +163,9 @@ typedef struct xfs_btree_block
 /*
  * Bmap root header, on-disk form only.
  */
-typedef struct xfs_bmdr_block
-{
-	u16	bb_level;	/* 0 is a leaf */
-	u16	bb_numrecs;	/* current # of data records */
+typedef struct xfs_bmdr_block {
+	u16 bb_level;		/* 0 is a leaf */
+	u16 bb_numrecs;		/* current # of data records */
 } xfs_bmdr_block_t;
 
 /*
@@ -193,35 +184,31 @@ typedef struct xfs_bmdr_block
 
 #define	BMBT_USE_64	1
 
-typedef struct xfs_bmbt_rec_32
-{
-	u32		l0, l1, l2, l3;
+typedef struct xfs_bmbt_rec_32 {
+	u32 l0, l1, l2, l3;
 } xfs_bmbt_rec_32_t;
-typedef struct xfs_bmbt_rec_64
-{
-	u64		l0, l1;
+typedef struct xfs_bmbt_rec_64 {
+	u64 l0, l1;
 } xfs_bmbt_rec_64_t;
 
 #if BMBT_USE_64
-typedef	u64	xfs_bmbt_rec_base_t;	/* use this for casts */
+typedef u64 xfs_bmbt_rec_base_t;	/* use this for casts */
 typedef xfs_bmbt_rec_64_t xfs_bmbt_rec_t, xfs_bmdr_rec_t;
-#else	/* !BMBT_USE_64 */
-typedef	u32	xfs_bmbt_rec_base_t;	/* use this for casts */
+#else				/* !BMBT_USE_64 */
+typedef u32 xfs_bmbt_rec_base_t;	/* use this for casts */
 typedef xfs_bmbt_rec_32_t xfs_bmbt_rec_t, xfs_bmdr_rec_t;
-#endif	/* BMBT_USE_64 */
+#endif				/* BMBT_USE_64 */
 
 /*
  * Key structure for non-leaf levels of the tree.
  */
-typedef struct xfs_bmbt_key
-{
-	xfs_dfiloff_t	br_startoff;	/* starting file offset */
+typedef struct xfs_bmbt_key {
+	xfs_dfiloff_t br_startoff;	/* starting file offset */
 } xfs_bmbt_key_t, xfs_bmdr_key_t;
 
 typedef xfs_dfsbno_t xfs_bmbt_ptr_t, xfs_bmdr_ptr_t;	/* btree pointer type */
 					/* btree block header type */
-typedef	struct xfs_btree_lblock xfs_bmbt_block_t;
-
+typedef struct xfs_btree_lblock xfs_bmbt_block_t;
 
 /* those are from xfs_dir2.h */
 /*
@@ -242,12 +229,12 @@ typedef	struct xfs_btree_lblock xfs_bmbt_block_t;
 /*
  * Byte offset in data block and shortform entry.
  */
-typedef	u16	xfs_dir2_data_off_t;
+typedef u16 xfs_dir2_data_off_t;
 
 /*
  * Byte offset in a directory.
  */
-typedef	xfs_off_t		xfs_dir2_off_t;
+typedef xfs_off_t xfs_dir2_off_t;
 
 /* those are from xfs_da_btree.h */
 /*========================================================================
@@ -264,10 +251,10 @@ typedef	xfs_off_t		xfs_dir2_off_t;
 #define	XFS_DIR2_LEAFN_MAGIC	0xd2ff	/* magic number: v2 dirlf multi blks */
 
 typedef struct xfs_da_blkinfo {
-	xfs_dablk_t forw;			/* previous block in list */
-	xfs_dablk_t back;			/* following block in list */
-	u16 magic;			/* validity check on block */
-	u16 pad;				/* unused */
+	xfs_dablk_t forw;	/* previous block in list */
+	xfs_dablk_t back;	/* following block in list */
+	u16 magic;		/* validity check on block */
+	u16 pad;		/* unused */
 } xfs_da_blkinfo_t;
 
 /*
@@ -289,9 +276,8 @@ typedef struct xfs_da_intnode {
 	struct xfs_da_node_entry {
 		xfs_dahash_t hashval;	/* hash value for this descendant */
 		xfs_dablk_t before;	/* Btree block before this key */
-	} btree[1];			/* variable sized array of keys */
+	} btree[1];		/* variable sized array of keys */
 } xfs_da_intnode_t;
-
 
 /* those are from xfs_dir2_data.h */
 /*
@@ -313,8 +299,8 @@ typedef struct xfs_da_intnode {
  * The freespace will be formatted as a xfs_dir2_data_unused_t.
  */
 typedef struct xfs_dir2_data_free {
-	xfs_dir2_data_off_t	offset;		/* start of freespace */
-	xfs_dir2_data_off_t	length;		/* length of freespace */
+	xfs_dir2_data_off_t offset;	/* start of freespace */
+	xfs_dir2_data_off_t length;	/* length of freespace */
 } xfs_dir2_data_free_t;
 
 /*
@@ -323,9 +309,9 @@ typedef struct xfs_dir2_data_free {
  * The code knows that XFS_DIR2_DATA_FD_COUNT is 3.
  */
 typedef struct xfs_dir2_data_hdr {
-	u32		magic;		/* XFS_DIR2_DATA_MAGIC */
-						/* or XFS_DIR2_BLOCK_MAGIC */
-	xfs_dir2_data_free_t	bestfree[XFS_DIR2_DATA_FD_COUNT];
+	u32 magic;		/* XFS_DIR2_DATA_MAGIC */
+	/* or XFS_DIR2_BLOCK_MAGIC */
+	xfs_dir2_data_free_t bestfree[XFS_DIR2_DATA_FD_COUNT];
 } xfs_dir2_data_hdr_t;
 
 /*
@@ -333,11 +319,11 @@ typedef struct xfs_dir2_data_hdr {
  * Tag appears as the last 2 bytes.
  */
 typedef struct xfs_dir2_data_entry {
-	xfs_ino_t		inumber;	/* inode number */
-	u8		namelen;	/* name length */
-	u8		name[1];	/* name bytes, no null */
-						/* variable offset */
-	xfs_dir2_data_off_t	tag;		/* starting offset of us */
+	xfs_ino_t inumber;	/* inode number */
+	u8 namelen;		/* name length */
+	u8 name[1];		/* name bytes, no null */
+	/* variable offset */
+	xfs_dir2_data_off_t tag;	/* starting offset of us */
 } xfs_dir2_data_entry_t;
 
 /*
@@ -345,17 +331,16 @@ typedef struct xfs_dir2_data_entry {
  * Tag appears as the last 2 bytes.
  */
 typedef struct xfs_dir2_data_unused {
-	u16		freetag;	/* XFS_DIR2_DATA_FREE_TAG */
-	xfs_dir2_data_off_t	length;		/* total free length */
-						/* variable offset */
-	xfs_dir2_data_off_t	tag;		/* starting offset of us */
+	u16 freetag;		/* XFS_DIR2_DATA_FREE_TAG */
+	xfs_dir2_data_off_t length;	/* total free length */
+	/* variable offset */
+	xfs_dir2_data_off_t tag;	/* starting offset of us */
 } xfs_dir2_data_unused_t;
 
 typedef union {
-	xfs_dir2_data_entry_t	entry;
-	xfs_dir2_data_unused_t	unused;
+	xfs_dir2_data_entry_t entry;
+	xfs_dir2_data_unused_t unused;
 } xfs_dir2_data_union_t;
-
 
 /* those are from xfs_dir2_leaf.h */
 /*
@@ -366,11 +351,10 @@ typedef union {
  * Leaf block header.
  */
 typedef struct xfs_dir2_leaf_hdr {
-	xfs_da_blkinfo_t	info;		/* header for da routines */
-	u16		count;		/* count of entries */
-	u16		stale;		/* count of stale entries */
+	xfs_da_blkinfo_t info;	/* header for da routines */
+	u16 count;		/* count of entries */
+	u16 stale;		/* count of stale entries */
 } xfs_dir2_leaf_hdr_t;
-
 
 /* those are from xfs_dir2_block.h */
 /*
@@ -389,10 +373,9 @@ typedef struct xfs_dir2_leaf_hdr {
 #define	XFS_DIR2_BLOCK_MAGIC	0x58443242	/* XD2B: for one block dirs */
 
 typedef struct xfs_dir2_block_tail {
-	u32	count;			/* count of leaf entries */
-	u32	stale;			/* count of stale lf entries */
+	u32 count;		/* count of leaf entries */
+	u32 stale;		/* count of stale lf entries */
 } xfs_dir2_block_tail_t;
-
 
 /* those are from xfs_dir2_sf.h */
 
@@ -406,25 +389,31 @@ typedef struct xfs_dir2_block_tail {
 /*
  * Inode number stored as 8 8-bit values.
  */
-typedef	struct { u8 i[8]; } xfs_dir2_ino8_t;
+typedef struct {
+	u8 i[8];
+} xfs_dir2_ino8_t;
 
 /*
  * Inode number stored as 4 8-bit values.
  * Works a lot of the time, when all the inode numbers in a directory
  * fit in 32 bits.
  */
-typedef struct { u8 i[4]; } xfs_dir2_ino4_t;
+typedef struct {
+	u8 i[4];
+} xfs_dir2_ino4_t;
 
 typedef union {
-	xfs_dir2_ino8_t	i8;
-	xfs_dir2_ino4_t	i4;
+	xfs_dir2_ino8_t i8;
+	xfs_dir2_ino4_t i4;
 } xfs_dir2_inou_t;
 
 /*
  * Normalized offset (in a data block) of the entry, really xfs_dir2_data_off_t.
  * Only need 16 bits, this is the byte offset into the single block form.
  */
-typedef struct { u8 i[2]; } xfs_dir2_sf_off_t;
+typedef struct {
+	u8 i[2];
+} xfs_dir2_sf_off_t;
 
 /*
  * The parent directory has a dedicated field, and the self-pointer must
@@ -435,21 +424,21 @@ typedef struct { u8 i[2]; } xfs_dir2_sf_off_t;
  * alignment for the inode number fields.
  */
 typedef struct xfs_dir2_sf_hdr {
-	u8		count;		/* count of entries */
-	u8		i8count;	/* count of 8-byte inode #s */
-	xfs_dir2_inou_t		parent;		/* parent dir inode number */
+	u8 count;		/* count of entries */
+	u8 i8count;		/* count of 8-byte inode #s */
+	xfs_dir2_inou_t parent;	/* parent dir inode number */
 } xfs_dir2_sf_hdr_t;
 
 typedef struct xfs_dir2_sf_entry {
-	u8		namelen;	/* actual name length */
-	xfs_dir2_sf_off_t	offset;		/* saved offset */
-	u8		name[1];	/* name, variable size */
-	xfs_dir2_inou_t		inumber;	/* inode number, var. offset */
+	u8 namelen;		/* actual name length */
+	xfs_dir2_sf_off_t offset;	/* saved offset */
+	u8 name[1];		/* name, variable size */
+	xfs_dir2_inou_t inumber;	/* inode number, var. offset */
 } xfs_dir2_sf_entry_t;
 
 typedef struct xfs_dir2_sf {
-	xfs_dir2_sf_hdr_t	hdr;		/* shortform header */
-	xfs_dir2_sf_entry_t	list[1];	/* shortform entries */
+	xfs_dir2_sf_hdr_t hdr;	/* shortform header */
+	xfs_dir2_sf_entry_t list[1];	/* shortform entries */
 } xfs_dir2_sf_t;
 
 /* those are from xfs_dinode.h */
@@ -465,71 +454,68 @@ typedef struct xfs_dir2_sf {
  * because we only need the core part in the in-core inode.
  */
 typedef struct xfs_timestamp {
-	s32	t_sec;		/* timestamp seconds */
-	s32	t_nsec;		/* timestamp nanoseconds */
+	s32 t_sec;		/* timestamp seconds */
+	s32 t_nsec;		/* timestamp nanoseconds */
 } xfs_timestamp_t;
 
 /*
  * Note: Coordinate changes to this structure with the XFS_DI_* #defines
  * below and the offsets table in xfs_ialloc_log_di().
  */
-typedef struct xfs_dinode_core
-{
-	u16	di_magic;	/* inode magic # = XFS_DINODE_MAGIC */
-	u16	di_mode;	/* mode and type of file */
-	s8	di_version;	/* inode version */
-	s8	di_format;	/* format of di_c data */
-	u16	di_onlink;	/* old number of links to file */
-	u32	di_uid;		/* owner's user id */
-	u32	di_gid;		/* owner's group id */
-	u32	di_nlink;	/* number of links to file */
-	u16	di_projid;	/* owner's project id */
-	u8	di_pad[10];	/* unused, zeroed space */
-	xfs_timestamp_t	di_atime;	/* time last accessed */
-	xfs_timestamp_t	di_mtime;	/* time last modified */
-	xfs_timestamp_t	di_ctime;	/* time created/inode modified */
-	xfs_fsize_t	di_size;	/* number of bytes in file */
-	xfs_drfsbno_t	di_nblocks;	/* # of direct & btree blocks used */
-	xfs_extlen_t	di_extsize;	/* basic/minimum extent size for file */
-	xfs_extnum_t	di_nextents;	/* number of extents in data fork */
-	xfs_aextnum_t	di_anextents;	/* number of extents in attribute fork*/
-	u8	di_forkoff;	/* attr fork offs, <<3 for 64b align */
-	s8	di_aformat;	/* format of attr fork's data */
-	u32	di_dmevmask;	/* DMIG event mask */
-	u16	di_dmstate;	/* DMIG state info */
-	u16	di_flags;	/* random flags, XFS_DIFLAG_... */
-	u32	di_gen;		/* generation number */
+typedef struct xfs_dinode_core {
+	u16 di_magic;		/* inode magic # = XFS_DINODE_MAGIC */
+	u16 di_mode;		/* mode and type of file */
+	s8 di_version;		/* inode version */
+	s8 di_format;		/* format of di_c data */
+	u16 di_onlink;		/* old number of links to file */
+	u32 di_uid;		/* owner's user id */
+	u32 di_gid;		/* owner's group id */
+	u32 di_nlink;		/* number of links to file */
+	u16 di_projid;		/* owner's project id */
+	u8 di_pad[10];		/* unused, zeroed space */
+	xfs_timestamp_t di_atime;	/* time last accessed */
+	xfs_timestamp_t di_mtime;	/* time last modified */
+	xfs_timestamp_t di_ctime;	/* time created/inode modified */
+	xfs_fsize_t di_size;	/* number of bytes in file */
+	xfs_drfsbno_t di_nblocks;	/* # of direct & btree blocks used */
+	xfs_extlen_t di_extsize;	/* basic/minimum extent size for file */
+	xfs_extnum_t di_nextents;	/* number of extents in data fork */
+	xfs_aextnum_t di_anextents;	/* number of extents in attribute fork */
+	u8 di_forkoff;		/* attr fork offs, <<3 for 64b align */
+	s8 di_aformat;		/* format of attr fork's data */
+	u32 di_dmevmask;	/* DMIG event mask */
+	u16 di_dmstate;		/* DMIG state info */
+	u16 di_flags;		/* random flags, XFS_DIFLAG_... */
+	u32 di_gen;		/* generation number */
 } xfs_dinode_core_t;
 
-typedef struct xfs_dinode
-{
-	xfs_dinode_core_t	di_core;
-	xfs_agino_t		di_next_unlinked;/* agi unlinked list ptr */
+typedef struct xfs_dinode {
+	xfs_dinode_core_t di_core;
+	xfs_agino_t di_next_unlinked;	/* agi unlinked list ptr */
 	union {
 		xfs_bmdr_block_t di_bmbt;	/* btree root block */
 		xfs_bmbt_rec_32_t di_bmx[1];	/* extent list */
-		xfs_dir2_sf_t	di_dir2sf;	/* shortform directory v2 */
-		char		di_c[1];	/* local contents */
+		xfs_dir2_sf_t di_dir2sf;	/* shortform directory v2 */
+		char di_c[1];	/* local contents */
 	} di_u;
 } xfs_dinode_t;
 
 /*
  * Values for di_format
  */
-typedef enum xfs_dinode_fmt
-{
-	XFS_DINODE_FMT_DEV,		/* CHR, BLK: di_dev */
-	XFS_DINODE_FMT_LOCAL,		/* DIR, REG: di_c */
-					/* LNK: di_symlink */
-	XFS_DINODE_FMT_EXTENTS,		/* DIR, REG, LNK: di_bmx */
-	XFS_DINODE_FMT_BTREE,		/* DIR, REG, LNK: di_bmbt */
-	XFS_DINODE_FMT_UUID 		/* MNT: di_uuid */
+typedef enum xfs_dinode_fmt {
+	XFS_DINODE_FMT_DEV,	/* CHR, BLK: di_dev */
+	XFS_DINODE_FMT_LOCAL,	/* DIR, REG: di_c */
+	/* LNK: di_symlink */
+	XFS_DINODE_FMT_EXTENTS,	/* DIR, REG, LNK: di_bmx */
+	XFS_DINODE_FMT_BTREE,	/* DIR, REG, LNK: di_bmbt */
+	XFS_DINODE_FMT_UUID	/* MNT: di_uuid */
 } xfs_dinode_fmt_t;
 
 /*
  * File types (mode field)
  */
-#define	IFMT		0170000		/* type of file */
-#define	IFDIR		0040000		/* directory */
-#define	IFREG		0100000		/* regular */
-#define	IFLNK		0120000		/* symbolic link */
+#define	IFMT		0170000	/* type of file */
+#define	IFDIR		0040000	/* directory */
+#define	IFREG		0100000	/* regular */
+#define	IFLNK		0120000	/* symbolic link */
