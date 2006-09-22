@@ -1,7 +1,6 @@
 #ifndef __TYPES_H
 #define __TYPES_H
 
-typedef __signed__ char __s8;
 
 
 
