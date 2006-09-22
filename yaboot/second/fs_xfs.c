@@ -166,9 +166,9 @@ static struct xfs_info xfs;
 #define inode		((xfs_dinode_t *)((char *)FSYS_BUF + 8192))
 #define icore		(inode->di_core)
 
-#define	mask32lo(n)	(((__uint32_t)1 << (n)) - 1)
+#define	mask32lo(n)	(((u32)1 << (n)) - 1)
 
-#define	XFS_INO_MASK(k)		((__uint32_t)((1ULL << (k)) - 1))
+#define	XFS_INO_MASK(k)		((u32)((1ULL << (k)) - 1))
 #define	XFS_INO_OFFSET_BITS	xfs.inopblog
 #define	XFS_INO_AGBNO_BITS	xfs.agblklog
 #define	XFS_INO_AGINO_BITS	(xfs.agblklog + xfs.inopblog)
@@ -250,7 +250,7 @@ static const char xfs_highbit[256] = {
 	7, 7, 7, 7, 7, 7, 7, 7,	/* f8 .. ff */
 };
 
-static int xfs_highbit32(__uint32_t v)
+static int xfs_highbit32(u32 v)
 {
 	int i;
 
@@ -401,14 +401,14 @@ static inline xfs_ino_t sf_ino(char *sfe, int namelen)
 	void *p = sfe + namelen + 3;
 
 	return (xfs.i8param == 0)
-	    ? le64(*(xfs_ino_t *) p) : le32(*(__uint32_t *) p);
+	    ? le64(*(xfs_ino_t *) p) : le32(*(u32 *) p);
 }
 
 static inline xfs_ino_t sf_parent_ino(void)
 {
 	return (xfs.i8param == 0)
 	    ? le64(*(xfs_ino_t *) (&inode->di_u.di_dir2sf.hdr.parent))
-	    : le32(*(__uint32_t *) (&inode->di_u.di_dir2sf.hdr.parent));
+	    : le32(*(u32 *) (&inode->di_u.di_dir2sf.hdr.parent));
 }
 
 static inline int roundup8(int n)
