@@ -111,7 +111,7 @@ struct ext2_super_block {
 	u32 s_feature_compat;	/* compatible feature set */
 	u32 s_feature_incompat;	/* incompatible feature set */
 	u32 s_feature_ro_compat;	/* readonly-compatible feature set */
-	__u8 s_uuid[16];	/* 128-bit uuid for volume */
+	u8 s_uuid[16];	/* 128-bit uuid for volume */
 	char s_volume_name[16];	/* volume name */
 	char s_last_mounted[64];	/* directory where last mounted */
 	u32 s_algorithm_usage_bitmap;	/* For compression */
@@ -119,19 +119,19 @@ struct ext2_super_block {
 	 * Performance hints.  Directory preallocation should only
 	 * happen if the EXT2_FEATURE_COMPAT_DIR_PREALLOC flag is on.
 	 */
-	__u8 s_prealloc_blocks;	/* Nr of blocks to try to preallocate */
-	__u8 s_prealloc_dir_blocks;	/* Nr to preallocate for dirs */
+	u8 s_prealloc_blocks;	/* Nr of blocks to try to preallocate */
+	u8 s_prealloc_dir_blocks;	/* Nr to preallocate for dirs */
 	u16 s_reserved_gdt_blocks;	/* Per group table for online growth */
 	/*
 	 * Journaling support valid if EXT2_FEATURE_COMPAT_HAS_JOURNAL set.
 	 */
-	__u8 s_journal_uuid[16];	/* uuid of journal superblock */
+	u8 s_journal_uuid[16];	/* uuid of journal superblock */
 	u32 s_journal_inum;	/* inode number of journal file */
 	u32 s_journal_dev;	/* device number of journal file */
 	u32 s_last_orphan;	/* start of list of inodes to delete */
 	u32 s_hash_seed[4];	/* HTREE hash seed */
-	__u8 s_def_hash_version;	/* Default hash version to use */
-	__u8 s_jnl_backup_type;	/* Default type of journal backup */
+	u8 s_def_hash_version;	/* Default hash version to use */
+	u8 s_jnl_backup_type;	/* Default type of journal backup */
 	u16 s_reserved_word_pad;
 	u32 s_default_mount_opts;
 	u32 s_first_meta_bg;	/* First metablock group */
@@ -179,24 +179,24 @@ struct ext2_inode {
 	u32 i_faddr;		/* Fragment address */
 	union {
 		struct {
-			__u8 l_i_frag;	/* Fragment number */
-			__u8 l_i_fsize;	/* Fragment size */
+			u8 l_i_frag;	/* Fragment number */
+			u8 l_i_fsize;	/* Fragment size */
 			u16 i_pad1;
 			u16 l_i_uid_high;	/* these 2 fields    */
 			u16 l_i_gid_high;	/* were reserved2[0] */
 			u32 l_i_reserved2;
 		} linux2;
 		struct {
-			__u8 h_i_frag;	/* Fragment number */
-			__u8 h_i_fsize;	/* Fragment size */
+			u8 h_i_frag;	/* Fragment number */
+			u8 h_i_fsize;	/* Fragment size */
 			u16 h_i_mode_high;
 			u16 h_i_uid_high;
 			u16 h_i_gid_high;
 			u32 h_i_author;
 		} hurd2;
 		struct {
-			__u8 m_i_frag;	/* Fragment number */
-			__u8 m_i_fsize;	/* Fragment size */
+			u8 m_i_frag;	/* Fragment number */
+			u8 m_i_fsize;	/* Fragment size */
 			u16 m_pad1;
 			u32 m_i_reserved2[2];
 		} masix2;

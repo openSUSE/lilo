@@ -370,7 +370,7 @@ struct reiserfs_state
     
    u16 version;              /* The ReiserFS version. */
    u16 tree_depth;           /* The current depth of the reiser tree. */
-   __u8  blocksize_shift;      /* 1 << blocksize_shift == blocksize. */
+   u8  blocksize_shift;      /* 1 << blocksize_shift == blocksize. */
    u16 blocksize;            /* The reiserfs block size (power of 2) */
 
     /* Cache */

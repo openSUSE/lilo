@@ -2,7 +2,6 @@
 #define __TYPES_H
 
 typedef __signed__ char __s8;
-typedef unsigned char __u8;
 
 
 
