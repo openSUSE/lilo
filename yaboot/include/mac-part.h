@@ -24,8 +24,8 @@
 #define APPLE_AUX_TYPE	"Apple_UNIX_SVR2"
 
 struct mac_partition {
-    __u16	signature;	/* expected to be MAC_PARTITION_MAGIC */
-    __u16	res1;
+    u16	signature;	/* expected to be MAC_PARTITION_MAGIC */
+    u16	res1;
     u32	map_count;	/* # blocks in partition map */
     u32	start_block;	/* absolute starting block # of partition */
     u32	block_count;	/* number of blocks in partition */
@@ -51,8 +51,8 @@ struct mac_partition {
 
 /* Driver descriptor structure, in block 0 */
 struct mac_driver_desc {
-    __u16	signature;	/* expected to be MAC_DRIVER_MAGIC */
-    __u16	block_size;
+    u16	signature;	/* expected to be MAC_DRIVER_MAGIC */
+    u16	block_size;
     u32	block_count;
     /* ... more stuff */
 };

@@ -80,18 +80,18 @@ struct ext2_super_block {
 	u32 s_inodes_per_group;	/* # Inodes per group */
 	u32 s_mtime;		/* Mount time */
 	u32 s_wtime;		/* Write time */
-	__u16 s_mnt_count;	/* Mount count */
+	u16 s_mnt_count;	/* Mount count */
 	s16 s_max_mnt_count;	/* Maximal mount count */
-	__u16 s_magic;		/* Magic signature */
-	__u16 s_state;		/* File system state */
-	__u16 s_errors;		/* Behaviour when detecting errors */
-	__u16 s_minor_rev_level;	/* minor revision level */
+	u16 s_magic;		/* Magic signature */
+	u16 s_state;		/* File system state */
+	u16 s_errors;		/* Behaviour when detecting errors */
+	u16 s_minor_rev_level;	/* minor revision level */
 	u32 s_lastcheck;	/* time of last check */
 	u32 s_checkinterval;	/* max. time between checks */
 	u32 s_creator_os;	/* OS */
 	u32 s_rev_level;	/* Revision level */
-	__u16 s_def_resuid;	/* Default uid for reserved blocks */
-	__u16 s_def_resgid;	/* Default gid for reserved blocks */
+	u16 s_def_resuid;	/* Default uid for reserved blocks */
+	u16 s_def_resgid;	/* Default gid for reserved blocks */
 	/*
 	 * These fields are for EXT2_DYNAMIC_REV superblocks only.
 	 *
@@ -106,8 +106,8 @@ struct ext2_super_block {
 	 * things it doesn't understand...
 	 */
 	u32 s_first_ino;	/* First non-reserved inode */
-	__u16 s_inode_size;	/* size of inode structure */
-	__u16 s_block_group_nr;	/* block group # of this superblock */
+	u16 s_inode_size;	/* size of inode structure */
+	u16 s_block_group_nr;	/* block group # of this superblock */
 	u32 s_feature_compat;	/* compatible feature set */
 	u32 s_feature_incompat;	/* incompatible feature set */
 	u32 s_feature_ro_compat;	/* readonly-compatible feature set */
@@ -121,7 +121,7 @@ struct ext2_super_block {
 	 */
 	__u8 s_prealloc_blocks;	/* Nr of blocks to try to preallocate */
 	__u8 s_prealloc_dir_blocks;	/* Nr to preallocate for dirs */
-	__u16 s_reserved_gdt_blocks;	/* Per group table for online growth */
+	u16 s_reserved_gdt_blocks;	/* Per group table for online growth */
 	/*
 	 * Journaling support valid if EXT2_FEATURE_COMPAT_HAS_JOURNAL set.
 	 */
@@ -132,7 +132,7 @@ struct ext2_super_block {
 	u32 s_hash_seed[4];	/* HTREE hash seed */
 	__u8 s_def_hash_version;	/* Default hash version to use */
 	__u8 s_jnl_backup_type;	/* Default type of journal backup */
-	__u16 s_reserved_word_pad;
+	u16 s_reserved_word_pad;
 	u32 s_default_mount_opts;
 	u32 s_first_meta_bg;	/* First metablock group */
 	u32 s_mkfs_time;	/* When the filesystem was created */
@@ -143,22 +143,22 @@ struct ext2_group_desc {
 	u32 bg_block_bitmap;	/* Blocks bitmap block */
 	u32 bg_inode_bitmap;	/* Inodes bitmap block */
 	u32 bg_inode_table;	/* Inodes table block */
-	__u16 bg_free_blocks_count;	/* Free blocks count */
-	__u16 bg_free_inodes_count;	/* Free inodes count */
-	__u16 bg_used_dirs_count;	/* Directories count */
-	__u16 bg_pad;
+	u16 bg_free_blocks_count;	/* Free blocks count */
+	u16 bg_free_inodes_count;	/* Free inodes count */
+	u16 bg_used_dirs_count;	/* Directories count */
+	u16 bg_pad;
 	u32 bg_reserved[3];
 };
 struct ext2_inode {
-	__u16 i_mode;		/* File mode */
-	__u16 i_uid;		/* Low 16 bits of Owner Uid */
+	u16 i_mode;		/* File mode */
+	u16 i_uid;		/* Low 16 bits of Owner Uid */
 	u32 i_size;		/* Size in bytes */
 	u32 i_atime;		/* Access time */
 	u32 i_ctime;		/* Creation time */
 	u32 i_mtime;		/* Modification time */
 	u32 i_dtime;		/* Deletion Time */
-	__u16 i_gid;		/* Low 16 bits of Group Id */
-	__u16 i_links_count;	/* Links count */
+	u16 i_gid;		/* Low 16 bits of Group Id */
+	u16 i_links_count;	/* Links count */
 	u32 i_blocks;		/* Blocks count */
 	u32 i_flags;		/* File flags */
 	union {
@@ -181,23 +181,23 @@ struct ext2_inode {
 		struct {
 			__u8 l_i_frag;	/* Fragment number */
 			__u8 l_i_fsize;	/* Fragment size */
-			__u16 i_pad1;
-			__u16 l_i_uid_high;	/* these 2 fields    */
-			__u16 l_i_gid_high;	/* were reserved2[0] */
+			u16 i_pad1;
+			u16 l_i_uid_high;	/* these 2 fields    */
+			u16 l_i_gid_high;	/* were reserved2[0] */
 			u32 l_i_reserved2;
 		} linux2;
 		struct {
 			__u8 h_i_frag;	/* Fragment number */
 			__u8 h_i_fsize;	/* Fragment size */
-			__u16 h_i_mode_high;
-			__u16 h_i_uid_high;
-			__u16 h_i_gid_high;
+			u16 h_i_mode_high;
+			u16 h_i_uid_high;
+			u16 h_i_gid_high;
 			u32 h_i_author;
 		} hurd2;
 		struct {
 			__u8 m_i_frag;	/* Fragment number */
 			__u8 m_i_fsize;	/* Fragment size */
-			__u16 m_pad1;
+			u16 m_pad1;
 			u32 m_i_reserved2[2];
 		} masix2;
 	} osd2;			/* OS dependent 2 */

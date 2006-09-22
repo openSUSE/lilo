@@ -2,9 +2,9 @@
 #define _REISERFS_SWAB_H_
 /* Stolen from linux/include/linux/byteorder/swab.h */
 #define swab16(x) \
-	((__u16)( \
-		(((__u16)(x) & (__u16)0x00ffU) << 8) | \
-		(((__u16)(x) & (__u16)0xff00U) >> 8) ))
+	((u16)( \
+		(((u16)(x) & (u16)0x00ffU) << 8) | \
+		(((u16)(x) & (u16)0xff00U) >> 8) ))
 #define swab32(x) \
 	((u32)( \
 		(((u32)(x) & (u32)0x000000ffUL) << 24) | \

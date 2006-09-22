@@ -5,14 +5,14 @@
 
 /* 32-bit ELF base types. */
 typedef u32	Elf32_Addr;
-typedef __u16	Elf32_Half;
+typedef u16	Elf32_Half;
 typedef u32	Elf32_Off;
 typedef s32	Elf32_Sword;
 typedef u32	Elf32_Word;
 
 /* 64-bit ELF base types. */
 typedef __u64	Elf64_Addr;
-typedef __u16	Elf64_Half;
+typedef u16	Elf64_Half;
 typedef s16	Elf64_SHalf;
 typedef __u64	Elf64_Off;
 typedef __s64	Elf64_Sword;
@@ -400,8 +400,8 @@ typedef struct elf64_sym {
  */
 typedef struct elf_ident_t {
   unsigned char e_ident[EI_NIDENT];
-  __u16	        e_type;
-  __u16	        e_machine;
+  u16	        e_type;
+  u16	        e_machine;
 } Elf_Ident;
 
 typedef struct elf32_hdr{

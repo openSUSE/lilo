@@ -126,7 +126,7 @@ static __inline__ int is_power_of_two(unsigned long word)
 
 static int read_disk_block(struct boot_file_t *file, u32 block, u32 start, u32 length, void *buf)
 {
-	__u16 fs_blocksize = INFO->blocksize == 0 ? REISERFS_OLD_BLOCKSIZE : INFO->blocksize;
+	u16 fs_blocksize = INFO->blocksize == 0 ? REISERFS_OLD_BLOCKSIZE : INFO->blocksize;
 	unsigned long long pos = (unsigned long long)block * (unsigned long long)fs_blocksize;
 	pos += (unsigned long long)INFO->partition_offset + (unsigned long long)start;
 	DEBUG_F("Reading %u bytes, starting at block %u, disk offset %Lu\n", length, block, pos);
@@ -431,7 +431,7 @@ static int reiserfs_read_super(void)
 /* Read in the node at the current path and depth into the node cache.
  * You must set INFO->blocks[depth] before.
  */
-static char *read_tree_node(u32 blockNr, __u16 depth)
+static char *read_tree_node(u32 blockNr, u16 depth)
 {
 	char *cache = CACHE(depth);
 	int num_cached = INFO->cached_slots;
@@ -472,7 +472,7 @@ static char *read_tree_node(u32 blockNr, __u16 depth)
  * INFO->current_info are adapted accordingly.  */
 static int next_key(void)
 {
-	__u16 depth;
+	u16 depth;
 	struct item_head *ih = INFO->current_ih + 1;
 	char *cache;
 
@@ -513,7 +513,7 @@ static int next_key(void)
 		}
 
 		do {
-			__u16 nr_item = blkh_nr_item(BLOCKHEAD(cache));
+			u16 nr_item = blkh_nr_item(BLOCKHEAD(cache));
 			int key_nr = INFO->next_key_nr[depth]++;
 
 			DEBUG_F("  depth=%u, i=%u/%u\n", depth, key_nr, nr_item);
@@ -871,7 +871,7 @@ typedef union {
 	__u64 linear;
 } offset_v2_esafe_overlay;
 
-inline __u16 offset_v2_k_type(struct offset_v2 *v2)
+inline u16 offset_v2_k_type(struct offset_v2 *v2)
 {
 	offset_v2_esafe_overlay tmp = *(offset_v2_esafe_overlay *) v2;
 	tmp.linear = le64_to_cpu(tmp.linear);

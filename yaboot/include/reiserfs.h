@@ -28,22 +28,22 @@ struct reiserfs_super_block
                                        async commit be */
     u32 s_journal_max_trans_age;  /* in seconds, how old can a
                                        transaction be */
-    __u16 s_blocksize;              /* block size */
-    __u16 s_oid_maxsize;            /* max size of object id array, */
-    __u16 s_oid_cursize;            /* current size of obj id array */
-    __u16 s_state;                  /* valid or error */
+    u16 s_blocksize;              /* block size */
+    u16 s_oid_maxsize;            /* max size of object id array, */
+    u16 s_oid_cursize;            /* current size of obj id array */
+    u16 s_state;                  /* valid or error */
     char s_magic[12];               /* reiserfs magic string indicates
                                        that file system is reiserfs */
     u32 s_hash_function_code;	    /* indicate, what hash function is
                                        being use to sort names in a
                                        directory */
-    __u16 s_tree_height;            /* height of disk tree */
-    __u16 s_bmap_nr;                /* amount of bitmap blocks needed
+    u16 s_tree_height;            /* height of disk tree */
+    u16 s_bmap_nr;                /* amount of bitmap blocks needed
                                        to address each block of file
                                        system */
-    __u16 s_version;
-    __u16 s_marked_in_use;
-    __u16 s_inode_generation;
+    u16 s_version;
+    u16 s_marked_in_use;
+    u16 s_inode_generation;
     char s_unused[124];             /* zero filled by mkreiserfs */
     char padding_to_quad[ 2 ];      /* aligned to u32 */
 } __attribute__ ((__packed__));
@@ -126,7 +126,7 @@ struct offset_v2 {
 } __attribute__ ((__packed__));
 
 #ifndef __LITTLE_ENDIAN
-inline __u16 offset_v2_k_type( struct offset_v2 *v2 );
+inline u16 offset_v2_k_type( struct offset_v2 *v2 );
 inline u64 offset_v2_k_offset( struct offset_v2 *v2 );
 #else
 # define offset_v2_k_type(v2)           ((v2)->k_type)
@@ -171,7 +171,7 @@ struct item_head
                                          searching for its key.*/
 
   union {
-    __u16 ih_free_space_reserved;     /* The free space in the last unformatted
+    u16 ih_free_space_reserved;     /* The free space in the last unformatted
                                          node of an indirect item if this is an
                                          indirect item.  This equals 0xFFFF
                                          iff this is a direct item or stat
@@ -179,13 +179,13 @@ struct item_head
                                          this field, is used to determine
                                          the item type, and thus which field
                                          this union contains. */
-    __u16 ih_entry_count;             /* Iff this is a directory item, this
+    u16 ih_entry_count;             /* Iff this is a directory item, this
                                          field equals the number of directory
 				         entries in the directory item. */
   } __attribute__ ((__packed__)) u;
-  __u16 ih_item_len;                  /* total size of the item body */
-  __u16 ih_item_location;             /* Offset to the item within the block */
-  __u16 ih_version;	              /* ITEM_VERSION_[01] of key type */
+  u16 ih_item_len;                  /* total size of the item body */
+  u16 ih_item_location;             /* Offset to the item within the block */
+  u16 ih_version;	              /* ITEM_VERSION_[01] of key type */
 } __attribute__ ((__packed__));
 #define IH_SIZE (sizeof(struct item_head))
 
@@ -197,10 +197,10 @@ struct item_head
 /* Header of a disk block.  More precisely, header of a formatted leaf
    or internal node, and not the header of an unformatted node. */
 struct block_head {       
-    __u16 blk_level;                  /* Level of a block in the tree */
-    __u16 blk_nr_item;                /* Number of keys/items in a block */
-    __u16 blk_free_space;             /* Block free space in bytes */
-    __u16 blk_reserved;
+    u16 blk_level;                  /* Level of a block in the tree */
+    u16 blk_nr_item;                /* Number of keys/items in a block */
+    u16 blk_free_space;             /* Block free space in bytes */
+    u16 blk_reserved;
     struct key blk_right_delim_key;   /* kept only for compatibility */
 };
 #define BLKH_SIZE                     (sizeof(struct block_head))
@@ -213,8 +213,8 @@ struct block_head {
 
 struct disk_child {
     u32       dc_block_number;   /* Disk child's block number */
-    __u16       dc_size;           /* Disk child's used space */
-    __u16       dc_reserved;
+    u16       dc_size;           /* Disk child's used space */
+    u16       dc_reserved;
 };
 
 #define DC_SIZE (sizeof(struct disk_child))
@@ -224,10 +224,10 @@ struct disk_child {
 /* Stat data */
 struct stat_data_v1
 {
-    __u16 sd_mode;              /* file type, permissions */
-    __u16 sd_nlink;             /* number of hard links */
-    __u16 sd_uid;               /* owner */
-    __u16 sd_gid;               /* group */
+    u16 sd_mode;              /* file type, permissions */
+    u16 sd_nlink;             /* number of hard links */
+    u16 sd_uid;               /* owner */
+    u16 sd_gid;               /* group */
     u32 sd_size;	        /* file size */
     u32 sd_atime;	        /* time of last access */
     u32 sd_mtime;	        /* time file was last modified  */
@@ -247,8 +247,8 @@ struct stat_data_v1
 /* Stat Data on disk (reiserfs version of UFS disk inode minus the
    address blocks) */
 struct stat_data {
-    __u16 sd_mode;     /* file type, permissions */
-    __u16 sd_reserved;
+    u16 sd_mode;     /* file type, permissions */
+    u16 sd_reserved;
     u32 sd_nlink;    /* number of hard links */
     __u64 sd_size;     /* file size */
     u32 sd_uid;      /* owner */
@@ -277,8 +277,8 @@ struct reiserfs_de_head
                             that is referenced by directory entry */
     u32 deh_objectid;  /* objectid of the object, that is referenced by
                             directory entry */
-    __u16 deh_location;  /* offset of name in the whole item */
-    __u16 deh_state;	 /* whether 1) entry contains stat data (for future),                               and 2) whether entry is hidden (unlinked) */
+    u16 deh_location;  /* offset of name in the whole item */
+    u16 deh_state;	 /* whether 1) entry contains stat data (for future),                               and 2) whether entry is hidden (unlinked) */
 } __attribute__ ((__packed__));
 #define DEH_SIZE                  sizeof(struct reiserfs_de_head)
 
@@ -368,14 +368,14 @@ struct reiserfs_state
     u32 journal_first_desc;  /* The first valid descriptor block in journal
                                  (relative to journal_block) */
     
-   __u16 version;              /* The ReiserFS version. */
-   __u16 tree_depth;           /* The current depth of the reiser tree. */
+   u16 version;              /* The ReiserFS version. */
+   u16 tree_depth;           /* The current depth of the reiser tree. */
    __u8  blocksize_shift;      /* 1 << blocksize_shift == blocksize. */
-   __u16 blocksize;            /* The reiserfs block size (power of 2) */
+   u16 blocksize;            /* The reiserfs block size (power of 2) */
 
     /* Cache */
-    __u16 cached_slots;
-    __u16 journal_transactions;
+    u16 cached_slots;
+    u16 journal_transactions;
     u32 blocks[REISERFS_MAX_TREE_HEIGHT];
     u32 next_key_nr[REISERFS_MAX_TREE_HEIGHT];
 };
