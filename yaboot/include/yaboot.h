@@ -44,7 +44,7 @@
 #ifndef __YABOOT_H__
 #define __YABOOT_H__
 
-#include "file.h"
+#include <file.h>
 
 struct boot_param_t {
 	struct path_description	kernel;

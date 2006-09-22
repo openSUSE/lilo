@@ -41,24 +41,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "stdarg.h"
-#include "string.h"
-#include "ctype.h"
-#include "stdlib.h"
-#include "prom.h"
-#include "file.h"
-#include "errors.h"
-#include "cfg.h"
-#include "cmdline.h"
-#include "yaboot.h"
-#include "elf.h"
-#include "debug.h"
+#include <stdarg.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <prom.h>
+#include <file.h>
+#include <errors.h>
+#include <cfg.h>
+#include <cmdline.h>
+#include <yaboot.h>
+#include <elf.h>
+#include <debug.h>
 
 #define CONFIG_FILE_MAX		0x8000	/* 32k */
 #define BOOTPATH_LEN		1024
 
 #ifdef USE_MD5_PASSWORDS
-#include "md5.h"
+#include <md5.h>
 #endif				/* USE_MD5_PASSWORDS */
 
 /* align addr on a size boundry - adjust address up if needed -- Cort */

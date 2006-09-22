@@ -24,15 +24,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "prom.h"
-#include "stdarg.h"
-#include "stddef.h"
-#include "stdlib.h"
-#include "string.h"
-#include "types.h"
-#include "ctype.h"
-#include "errors.h"
-#include "debug.h"
+#include <prom.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+#include <types.h>
+#include <ctype.h>
+#include <errors.h>
+#include <debug.h>
 
 #define READ_BLOCKS_USE_READ	1
 

@@ -22,14 +22,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "types.h"
-#include "ctype.h"
-#include "string.h"
-#include "stdlib.h"
-#include "fs.h"
-#include "errors.h"
-#include "debug.h"
-#include "reiserfs.h"
+#include <types.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
+#include <fs.h>
+#include <errors.h>
+#include <debug.h>
+#include <reiserfs.h>
 
 static int reiserfs_read_super(void);
 static int reiserfs_open_file(char *dirname);

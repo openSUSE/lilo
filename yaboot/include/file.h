@@ -27,14 +27,14 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "types.h"
-#include "stddef.h"
-#include "prom.h"
-#include "errors.h"
+#include <types.h>
+#include <stddef.h>
+#include <prom.h>
+#include <errors.h>
 
 struct boot_file_t;
 struct path_description;
-#include "fs.h"
+#include <fs.h>
 
 #define FILE_MAX_PATH		1024
 

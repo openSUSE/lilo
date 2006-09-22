@@ -1,7 +1,7 @@
 #ifndef _BYTEORDER_H_
 #define _BYTEORDER_H_
 
-#include "swab.h"
+#include <swab.h>
 
 # define le64_to_cpu(x)  swab64((x))
 # define cpu_to_le64(x)  swab64((x))

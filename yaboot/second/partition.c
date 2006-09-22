@@ -27,20 +27,20 @@
  *        fixing CDROM handling by directly using the ATAPI layer.
  */
 
-#include "ctype.h"
-#include "types.h"
-#include "stddef.h"
-#include "stdlib.h"
-#include "mac-part.h"
-#include "msdos-part.h"
-#include "amiga-part.h"
-#include "partition.h"
-#include "prom.h"
-#include "string.h"
-#include "iso_fs.h"
-#include "debug.h"
-#include "errors.h"
-#include "byteorder.h"
+#include <ctype.h>
+#include <types.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <mac-part.h>
+#include <msdos-part.h>
+#include <amiga-part.h>
+#include <partition.h>
+#include <prom.h>
+#include <string.h>
+#include <iso_fs.h>
+#include <debug.h>
+#include <errors.h>
+#include <byteorder.h>
 
 #define MAX_BLOCK_SIZE	2048
 static char block_buffer[MAX_BLOCK_SIZE];

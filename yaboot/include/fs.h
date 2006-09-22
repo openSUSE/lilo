@@ -23,8 +23,8 @@
 #ifndef FS_H
 #define FS_H
 
-#include "partition.h"
-#include "file.h"
+#include <partition.h>
+#include <file.h>
 
 struct fs_t {
 	const char *name;

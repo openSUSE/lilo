@@ -24,20 +24,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "ctype.h"
-#include "types.h"
-#include "stddef.h"
-#include "stdlib.h"
-#include "file.h"
-#include "prom.h"
-#include "string.h"
-#include "partition.h"
-#include "fs.h"
-#include "errors.h"
-#include "debug.h"
-#include "stdlib.h"
-#include "fs.h"
-#include "errors.h"
+#include <ctype.h>
+#include <types.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <file.h>
+#include <prom.h>
+#include <string.h>
+#include <partition.h>
+#include <fs.h>
+#include <errors.h>
+#include <debug.h>
+#include <stdlib.h>
+#include <fs.h>
+#include <errors.h>
 
 extern const struct fs_t of_filesystem;
 extern const struct fs_t of_net_filesystem;

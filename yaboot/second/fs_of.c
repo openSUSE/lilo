@@ -31,18 +31,18 @@
  * itself
  */
 
-#include "ctype.h"
-#include "types.h"
-#include "stddef.h"
-#include "stdlib.h"
-#include "file.h"
-#include "prom.h"
-#include "string.h"
-#include "partition.h"
-#include "msdos-part.h"
-#include "fs.h"
-#include "errors.h"
-#include "debug.h"
+#include <ctype.h>
+#include <types.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <file.h>
+#include <prom.h>
+#include <string.h>
+#include <partition.h>
+#include <msdos-part.h>
+#include <fs.h>
+#include <errors.h>
+#include <debug.h>
 
 #define LOAD_BUFFER_BASE (42*1024*1024)
 #define LOAD_BUFFER_SIZE (12*1024*1024)

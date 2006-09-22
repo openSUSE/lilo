@@ -25,17 +25,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "ctype.h"
-#include "types.h"
-#include "stddef.h"
-#include "stdlib.h"
-#include "file.h"
-#include "prom.h"
-#include "string.h"
-#include "partition.h"
-#include "fs.h"
-#include "errors.h"
-#include "debug.h"
+#include <ctype.h>
+#include <types.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <file.h>
+#include <prom.h>
+#include <string.h>
+#include <partition.h>
+#include <fs.h>
+#include <errors.h>
+#include <debug.h>
 
 #define FAST_VERSION
 #define MAX_READ_RANGE	256

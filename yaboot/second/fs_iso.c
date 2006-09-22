@@ -18,15 +18,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "ctype.h"
-#include "types.h"
-#include "stddef.h"
-#include "file.h"
-#include "prom.h"
-#include "string.h"
-#include "partition.h"
-#include "fs.h"
-#include "errors.h"
+#include <ctype.h>
+#include <types.h>
+#include <stddef.h>
+#include <file.h>
+#include <prom.h>
+#include <string.h>
+#include <partition.h>
+#include <fs.h>
+#include <errors.h>
 
 static int iso_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {

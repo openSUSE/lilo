@@ -19,12 +19,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "setjmp.h"
-#include "stdarg.h"
-#include "stdlib.h"
-#include "string.h"
-#include "types.h"
-#include "prom.h"
+#include <setjmp.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <types.h>
+#include <prom.h>
 
 /* Imported functions */
 extern int strcasecmp(const char *s1, const char *s2);

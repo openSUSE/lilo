@@ -5,7 +5,7 @@
 #ifndef __STDLIB_H
 #define __STDLIB_H
 
-#include "stdarg.h"
+#include <stdarg.h>
 
 extern void malloc_init(void *bottom, unsigned long size);
 extern void malloc_dispose(void);

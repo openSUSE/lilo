@@ -1,7 +1,7 @@
 #ifndef _REISERFS_H_
 #define _REISERFS_H_
-#include "byteorder.h"
-#include "types.h"
+#include <byteorder.h>
+#include <types.h>
 
 /* ReiserFS Super Block */
 /* include/linux/reiserfs_fs_sb.h */

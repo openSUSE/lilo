@@ -1,8 +1,8 @@
 #ifndef _LINUX_STRING_H_
 #define _LINUX_STRING_H_
 
-#include "types.h"
-#include "stddef.h"
+#include <types.h>
+#include <stddef.h>
 
 extern char * ___strtok;
 extern char * strcpy(char *,const char *);

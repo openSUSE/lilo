@@ -27,7 +27,7 @@
 #ifndef PROM_H
 #define PROM_H
 
-#include "stdarg.h"
+#include <stdarg.h>
 
 typedef void *prom_handle;
 typedef void *ihandle;

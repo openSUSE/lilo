@@ -23,11 +23,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "types.h"
-#include "stdarg.h"
-#include "prom.h"
-#include "string.h"
-#include "cfg.h"
+#include <types.h>
+#include <stdarg.h>
+#include <prom.h>
+#include <string.h>
+#include <cfg.h>
 
 #define CMD_LENG	512
 char cbuff[CMD_LENG];

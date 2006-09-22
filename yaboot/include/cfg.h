@@ -21,7 +21,7 @@
 #ifndef CFG_H
 #define CFG_H
 
-#include "types.h"
+#include <types.h>
 
 extern int	cfg_parse(char *buff, int len, int cpu); 
 extern char*	cfg_get_strg(char *image, char *item);

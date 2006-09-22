@@ -24,8 +24,8 @@
 
 /* See RFC 1321 for a description of the MD5 algorithm. */
 
-#include "string.h"
-#include "md5.h"
+#include <string.h>
+#include <md5.h>
 
 #ifdef TEST
 # include <stdio.h>

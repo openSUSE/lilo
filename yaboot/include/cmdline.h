@@ -23,7 +23,7 @@
 #ifndef CMDLINE_H
 #define CMDLINE_H
 
-#include "types.h"
+#include <types.h>
 
 extern void	cmdinit();
 extern void	cmdedit(void (*tabfunc) (void), int password);
