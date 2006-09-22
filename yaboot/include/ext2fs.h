@@ -1,8 +1,5 @@
 #include <types.h>
 
-typedef __u32		dgrp_t;
-
-
 #define EXT2_ET_MAGIC_IO_CHANNEL                 (2133571333L)
 #define EXT2_ET_MAGIC_IO_MANAGER                 (2133571335L)
 #define EXT2_ET_BAD_MAGIC                        (2133571347L)
@@ -256,7 +253,7 @@ struct struct_ext2_filsys {
 	struct ext2_super_block	* 	super;
 	unsigned int			blocksize;
 	int				fragsize;
-	dgrp_t				group_desc_count;
+	u32				group_desc_count;
 	unsigned long			desc_blocks;
 	struct ext2_group_desc *	group_desc;
 	int				inode_blocks_per_group;
