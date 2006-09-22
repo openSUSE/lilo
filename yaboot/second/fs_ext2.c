@@ -28,6 +28,7 @@
 #include "ctype.h"
 #include "types.h"
 #include "stddef.h"
+#include "stdlib.h"
 #include "file.h"
 #include "prom.h"
 #include "string.h"
@@ -41,8 +42,7 @@
 #undef VERBOSE_DEBUG
 
 typedef int FILE;
-#include "linux/ext2_fs.h"
-#include "ext2fs/ext2fs.h"
+#include <ext2fs.h>
 static io_manager linux_io_manager;
 
 /* Currently, we have a mess between what is in the file structure

@@ -83,14 +83,9 @@ second/fs_ext2.o: \
 	include/string.h \
 	include/errors.h \
 	include/debug.h \
-	include/linux/ext2_fs.h \
 	include/linux/types.h \
-	include/ext2fs/ext2fs.h \
-	include/stdlib.h \
-	include/et/com_err.h \
-	include/ext2fs/ext2_io.h \
-	include/ext2fs/ext2_err.h \
-	include/ext2fs/bitops.h
+	include/ext2fs.h \
+	include/stdlib.h
 
 second/fs_iso.o: \
 	second/fs_iso.c \
