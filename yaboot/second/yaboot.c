@@ -51,7 +51,7 @@
 #include "cfg.h"
 #include "cmdline.h"
 #include "yaboot.h"
-#include "linux/elf.h"
+#include "elf.h"
 #include "debug.h"
 
 #define CONFIG_FILE_MAX		0x8000	/* 32k */
