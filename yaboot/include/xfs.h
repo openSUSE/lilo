@@ -34,7 +34,6 @@
 
 #ifndef _BITS_TYPES_H
 typedef signed char	__int8_t;
-typedef unsigned char	__uint8_t;
 typedef short		__int16_t;
 typedef unsigned short	__uint16_t;
 typedef int		__int32_t;
@@ -47,7 +46,7 @@ typedef __uint64_t	xfs_ino_t;
 typedef	__uint32_t	xfs_agino_t;
 typedef __int64_t	xfs_daddr_t;
 typedef __int64_t	xfs_off_t;
-typedef __uint8_t	uuid_t[16];
+typedef u8	uuid_t[16];
 
 
 /* those are from xfs_types.h */
@@ -103,14 +102,14 @@ typedef struct xfs_sb
 	__uint16_t	sb_inodesize;	/* inode size, bytes */
 	__uint16_t	sb_inopblock;	/* inodes per block */
 	char		sb_fname[12];	/* file system name */
-	__uint8_t	sb_blocklog;	/* log2 of sb_blocksize */
-	__uint8_t	sb_sectlog;	/* log2 of sb_sectsize */
-	__uint8_t	sb_inodelog;	/* log2 of sb_inodesize */
-	__uint8_t	sb_inopblog;	/* log2 of sb_inopblock */
-	__uint8_t	sb_agblklog;	/* log2 of sb_agblocks (rounded up) */
-	__uint8_t	sb_rextslog;	/* log2 of sb_rextents */
-	__uint8_t	sb_inprogress;	/* mkfs is in progress, don't mount */
-	__uint8_t	sb_imax_pct;	/* max % of fs for inode space */
+	u8	sb_blocklog;	/* log2 of sb_blocksize */
+	u8	sb_sectlog;	/* log2 of sb_sectsize */
+	u8	sb_inodelog;	/* log2 of sb_inodesize */
+	u8	sb_inopblog;	/* log2 of sb_inopblock */
+	u8	sb_agblklog;	/* log2 of sb_agblocks (rounded up) */
+	u8	sb_rextslog;	/* log2 of sb_rextents */
+	u8	sb_inprogress;	/* mkfs is in progress, don't mount */
+	u8	sb_imax_pct;	/* max % of fs for inode space */
 					/* statistics */
 	/*
 	 * These fields must remain contiguous.  If you really
@@ -127,13 +126,13 @@ typedef struct xfs_sb
 	xfs_ino_t	sb_uquotino;	/* user quota inode */
 	xfs_ino_t	sb_gquotino;	/* group quota inode */
 	__uint16_t	sb_qflags;	/* quota flags */
-	__uint8_t	sb_flags;	/* misc. flags */
-	__uint8_t	sb_shared_vn;	/* shared version number */
+	u8	sb_flags;	/* misc. flags */
+	u8	sb_shared_vn;	/* shared version number */
 	xfs_extlen_t	sb_inoalignmt;	/* inode chunk alignment, fsblocks */
 	__uint32_t	sb_unit;	/* stripe or raid unit */
 	__uint32_t	sb_width;	/* stripe or raid width */	
-	__uint8_t	sb_dirblklog;	/* log2 of dir block size (fsbs) */
-        __uint8_t       sb_dummy[7];    /* padding */
+	u8	sb_dirblklog;	/* log2 of dir block size (fsbs) */
+        u8       sb_dummy[7];    /* padding */
 } xfs_sb_t;
 
 
@@ -344,8 +343,8 @@ typedef struct xfs_dir2_data_hdr {
  */
 typedef struct xfs_dir2_data_entry {
 	xfs_ino_t		inumber;	/* inode number */
-	__uint8_t		namelen;	/* name length */
-	__uint8_t		name[1];	/* name bytes, no null */
+	u8		namelen;	/* name length */
+	u8		name[1];	/* name bytes, no null */
 						/* variable offset */
 	xfs_dir2_data_off_t	tag;		/* starting offset of us */
 } xfs_dir2_data_entry_t;
@@ -416,14 +415,14 @@ typedef struct xfs_dir2_block_tail {
 /*
  * Inode number stored as 8 8-bit values.
  */
-typedef	struct { __uint8_t i[8]; } xfs_dir2_ino8_t;
+typedef	struct { u8 i[8]; } xfs_dir2_ino8_t;
 
 /*
  * Inode number stored as 4 8-bit values.
  * Works a lot of the time, when all the inode numbers in a directory
  * fit in 32 bits.
  */
-typedef struct { __uint8_t i[4]; } xfs_dir2_ino4_t;
+typedef struct { u8 i[4]; } xfs_dir2_ino4_t;
 
 typedef union {
 	xfs_dir2_ino8_t	i8;
@@ -434,7 +433,7 @@ typedef union {
  * Normalized offset (in a data block) of the entry, really xfs_dir2_data_off_t.
  * Only need 16 bits, this is the byte offset into the single block form.
  */
-typedef struct { __uint8_t i[2]; } xfs_dir2_sf_off_t;
+typedef struct { u8 i[2]; } xfs_dir2_sf_off_t;
 
 /*
  * The parent directory has a dedicated field, and the self-pointer must
@@ -445,15 +444,15 @@ typedef struct { __uint8_t i[2]; } xfs_dir2_sf_off_t;
  * alignment for the inode number fields.
  */
 typedef struct xfs_dir2_sf_hdr {
-	__uint8_t		count;		/* count of entries */
-	__uint8_t		i8count;	/* count of 8-byte inode #s */
+	u8		count;		/* count of entries */
+	u8		i8count;	/* count of 8-byte inode #s */
 	xfs_dir2_inou_t		parent;		/* parent dir inode number */
 } xfs_dir2_sf_hdr_t;
 
 typedef struct xfs_dir2_sf_entry {
-	__uint8_t		namelen;	/* actual name length */
+	u8		namelen;	/* actual name length */
 	xfs_dir2_sf_off_t	offset;		/* saved offset */
-	__uint8_t		name[1];	/* name, variable size */
+	u8		name[1];	/* name, variable size */
 	xfs_dir2_inou_t		inumber;	/* inode number, var. offset */
 } xfs_dir2_sf_entry_t;
 
@@ -494,7 +493,7 @@ typedef struct xfs_dinode_core
 	__uint32_t	di_gid;		/* owner's group id */
 	__uint32_t	di_nlink;	/* number of links to file */
 	__uint16_t	di_projid;	/* owner's project id */
-	__uint8_t	di_pad[10];	/* unused, zeroed space */
+	u8	di_pad[10];	/* unused, zeroed space */
 	xfs_timestamp_t	di_atime;	/* time last accessed */
 	xfs_timestamp_t	di_mtime;	/* time last modified */
 	xfs_timestamp_t	di_ctime;	/* time created/inode modified */
@@ -503,7 +502,7 @@ typedef struct xfs_dinode_core
 	xfs_extlen_t	di_extsize;	/* basic/minimum extent size for file */
 	xfs_extnum_t	di_nextents;	/* number of extents in data fork */
 	xfs_aextnum_t	di_anextents;	/* number of extents in attribute fork*/
-	__uint8_t	di_forkoff;	/* attr fork offs, <<3 for 64b align */
+	u8	di_forkoff;	/* attr fork offs, <<3 for 64b align */
 	__int8_t	di_aformat;	/* format of attr fork's data */
 	__uint32_t	di_dmevmask;	/* DMIG event mask */
 	__uint16_t	di_dmstate;	/* DMIG state info */
