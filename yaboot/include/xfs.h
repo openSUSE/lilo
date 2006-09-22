@@ -33,7 +33,6 @@
  */
 
 #ifndef _BITS_TYPES_H
-typedef short		__int16_t;
 typedef unsigned short	__uint16_t;
 typedef int		__int32_t;
 typedef unsigned int	__uint32_t;
@@ -54,7 +53,7 @@ typedef __uint32_t	xfs_agblock_t;	/* blockno in alloc. group */
 typedef	__uint32_t	xfs_extlen_t;	/* extent length in blocks */
 typedef	__uint32_t	xfs_agnumber_t;	/* allocation group number */
 typedef __int32_t	xfs_extnum_t;	/* # of extents in a file */
-typedef __int16_t	xfs_aextnum_t;	/* # extents in an attribute fork */
+typedef s16	xfs_aextnum_t;	/* # extents in an attribute fork */
 typedef	__int64_t	xfs_fsize_t;	/* bytes in a file */
 
 typedef	__uint32_t	xfs_dablk_t;	/* dir/attr block number (in file) */
