@@ -41,7 +41,6 @@
 #define MAX_READ_RANGE	256
 #undef VERBOSE_DEBUG
 
-typedef int FILE;
 #include <ext2fs.h>
 static io_manager linux_io_manager;
 
