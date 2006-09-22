@@ -33,7 +33,6 @@
  */
 
 #ifndef _BITS_TYPES_H
-typedef int		__int32_t;
 typedef long long	__int64_t;
 typedef unsigned long long __uint64_t;
 #endif
@@ -50,7 +49,7 @@ typedef u8	uuid_t[16];
 typedef u32	xfs_agblock_t;	/* blockno in alloc. group */
 typedef	u32	xfs_extlen_t;	/* extent length in blocks */
 typedef	u32	xfs_agnumber_t;	/* allocation group number */
-typedef __int32_t	xfs_extnum_t;	/* # of extents in a file */
+typedef s32	xfs_extnum_t;	/* # of extents in a file */
 typedef s16	xfs_aextnum_t;	/* # extents in an attribute fork */
 typedef	__int64_t	xfs_fsize_t;	/* bytes in a file */
 
@@ -470,8 +469,8 @@ typedef struct xfs_dir2_sf {
  * because we only need the core part in the in-core inode.
  */
 typedef struct xfs_timestamp {
-	__int32_t	t_sec;		/* timestamp seconds */
-	__int32_t	t_nsec;		/* timestamp nanoseconds */
+	s32	t_sec;		/* timestamp seconds */
+	s32	t_nsec;		/* timestamp nanoseconds */
 } xfs_timestamp_t;
 
 /*
