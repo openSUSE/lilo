@@ -116,12 +116,12 @@ struct offset_v1 {
 struct offset_v2 {
 #ifdef __LITTLE_ENDIAN
     /* little endian version */
-    __u64 k_offset:60;
-    __u64 k_type: 4;
+    u64 k_offset:60;
+    u64 k_type: 4;
 #else
     /* big endian version */
-    __u64 k_type: 4;
-    __u64 k_offset:60;
+    u64 k_type: 4;
+    u64 k_offset:60;
 #endif
 } __attribute__ ((__packed__));
 
@@ -250,7 +250,7 @@ struct stat_data {
     u16 sd_mode;     /* file type, permissions */
     u16 sd_reserved;
     u32 sd_nlink;    /* number of hard links */
-    __u64 sd_size;     /* file size */
+    u64 sd_size;     /* file size */
     u32 sd_uid;      /* owner */
     u32 sd_gid;      /* group */
     u32 sd_atime;    /* time of last access */
@@ -360,7 +360,7 @@ struct reiserfs_state
     struct boot_file_t *file;
     struct item_head *current_ih;
     char *current_item;
-    __u64 partition_offset;
+    u64 partition_offset;
 
     /* Commonly used values, cpu order */
     u32 journal_block;       /* Start of journal */

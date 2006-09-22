@@ -301,7 +301,7 @@ static int journal_init(void)
 static int reiserfs_read_super(void)
 {
 	struct reiserfs_super_block super;
-	__u64 superblock = REISERFS_SUPERBLOCK_BLOCK;
+	u64 superblock = REISERFS_SUPERBLOCK_BLOCK;
 	char s_magic[sizeof(super.s_magic) + 1];
 	int i;
 
@@ -628,7 +628,7 @@ static int reiserfs_read_data(char *buf, u32 len)
 	errnum = 0;
 
 	DEBUG_F("reiserfs_read_data: INFO->file->pos=%Lu len=%u, offset=%Lu\n",
-		INFO->file->pos, len, (__u64) IH_KEY_OFFSET(INFO->current_ih) - 1);
+		INFO->file->pos, len, (u64) IH_KEY_OFFSET(INFO->current_ih) - 1);
 
 	if (INFO->current_ih->ih_key.k_objectid != INFO->fileinfo.k_objectid
 	    || IH_KEY_OFFSET(INFO->current_ih) > INFO->file->pos + 1) {
@@ -868,7 +868,7 @@ static int reiserfs_open_file(char *dirname)
 #ifndef __LITTLE_ENDIAN
 typedef union {
 	struct offset_v2 offset_v2;
-	__u64 linear;
+	u64 linear;
 } offset_v2_esafe_overlay;
 
 inline u16 offset_v2_k_type(struct offset_v2 *v2)

@@ -85,9 +85,9 @@ struct boot_file_t {
 	enum device_type dev_type;
 	ihandle		of_device;
 	ino_t		inode;
-	__u64           pos;
+	u64           pos;
 	unsigned char*	buffer;
-	__u64   	len;
+	u64   	len;
 //	unsigned int	dev_blk_size;
 //	unsigned int	part_start;
 //	unsigned int	part_count;

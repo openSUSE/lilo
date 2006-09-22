@@ -4,7 +4,6 @@
 
 
 
-typedef unsigned long long __u64;
 
 typedef signed char s8;
 typedef unsigned char u8;
