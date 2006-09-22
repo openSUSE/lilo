@@ -32,11 +32,8 @@
  * http://oss.sgi.com/projects/GenInfo/SGIGPLNoticeExplan/
  */
 
-#ifndef _BITS_TYPES_H
-typedef unsigned long long __uint64_t;
-#endif
 
-typedef __uint64_t	xfs_ino_t;
+typedef u64	xfs_ino_t;
 typedef	u32	xfs_agino_t;
 typedef s64	xfs_daddr_t;
 typedef s64	xfs_off_t;
@@ -58,14 +55,14 @@ typedef	u32	xfs_dahash_t;	/* dir/attr hash value */
 /*
  * Disk based types:
  */
-typedef __uint64_t	xfs_dfsbno_t;	/* blockno in filesystem (agno|agbno) */
-typedef __uint64_t	xfs_drfsbno_t;	/* blockno in filesystem (raw) */
-typedef	__uint64_t	xfs_drtbno_t;	/* extent (block) in realtime area */
-typedef	__uint64_t	xfs_dfiloff_t;	/* block number in a file */
+typedef u64	xfs_dfsbno_t;	/* blockno in filesystem (agno|agbno) */
+typedef u64	xfs_drfsbno_t;	/* blockno in filesystem (raw) */
+typedef	u64	xfs_drtbno_t;	/* extent (block) in realtime area */
+typedef	u64	xfs_dfiloff_t;	/* block number in a file */
 
-typedef	__uint64_t	xfs_fsblock_t;	/* blockno in filesystem (agno|agbno) */
-typedef	__uint64_t	xfs_fileoff_t;	/* block number in a file */
-typedef	__uint64_t	xfs_filblks_t;	/* number of blocks in a file */
+typedef	u64	xfs_fsblock_t;	/* blockno in filesystem (agno|agbno) */
+typedef	u64	xfs_fileoff_t;	/* block number in a file */
+typedef	u64	xfs_filblks_t;	/* number of blocks in a file */
 
 
 /* those are from xfs_sb.h */
@@ -110,10 +107,10 @@ typedef struct xfs_sb
 	 * want to change their layout, make sure you fix the
 	 * code in xfs_trans_apply_sb_deltas().
 	 */
-	__uint64_t	sb_icount;	/* allocated inodes */
-	__uint64_t	sb_ifree;	/* free inodes */
-	__uint64_t	sb_fdblocks;	/* free data blocks */
-	__uint64_t	sb_frextents;	/* free realtime extents */
+	u64	sb_icount;	/* allocated inodes */
+	u64	sb_ifree;	/* free inodes */
+	u64	sb_fdblocks;	/* free data blocks */
+	u64	sb_frextents;	/* free realtime extents */
 	/*
 	 * End contiguous fields.
 	 */
@@ -202,11 +199,11 @@ typedef struct xfs_bmbt_rec_32
 } xfs_bmbt_rec_32_t;
 typedef struct xfs_bmbt_rec_64
 {
-	__uint64_t		l0, l1;
+	u64		l0, l1;
 } xfs_bmbt_rec_64_t;
 
 #if BMBT_USE_64
-typedef	__uint64_t	xfs_bmbt_rec_base_t;	/* use this for casts */
+typedef	u64	xfs_bmbt_rec_base_t;	/* use this for casts */
 typedef xfs_bmbt_rec_64_t xfs_bmbt_rec_t, xfs_bmdr_rec_t;
 #else	/* !BMBT_USE_64 */
 typedef	u32	xfs_bmbt_rec_base_t;	/* use this for casts */
