@@ -15,7 +15,7 @@ typedef __u64	Elf64_Addr;
 typedef u16	Elf64_Half;
 typedef s16	Elf64_SHalf;
 typedef __u64	Elf64_Off;
-typedef __s64	Elf64_Sword;
+typedef s64	Elf64_Sword;
 typedef __u64	Elf64_Word;
 
 /* These constants are for the segment types stored in the image headers */
