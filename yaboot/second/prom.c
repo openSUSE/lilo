@@ -480,9 +480,9 @@ void prom_readline(const char *prompt, char *buf, int len)
 #endif
 
 #ifdef CONFIG_SET_COLORMAP
-int prom_set_color(prom_handle device, int color, int r, int g, int b)
+void prom_set_color(prom_handle device, int color, int r, int g, int b)
 {
-	return (int)call_prom("call-method", 6, 1, "color!", device, color, b, g, r);
+	call_prom("call-method", 6, 0, "color!", device, color, b, g, r);
 }
 #endif				/* CONFIG_SET_COLORMAP */
 
