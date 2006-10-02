@@ -15,7 +15,7 @@ until [ "$#" = "0" ] ; do
 		echo "Relink yaboot and include a yaboot.conf into the boot binary."
 		echo "This is useful on CHRP when booting from 0x41 PReP partition and"
 		echo "more than one Linux installation on the same drive."
-		echo "Usage: ${0##*/} --configfile <yaboot.conf> --output <zImage> [--tmp <tempdir>] [--addnote]"
+		echo "Usage: ${0##*/} --configfile <yaboot.conf> --output <yaboot> [--tmp <tempdir>] [--addnote]"
 		exit 1
 		;;
 		--addnote)
