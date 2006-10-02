@@ -42,7 +42,7 @@ ihandle prom_stdin, prom_stdout;
 int stdout_is_screen;
 
 static ihandle prom_mmu;
-static ihandle prom_chosen, prom_options;
+static ihandle prom_chosen;
 
 struct prom_args {
 	const char *service;
@@ -234,7 +234,6 @@ void prom_init(prom_entry pp)
 	prom_chosen = prom_finddevice("/chosen");
 	if (prom_chosen == (void *)-1)
 		prom_exit();
-	prom_options = prom_finddevice("/options");
 	if (prom_get_chosen("stdout", &prom_stdout, sizeof(prom_stdout)) <= 0)
 		prom_exit();
 	if (prom_get_chosen("stdin", &prom_stdin, sizeof(prom_stdin)) <= 0)
