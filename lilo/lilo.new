@@ -38,6 +38,8 @@ SHOW_OF_PATH="/bin/show_of_path.sh --quiet"
 DEFAULT_BOOTFOLDER=suseboot
 TEMP="${TMPDIR:-/tmp}/ppc_lilo"
 MACHINE=
+_sysfs_mounted=
+_proc_mounted=
 
 shopt -s extglob
 
@@ -54,10 +56,10 @@ STAT_CMD=/usr/bin/stat
 # trap EXIT function
 function clean_environment () {
     cd /
+    rm -rf $TEMP
     [[ $(</proc/mounts) == *$TEMP/boot\ * ]] && umount $TEMP/boot
     [ $_sysfs_mounted ] && umount /sys
     [ $_proc_mounted ] && umount /proc
-    rm -rf $TEMP
 } #end function clean_environment
 
 
@@ -733,14 +735,6 @@ function check_config_file () {
 } #end function check_config_file
 
 
-#
-# prepare environment:
-#
-rm -rf $TEMP
-mkdir -p $TEMP
-trap "clean_environment" EXIT INT
-
-
 # check for requirements:
 #   /proc
 #   /sys
@@ -763,6 +757,14 @@ elif mount -t sysfs sysfs /sys; then
 else
     error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
 fi
+
+
+#
+# prepare environment:
+#
+rm -rf $TEMP
+mkdir -p $TEMP
+trap "clean_environment" EXIT INT
 
 
 #

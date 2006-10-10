@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 10 15:27:17 CEST 2006 - olh@suse.de
+
+- rm -rf fails with new sys*at syscalls if /proc is not mounted
+
+-------------------------------------------------------------------
 Tue Sep 19 21:28:26 CEST 2006 - olh@suse.de
 
 - the filesystem detection update broke CD booting, handle the case
