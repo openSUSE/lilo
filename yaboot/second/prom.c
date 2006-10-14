@@ -230,6 +230,21 @@ enum device_type prom_get_devtype(const char *device)
 void prom_init(prom_entry pp)
 {
 	prom = pp;
+	char cmptbl[64];
+	int len;
+
+	/* this must be done before looking for stdout, for whatever reason */
+	len = prom_getprop(prom_finddevice("/"), "compatible", cmptbl, sizeof(cmptbl) - 1);
+	if (len > 0 && len < sizeof(cmptbl)) {
+		cmptbl[len] = '\0';
+		while (--len) {
+			if (!cmptbl[len])
+				cmptbl[len] = ' ';
+		}
+		/* G5 with nvidia card crash when no monitor is connected */
+		if (!strstr(cmptbl, "MacRISC4") && strstr(cmptbl, "MacRISC"))
+			prom_interpret("output-device output");
+	}
 
 	prom_chosen = prom_finddevice("/chosen");
 	if (prom_chosen == (void *)-1)
