@@ -100,11 +100,8 @@ static void partition_mac_lookup(prom_handle disk, struct partition_t **list)
 		/* We use the partition block size from the partition table.
 		 * The filesystem implmentations are responsible for mapping
 		 * to their own fs blocksize */
-		add_new_partition(list,	/* partition list */
-				  block,	/* partition number */
-				  part->start_block + part->data_start,	/* start */
-				  part->data_count,	/* size */
-				  LABEL_MAC, ptable_block_size, 0);
+		add_new_partition(list, block, part->start_block + part->data_start, part->data_count, LABEL_MAC, ptable_block_size,
+				  0);
 	}
 }
 
@@ -315,10 +312,8 @@ static void partition_amiga_lookup(prom_handle disk, unsigned int prom_blksize, 
 		/* We use the partition block size from the partition table.
 		 * The filesystem implmentations are responsible for mapping
 		 * to their own fs blocksize */
-		add_new_partition(list,	/* partition list */
-				  partition,	/* partition number */
-				  blockspercyl * amiga_block[AMIGA_PART_LOWCYL],	/* start */
-				  blockspercyl * (amiga_block[AMIGA_PART_HIGHCYL] - amiga_block[AMIGA_PART_LOWCYL] + 1),	/* size */
+		add_new_partition(list, partition, blockspercyl * amiga_block[AMIGA_PART_LOWCYL],
+				  blockspercyl * (amiga_block[AMIGA_PART_HIGHCYL] - amiga_block[AMIGA_PART_LOWCYL] + 1),
 				  LABEL_AMIGA, prom_blksize, 0);
 	}
 }
