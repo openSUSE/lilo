@@ -114,7 +114,7 @@ function running_on_pmac_new () {
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 	if [ "$OPTION_DEFAULT" ]; then
 	    if [[ "$OPTION_DEFAULT" = @(macos|macosx) ]] ; then
-		# yaboot.conf gets the first available imag= label as default
+		# yaboot.conf gets the first available image= label as default
 		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 		    test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 		    echo "default = ${CONFIG_IMAGE_LABEL[$i]}"
