@@ -289,7 +289,7 @@ static void partition_amiga_lookup(prom_handle disk, unsigned int prom_blksize, 
 	for (i = 0; i < possible; i++)
 		used[i] = 0;
 
-	for (part = amiga_block[AMIGA_PARTITIONS], partition = 0;
+	for (part = amiga_block[AMIGA_PARTITIONS], partition = 1 + pegasos_amgia_partition_offset;
 	     part != AMIGA_END; part = amiga_block[AMIGA_PART_NEXT], partition++) {
 		if (prom_readblocks(disk, part, 1, block_buffer) != 1) {
 			prom_printf("Can't read partition block %d\n", part);

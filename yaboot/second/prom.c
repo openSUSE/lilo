@@ -43,6 +43,9 @@ int stdout_is_screen;
 
 static ihandle prom_mmu;
 static ihandle prom_chosen;
+static ihandle prom_openprom;
+unsigned int of_built_on;
+int pegasos_amgia_partition_offset;
 
 struct prom_args {
 	const char *service;
@@ -227,6 +230,18 @@ enum device_type prom_get_devtype(const char *device)
 	}
 }
 
+static void get_openprom_build_date(void)
+{
+	unsigned int built_on;
+	if (prom_getprop(prom_openprom, "built-on", &built_on, sizeof(built_on)) == 4) {
+		if (built_on > 20040101 && built_on < 20991231) {
+			of_built_on = built_on;
+		}
+		if (of_built_on && of_built_on < 20060101U)
+			pegasos_amgia_partition_offset = -1;
+	}
+}
+
 void prom_init(prom_entry pp)
 {
 	prom = pp;
@@ -249,6 +264,9 @@ void prom_init(prom_entry pp)
 	prom_chosen = prom_finddevice("/chosen");
 	if (prom_chosen == (void *)-1)
 		prom_exit();
+	prom_openprom = prom_finddevice("/openprom");
+	if (prom_openprom != (void *)-1)
+		get_openprom_build_date();
 	if (prom_get_chosen("stdout", &prom_stdout, sizeof(prom_stdout)) <= 0)
 		prom_exit();
 	if (prom_get_chosen("stdin", &prom_stdin, sizeof(prom_stdin)) <= 0)
