@@ -6,6 +6,7 @@ BUILD_DIST=ppc
 BUILD_ROOT=/abuild/buildsystem.$$HOST.$$LOGNAME
 BUILD_DIR=$(BUILD_ROOT)/usr/src/packages/RPMS
 PKG=lilo
+D=
 
 
 .PHONY:	export build submit rpm clean
@@ -50,6 +51,10 @@ submit:	.submitted
 	sed -i "s/^%define yaboot_vers.*/%define yaboot_vers $$yv/" lilo.spec ; \
 	rm -rf version Makefile lilo-$$lv lilo.spec.in \
 	yaboot-$$yv ; \
+	if test "$(D)" != "" ; then \
+	echo '#!/bin/bash' > get_release_number.sh ; \
+	echo 'env -i - date -u +%Y%m%d%H%M' >> get_release_number.sh ; \
+	fi ; \
 	pwd ; \
 	ls -la ; \
 	if /work/src/bin/check_if_valid_source_dir; then cd -; echo $$tmpdir > $@; else exit 1 ; fi
