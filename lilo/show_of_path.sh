@@ -93,24 +93,6 @@ function read_int() {
 }
 
 
-function pegasos_amiga_partition_offset() {
-	local of_release
-	local offset
-	of_release=$(read_int /proc/device-tree/openprom/built-on)
-	offset=0
-	case "$of_release" in
-		20??????)
-			if test "$of_release" -lt 20060101
-			then
-				offset="-1"
-			fi
-		;;
-	esac
-	echo $offset
-}
-
-
-
 # if no file path is given on cmd line check for root file system
 file=/
 
@@ -329,14 +311,7 @@ if [ -f devspec ] ; then
 	sas*)
 	    file_storage_type=sas
 	    ;;
-	spi)
-	    # old pegasos firmware starts to count partitions at zero instead of 1
-	    file_storage_type=ide
-	    if [ "$file_partition" ]; then
-		file_partition=$(( file_partition + `pegasos_amiga_partition_offset` ))
-	    fi
-	    ;;
-	ide|ata)
+	ide|ata|spi)
 	    # TODO
 	    # check for right file-storage_type == ide ??
 	    file_storage_type=ide

@@ -48,7 +48,6 @@ extern prom_handle prom_stdin;
 extern prom_handle prom_stdout;
 extern int stdout_is_screen;
 extern unsigned int of_built_on;
-extern int pegasos_amgia_partition_offset;
 
 prom_handle prom_open(const char *spec);
 int prom_read(prom_handle file, void *buf, int len);

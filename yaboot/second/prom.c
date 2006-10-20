@@ -45,7 +45,6 @@ static ihandle prom_mmu;
 static ihandle prom_chosen;
 static ihandle prom_openprom;
 unsigned int of_built_on;
-int pegasos_amgia_partition_offset;
 
 struct prom_args {
 	const char *service;
@@ -237,8 +236,6 @@ static void get_openprom_build_date(void)
 		if (built_on > 20040101 && built_on < 20991231) {
 			of_built_on = built_on;
 		}
-		if (of_built_on && of_built_on < 20060101U)
-			pegasos_amgia_partition_offset = -1;
 	}
 }
 

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct 20 14:32:12 CEST 2006 - olh@suse.de
+
+- revert parts of last change
+  yaboot will always start counting at 1 on amiga partition tables
+
+-------------------------------------------------------------------
 Thu Oct 19 14:43:42 CEST 2006 - olh@suse.de
 
 - handle amiga partition number offset correctly on pegasos
