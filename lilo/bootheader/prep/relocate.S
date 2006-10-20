@@ -155,18 +155,8 @@ do_relocate_out:
 	.previous
 
 start_ldr:
-/* Clear all of BSS and set up stack for C calls */
-	lis	r3,_edata@h
-	ori	r3,r3,_edata@l
-	lis	r4,_end@h
-	ori	r4,r4,_end@l
-	subi	r3,r3,4
-	subi	r4,r4,4
-	li	r0,0
-50:	stwu	r0,4(r3)
-	cmpw	cr0,r3,r4
-	bne	50b
-90:	mr	r9,r1		/* Save old stack pointer (in case it matters) */
+/* set up stack for C calls */
+	mr	r9,r1		/* Save old stack pointer (in case it matters) */
 	lis	r1,.stack@h
 	ori	r1,r1,.stack@l
 	addi	r1,r1,4096*2

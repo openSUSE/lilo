@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Oct 20 16:16:42 CEST 2006 - olh@suse.de
+
+- fix infinite loop due to unaligned section data in prep bootheader
+
+-------------------------------------------------------------------
 Fri Oct 20 14:32:12 CEST 2006 - olh@suse.de
 
 - revert parts of last change

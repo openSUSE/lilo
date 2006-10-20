@@ -23,6 +23,7 @@
 #include <byteswab.h>
 
 extern char _start[];
+extern char __bss_start[];
 extern char _end[];
 extern char _vmlinuz_start[];
 extern char _vmlinuz_end[];
@@ -526,6 +527,9 @@ load_kernel(unsigned long load_addr, int num_words, unsigned long cksum,
 {
 	int start_multi = 0;
 	unsigned int pci_viddid, pci_did, tulip_pci_base, tulip_base;
+
+	/* Clear out the BSS as per ANSI C requirements */
+	memset(__bss_start, 0, _end - __bss_start);
 
 	/* If we have Open Firmware, initialise it immediately */
 	if (OFW) {
