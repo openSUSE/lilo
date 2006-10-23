@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 23 13:30:39 CEST 2006 - olh@suse.de
+
+- add some support for pegaos to lilo (205550)
+
+-------------------------------------------------------------------
 Fri Oct 20 16:16:42 CEST 2006 - olh@suse.de
 
 - fix infinite loop due to unaligned section data in prep bootheader

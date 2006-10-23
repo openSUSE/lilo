@@ -7,6 +7,7 @@
 unset firmware_status
 unset running_on_chrp
 unset running_on_prep
+unset running_on_pegaos
 
 FW_STATUS_FILE=/lib/lilo/chrp/firmware_status.chrp
 
@@ -829,6 +830,60 @@ function running_on_prep () {
 	"$TEMP/zImage.prep"
     echo "Installing $TEMP/zImage.prep onto $P"
     dd if="$TEMP/zImage.prep" of=$P 2>/dev/null
+}
+
+function running_on_pegasos () {
+	echo running on pegasos
+
+	# build the temp yaboot.conf
+
+	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+		test -z ${CONFIG_IMAGE_FILE[$i]} && continue
+		test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
+		CONFIG_IMAGE_PATH[$i]=$( get_of_path ${CONFIG_IMAGE_FILE[$i]} )
+		if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then 
+			CONFIG_IMAGE_INITRDPATH[$i]=$( get_of_path ${CONFIG_IMAGE_INITRD[$i]} )
+		fi
+	done
+
+	# starting the work
+	{
+		test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
+		test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
+		test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
+		test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
+		test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
+
+		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+			[ "${CONFIG_IMAGE_OTHER[$i]}" ] &&  continue
+			[ "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" ] && continue
+			echo "image = ${CONFIG_IMAGE_PATH[$i]}"
+			test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
+			test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
+			test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
+			test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${CONFIG_IMAGE_INITRDPATH[$i]}" 
+		done
+	} > $TEMP/yaboot.conf
+
+	echo "yaboot will use a buit-in yaboot.conf with SmartFirmware version 1.2"
+	/lib/lilo/scripts/make_yaboot.sh \
+		--configfile $TEMP/yaboot.conf \
+		--tmp $TEMP \
+		--output $TEMP/yaboot
+
+	if [ -z "$OPTION_BOOT" ] ; then
+		rm -fv /yaboot
+		cp -v $TEMP/yaboot /yaboot
+	else
+		if [ -f "$OPTION_BOOT" -o ! -e "$OPTION_BOOT" ] ; then
+			rm -fv "$OPTION_BOOT"
+			cp -v $TEMP/yaboot $OPTION_BOOT
+		fi
+	fi
+	if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+		NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
+		echo "set OF boot-device '$NV_BOOT_PATH' does not work yet on Pegasos."
+	fi
 }
 
 #

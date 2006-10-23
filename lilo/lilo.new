@@ -500,6 +500,10 @@ function running_on_prep () {
     running_on_prep;
 }
 
+function running_on_pegasos () {
+    source /lib/lilo/lilo-chrp.lib
+    running_on_pegasos;
+}
 
 function running_on_pmac_old () {
     source /lib/lilo/lilo-pmac.lib
@@ -689,11 +693,11 @@ function check_config_file () {
 	#   work around a YaST bug, which comes from a certain kind of
 	#   intel-architecture blindness, some architectures can guess boot
 	#   drive :-)
-	if [[ "$MACHINE" != @(chrp|prep) ]]; then
+	if [[ "$MACHINE" != @(chrp|prep|pegasos) ]]; then
 	    error "boot=<partition> is not specified!"
 	fi
     else
-	if [ "$MACHINE" != "iseries" ]; then
+	if [ "$MACHINE" != "iseries" -a "$MACHINE"  != "pegasos" ]; then
 	    if [ ! -b $OPTION_BOOT ]; then
 		error "boot = $OPTION_BOOT is not a valid block device"
 	    fi
@@ -785,6 +789,7 @@ case "$MACHINE" in
     chrp)      running_on_chrp     ;;
     prep)      running_on_prep     ;;
     iseries)   running_on_iseries  ;;
+    pegasos)   running_on_pegasos  ;;
 esac
 
 #
