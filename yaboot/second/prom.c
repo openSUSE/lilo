@@ -241,9 +241,10 @@ static void get_openprom_build_date(void)
 
 void prom_init(prom_entry pp)
 {
-	prom = pp;
 	char cmptbl[64];
 	int len;
+
+	prom = pp;
 
 	/* this must be done before looking for stdout, for whatever reason */
 	len = prom_getprop(prom_finddevice("/"), "compatible", cmptbl, sizeof(cmptbl) - 1);
