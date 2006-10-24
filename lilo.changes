@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Oct 24 22:32:04 CEST 2006 - olh@suse.de
+
+- temporary reverse the meaning of the lilo.conf  'no_os_chooser'
+  option to test the new output-device code
+  other= will currently only work when no_os_chooser is specified
+
+-------------------------------------------------------------------
 Tue Oct 24 22:20:40 CEST 2006 - olh@suse.de
 
 - open the output-device on pmac in yaboot when a monitor is connected

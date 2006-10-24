@@ -38,6 +38,7 @@ SHOW_OF_PATH="/bin/show_of_path.sh --quiet"
 DEFAULT_BOOTFOLDER=suseboot
 TEMP="${TMPDIR:-/tmp}/ppc_lilo"
 MACHINE=
+OPTION_NO_OS_CHOOSER=yes
 _sysfs_mounted=
 _proc_mounted=
 
@@ -592,7 +593,7 @@ function parse_config_file () {
 		;;
 	    no_os_chooser)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
-		OPTION_NO_OS_CHOOSER="yes"
+		OPTION_NO_OS_CHOOSER="no"
 		;;
 	    force_fat)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
