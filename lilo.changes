@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 24 22:20:40 CEST 2006 - olh@suse.de
+
+- open the output-device on pmac in yaboot when a monitor is connected
+
+-------------------------------------------------------------------
 Tue Oct 24 22:12:56 CEST 2006 - olh@suse.de
 
 - add a getproplen call to yaboot and bootheader
