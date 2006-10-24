@@ -12,6 +12,7 @@ Requires:     dosfstools
 Requires:     gawk sed coreutils
 Requires:     powerpc-utils
 Requires:     binutils
+Requires:     parted
 Version:      0
 Release:      0
 Source0:      lilo-%{version}.tar.bz2

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 24 20:25:43 CEST 2006 - olh@suse.de
+
+- lilo requires parted
+
+-------------------------------------------------------------------
 Mon Oct 23 13:30:39 CEST 2006 - olh@suse.de
 
 - add some support for pegaos to lilo (205550)
