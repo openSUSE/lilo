@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 24 22:12:56 CEST 2006 - olh@suse.de
+
+- add a getproplen call to yaboot and bootheader
+
+-------------------------------------------------------------------
 Tue Oct 24 20:25:43 CEST 2006 - olh@suse.de
 
 - lilo requires parted

@@ -145,6 +145,11 @@ prom_handle prom_findpackage(const char *path)
 	return call_prom("find-package", 1, 1, path);
 }
 
+int prom_getproplen(prom_handle pack, const char *name)
+{
+	return (int)call_prom("getproplen", 2, 1, pack, name);
+}
+
 int prom_getprop(prom_handle pack, const char *name, void *mem, int len)
 {
 	return (int)call_prom("getprop", 4, 1, pack, name, mem, len);
