@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Oct 27 13:11:13 CEST 2006 - olh@suse.de
+
+- move and resize the yaboot internal malloc area (215616)
+
+-------------------------------------------------------------------
 Tue Oct 24 22:32:04 CEST 2006 - olh@suse.de
 
 - temporary reverse the meaning of the lilo.conf  'no_os_chooser'
