@@ -48,7 +48,7 @@ extern void of1275_prominit(prom_entry entry);
 extern int of1275_read(phandle node, void *buf, int buflen);
 extern void of1275_release(unsigned int virt, unsigned int size);
 extern int of1275_seek(ihandle node, unsigned int a, unsigned int b);
-extern int of1275_setprop(phandle node, const char *name, void *buf, int buflen);
+extern int of1275_setprop(phandle node, const char *name, const void *buf, int buflen);
 extern int of1275_write(phandle node, void *buf, int buflen);
 
 extern void find_type_devices(phandle *, const char *type, int);

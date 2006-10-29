@@ -94,7 +94,7 @@ prom_handle prom_finddevice(const char *name);
 prom_handle prom_findpackage(const char *path);
 int prom_getproplen(prom_handle dev, const char *name);
 int prom_getprop(prom_handle dev, const char *name, void *buf, int len);
-int prom_setprop(prom_handle dev, const char *name, void *buf, int len);
+int prom_setprop(prom_handle dev, const char *name, const void *buf, int len);
 enum device_type prom_get_devtype(const char *device);
 
 /* misc */

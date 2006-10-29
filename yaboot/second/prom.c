@@ -155,7 +155,7 @@ int prom_getprop(prom_handle pack, const char *name, void *mem, int len)
 	return (int)call_prom("getprop", 4, 1, pack, name, mem, len);
 }
 
-int prom_setprop(prom_handle pack, const char *name, void *mem, int len)
+int prom_setprop(prom_handle pack, const char *name, const void *mem, int len)
 {
 	return (int)call_prom("setprop", 4, 1, pack, name, mem, len);
 }

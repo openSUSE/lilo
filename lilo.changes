@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Oct 29 21:13:12 CET 2006 - olh@suse.de
+
+- setprop takes a const *buf
+
+-------------------------------------------------------------------
 Fri Oct 27 13:11:13 CEST 2006 - olh@suse.de
 
 - move and resize the yaboot internal malloc area (215616)
