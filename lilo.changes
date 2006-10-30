@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 30 23:02:08 CET 2006 - olh@suse.de
+
+- encode foreground-color in hex in os-chooser
+
+-------------------------------------------------------------------
 Mon Oct 30 22:59:40 CET 2006 - olh@suse.de
 
 - handle no monitor connected on G5 with nvidia card in os-chooser
