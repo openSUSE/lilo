@@ -192,7 +192,7 @@ function running_on_pmac_new () {
 			# macos or macosx is the default
 			MY_STRING_WITH_SPACE_BAR=$MY_YABOOT_STRING
 			MY_STRING_WITHOUT_SPACE_BAR=$MY_MACOS_STRING
-			SPACE_BAR_HINT="linux"
+			SPACE_BAR_HINT="Linux"
 		else
 			#yaboot is the default
 			MY_STRING_WITH_SPACE_BAR=$MY_MACOS_STRING
