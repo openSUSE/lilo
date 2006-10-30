@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct 30 14:06:25 CET 2006 - olh@suse.de
+
+- option no_os_chooser does now only load and start yaboot
+  it will not open the screen with " screen" output
+
+-------------------------------------------------------------------
 Mon Oct 30 13:44:40 CET 2006 - olh@suse.de
 
 - use cat instead of echo to generate the pmac os-chooser script

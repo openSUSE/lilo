@@ -168,71 +168,78 @@ function running_on_pmac_new () {
 	</DESCRIPTION>
 	<BOOT-SCRIPT>
 	EOF
-	cat <<-EOF
-	" screen" output
-	dev screen
-	" "(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)" drop 0 7 set-colors
-	" "(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)" drop 8 15 set-colors
-	device-end
-	f to foreground-color
-	0 to background-color
-	EOF
-
-	if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
-		MY_MACOS_STRING=
-		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-			if [ -n "${CONFIG_IMAGE_OTHER[$i]}" ] ; then
-				if [ "${CONFIG_IMAGE_LABEL[$i]}" = "macosx" ] ; then
-					MY_MACOS_STRING="\" Booting Mac OS X ...\" cr \" boot $OTHER_DEVICEPATH,System\\Library\\CoreServices\\BootX\" eval"
-				else
-					MY_MACOS_STRING="\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
-				fi
-				break
-			fi
-		done
-		MY_YABOOT_STRING="\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval "
-		if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
-			# macos or macosx is the default
-			MY_STRING_WITH_SPACE_BAR=$MY_YABOOT_STRING
-			MY_STRING_WITHOUT_SPACE_BAR=$MY_MACOS_STRING
-			SPACE_BAR_HINT="Linux"
-		else
-			#yaboot is the default
-			MY_STRING_WITH_SPACE_BAR=$MY_MACOS_STRING
-			MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
-			SPACE_BAR_HINT="MacOS"
-		fi
-		# 1 is the timeout
+	if [ "$OPTION_USE_OS_CHOOSER" = "yes" ] ; then
 		cat <<-EOF
-		" "(0C)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(0d 0a)" fb8-write drop
-		" "(09)  press space to boot $SPACE_BAR_HINT ... " fb8-write drop
-		get-msecs d# 3 3E8 * +
-		begin
-		  key? if
-		    key case
-		      hex 20 of $MY_STRING_WITH_SPACE_BAR  endof
-		    endcase
-		  then
-		  dup get-msecs &lt;
-		until
-		drop
-		$MY_STRING_WITHOUT_SPACE_BAR
-		echo
+		" screen" output
+		dev screen
+		" "(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)" drop 0 7 set-colors
+		" "(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)" drop 8 15 set-colors
+		device-end
+		f to foreground-color
+		0 to background-color
 		EOF
+
+		if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
+			MY_MACOS_STRING=
+			for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+				if [ -n "${CONFIG_IMAGE_OTHER[$i]}" ] ; then
+					if [ "${CONFIG_IMAGE_LABEL[$i]}" = "macosx" ] ; then
+						MY_MACOS_STRING="\" Booting Mac OS X ...\" cr \" boot $OTHER_DEVICEPATH,System\\Library\\CoreServices\\BootX\" eval"
+					else
+						MY_MACOS_STRING="\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
+					fi
+					break
+				fi
+			done
+			MY_YABOOT_STRING="\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval "
+			if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
+				# macos or macosx is the default
+				MY_STRING_WITH_SPACE_BAR=$MY_YABOOT_STRING
+				MY_STRING_WITHOUT_SPACE_BAR=$MY_MACOS_STRING
+				SPACE_BAR_HINT="Linux"
+			else
+				#yaboot is the default
+				MY_STRING_WITH_SPACE_BAR=$MY_MACOS_STRING
+				MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
+				SPACE_BAR_HINT="MacOS"
+			fi
+			# 1 is the timeout
+			cat <<-EOF
+			" "(0C)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(0d 0a)" fb8-write drop
+			" "(09)  press space to boot $SPACE_BAR_HINT ... " fb8-write drop
+			get-msecs d# 3 3E8 * +
+			begin
+			  key? if
+			    key case
+			      hex 20 of $MY_STRING_WITH_SPACE_BAR  endof
+			    endcase
+			  then
+			  dup get-msecs &lt;
+			until
+			drop
+			$MY_STRING_WITHOUT_SPACE_BAR
+			echo
+			EOF
+		else
+			cat <<-EOF
+			" "(0d 0a)" fb8-write drop
+			" Booting Yaboot ..." cr " boot $BOOT_DEVICEPATH,\\\\yaboot" eval
+			EOF
+		fi
 	else
 		cat <<-EOF
-		" "(0d 0a)" fb8-write drop
-		" Booting Yaboot ..." cr " boot $BOOT_DEVICEPATH,\\\\yaboot" eval
+		load $BOOT_DEVICEPATH,\\\\yaboot
+		go
 		EOF
 	fi
 	echo "</BOOT-SCRIPT>"
@@ -263,14 +270,9 @@ function running_on_pmac_new () {
     hattrib -t FNDR -c MACS Finder
     hattrib -t zsys -c MACS System
     hattrib -t TEXT -c "R*ch" yaboot.conf
-    if [ "$OPTION_NO_OS_CHOOSER" = "yes" ] ; then
-	hattrib -t tbxi -c chrp yaboot
-	hattrib -t TEXT -c "R*ch" os-chooser 2>/dev/null
-    else
-	hcopy $TEMP/os-chooser :os-chooser
-	hattrib -t BINA -c UNIX yaboot
-	hattrib -t tbxi -c chrp os-chooser
-    fi
+    hcopy $TEMP/os-chooser :os-chooser
+    hattrib -t BINA -c UNIX yaboot
+    hattrib -t tbxi -c chrp os-chooser
     
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
