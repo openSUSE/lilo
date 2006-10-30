@@ -175,18 +175,17 @@ function running_on_pmac_new () {
 	echo "0 to background-color"
 
 	if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
-		MY_MACOS_STRING=$(
+		MY_MACOS_STRING=
 		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 			if [ -n "${CONFIG_IMAGE_OTHER[$i]}" ] ; then
 				if [ "${CONFIG_IMAGE_LABEL[$i]}" = "macosx" ] ; then
-					echo "\" Booting Mac OS X ...\" cr \" boot $OTHER_DEVICEPATH,System\\Library\\CoreServices\\BootX\" eval"
+					MY_MACOS_STRING="\" Booting Mac OS X ...\" cr \" boot $OTHER_DEVICEPATH,System\\Library\\CoreServices\\BootX\" eval"
 				else
-					echo "\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
+					MY_MACOS_STRING="\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
 				fi
 				break
 			fi
 		done
-		)
 		MY_YABOOT_STRING="\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval "
 		if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
 			# macos or macosx is the default

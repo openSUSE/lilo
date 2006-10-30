@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 30 13:27:39 CET 2006 - olh@suse.de
+
+- no subshell for string assignment for pmac os-chooser
+
+-------------------------------------------------------------------
 Mon Oct 30 12:57:31 CET 2006 - olh@suse.de
 
 - change pmac os-chooser hint from linux to Linux
