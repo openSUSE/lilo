@@ -201,7 +201,7 @@ int prom_get_chosen(const char *name, void *mem, int len)
 	return prom_getprop(prom_chosen, name, mem, len);
 }
 
-int prom_set_chosen(const char *name, void *mem, int len)
+int prom_set_chosen(const char *name, const void *mem, int len)
 {
 	return prom_setprop(prom_chosen, name, mem, len);
 }

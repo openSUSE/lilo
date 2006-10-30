@@ -106,7 +106,7 @@ void prom_sleep(int seconds);
 int prom_interpret(const char *forth);
 
 int prom_get_chosen(const char *name, void *mem, int len);
-int prom_set_chosen(const char *name, void *mem, int len);
+int prom_set_chosen(const char *name, const void *mem, int len);
 
 extern int prom_getms(void);
 extern void prom_pause(void);
