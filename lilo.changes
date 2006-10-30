@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 30 22:59:40 CET 2006 - olh@suse.de
+
+- handle no monitor connected on G5 with nvidia card in os-chooser
+
+-------------------------------------------------------------------
 Mon Oct 30 15:05:51 CET 2006 - olh@suse.de
 
 - let yaboot run 'output-device output' if no yaboot,do-not-open-screen
