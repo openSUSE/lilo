@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 30 23:04:02 CET 2006 - olh@suse.de
+
+- use load/go in os-chooser instead of boot eval in linux only config
+
+-------------------------------------------------------------------
 Mon Oct 30 23:02:08 CET 2006 - olh@suse.de
 
 - encode foreground-color in hex in os-chooser

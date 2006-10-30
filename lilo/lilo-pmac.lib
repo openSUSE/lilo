@@ -253,8 +253,8 @@ function running_on_pmac_new () {
 			EOF
 		else
 			cat <<-EOF
-			" "(0d 0a)" fb8-write drop
-			" Booting Yaboot ..." cr " boot $BOOT_DEVICEPATH,\\\\yaboot" eval
+			load $BOOT_DEVICEPATH,\\\\yaboot
+			go
 			EOF
 		fi
 	else
