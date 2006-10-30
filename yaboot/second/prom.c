@@ -284,6 +284,10 @@ void prom_init(prom_entry pp)
 
 	prom = pp;
 
+	prom_chosen = prom_finddevice("/chosen");
+	if (prom_chosen == (void *)-1)
+		prom_exit();
+
 	/* this must be done before looking for stdout, for whatever reason */
 	len = prom_getprop(prom_finddevice("/"), "compatible", cmptbl, sizeof(cmptbl) - 1);
 	if (len > 0 && len < sizeof(cmptbl)) {
@@ -297,9 +301,6 @@ void prom_init(prom_entry pp)
 			prom_interpret("output-device output");
 	}
 
-	prom_chosen = prom_finddevice("/chosen");
-	if (prom_chosen == (void *)-1)
-		prom_exit();
 	prom_openprom = prom_finddevice("/openprom");
 	if (prom_openprom != (void *)-1)
 		get_openprom_build_date();
