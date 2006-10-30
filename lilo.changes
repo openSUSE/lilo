@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 30 11:38:17 CET 2006 - olh@suse.de
+
+- fix weird loop handling in running_on_pmac_new
+
+-------------------------------------------------------------------
 Sun Oct 29 21:13:12 CET 2006 - olh@suse.de
 
 - setprop takes a const *buf

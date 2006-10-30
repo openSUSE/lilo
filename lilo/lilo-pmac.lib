@@ -175,16 +175,15 @@ function running_on_pmac_new () {
 	echo "0 to background-color"
 	
 	if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
-	    unset LOOPBLAH
 	    MY_MACOS_STRING=$(
 	    for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-		if [ -n "${CONFIG_IMAGE_OTHER[$i]}" -a -z "$LOOPBLAH" ] ; then
-		    LOOPBLAH=true
+		if [ -n "${CONFIG_IMAGE_OTHER[$i]}" ] ; then
 		    if [ "${CONFIG_IMAGE_LABEL[$i]}" = "macosx" ] ; then
 			echo "\" Booting Mac OS X ...\" cr \" boot $OTHER_DEVICEPATH,System\\Library\\CoreServices\\BootX\" eval"
 		    else
 			echo "\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
 		    fi
+		    break
 		fi
 	    done
 	    )
