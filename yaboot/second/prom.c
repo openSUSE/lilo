@@ -244,37 +244,17 @@ static void get_openprom_build_date(void)
 	}
 }
 
-static int screen_connected(const char *path)
+static int open_output_device(void)
 {
-	if (prom_getproplen(prom_finddevice(path), "iso6429-1983-colors") >= 0)
+	int ret;
+
+	ret = prom_get_chosen("yaboot,do-open-screen", &ret, sizeof(ret));
+	if (ret >= 0)
 		return 1;
-	return 0;
-}
-
-static int find_screen(void)
-{
-	char screen_path[128];
-	int len;
-
-	len = prom_getprop(prom_finddevice("/aliases"), "screen", screen_path, sizeof(screen_path) - 1);
-	if (len > 5 && len < sizeof(screen_path)) {
-		screen_path[len] = '\0';
-		len = strlen(screen_path);
-		if (screen_connected(screen_path))
-			return 1;
-		if (screen_path[len - 2] == '@') {
-			if (screen_path[len - 3] == 'A') {
-				screen_path[len - 3] = 'B';
-				screen_path[len - 1] = '1';
-				return screen_connected(screen_path);
-			} else if (screen_path[len - 3] == 'B') {
-				screen_path[len - 3] = 'A';
-				screen_path[len - 1] = '0';
-				return screen_connected(screen_path);
-			}
-		}
-	}
-	return 0;
+	ret = prom_get_chosen("yaboot,do-not-open-screen", &ret, sizeof(ret));
+	if (ret >= 0)
+		return 0;
+	return 1;
 }
 
 void prom_init(prom_entry pp)
@@ -297,7 +277,7 @@ void prom_init(prom_entry pp)
 				cmptbl[len] = ' ';
 		}
 		/* G5 with nvidia card crash when no monitor is connected */
-		if (strstr(cmptbl, "MacRISC") && find_screen())
+		if (strstr(cmptbl, "MacRISC") && open_output_device())
 			prom_interpret("output-device output");
 	}
 

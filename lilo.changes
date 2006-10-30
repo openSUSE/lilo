@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Oct 30 15:05:51 CET 2006 - olh@suse.de
+
+- let yaboot run 'output-device output' if no yaboot,do-not-open-screen
+  exists, or if yaboot,do-open-screen property exists in /chosen
+
+-------------------------------------------------------------------
 Mon Oct 30 14:06:25 CET 2006 - olh@suse.de
 
 - option no_os_chooser does now only load and start yaboot

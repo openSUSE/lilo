@@ -170,6 +170,7 @@ function running_on_pmac_new () {
 	EOF
 	if [ "$OPTION_USE_OS_CHOOSER" = "yes" ] ; then
 		cat <<-EOF
+		dev /chosen 0 0 " yaboot,do-not-open-screen" property device-end
 		" screen" output
 		dev screen
 		" "(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)" drop 0 7 set-colors
@@ -238,6 +239,7 @@ function running_on_pmac_new () {
 		fi
 	else
 		cat <<-EOF
+		dev /chosen 0 0 " yaboot,do-not-open-screen" property device-end
 		load $BOOT_DEVICEPATH,\\\\yaboot
 		go
 		EOF
