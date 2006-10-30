@@ -158,21 +158,25 @@ function running_on_pmac_new () {
     echo "BOOT_DEVICEPATH  =  $BOOT_DEVICEPATH"
     echo "OTHER_DEVICEPATH  =  $OTHER_DEVICEPATH"
     {
-	echo "<CHRP-BOOT>"
-	echo "<COMPATIBLE>"
-	echo "MacRISC MacRISC3 MacRISC4"
-	echo "</COMPATIBLE>"
-	echo "<DESCRIPTION>"
-	echo "Linux/PPC Yaboot bootloader"
-	echo "</DESCRIPTION>"
-	echo "<BOOT-SCRIPT>"
-	echo "\" screen\" output"
-	echo "dev screen"
-	echo "\" \"(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)\" drop 0 7 set-colors"
-	echo "\" \"(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)\" drop 8 15 set-colors"
-	echo "device-end"
-	echo "f to foreground-color"
-	echo "0 to background-color"
+	cat <<-EOF
+	<CHRP-BOOT>
+	<COMPATIBLE>
+	MacRISC MacRISC3 MacRISC4
+	</COMPATIBLE>
+	<DESCRIPTION>
+	Linux/PPC Yaboot bootloader
+	</DESCRIPTION>
+	<BOOT-SCRIPT>
+	EOF
+	cat <<-EOF
+	" screen" output
+	dev screen
+	" "(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)" drop 0 7 set-colors
+	" "(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)" drop 8 15 set-colors
+	device-end
+	f to foreground-color
+	0 to background-color
+	EOF
 
 	if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
 		MY_MACOS_STRING=
@@ -199,34 +203,37 @@ function running_on_pmac_new () {
 			SPACE_BAR_HINT="MacOS"
 		fi
 		# 1 is the timeout
-		echo "\" \"(0C)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo "\" \"(09)  press space to boot $SPACE_BAR_HINT ... \" fb8-write drop"
-		echo "get-msecs d# 3 3E8 * +"
-		echo "begin"
-		echo "  key? if"
-		echo "    key case"
-		echo -n "      hex 20 of "
-		echo " $MY_STRING_WITH_SPACE_BAR  endof"
-		echo "    endcase"
-		echo "  then"
-		echo "  dup get-msecs &lt;"
-		echo "until"
-		echo "drop"
-		echo $MY_STRING_WITHOUT_SPACE_BAR
+		cat <<-EOF
+		" "(0C)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(0d 0a)" fb8-write drop
+		" "(09)  press space to boot $SPACE_BAR_HINT ... " fb8-write drop
+		get-msecs d# 3 3E8 * +
+		begin
+		  key? if
+		    key case
+		      hex 20 of $MY_STRING_WITH_SPACE_BAR  endof
+		    endcase
+		  then
+		  dup get-msecs &lt;
+		until
+		drop
+		$MY_STRING_WITHOUT_SPACE_BAR
 		echo
+		EOF
 	else
-		echo "\" \"(0d 0a)\" fb8-write drop"
-		echo -e "\n\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\\\yaboot\" eval"
+		cat <<-EOF
+		" "(0d 0a)" fb8-write drop
+		" Booting Yaboot ..." cr " boot $BOOT_DEVICEPATH,\\\\yaboot" eval
+		EOF
 	fi
 	echo "</BOOT-SCRIPT>"
 	cat /lib/lilo/pmac/os-badge-icon

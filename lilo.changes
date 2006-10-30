@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct 30 13:44:40 CET 2006 - olh@suse.de
+
+- use cat instead of echo to generate the pmac os-chooser script
+
+-------------------------------------------------------------------
 Mon Oct 30 13:27:39 CET 2006 - olh@suse.de
 
 - no subshell for string assignment for pmac os-chooser
