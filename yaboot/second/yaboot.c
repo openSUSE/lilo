@@ -592,34 +592,9 @@ static void setup_display(void)
 		0xff, 0xff, 0x55,
 		0xff, 0xff, 0xff
 	};
-	int i, result;
-	prom_handle scrn = PROM_INVALID_HANDLE;
-
-	/* Try Apple's mac-boot screen ihandle */
-	result = (int)call_prom_return("interpret", 1, 2, "\" _screen-ihandle\" $find if execute else 0 then", &scrn);
-	DEBUG_F("Trying to get screen ihandle, result: %d, scrn: %p\n", result, scrn);
-
-	if (scrn == 0 || scrn == PROM_INVALID_HANDLE) {
-		char type[32];
-		/* Hrm... check to see if stdout is a display */
-		scrn = call_prom("instance-to-package", 1, 1, prom_stdout);
-		DEBUG_F("instance-to-package of stdout is: %p\n", scrn);
-		if (prom_getprop(scrn, "device_type", type, 32) > 0 && !strncmp(type, "display", 7)) {
-			DEBUG_F("got it ! stdout is a screen\n");
-			scrn = prom_stdout;
-		} else {
-			/* Else, we try to open the package */
-			scrn = (prom_handle) call_prom("open", 1, 1, "screen");
-			DEBUG_F("Open screen result: %p\n", scrn);
-		}
-	}
-
-	if (scrn == PROM_INVALID_HANDLE) {
-		prom_printf("No screen device found!\n");
-		return;
-	}
+	int i;
 	for (i = 0; i < 16; i++)
-		prom_set_color(scrn, i, default_colors[i * 3], default_colors[i * 3 + 1], default_colors[i * 3 + 2]);
+		prom_set_color(prom_stdout, i, default_colors[i * 3], default_colors[i * 3 + 1], default_colors[i * 3 + 2]);
 
 	prom_printf("\x1b[1;37m\x1b[2;40m");
 #ifdef COLOR_TEST

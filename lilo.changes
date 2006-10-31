@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 31 22:14:37 CET 2006 - olh@suse.de
+
+- use the stdout ihandle in yaboot to setup the color map
+
+-------------------------------------------------------------------
 Tue Oct 31 15:31:23 CET 2006 - olh@suse.de
 
 - use a different Forth script for MacRISC[34] to open the screen
