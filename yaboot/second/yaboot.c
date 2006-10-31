@@ -618,9 +618,9 @@ static void setup_display(void)
 		prom_printf("No screen device found!\n");
 		return;
 	}
-	for (i = 0; i < 16; i++) {
+	for (i = 0; i < 16; i++)
 		prom_set_color(scrn, i, default_colors[i * 3], default_colors[i * 3 + 1], default_colors[i * 3 + 2]);
-	}
+
 	prom_printf("\x1b[1;37m\x1b[2;40m");
 #ifdef COLOR_TEST
 	for (i = 0; i < 16; i++) {
