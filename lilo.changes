@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 31 15:31:23 CET 2006 - olh@suse.de
+
+- use a different Forth script for MacRISC[34] to open the screen
+
+-------------------------------------------------------------------
 Mon Oct 30 23:04:02 CET 2006 - olh@suse.de
 
 - use load/go in os-chooser instead of boot eval in linux only config
