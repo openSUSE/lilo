@@ -244,17 +244,45 @@ static void get_openprom_build_date(void)
 	}
 }
 
-static int open_output_device(void)
+/* G5 with nvidia card crash when no monitor is connected */
+static void open_output_device(void)
 {
 	int ret;
-
-	ret = prom_get_chosen("yaboot,do-open-screen", &ret, sizeof(ret));
-	if (ret >= 0)
-		return 1;
-	ret = prom_get_chosen("yaboot,do-not-open-screen", &ret, sizeof(ret));
-	if (ret >= 0)
-		return 0;
-	return 1;
+	if (prom_get_chosen("yaboot,do-not-open-screen", &ret, sizeof(ret)) >= 0)
+		return;
+	/* *INDENT-OFF* */
+	prom_interpret(
+		" output-device find-device?"
+		" if"
+			" \" device_type\" active-package get-package-property"
+			" not"
+			" if"
+				" decode-string"
+				" 2swap"
+				" 2drop"
+				" \" display\" $="
+				" if"
+					" \" display-cfg\" active-package get-package-property"
+					" dup"
+					" not"
+					" if"
+						" drop"
+						" decode-int"
+						" 2rot"
+						" 2drop"
+						" -1 ="
+						" not"
+					" then"
+					" if"
+						" output-device output"
+						" h#f to foreground-color"
+						" 0 to background-color"
+					" then"
+				" then"
+			" then"
+		" then"
+	);
+	/* *INDENT-ON* */
 }
 
 void prom_init(prom_entry pp)
@@ -276,9 +304,8 @@ void prom_init(prom_entry pp)
 			if (!cmptbl[len])
 				cmptbl[len] = ' ';
 		}
-		/* G5 with nvidia card crash when no monitor is connected */
-		if (strstr(cmptbl, "MacRISC") && open_output_device())
-			prom_interpret("output-device output");
+		if (strstr(cmptbl, "MacRISC"))
+			open_output_device();
 	}
 
 	prom_openprom = prom_finddevice("/openprom");

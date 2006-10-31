@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Oct 31 23:14:50 CET 2006 - olh@suse.de
+
+- open output-device in yaboot and remove yaboot,do-open-screen handling 
+  leave the output-device alone if yaboot,do-not-open-screen exists
+
+-------------------------------------------------------------------
 Tue Oct 31 22:14:37 CET 2006 - olh@suse.de
 
 - use the stdout ihandle in yaboot to setup the color map
