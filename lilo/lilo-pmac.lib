@@ -254,7 +254,6 @@ function running_on_pmac_new () {
 			until
 			drop
 			$MY_STRING_WITHOUT_SPACE_BAR
-			echo
 			EOF
 		else
 			cat <<-EOF
