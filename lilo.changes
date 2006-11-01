@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Nov  1 13:15:19 CET 2006 - olh@suse.de
+
+- set the color map also in the new Forth script
+
+-------------------------------------------------------------------
 Tue Oct 31 23:14:50 CET 2006 - olh@suse.de
 
 - open output-device in yaboot and remove yaboot,do-open-screen handling 
