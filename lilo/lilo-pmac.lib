@@ -229,7 +229,7 @@ function running_on_pmac_new () {
 				MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
 				SPACE_BAR_HINT="MacOS"
 			fi
-			# 1 is the timeout
+			# 5 is the timeout
 			cat <<-EOF
 			" "(0C)" fb8-write drop
 			" "(0d 0a)" fb8-write drop
@@ -243,7 +243,7 @@ function running_on_pmac_new () {
 			" "(0d 0a)" fb8-write drop
 			" "(0d 0a)" fb8-write drop
 			" "(09)  press space to boot $SPACE_BAR_HINT ... " fb8-write drop
-			get-msecs d# 3 3E8 * +
+			get-msecs d# 5 3E8 * +
 			begin
 			  key? if
 			    key case
