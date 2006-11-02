@@ -118,6 +118,7 @@ function running_on_pmac_new () {
 		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 		    test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 		    echo "default = ${CONFIG_IMAGE_LABEL[$i]}"
+		    break
 		done
 	    else
 		# a image = label is the default

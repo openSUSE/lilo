@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Nov  2 16:10:22 CET 2006 - olh@suse.de
+
+- fix duplicate default= lines in yaboot.conf if macos is
+  configured as default in lilo.conf
+
+-------------------------------------------------------------------
 Wed Nov  1 13:28:36 CET 2006 - olh@suse.de
 
 - set the os-chooser timeout from 3 to 5 seconds to fix slow monitors
