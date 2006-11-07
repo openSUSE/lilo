@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov  7 13:30:40 CET 2006 - olh@suse.de
+
+- remove chmod calls in install section, permissions come via files
+
+-------------------------------------------------------------------
 Tue Nov  7 13:11:04 CET 2006 - olh@suse.de
 
 - drop /sbin/lilo.old, its only purpose was the keyboard handling
