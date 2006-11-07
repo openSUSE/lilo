@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov  7 13:06:45 CET 2006 - olh@suse.de
+
+- keep a copy of local modifications to bash script libraries
+
+-------------------------------------------------------------------
 Tue Nov  7 11:40:04 CET 2006 - olh@suse.de
 
 - do not use find-device?, it is not available in the firmware
