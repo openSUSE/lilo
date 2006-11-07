@@ -172,35 +172,33 @@ function running_on_pmac_new () {
 	if [ "$OPTION_USE_OS_CHOOSER" = "yes" ] ; then
 		cat <<-EOF
 		dev /chosen 0 0 " yaboot,do-not-open-screen" property device-end
-		output-device find-device?
+		output-device find-device
+		" device_type" active-package get-package-property
+		not
 		if
-			" device_type" active-package get-package-property
-			not
+			decode-string
+			2swap
+			2drop
+			" display" $=
 			if
-				decode-string
-				2swap
-				2drop
-				" display" $=
+				" display-cfg" active-package get-package-property
+				dup
+				not
 				if
-					" display-cfg" active-package get-package-property
-					dup
+					drop
+					decode-int
+					2rot
+					2drop
+					-1 =
 					not
-					if
-						drop
-						decode-int
-						2rot
-						2drop
-						-1 =
-						not
-					then
-					if
-						output-device output
-						output-device select-dev
-						" "(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)" drop 0  7 " set-colors" my-self \$call-method
-						" "(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)" drop 8 15 " set-colors" my-self \$call-method
-						f to foreground-color
-						0 to background-color
-					then
+				then
+				if
+					output-device output
+					output-device select-dev
+					" "(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)" drop 0  7 " set-colors" my-self \$call-method
+					" "(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)" drop 8 15 " set-colors" my-self \$call-method
+					f to foreground-color
+					0 to background-color
 				then
 			then
 		then

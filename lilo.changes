@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov  7 11:40:04 CET 2006 - olh@suse.de
+
+- do not use find-device?, it is not available in the firmware
+  of the firstgen newworlds
+
+-------------------------------------------------------------------
 Tue Nov  7 11:38:19 CET 2006 - olh@suse.de
 
 - use 'f' instead of 'h#f' to assign background-color
