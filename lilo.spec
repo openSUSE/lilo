@@ -66,7 +66,6 @@ mkdir -p $RPM_BUILD_ROOT%{_mandir}/man5
 cd lilo.ppc
 chmod 755 show_of_path.sh
 chmod 754 lilo.{old,new}
-cp -av lilo.old $RPM_BUILD_ROOT/sbin/lilo.old
 cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo
 cp -av lilo-pmac.lib $RPM_BUILD_ROOT/lib/lilo/lilo-pmac.lib
 cp -av lilo-chrp.lib $RPM_BUILD_ROOT/lib/lilo/lilo-chrp.lib
@@ -127,7 +126,6 @@ exit 0
 %attr(755,root,root) %config /lib/lilo/chrp/firmware_status.chrp*
 %attr(755,root,root) %config /lib/lilo/scripts/*.sh
 %attr(755,root,root) /lib/lilo/utils/*
-%attr(755,root,root) %config /sbin/lilo.old
 %attr(755,root,root) %config /sbin/lilo
 
 %doc %{_docdir}/lilo

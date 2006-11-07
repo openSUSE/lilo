@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov  7 13:11:04 CET 2006 - olh@suse.de
+
+- drop /sbin/lilo.old, its only purpose was the keyboard handling
+  in os-chooser on firstgen iMac
+
+-------------------------------------------------------------------
 Tue Nov  7 13:06:45 CET 2006 - olh@suse.de
 
 - keep a copy of local modifications to bash script libraries
