@@ -275,7 +275,7 @@ static void open_output_device(void)
 					" then"
 					" if"
 						" output-device output"
-						" h#f to foreground-color"
+						" f to foreground-color"
 						" 0 to background-color"
 					" then"
 				" then"

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov  7 11:38:19 CET 2006 - olh@suse.de
+
+- use 'f' instead of 'h#f' to assign background-color
+  the firmware in the firstgen newworlds does not handle it
+
+-------------------------------------------------------------------
 Thu Nov  2 16:10:22 CET 2006 - olh@suse.de
 
 - fix duplicate default= lines in yaboot.conf if macos is
