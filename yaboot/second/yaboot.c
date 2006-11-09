@@ -54,6 +54,17 @@
 #include <elf.h>
 #include <debug.h>
 
+#if 0
+static void hard_coded_bootpath(char *buf)
+{
+	prom_printf("original bootpath: '%s'\n using hardcoded bootpath: ", buf);
+	sprintf(buf, "/pci@8000000f8000000/ide@4,1/disk@0");
+	prom_printf("'%s'\n", buf);
+}
+#else
+#define hard_coded_bootpath(p) do { } while(0)
+#endif
+
 #define CONFIG_FILE_MAX		0x8000	/* 32k */
 #define BOOTPATH_LEN		1024
 
@@ -1109,6 +1120,7 @@ static void yaboot_main(void)
 	if (bootpath) {
 		memset(bootpath, 0, BOOTPATH_LEN);
 		prom_get_chosen("bootpath", bootpath, BOOTPATH_LEN - 1);
+		hard_coded_bootpath(bootpath);
 		DEBUG_F("/chosen/bootpath = %s\n", bootpath);
 		if (bootpath[0] == 0) {
 			prom_printf("Couldn't determine boot device\n");
