@@ -868,7 +868,7 @@ static int get_params(struct boot_param_t *params)
 				restricted = 1;
 			if (label) {
 				if (params->args && password && restricted)
-					check_password("To specify arguments for this image " "you must enter the password.");
+					check_password("To specify arguments for this image you must enter the password.");
 				else if (password && !restricted)
 					check_password("This image is restricted.");
 			}
