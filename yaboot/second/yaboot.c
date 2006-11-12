@@ -866,10 +866,10 @@ static int get_params(struct boot_param_t *params)
 			set_default_device(cfg_get_strg(label, "device"), cfg_get_strg(label, "partition"), &img_def_device);
 			if (cfg_get_flag(label, "restricted"))
 				restricted = 1;
-			if (label) {
-				if (params->args && password && restricted)
+			if (label && password) {
+				if (params->args && restricted)
 					check_password("To specify arguments for this image you must enter the password.");
-				else if (password && !restricted)
+				else if (!restricted)
 					check_password("This image is restricted.");
 			}
 			params->args = make_params(label, params->args);
