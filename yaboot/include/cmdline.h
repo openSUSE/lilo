@@ -30,4 +30,8 @@ extern void	cmdedit(void (*tabfunc) (void), int password);
 
 extern char	cbuff[];
 extern char	passwdbuff[];
+static inline int char_is_newline(int c)
+{
+	return c == '\n' || c == '\r';
+}
 #endif

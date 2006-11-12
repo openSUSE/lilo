@@ -815,13 +815,13 @@ static int get_params(struct boot_param_t *params)
 		}
 		if (c == -1)
 			c = '\n';
-		else if (c != '\n' && c != '\t' && c != '\r' && c != '\b') {
+		else if (!char_is_newline(c) && c != '\t' && c != '\b') {
 			cbuff[0] = c;
 			cbuff[1] = 0;
 		}
 	}
 
-	if (c != -1 && c != '\n' && c != '\r') {
+	if (c != -1 && !char_is_newline(c)) {
 		if (c == '\t') {
 			maintabfunc();
 		} else if (c >= ' ') {
@@ -835,7 +835,7 @@ static int get_params(struct boot_param_t *params)
 		}
 	}
 
-	if (c == '\n' || c == '\r') {
+	if (char_is_newline(c)) {
 		if (!imagename)
 			imagename = cfg_get_default();
 		if (imagename)

@@ -25,6 +25,7 @@
 #include <string.h>
 #include <types.h>
 #include <prom.h>
+#include <cmdline.h>
 
 /* Imported functions */
 extern int strcasecmp(const char *s1, const char *s2);
@@ -164,14 +165,14 @@ static char *cfg_get_token(void)
 		return here;
 	}
 	while (1) {
-		while (ch = next(), ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
-			if (ch == '\n' || ch == '\r')
+		while (ch = next(), ch == ' ' || ch == '\t' || char_is_newline(ch))
+			if (char_is_newline(ch))
 				line_num++;
 		if (ch == EOF || ch == (int)NULL)
 			return NULL;
 		if (ch != '#')
 			break;
-		while (ch = next_raw(), (ch != '\n' && ch != '\r'))
+		while (ch = next_raw(), !char_is_newline(ch))
 			if (ch == EOF)
 				return NULL;
 		line_num++;
@@ -207,7 +208,7 @@ static char *cfg_get_token(void)
 				default:
 					cfg_error("Bad use of \\ in quoted string");
 				}
-			} else if ((ch == '\n') || (ch == '\r'))
+			} else if (char_is_newline(ch))
 				cfg_error("newline is not allowed in quoted strings");
 			*here++ = ch;
 		}
@@ -226,7 +227,7 @@ static char *cfg_get_token(void)
 				*here++ = ch == '\t' ? ' ' : ch;
 			escaped = 0;
 		} else {
-			if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '#' || ch == '=' || ch == EOF) {
+			if (ch == ' ' || ch == '\t' || char_is_newline(ch) || ch == '#' || ch == '=' || ch == EOF) {
 				again(ch);
 				*here = 0;
 				return strdup(buf);

@@ -28,6 +28,7 @@
 #include <prom.h>
 #include <string.h>
 #include <cfg.h>
+#include <cmdline.h>
 
 #define CMD_LENG	512
 char cbuff[CMD_LENG];
@@ -57,7 +58,7 @@ void cmdedit(void (*tabfunc) (void), int password)
 		c = prom_getchar();
 		if (c == -1)
 			break;
-		if (c == '\n' || c == '\r') {
+		if (char_is_newline(c)) {
 			break;
 		}
 		if (c == '\t' && !x && tabfunc)

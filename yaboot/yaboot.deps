@@ -45,6 +45,7 @@ second/cfg.o: \
 	include/stdlib.h \
 	include/string.h \
 	include/types.h \
+	include/cmdline.h \
 	include/prom.h
 
 second/cmdline.o: \
@@ -52,6 +53,7 @@ second/cmdline.o: \
 	include/types.h \
 	include/prom.h \
 	include/string.h \
+	include/cmdline.h \
 	include/cfg.h
 
 second/crt0.o: \
