@@ -34,4 +34,8 @@ static inline int char_is_newline(int c)
 {
 	return c == '\n' || c == '\r';
 }
+static inline int char_is_backspace(int c)
+{
+	return c == '\b' || c == 0x7f;
+}
 #endif

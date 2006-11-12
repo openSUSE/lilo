@@ -815,7 +815,7 @@ static int get_params(struct boot_param_t *params)
 		}
 		if (c == -1)
 			c = '\n';
-		else if (!char_is_newline(c) && c != '\t' && c != '\b') {
+		else if (!char_is_newline(c) && c != '\t' && !char_is_backspace(c)) {
 			cbuff[0] = c;
 			cbuff[1] = 0;
 		}
