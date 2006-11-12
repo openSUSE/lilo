@@ -212,7 +212,7 @@ static char *cfg_get_token(void)
 			*here++ = ch;
 		}
 		cfg_error("Quoted string is too long");
-		return 0;	/* not reached */
+		return NULL;	/* not reached */
 	}
 	here = buf;
 	escaped = 0;
@@ -237,7 +237,7 @@ static char *cfg_get_token(void)
 		ch = next();
 	}
 	cfg_error("Token is too long");
-	return 0;		/* not reached */
+	return NULL;		/* not reached */
 }
 
 static void cfg_return_token(char *token)
@@ -362,7 +362,7 @@ static char *cfg_get_strg_i(CONFIG * table, char *item)
 	for (walk = table; walk->type != cft_end; walk++)
 		if (walk->name && !strcasecmp(walk->name, item))
 			return walk->data;
-	return 0;
+	return NULL;
 }
 
 char *cfg_get_strg(char *image, char *item)
@@ -389,7 +389,7 @@ char *cfg_get_strg(char *image, char *item)
 			return ret;
 		}
 	}
-	return 0;
+	return NULL;
 }
 
 int cfg_get_flag(char *image, char *item)
@@ -449,7 +449,7 @@ char *cfg_get_default(void)
 	if (ret)
 		return ret;
 	if (!images)
-		return 0;
+		return NULL;
 	ret = cfg_get_strg_i(images->table, "label");
 	if (!ret) {
 		ret = cfg_get_strg_i(images->table, "image");
