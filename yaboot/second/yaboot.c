@@ -78,7 +78,7 @@ static void hard_coded_bootpath(char *buf)
 
 #define MALLOCADDR ((2 * 1024 * 1024) + (512 * 1024))
 #define MALLOCSIZE ((1 * 1024 * 1024) + (512 * 1024))
-#define CLAIM_END (128 * 1024 * 1024)	/* FIXME: look at /memory/available */
+#define CLAIM_END (128 * 1024 * 1024)	/* FIXME: look at /memory/reg */
 
 typedef struct {
 	union {
