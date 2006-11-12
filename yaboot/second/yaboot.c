@@ -850,7 +850,6 @@ static int get_params(struct boot_param_t *params)
 		word_split(&imagename, &params->args);
 	}
 
-	/* chrp gets this wrong, force it -- Cort */
 	if (useconf && (!imagename || imagename[0] == 0))
 		imagename = cfg_get_default();
 
