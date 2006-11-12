@@ -165,7 +165,7 @@ static char *cfg_get_token(void)
 		return here;
 	}
 	while (1) {
-		while (ch = next(), ch == ' ' || ch == '\t' || char_is_newline(ch))
+		while (ch = next(), ch == ' ' || char_is_tab(ch) || char_is_newline(ch))
 			if (char_is_newline(ch))
 				line_num++;
 		if (ch == EOF || ch == (int)NULL)
@@ -196,7 +196,7 @@ static char *cfg_get_token(void)
 					break;
 				case '\n':
 				case '\r':
-					while ((ch = next()), ch == ' ' || ch == '\t') ;
+					while ((ch = next()), ch == ' ' || char_is_tab(ch)) ;
 					if (!ch)
 						continue;
 					again(ch);
@@ -224,10 +224,10 @@ static char *cfg_get_token(void)
 			if (ch == '\n')
 				line_num++;
 			else
-				*here++ = ch == '\t' ? ' ' : ch;
+				*here++ = char_is_tab(ch) ? ' ' : ch;
 			escaped = 0;
 		} else {
-			if (ch == ' ' || ch == '\t' || char_is_newline(ch) || ch == '#' || ch == '=' || ch == EOF) {
+			if (ch == ' ' || char_is_tab(ch) || char_is_newline(ch) || ch == '#' || ch == '=' || ch == EOF) {
 				again(ch);
 				*here = 0;
 				return strdup(buf);

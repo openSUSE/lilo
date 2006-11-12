@@ -38,4 +38,8 @@ static inline int char_is_backspace(int c)
 {
 	return c == '\b' || c == 0x7f;
 }
+static inline int char_is_tab(int c)
+{
+	return c == '\t';
+}
 #endif

@@ -61,7 +61,7 @@ void cmdedit(void (*tabfunc) (void), int password)
 		if (char_is_newline(c)) {
 			break;
 		}
-		if (c == '\t' && !x && tabfunc)
+		if (char_is_tab(c) && !x && tabfunc)
 			(*tabfunc) ();
 		if (char_is_backspace(c)) {
 			if (x > 0) {
