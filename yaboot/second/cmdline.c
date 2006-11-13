@@ -87,3 +87,54 @@ void cmdedit(void (*tabfunc) (void), int password)
 	}
 	buff[x] = 0;
 }
+
+static void tabfunc(char *buf, int len,void (*func) (void))
+{
+	if (!len) {
+		cfg_print_images();
+		(*func) ();
+	}
+}
+
+static char *buffer_edit(char *buf, void (*func) (void))
+{
+	int len, c;
+	len = strlen(buf);
+	if (func)
+		prom_printf(buf);
+	else {
+		for (c = 0; c < len; c++)
+			prom_printf("*");
+	}
+
+	for (;;) {
+		c = prom_getchar();
+		if (c == -1)
+			break;
+		if (char_is_newline(c))
+			break;
+		if (char_is_tab(c) && func)
+			tabfunc(buf, len, func);
+		else if (char_is_backspace(c)) {
+			if (len > 0) {
+				--len;
+				buf[len] = 0;
+				prom_printf("\b \b");
+			}
+		} else {
+			c = char_to_ascii(c);
+			if (c && len < CMD_LENG - 2) {
+				buf[len] = c;
+				buf[len + 1] = 0;
+				if (func)
+					prom_printf(buf + len);
+				else
+					prom_printf("*");
+				len++;
+			}
+		}
+	}
+
+	buf[len] = 0;
+	return buf;
+}
