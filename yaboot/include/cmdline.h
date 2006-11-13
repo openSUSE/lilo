@@ -42,4 +42,8 @@ static inline int char_is_tab(int c)
 {
 	return c == '\t';
 }
+static inline int char_to_ascii(int c)
+{
+	return c > 0x7f ? 0 : c < ' ' ? 0 : c;
+}
 #endif
