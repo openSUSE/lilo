@@ -753,12 +753,14 @@ static char *make_params(char *label, char *params)
 static void check_password(char *str)
 {
 	int i;
+	char *passwdbuff = passwdinit();
 
+	if (!passwdbuff)
+		return;
 	prom_printf("\n%s", str);
 	for (i = 0; i < 3; i++) {
 		prom_printf("\nPassword: ");
-		passwdbuff[0] = 0;
-		cmdedit((void (*)(void))0, 1);
+		passwordedit(passwdbuff);
 		prom_printf("\n");
 #ifdef USE_MD5_PASSWORDS
 		if (!strncmp(password, "$1$", 3)) {

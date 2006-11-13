@@ -29,7 +29,10 @@ extern void	cmdinit();
 extern void	cmdedit(void (*tabfunc) (void), int password);
 
 extern char	cbuff[];
-extern char	passwdbuff[];
+
+extern char *passwdinit(void);
+extern char *passwordedit(char *buf);
+
 static inline int char_is_newline(int c)
 {
 	return c == '\n' || c == '\r';

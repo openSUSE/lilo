@@ -29,16 +29,25 @@
 #include <string.h>
 #include <cfg.h>
 #include <cmdline.h>
+#include <stdlib.h>
 
 #define CMD_LENG	512
 char cbuff[CMD_LENG];
-char passwdbuff[CMD_LENG];
+static char *passwdbuff;
 extern int useconf;
+
+char *passwdinit(void)
+{
+	if (!passwdbuff)
+		passwdbuff = malloc(CMD_LENG);
+	if (passwdbuff)
+		passwdbuff[0] = 0;
+	return passwdbuff;
+}
 
 void cmdinit()
 {
 	cbuff[0] = 0;
-	passwdbuff[0] = 0;
 }
 
 void cmdedit(void (*tabfunc) (void), int password)
@@ -138,3 +147,9 @@ static char *buffer_edit(char *buf, void (*func) (void))
 	buf[len] = 0;
 	return buf;
 }
+
+char *passwordedit(char *buf)
+{
+	return buffer_edit(buf, NULL);
+}
+
