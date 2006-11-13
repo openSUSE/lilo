@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 13 14:30:07 CET 2006 - olh@suse.de
+
+- handle second ide port and cdrom device paths on pegasos (218692)
+
+-------------------------------------------------------------------
 Mon Nov 13 13:20:38 CET 2006 - olh@suse.de
 
 - implement tab completion for yaboot.conf section label names

@@ -92,9 +92,36 @@ function read_int() {
     echo $(( 0x$(read_qbyte "$1" 1) ))
 }
 
+function get_port () {
+	local variant orig_offset
+	local i port offset
+
+	variant=$1
+	orig_offset=$2
+
+	offset=$orig_offset
+	for i in $variant[0-9]*
+	do
+		: i $i
+		port="${i#$variant}"
+		if test "$port" -lt "$offset"
+		then
+			offset=$port
+		fi
+	done
+	if test "$port" != "0"
+	then
+		echo $(( $orig_offset - $offset ))
+	fi
+}
 
 # if no file path is given on cmd line check for root file system
 file=/
+#
+sysfs_ide_media_type=
+of_ide_media_type=
+ide_port=
+ide_channel=
 
 if [ "$#" -gt 0 ] ; then
     until  [ "$#" = 0 ] ; do
@@ -223,15 +250,23 @@ if test -f ieee1394_id ; then
 else
 case "$file_full_sysfs_path" in
     */ide+([0-9])/+([0-9.]))
-      	file_storage_type=ide
-      	of_disk_ide_channel="${file_full_sysfs_path##*.}"
-      	cd ../..
-      	if [[ "$of_disk_ide_channel" == */* ]]; then
-	    of_disk_ide_channel="${of_disk_ide_channel%%/*}"
+	if test -f media
+	then
+		read sysfs_ide_media_type < media
+	fi
+	: sysfs_ide_media_type $sysfs_ide_media_type
+	file_storage_type=ide
+	ide_port="${file_full_sysfs_path##*/ide}"
+	ide_port="${ide_port%%/*}"
+	ide_channel="${file_full_sysfs_path##*.}"
+	cd ../..
+	if [[ "$ide_channel" == */* ]]; then
+	    ide_channel="${ide_channel%%/*}"
 	    cd ../..
 	fi
-      	dbg_show of_disk_ide_channel
-      	;;
+	dbg_show ide_port
+	dbg_show ide_channel
+	;;
     */host+([0-9])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
       	# file_storage_type=scsi !! or vscsi, will be determined later
 	declare spec="${file_full_sysfs_path##*/host+([0-9])/}"
@@ -311,7 +346,10 @@ if [ -f devspec ] ; then
 	sas*)
 	    file_storage_type=sas
 	    ;;
-	ide|ata|spi)
+	spi)
+	    file_storage_type=spi-ide
+	    ;;
+	ide|ata)
 	    # TODO
 	    # check for right file-storage_type == ide ??
 	    file_storage_type=ide
@@ -377,7 +415,7 @@ if [ -f devspec ] ; then
 
     case "$file_storage_type" in
         ide)
-	    file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}/disk@$of_disk_ide_channel"
+	    file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}/disk@$ide_channel"
 	    ;;
         scsi)
 	    if [ -d ${file_of_hw_devtype}/disk ]; then
@@ -447,6 +485,20 @@ if [ -f devspec ] ; then
 	    ;;
         sata|pci-ide)
 	    file_of_hw_path=$of_device_path
+	    ;;
+	spi-ide)
+	    case "$sysfs_ide_media_type" in
+		cdrom)
+		of_ide_media_type=cdrom
+		;;
+		disk)
+		of_ide_media_type=disk
+		;;
+		*)
+		of_ide_media_type=unhandled
+		;;
+	    esac
+	    file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}/$of_ide_media_type@$ide_port,$ide_channel"
 	    ;;
         vscsi)
 	    (( of_disk_vscsi_nr = ( (2 << 14) | (of_disk_scsi_chan<<5) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) <<48 )); #
@@ -554,7 +606,7 @@ else # no 'devspec' found
 	of_device_path=${of_device_path%/device_type}
 	case "$file_storage_type" in
 	    ide)
-		file_of_hw_path="${of_device_path##/proc/device-tree}@$of_disk_ide_channel"
+		file_of_hw_path="${of_device_path##/proc/device-tree}@$ide_channel"
 		;;
 	    scsi)
 		file_of_hw_path=$(printf  "%s/sd@%x,%x"  "${of_device_path##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
