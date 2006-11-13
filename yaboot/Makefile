@@ -194,7 +194,7 @@ clean:
 	rm -f second/yaboot.debug
 	rm -f second/yaboot.chrp
 	rm -f second/yaboot.a
-	rm -f second/empty.c second/emtpy.o
+	rm -f second/empty.c second/empty.o
 	rm -f util/split_of_path
 	rm -f tags
 	rm -f md5test
