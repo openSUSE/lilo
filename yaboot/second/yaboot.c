@@ -799,17 +799,15 @@ static void print_all_labels(void)
 static int get_params(struct boot_param_t *params)
 {
 	struct path_description img_def_device;
-	char *p, *q;
-	char *cmdbuff;
-	int c;
-	char *imagename = NULL, *label;
-	int timeout;
-	int restricted = 0;
+	char *p, *q, *cmdbuff, *imagename, *label;
+	int c, timeout, restricted;
 
 	cmdbuff = cmdlineinit();
 	if (!cmdbuff)
 		return 1;
 
+	imagename = label = NULL;
+	restricted = c = 0;
 	memcpy(&img_def_device, &default_device, sizeof(img_def_device));
 	memset(params, 0, sizeof(*params));
 	params->args = "";
@@ -817,7 +815,6 @@ static int get_params(struct boot_param_t *params)
 	cmdinit();
 	print_boot();
 
-	c = -1;
 	if (useconf && (p = cfg_get_strg(NULL, "timeout")) && *p) {
 		timeout = simple_strtol(p, NULL, 0);
 		if (timeout > 0) {
@@ -835,8 +832,7 @@ static int get_params(struct boot_param_t *params)
 	}
 
 	if (char_is_newline(c)) {
-		if (!imagename)
-			imagename = cfg_get_default();
+		imagename = cfg_get_default();
 		if (imagename)
 			prom_printf("%s", imagename);
 		prom_printf("\n");
@@ -856,8 +852,6 @@ static int get_params(struct boot_param_t *params)
 
 	if (useconf && (!imagename || imagename[0] == 0))
 		imagename = cfg_get_default();
-
-	label = 0;
 
 	if (useconf) {
 		set_default_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), &img_def_device);
