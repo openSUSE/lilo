@@ -185,7 +185,7 @@ dbg_show file_sysfs_dir
 if [ ! -L "$file_sysfs_dir/device" ] ; then
     # maybe a partition
     if [ ! -L "$file_sysfs_dir/../device" ] ; then
-    	if [ -d "$file_sysfs_dir/md" ] ; then
+	if [ -d "$file_sysfs_dir/md" ] ; then
 	    # TODO: think about whether we enable reading of
 	    # $(<md/level) == raid0 through the first
 	    # partition/device (md/rd0/block) of the soft raid
