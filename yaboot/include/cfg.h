@@ -26,7 +26,7 @@
 extern int	cfg_parse(char *buff, int len, int cpu); 
 extern char*	cfg_get_strg(char *image, char *item);
 extern int	cfg_get_flag(char *image, char *item);
-extern void	cfg_print_images(void);
+extern int	cfg_print_images(char *buf, int len, int remaining);
 extern char*	cfg_get_default(void);
 
 #endif

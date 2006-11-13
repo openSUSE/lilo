@@ -26,7 +26,7 @@
 #include <types.h>
 
 extern char *cmdlineinit(void);
-extern char *cmdlineedit(char *buf, void (*func) (void));
+extern char *cmdlineedit(char *buf, void (*func) (const char *p, const int nl));
 extern char *passwdinit(void);
 extern char *passwordedit(char *buf);
 

@@ -54,15 +54,45 @@ char *cmdlineinit(void)
 	return cmdbuff;
 }
 
-static void tabfunc(char *buf, int len,void (*func) (void))
+static int tabfunc(char *buf, const int len, void (*func) (const char *p, const int nl))
 {
-	if (!len) {
-		cfg_print_images();
-		(*func) ();
-	}
+	int label_len, print_label, c;
+	int ret_len, pb, nl;
+	char *p;
+	ret_len = 0;
+	pb = nl = 1;
+	if (len > 0) {
+		print_label = 0;
+		p = buf;
+		for (c = 0; c < len; c++) {
+			if (buf[c] == ' ') {
+				if (print_label) {
+					print_label = 0;
+					break;
+				}
+				p++;
+				continue;
+			}
+			print_label = 1;
+		}
+		if (print_label) {
+			label_len = len - (int)(p - buf);
+			ret_len = cfg_print_images(p, label_len, CMD_LENG - len - 1);
+			if (ret_len) {
+				if (buf[len + ret_len - 1] != ' ')
+					nl = 0;
+				else
+					pb = 0;
+			}
+		}
+	} else
+		cfg_print_images(NULL, 0, 0);
+	if (pb)
+		(*func) (buf, nl);
+	return ret_len + len;
 }
 
-static char *buffer_edit(char *buf, void (*func) (void))
+static char *buffer_edit(char *buf, void (*func) (const char *p, const int nl))
 {
 	int len, c;
 	len = strlen(buf);
@@ -80,7 +110,7 @@ static char *buffer_edit(char *buf, void (*func) (void))
 		if (char_is_newline(c))
 			break;
 		if (char_is_tab(c) && func)
-			tabfunc(buf, len, func);
+			len = tabfunc(buf, len, func);
 		else if (char_is_backspace(c)) {
 			if (len > 0) {
 				--len;
@@ -110,7 +140,7 @@ char *passwordedit(char *buf)
 	return buffer_edit(buf, NULL);
 }
 
-char *cmdlineedit(char *buf, void (*func) (void))
+char *cmdlineedit(char *buf, void (*func) (const char *p, const int nl))
 {
 	return buffer_edit(buf, func);
 }

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 13 13:20:38 CET 2006 - olh@suse.de
+
+- implement tab completion for yaboot.conf section label names
+
+-------------------------------------------------------------------
 Tue Nov  7 13:30:40 CET 2006 - olh@suse.de
 
 - remove chmod calls in install section, permissions come via files

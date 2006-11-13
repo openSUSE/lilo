@@ -775,16 +775,16 @@ static void check_password(char *str)
 	prom_interpret("reset-all");
 }
 
-static void print_boot(void)
+static void print_boot(const char *p, const int nl) 
 {
-	prom_printf("boot: ");
+	prom_printf("%sboot: %s", nl ? "\n": "", p ? p : "");
 }
 
 static void print_all_labels(void)
 {
 	if (useconf) {
-		cfg_print_images();
-		print_boot();
+		cfg_print_images(NULL, 0, 0);
+		print_boot(NULL, 0);
 	}
 }
 
@@ -804,7 +804,7 @@ static int get_params(struct boot_param_t *params)
 	memset(params, 0, sizeof(*params));
 	params->args = "";
 
-	print_boot();
+	print_boot(NULL, 0);
 
 	if (useconf && (p = cfg_get_strg(NULL, "timeout")) && *p) {
 		timeout = simple_strtol(p, NULL, 0);

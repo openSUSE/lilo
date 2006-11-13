@@ -100,6 +100,8 @@ static char *currp;
 static char *endp;
 static CONFIG *curr_table = cf_options;
 static jmp_buf env;
+static int tab_completion_len;
+static char *tab_completion_buf;
 
 static struct IMAGES {
 	CONFIG table[sizeof(cf_image) / sizeof(cf_image[0])];
@@ -316,8 +318,14 @@ static int cfg_set(char *item, char *value)
 					cfg_warn("Duplicate entry '%s'", walk->name);
 				if (walk->type == cft_flag)
 					walk->data = &flag_set;
-				else if (walk->type == cft_strg)
+				else if (walk->type == cft_strg) {
 					walk->data = value;
+					if (strcmp(item, "label") == 0 || strcmp(item, "alias") == 0) {
+						int len = strlen(value);
+						if (len > tab_completion_len)
+							tab_completion_len = len;
+					}
+				}
 			}
 			break;
 		}
@@ -346,7 +354,7 @@ int cfg_parse(char *buff, int len, int cpu)
 		return 0;
 	while (1) {
 		if (!cfg_next(&item, &value))
-			return 1;
+			break;
 		if (!cfg_set(item, value)) {
 #ifdef DEBUG
 			prom_printf("Can't set item %s to value %s\n", item, value);
@@ -354,6 +362,9 @@ int cfg_parse(char *buff, int len, int cpu)
 		}
 		free(item);
 	}
+	if (tab_completion_len)
+		tab_completion_buf = malloc(tab_completion_len + 2);
+	return !!tab_completion_buf;
 }
 
 static char *cfg_get_strg_i(CONFIG * table, char *item)
@@ -413,33 +424,117 @@ static void printlabel(char *label, int defflag)
 		printl_count = 0;
 }
 
-void cfg_print_images(void)
+int cfg_print_images(char *buf, int len, int remaining)
 {
 	struct IMAGES *p;
-	char *label, *alias;
+	char *label, *alias, *image, *last_match;
+	char *def;
+	int label_match_count, curlen, following_char, print_matching_labels;
 
-	char *ret = cfg_get_strg_i(cf_options, "default");
-	int defflag = 0;
+	printl_count = print_matching_labels = 0;
+	following_char = -1;
+	curlen = len;
+	if (len)
+		memcpy(tab_completion_buf, buf, len);
+	tab_completion_buf[len] = '\0';
+	def = cfg_get_strg_i(cf_options, "default");
 
-	printl_count = 0;
-	for (p = images; p; p = p->next) {
-		label = cfg_get_strg_i(p->table, "label");
-		if (!label) {
-			label = cfg_get_strg_i(p->table, "image");
-			alias = strrchr(label, '/');
-			if (alias)
-				label = alias + 1;
+	do {
+		label_match_count = 0;
+		last_match = NULL;
+		for (p = images; p; p = p->next) {
+			label = cfg_get_strg_i(p->table, "label");
+			alias = cfg_get_strg_i(p->table, "alias");
+			image = NULL;
+			if (!label && !alias) {
+				if (len)
+					continue;
+				image = cfg_get_strg_i(p->table, "image");
+				if (!image)
+					continue;
+				alias = strrchr(image, '/');
+				if (alias) {
+					image = alias + 1;
+					alias = NULL;
+				}
+			}
+			if (len) {
+				if (label && strlen(label) < remaining && memcmp(label, tab_completion_buf, curlen) == 0) {
+					if (print_matching_labels) {
+						print_matching_labels++;
+						printlabel(label, strcmp(def, label) == 0);
+					} else {
+						if (following_char >= 0) {
+							if (label[curlen] == following_char) {
+								label_match_count++;
+								if (!last_match)
+									last_match = label;
+							} else {
+								print_matching_labels = 1;
+								label_match_count = 0;
+								break;
+							}
+						} else {
+							if (!last_match)
+								last_match = label;
+							label_match_count++;
+						}
+					}
+				}
+				if (alias && strlen(alias) < remaining && memcmp(alias, tab_completion_buf, curlen) == 0) {
+					if (print_matching_labels) {
+						print_matching_labels++;
+						printlabel(alias, strcmp(def, alias) == 0);
+					} else {
+						if (following_char >= 0) {
+							if (alias[curlen] == following_char) {
+								label_match_count++;
+								if (!last_match)
+									last_match = alias;
+							} else {
+								print_matching_labels = 1;
+								label_match_count = 0;
+								break;
+							}
+						} else {
+							if (!last_match)
+								last_match = alias;
+							label_match_count++;
+						}
+					}
+				}
+			} else {
+				if (label)
+					printlabel(label, strcmp(def, label) == 0);
+				if (alias)
+					printlabel(alias, strcmp(def, alias) == 0);
+			}
 		}
-		if (!strcmp(ret, label))
-			defflag = 1;
-		else
-			defflag = 0;
-		alias = cfg_get_strg_i(p->table, "alias");
-		printlabel(label, defflag);
-		if (alias)
-			printlabel(alias, 0);
+		if (label_match_count) {
+			if (label_match_count == 1) {
+				sprintf(tab_completion_buf, "%s ", last_match);
+				memcpy(buf, tab_completion_buf, strlen(tab_completion_buf) + 1);
+				prom_printf("%s", buf + curlen);
+				label_match_count = 0;
+			} else {
+				if (following_char >= 0) {
+					tab_completion_buf[curlen] = following_char;
+					curlen++;
+					tab_completion_buf[curlen] = '\0';
+					prom_printf("%s", tab_completion_buf + curlen - 1);
+				}
+				following_char = last_match[curlen];
+			}
+		} else
+			following_char = -1;
 	}
-	prom_printf("\n");
+	while (label_match_count || print_matching_labels == 1);
+
+	if (print_matching_labels > 1 && printl_count)
+		prom_printf("\n");
+	if (len)
+		memcpy(buf, tab_completion_buf, strlen(tab_completion_buf) + 1);
+	return strlen(tab_completion_buf) - len;
 }
 
 char *cfg_get_default(void)
