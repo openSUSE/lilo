@@ -30,6 +30,8 @@ extern void	cmdedit(void (*tabfunc) (void), int password);
 
 extern char	cbuff[];
 
+extern char *cmdlineinit(void);
+extern char *cmdlineedit(char *buf, void (*func) (void));
 extern char *passwdinit(void);
 extern char *passwordedit(char *buf);
 

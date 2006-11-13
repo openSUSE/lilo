@@ -33,6 +33,7 @@
 
 #define CMD_LENG	512
 char cbuff[CMD_LENG];
+static char *cmdbuff;
 static char *passwdbuff;
 extern int useconf;
 
@@ -43,6 +44,15 @@ char *passwdinit(void)
 	if (passwdbuff)
 		passwdbuff[0] = 0;
 	return passwdbuff;
+}
+
+char *cmdlineinit(void)
+{
+	if (!cmdbuff)
+		cmdbuff = malloc(CMD_LENG);
+	if (cmdbuff)
+		cmdbuff[0] = 0;
+	return cmdbuff;
 }
 
 void cmdinit()
@@ -153,3 +163,7 @@ char *passwordedit(char *buf)
 	return buffer_edit(buf, NULL);
 }
 
+char *cmdlineedit(char *buf, void (*func) (void))
+{
+	return buffer_edit(buf, func);
+}

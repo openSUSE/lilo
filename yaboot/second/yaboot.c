@@ -800,10 +800,15 @@ static int get_params(struct boot_param_t *params)
 {
 	struct path_description img_def_device;
 	char *p, *q;
+	char *cmdbuff;
 	int c;
 	char *imagename = NULL, *label;
 	int timeout;
 	int restricted = 0;
+
+	cmdbuff = cmdlineinit();
+	if (!cmdbuff)
+		return 1;
 
 	memcpy(&img_def_device, &default_device, sizeof(img_def_device));
 	memset(params, 0, sizeof(*params));
@@ -824,8 +829,8 @@ static int get_params(struct boot_param_t *params)
 		if (c == -1 || !c)
 			c = '\n';
 		else if (!char_is_newline(c) && !char_is_tab(c) && !char_is_backspace(c)) {
-			cbuff[0] = c = char_to_ascii(c);
-			cbuff[1] = 0;
+			cmdbuff[0] = c = char_to_ascii(c);
+			cmdbuff[1] = 0;
 		}
 	}
 
@@ -836,15 +841,15 @@ static int get_params(struct boot_param_t *params)
 			prom_printf("%s", imagename);
 		prom_printf("\n");
 	} else {
-		if (c >= ' ' && useconf && cfg_get_flag(cbuff, "single-key")) {
-			imagename = cbuff;
-			prom_printf("%s\n", cbuff);
+		if (c >= ' ' && useconf && cfg_get_flag(cmdbuff, "single-key")) {
+			imagename = cmdbuff;
+			prom_printf("%s\n", cmdbuff);
 		} else {
 			if (char_is_tab(c))
 				print_all_labels();
-			cmdedit(maintabfunc, 0);
+			cmdlineedit(cmdbuff, print_boot);
 			prom_printf("\n");
-			imagename = cbuff;
+			imagename = cmdbuff;
 			word_split(&imagename, &params->args);
 		}
 	}
