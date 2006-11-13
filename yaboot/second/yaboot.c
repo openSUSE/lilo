@@ -105,7 +105,6 @@ static char *password;
 static struct path_description default_device;
 static int _cpu;
 
-#define DEFAULT_TIMEOUT		-1
 
 extern char __bss_start[];
 extern char _start[];
@@ -804,7 +803,6 @@ static int get_params(struct boot_param_t *params)
 	int c;
 	char *imagename = NULL, *label;
 	int timeout;
-	int beg, end;
 	int singlekey = 0;
 	int restricted = 0;
 
@@ -815,20 +813,16 @@ static int get_params(struct boot_param_t *params)
 	cmdinit();
 	print_boot();
 
-	timeout = DEFAULT_TIMEOUT;
-	if (useconf && (q = cfg_get_strg(NULL, "timeout")) != 0 && *q != 0)
-		timeout = simple_strtol(q, NULL, 0);
-
 	c = -1;
-	if (timeout != -1) {
-		beg = prom_getms();
+	if (useconf && (p = cfg_get_strg(NULL, "timeout")) && *p) {
+		timeout = simple_strtol(p, NULL, 0);
 		if (timeout > 0) {
-			end = beg + 100 * timeout;
+			timeout = prom_getms() + 100 * timeout;
 			do {
 				c = prom_nbgetchar();
-			} while (c == -1 && prom_getms() <= end);
+			} while (c == -1 && prom_getms() <= timeout);
 		}
-		if (c == -1)
+		if (c == -1 || !c)
 			c = '\n';
 		else if (!char_is_newline(c) && !char_is_tab(c) && !char_is_backspace(c)) {
 			cbuff[0] = c;
