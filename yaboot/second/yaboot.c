@@ -803,7 +803,6 @@ static int get_params(struct boot_param_t *params)
 	int c;
 	char *imagename = NULL, *label;
 	int timeout;
-	int singlekey = 0;
 	int restricted = 0;
 
 	memcpy(&img_def_device, &default_device, sizeof(img_def_device));
@@ -830,31 +829,24 @@ static int get_params(struct boot_param_t *params)
 		}
 	}
 
-	if (c != -1 && !char_is_newline(c)) {
-		if (char_is_tab(c)) {
-			print_all_labels();
-		} else if (c >= ' ') {
-			cbuff[0] = c;
-			cbuff[1] = 0;
-			if ((cfg_get_flag(cbuff, "single-key")) && useconf) {
-				imagename = cbuff;
-				singlekey = 1;
-				prom_printf("%s\n", cbuff);
-			}
-		}
-	}
-
 	if (char_is_newline(c)) {
 		if (!imagename)
 			imagename = cfg_get_default();
 		if (imagename)
 			prom_printf("%s", imagename);
 		prom_printf("\n");
-	} else if (!singlekey) {
-		cmdedit(maintabfunc, 0);
-		prom_printf("\n");
-		imagename = cbuff;
-		word_split(&imagename, &params->args);
+	} else {
+		if (c >= ' ' && useconf && cfg_get_flag(cbuff, "single-key")) {
+			imagename = cbuff;
+			prom_printf("%s\n", cbuff);
+		} else {
+			if (char_is_tab(c))
+				print_all_labels();
+			cmdedit(maintabfunc, 0);
+			prom_printf("\n");
+			imagename = cbuff;
+			word_split(&imagename, &params->args);
+		}
 	}
 
 	if (useconf && (!imagename || imagename[0] == 0))
