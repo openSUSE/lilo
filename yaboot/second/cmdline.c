@@ -32,7 +32,6 @@
 #include <stdlib.h>
 
 #define CMD_LENG	512
-char cbuff[CMD_LENG];
 static char *cmdbuff;
 static char *passwdbuff;
 extern int useconf;
@@ -53,58 +52,6 @@ char *cmdlineinit(void)
 	if (cmdbuff)
 		cmdbuff[0] = 0;
 	return cmdbuff;
-}
-
-void cmdinit()
-{
-	cbuff[0] = 0;
-}
-
-void cmdedit(void (*tabfunc) (void), int password)
-{
-	int x, c;
-	char *buff = password ? passwdbuff : cbuff;
-	for (x = 0; x < CMD_LENG - 1; x++) {
-		if (buff[x] == 0)
-			break;
-		else if (password)
-			prom_printf("*");
-	}
-	if (!password)
-		prom_printf(buff, x);
-
-	for (;;) {
-		c = prom_getchar();
-		if (c == -1)
-			break;
-		if (char_is_newline(c)) {
-			break;
-		}
-		if (char_is_tab(c) && !x && tabfunc)
-			(*tabfunc) ();
-		if (char_is_backspace(c)) {
-			if (x > 0) {
-				--x;
-				buff[x] = 0;
-				prom_printf("\b \b");
-			}
-		} else if ((c & 0xE0) != 0) {
-			if (x < CMD_LENG - 1) {
-				buff[x] = c;
-				buff[x + 1] = 0;
-				if (password)
-					prom_printf("*");
-				else
-					prom_printf(buff + x);
-				x++;
-			}
-			if (x == 1 && !password && useconf) {
-				if (cfg_get_flag(cbuff, "single-key"))
-					break;
-			}
-		}
-	}
-	buff[x] = 0;
 }
 
 static void tabfunc(char *buf, int len,void (*func) (void))

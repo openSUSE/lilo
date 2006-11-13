@@ -651,14 +651,6 @@ static char *check_manual_config_filepath(char *bootargs)
 	return *c1 ? c1 : NULL;
 }
 
-static void maintabfunc(void)
-{
-	if (useconf) {
-		cfg_print_images();
-		prom_printf("boot: %s", cbuff);
-	}
-}
-
 static void word_split(char **linep, char **paramsp)
 {
 	char *p;
@@ -812,7 +804,6 @@ static int get_params(struct boot_param_t *params)
 	memset(params, 0, sizeof(*params));
 	params->args = "";
 
-	cmdinit();
 	print_boot();
 
 	if (useconf && (p = cfg_get_strg(NULL, "timeout")) && *p) {
