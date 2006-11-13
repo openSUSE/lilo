@@ -784,6 +784,19 @@ static void check_password(char *str)
 	prom_interpret("reset-all");
 }
 
+static void print_boot(void)
+{
+	prom_printf("boot: ");
+}
+
+static void print_all_labels(void)
+{
+	if (useconf) {
+		cfg_print_images();
+		print_boot();
+	}
+}
+
 static int get_params(struct boot_param_t *params)
 {
 	struct path_description img_def_device;
@@ -800,12 +813,12 @@ static int get_params(struct boot_param_t *params)
 	params->args = "";
 
 	cmdinit();
+	print_boot();
 
 	timeout = DEFAULT_TIMEOUT;
 	if (useconf && (q = cfg_get_strg(NULL, "timeout")) != 0 && *q != 0)
 		timeout = simple_strtol(q, NULL, 0);
 
-	prom_printf("boot: ");
 	c = -1;
 	if (timeout != -1) {
 		beg = prom_getms();
@@ -825,7 +838,7 @@ static int get_params(struct boot_param_t *params)
 
 	if (c != -1 && !char_is_newline(c)) {
 		if (char_is_tab(c)) {
-			maintabfunc();
+			print_all_labels();
 		} else if (c >= ' ') {
 			cbuff[0] = c;
 			cbuff[1] = 0;
