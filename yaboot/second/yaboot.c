@@ -787,8 +787,13 @@ static void print_all_labels(void)
 		print_boot(NULL, 0);
 	}
 }
+enum get_params_result {
+	GET_PARAMS_FATAL,
+	GET_PARAMS_OK,
+	GET_PARAMS_STOP,
+};
 
-static int get_params(struct boot_param_t *params)
+static enum get_params_result get_params(struct boot_param_t *params, enum get_params_result gpr)
 {
 	struct path_description img_def_device;
 	char *p, *q, *cmdbuff, *imagename, *label;
@@ -796,7 +801,7 @@ static int get_params(struct boot_param_t *params)
 
 	cmdbuff = cmdlineinit();
 	if (!cmdbuff)
-		return 1;
+		return GET_PARAMS_FATAL;
 
 	imagename = label = NULL;
 	restricted = c = 0;
@@ -806,7 +811,7 @@ static int get_params(struct boot_param_t *params)
 
 	print_boot(NULL, 0);
 
-	if (useconf && (p = cfg_get_strg(NULL, "timeout")) && *p) {
+	if (gpr == GET_PARAMS_OK && useconf && (p = cfg_get_strg(NULL, "timeout")) && *p) {
 		timeout = simple_strtol(p, NULL, 0);
 		if (timeout > 0) {
 			timeout = prom_getms() + 100 * timeout;
@@ -866,7 +871,7 @@ static int get_params(struct boot_param_t *params)
 	}
 
 	if (imagename == NULL)
-		return 0;
+		return GET_PARAMS_STOP;
 
 	if (!strcmp(imagename, "help")) {
 		prom_printf("\nPress the tab key for a list of defined images.\n"
@@ -882,19 +887,19 @@ static int get_params(struct boot_param_t *params)
 			    "If you omit \"device:\" and \"partno\" yaboot will use the values of \n"
 			    "\"device=\" and \"partition=\" in yaboot.conf, right now those are set to: \n"
 			    "device=%s\n" "partition=%d\n\n", default_device.device, default_device.part);
-		return 0;
+		return GET_PARAMS_STOP;
 	}
 
 	if (!strcmp(imagename, "halt")) {
 		if (password)
 			check_password("Restricted command.");
 		prom_pause();
-		return 0;
+		return GET_PARAMS_FATAL;
 	}
 	if (!strcmp(imagename, "bye")) {
 		if (password)
 			check_password("Restricted command.");
-		return 1;
+		return GET_PARAMS_FATAL;
 	}
 
 	if (imagename[0] == '$') {
@@ -902,7 +907,7 @@ static int get_params(struct boot_param_t *params)
 		if (password)
 			check_password("OpenFirmware commands are restricted.");
 		prom_interpret(imagename + 1);
-		return 0;
+		return GET_PARAMS_STOP;
 	}
 
 	if (!label && password)
@@ -910,7 +915,7 @@ static int get_params(struct boot_param_t *params)
 
 	if (!imagepath_to_path_description(imagename, &params->kernel, &img_def_device)) {
 		prom_printf("%s: Unable to parse\n", imagename);
-		return 0;
+		return GET_PARAMS_STOP;
 	}
 
 	p = strstr(params->args, "initrd=");
@@ -929,7 +934,7 @@ static int get_params(struct boot_param_t *params)
 		if (!imagepath_to_path_description(p, &params->rd, &img_def_device))
 			prom_printf("%s: Unable to parse\n", p);
 	}
-	return 0;
+	return GET_PARAMS_OK;
 }
 
 /* This is derived from quik core. To be changed to first parse the headers
@@ -942,6 +947,7 @@ static void yaboot_text_ui(void)
 
 	struct boot_file_t file;
 	int result;
+	enum get_params_result gpr;
 	struct boot_param_t params;
 	void *claim_base;
 	void *initrd_base;
@@ -956,13 +962,17 @@ static void yaboot_text_ui(void)
 	if (!make_params_buffer)
 		return;
 	loadinfo.load_loc = 0;
+	gpr = GET_PARAMS_OK;
 
 	for (;;) {
 		initrd_size = 0;
 		initrd_base = NULL;
 
-		if (get_params(&params))
+		gpr = get_params(&params, gpr);
+		if (gpr == GET_PARAMS_FATAL)
 			return;
+		if (gpr == GET_PARAMS_STOP)
+			continue;
 
 		prom_printf("Please wait, loading kernel...\n");
 
@@ -973,6 +983,7 @@ static void yaboot_text_ui(void)
 				prom_perror(result, msg);
 				free(msg);
 			}
+			gpr = GET_PARAMS_STOP;
 			continue;
 		}
 
@@ -982,24 +993,28 @@ static void yaboot_text_ui(void)
 		if (file.fs->read(&file, sizeof(Elf_Ident), &loadinfo.elf) < sizeof(Elf_Ident)) {
 			prom_printf("\nCan't read Elf e_ident/e_type/e_machine info\n");
 			file.fs->close(&file);
+			gpr = GET_PARAMS_STOP;
 			continue;
 		}
 
 		if (is_elf32(&loadinfo)) {
 			if (!load_elf32(&file, &loadinfo)) {
 				file.fs->close(&file);
+				gpr = GET_PARAMS_STOP;
 				continue;
 			}
 			prom_printf("   Elf32 kernel loaded...\n");
 		} else if (is_elf64(&loadinfo)) {
 			if (!load_elf64(&file, &loadinfo)) {
 				file.fs->close(&file);
+				gpr = GET_PARAMS_STOP;
 				continue;
 			}
 			prom_printf("   Elf64 kernel loaded...\n");
 		} else {
 			prom_printf("%s: Not a valid ELF image\n", params.kernel.filename);
 			file.fs->close(&file);
+			gpr = GET_PARAMS_STOP;
 			continue;
 		}
 		file.fs->close(&file);
@@ -1021,6 +1036,7 @@ static void yaboot_text_ui(void)
 					prom_perror(result, msg);
 					free(msg);
 				}
+				gpr = GET_PARAMS_STOP;
 			} else {
 #define INITRD_CHUNKSIZE 0x400000
 				/* put initrd after the kernels final location */
@@ -1067,10 +1083,10 @@ static void yaboot_text_ui(void)
 					free(msg);
 				}
 				prom_printf("ramdisk loaded %08lx @ %p\n", initrd_size, initrd_base);
-
 			} else {
 				prom_printf("ramdisk load failed !\n");
-				prom_pause();
+				gpr = GET_PARAMS_STOP;
+				continue;
 			}
 		}
 

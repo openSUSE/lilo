@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov 14 21:57:09 CET 2006 - olh@suse.de
+
+- handle load errors in yaboot, stop after the first error
+  ramdisk loading is not fatal.
+
+-------------------------------------------------------------------
 Tue Nov 14 20:08:37 CET 2006 - olh@suse.de
 
 - correct newline printing in yaboots label tab completion
