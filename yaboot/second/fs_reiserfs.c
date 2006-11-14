@@ -658,7 +658,7 @@ static int reiserfs_read_data(char *buf, u32 len)
 
 			while (offset < blocksize) {
 				u32 blocknr = le32_to_cpu(((u32 *)
-							     INFO->current_item)[offset >> INFO->blocksize_shift]);
+							   INFO->current_item)[offset >> INFO->blocksize_shift]);
 
 				int blk_offset = offset & (INFO->blocksize - 1);
 

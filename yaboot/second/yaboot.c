@@ -105,7 +105,6 @@ static char *password;
 static struct path_description default_device;
 static int _cpu;
 
-
 extern char __bss_start[];
 extern char _start[];
 extern char _end[];
@@ -775,9 +774,9 @@ static void check_password(char *str)
 	prom_interpret("reset-all");
 }
 
-static void print_boot(const char *p, const int nl) 
+static void print_boot(const char *p, const int nl)
 {
-	prom_printf("%sboot: %s", nl ? "\n": "", p ? p : "");
+	prom_printf("%sboot: %s", nl ? "\n" : "", p ? p : "");
 }
 
 static void print_all_labels(void)
