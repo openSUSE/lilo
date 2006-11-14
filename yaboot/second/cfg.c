@@ -417,8 +417,9 @@ static void printlabel(char *label, int defflag)
 	if (!printl_count)
 		prom_printf("\n");
 	prom_printf("%s %s", defflag ? "*" : " ", label);
-	while (len++ < 25)
-		prom_putchar(' ');
+	if (printl_count < 3)
+		while (len++ < 25)
+			prom_putchar(' ');
 	printl_count++;
 	if (printl_count == 3)
 		printl_count = 0;
