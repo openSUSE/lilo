@@ -414,15 +414,19 @@ static void printlabel(char *label, int defflag)
 {
 	int len = strlen(label);
 
-	if (!printl_count)
+	if (!printl_count) {
+		printl_count++;
 		prom_printf("\n");
+	}
 	prom_printf("%s %s", defflag ? "*" : " ", label);
-	if (printl_count < 3)
+	if (printl_count < 4)
 		while (len++ < 25)
 			prom_putchar(' ');
 	printl_count++;
-	if (printl_count == 3)
-		printl_count = 0;
+	if (printl_count == 4) {
+		prom_printf("\n");
+		printl_count = 1;
+	}
 }
 
 int cfg_print_images(char *buf, int len, int remaining)
@@ -535,7 +539,7 @@ int cfg_print_images(char *buf, int len, int remaining)
 	while (label_match_count || print_matching_labels == 1);
 
 	added = strlen(tab_completion_buf) - len;
-	if (print_matching_labels > 1 && (added && (printl_count == 0 || printl_count == 2)))
+	if (printl_count == 2 || printl_count == 3)
 		prom_printf("\n");
 	if (len)
 		memcpy(buf, tab_completion_buf, strlen(tab_completion_buf) + 1);
