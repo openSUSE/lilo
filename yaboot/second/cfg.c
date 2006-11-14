@@ -431,6 +431,9 @@ int cfg_print_images(char *buf, int len, int remaining)
 	char *def;
 	int label_match_count, curlen, following_char, print_matching_labels;
 
+	if (len > tab_completion_len)
+		return 0;
+
 	printl_count = print_matching_labels = 0;
 	following_char = -1;
 	curlen = len;
