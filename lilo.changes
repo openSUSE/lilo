@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov 14 22:20:49 CET 2006 - olh@suse.de
+
+- update the yaboot 'help' text
+
+-------------------------------------------------------------------
 Tue Nov 14 21:57:09 CET 2006 - olh@suse.de
 
 - handle load errors in yaboot, stop after the first error

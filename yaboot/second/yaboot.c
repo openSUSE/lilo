@@ -873,19 +873,22 @@ static enum get_params_result get_params(struct boot_param_t *params, enum get_p
 		return GET_PARAMS_STOP;
 
 	if (!strcmp(imagename, "help")) {
-		prom_printf("\nPress the tab key for a list of defined images.\n"
-			    "The label marked with a \"*\" is is the default image, "
-			    "press <return> to boot it.\n\n"
-			    "To boot any other label simply type its name and press <return>.\n\n"
-			    "To boot a kernel image which is not defined in the yaboot configuration \n"
-			    "file, enter the kernel image name as [[device:][partno],]/path, where \n"
-			    "\"device:\" is the OpenFirmware device path to the disk the image \n"
-			    "resides on, and \"partno\" is the partition number the image resides on.\n"
-			    "Note that the comma (,) is only required if you specify an OpenFirmware\n"
-			    "device, if you only specify a filename you should not start it with a \",\"\n\n"
-			    "If you omit \"device:\" and \"partno\" yaboot will use the values of \n"
-			    "\"device=\" and \"partition=\" in yaboot.conf, right now those are set to: \n"
-			    "device=%s\n" "partition=%d\n\n", default_device.device, default_device.part);
+		prom_printf("  Press the tab key for a list of defined images.\n"
+			    "  The label marked with a \"*\" is is the default image, press <return> to boot it.\n\n"
+			    "  To boot any other label simply type its name and press <return>.\n"
+			    "  It is also possible to expand a label with the tab key.\n\n"
+			    "  To boot a kernel image which is not defined in the yaboot configuration \n"
+			    "  file, enter the kernel image name as [[device:[partno]],]/path, where \n"
+			    "  \"device:\" is the OpenFirmware device path to the disk the image \n"
+			    "  resides on, and \"partno\" is the partition number the image resides on.\n"
+			    "  Note that the comma (,) is only required if you specify an OpenFirmware\n"
+			    "  device, if you only specify a filename you should not start it with a \",\"\n"
+			    "  The shortcut '&device;' can be used to specify the OpenFirmware device path\n"
+			    "  where yaboot was loaded from.\n\n"
+			    "  To load an initrd, specify its path as initrd=[[device:[partno]],]/path\n\n"
+			    "  If you omit \"device:\" and \"partno\" yaboot will use the values of \n"
+			    "  \"device=\" and \"partition=\" in yaboot.conf, right now those are set to: \n"
+			    "  device=%s\n  partition=%d\n\n", default_device.device, default_device.part);
 		return GET_PARAMS_STOP;
 	}
 
