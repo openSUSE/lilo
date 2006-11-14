@@ -430,7 +430,7 @@ int cfg_print_images(char *buf, int len, int remaining)
 	struct IMAGES *p;
 	char *label, *alias, *image, *last_match;
 	char *def;
-	int label_match_count, curlen, following_char, print_matching_labels;
+	int label_match_count, curlen, following_char, print_matching_labels, added;
 
 	if (len > tab_completion_len)
 		return 0;
@@ -534,11 +534,12 @@ int cfg_print_images(char *buf, int len, int remaining)
 	}
 	while (label_match_count || print_matching_labels == 1);
 
-	if (print_matching_labels > 1 && printl_count)
+	added = strlen(tab_completion_buf) - len;
+	if (print_matching_labels > 1 && (added && (printl_count == 0 || printl_count == 2)))
 		prom_printf("\n");
 	if (len)
 		memcpy(buf, tab_completion_buf, strlen(tab_completion_buf) + 1);
-	return strlen(tab_completion_buf) - len;
+	return added;
 }
 
 char *cfg_get_default(void)

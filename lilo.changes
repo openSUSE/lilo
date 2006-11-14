@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov 14 20:08:37 CET 2006 - olh@suse.de
+
+- correct newline printing in yaboots label tab completion
+
+-------------------------------------------------------------------
 Tue Nov 14 16:16:32 CET 2006 - jplack@suse.de
 
 - do hformat HFS partition if mount fails (#118023)
