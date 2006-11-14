@@ -528,6 +528,7 @@ function parse_config_file () {
     # OPTION_ACTIVATE is a flag whether or not the boot partition must be set active in OF
     # OPTION_USE_OS_CHOOSER is a flag whether or not the Forth script used as bootfile will open the screen
     # OPTION_TIMEOUT contains the timeout variable in seconds
+    # OPTION_MACOSTIMEOUT contains the timeout between linux/macos in seconds
     # OPTION_DEFAULT contains the default label
     # OPTION_ROOT contains the global or local root= device
     # OPTION_APPEND contains the global or local append= strings
@@ -610,6 +611,10 @@ function parse_config_file () {
   	    timeout)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
 		OPTION_TIMEOUT=$value
+		;;
+  	    macos_timeout)
+		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
+		OPTION_MACOSTIMEOUT=$value
 		;;
 	    default)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7

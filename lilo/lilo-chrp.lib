@@ -7,7 +7,7 @@
 unset firmware_status
 unset running_on_chrp
 unset running_on_prep
-unset running_on_pegaos
+unset running_on_pegasos
 
 FW_STATUS_FILE=/lib/lilo/chrp/firmware_status.chrp
 

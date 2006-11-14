@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Tue Nov 14 16:16:32 CET 2006 - jplack@suse.de
+
+- do hformat HFS partition if mount fails (#118023)
+- use &device; instead of full of path in os-chooser (#194118)
+- make timeout to select macos/linux boot configurable (#118776)
+- copy global 'initrd=/boot/initrd' to boot device for pmac_old and
+  pmac_new (#177481)
+- bump version to 10.1.21
+
+-------------------------------------------------------------------
 Mon Nov 13 14:30:07 CET 2006 - olh@suse.de
 
 - handle second ide port and cdrom device paths on pegasos (218692)

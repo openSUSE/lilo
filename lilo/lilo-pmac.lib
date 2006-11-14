@@ -28,16 +28,16 @@ function running_on_pmac_old () {
 	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
 	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
-	test -z "$OPTION_INITRD"  || echo "initrd = ${HFS_BOOTFOLDER}:`basename ${OPTION_INITRD}`"
+	test -z "$OPTION_INITRD"  || echo "initrd = ${HFS_BOOTFOLDER}:initrd.def"
 	echo
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	    test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 	    test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-	    echo "image = ${HFS_BOOTFOLDER}:`basename ${CONFIG_IMAGE_FILE[$i]}`"
+	    echo "image = ${HFS_BOOTFOLDER}:" $(printf "vmlinux.%03d" $i)
 	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
 	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
 	    test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
-	    test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${HFS_BOOTFOLDER}:`basename ${CONFIG_IMAGE_INITRD[$i]}`"
+	    test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${HFS_BOOTFOLDER}:"$(printf "initrd.%03d" $i)
 	    echo
 	done
 	echo
@@ -51,7 +51,11 @@ function running_on_pmac_old () {
     humount $OPTION_BOOT 2>/dev/null
     humount $OPTION_BOOT 2>/dev/null
     
-    hmount $OPTION_BOOT  || exit 1
+    hmount $OPTION_BOOT || {
+	echo "Mounting of $OPTION_BOOT failed, trying again after formatting"
+	hformat -l "Linux boot partition" $OPTION_BOOT
+	hmount $OPTION_BOOT || exit 1
+    }
     echo using bootfolder \'$HFS_BOOTFOLDER\' on volume `hpwd` on $OPTION_BOOT 
     hmkdir $HFS_BOOTFOLDER 2>/dev/null
     hattrib -b $HFS_BOOTFOLDER
@@ -62,13 +66,14 @@ function running_on_pmac_old () {
     hattrib -t TEXT -c "R*ch" :miboot.conf
     hattrib -t FNDR -c MACS Finder
     hattrib -t zsys -c MACS System
+    [ "$OPTION_INITRD" ] && hcopy $OPTION_INITRD :initrd.def
     
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-	hcopy ${CONFIG_IMAGE_FILE[$i]} :`basename ${CONFIG_IMAGE_FILE[$i]}`
+	hcopy ${CONFIG_IMAGE_FILE[$i]} :$(printf "vmlinux.%03d" $i)
 	if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
-	    hcopy ${CONFIG_IMAGE_INITRD[$i]} :`basename ${CONFIG_IMAGE_INITRD[$i]}`
+	    hcopy ${CONFIG_IMAGE_INITRD[$i]} :$(printf "initrd.%03d" $i)
 	fi
     done
     hpwd
@@ -129,12 +134,13 @@ function running_on_pmac_new () {
 	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 	test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
+	test -z "$OPTION_INITRD"  || echo "initrd = initrd.def"
 
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	    [ "${CONFIG_IMAGE_OTHER[$i]}" ] &&  continue
 	    test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	    if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
-		echo "image = `basename ${CONFIG_IMAGE_FILE[$i]}`"
+		echo "image = "$(printf "vmlinux.%03d" $i)
 	    else
 		echo "image = ${CONFIG_IMAGE_PATH[$i]}"
 	    fi
@@ -145,7 +151,7 @@ function running_on_pmac_new () {
 
 	    if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
 		if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
-		    echo "    initrd = `basename ${CONFIG_IMAGE_INITRD[$i]}`" 
+		    echo "    initrd = $(printf "initrd.%03d" $i)" 
 		else 
 		    echo "    initrd = ${CONFIG_IMAGE_INITRDPATH[$i]}" 
 		fi
@@ -153,11 +159,13 @@ function running_on_pmac_new () {
 	done
     } > $TEMP/yaboot.conf
 
-    BOOT_DEVICEPATH=$(get_of_path $OPTION_BOOT)
+    # BOOT_DEVICEPATH=$(get_of_path $OPTION_BOOT)
+    BOOT_DEVICEPATH="&device;:&partition;"
     OTHER_DEVICEPATH=$(get_of_path $OPTION_OTHER)
+    TIMEOUT=${OPTION_MACOSTIMEOUT:-5}
 
-    echo "BOOT_DEVICEPATH  =  $BOOT_DEVICEPATH"
-    echo "OTHER_DEVICEPATH  =  $OTHER_DEVICEPATH"
+    echo "BOOT_DEVICEPATH  = $BOOT_DEVICEPATH"
+    echo "OTHER_DEVICEPATH = $OTHER_DEVICEPATH"
     {
 	cat <<-EOF
 	<CHRP-BOOT>
@@ -242,7 +250,7 @@ function running_on_pmac_new () {
 			" "(0d 0a)" fb8-write drop
 			" "(0d 0a)" fb8-write drop
 			" "(09)  press space to boot $SPACE_BAR_HINT ... " fb8-write drop
-			get-msecs d# 5 3E8 * +
+			get-msecs d# $TIMEOUT 3E8 * +
 			begin
 			  key? if
 			    key case
@@ -280,7 +288,11 @@ function running_on_pmac_new () {
     humount $OPTION_BOOT 2>/dev/null
     humount $OPTION_BOOT 2>/dev/null
     
-    hmount $OPTION_BOOT || exit 1
+    hmount $OPTION_BOOT || {
+	echo "Mounting of $OPTION_BOOT failed, trying again after formatting"
+	hformat -l "Linux boot partition" $OPTION_BOOT
+	hmount $OPTION_BOOT || exit 1
+    }
 
     HFS_BOOTFOLDER="${OPTION_BOOTFOLDER:-$DEFAULT_BOOTFOLDER}"
     hmkdir $HFS_BOOTFOLDER 2>/dev/null
@@ -298,16 +310,17 @@ function running_on_pmac_new () {
     hcopy $TEMP/os-chooser :os-chooser
     hattrib -t BINA -c UNIX yaboot
     hattrib -t tbxi -c chrp os-chooser
-    
+    [ "$OPTION_INITRD" ] && hcopy $OPTION_INITRD :initrd.def
+
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
-	    hcopy ${CONFIG_IMAGE_FILE[$i]} :`basename ${CONFIG_IMAGE_FILE[$i]}`
+	    hcopy ${CONFIG_IMAGE_FILE[$i]} :$(printf "vmlinux.%03d" $i)
 	fi
 	test -z "${CONFIG_IMAGE_INITRD[$i]}" || (
 	if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
-	    hcopy ${CONFIG_IMAGE_INITRD[$i]} :`basename ${CONFIG_IMAGE_INITRD[$i]}`
+	    hcopy ${CONFIG_IMAGE_INITRD[$i]} :$(printf "initrd.%03d" $i)
 	fi )
     done
     hpwd
