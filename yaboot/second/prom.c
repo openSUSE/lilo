@@ -43,8 +43,6 @@ int stdout_is_screen;
 
 static ihandle prom_mmu;
 static ihandle prom_chosen;
-static ihandle prom_openprom;
-unsigned int of_built_on;
 
 struct prom_args {
 	const char *service;
@@ -234,16 +232,6 @@ enum device_type prom_get_devtype(const char *device)
 	}
 }
 
-static void get_openprom_build_date(void)
-{
-	unsigned int built_on;
-	if (prom_getprop(prom_openprom, "built-on", &built_on, sizeof(built_on)) == 4) {
-		if (built_on > 20040101 && built_on < 20991231) {
-			of_built_on = built_on;
-		}
-	}
-}
-
 /* G5 with nvidia card crash when no monitor is connected */
 static void open_output_device(void)
 {
@@ -306,9 +294,6 @@ void prom_init(prom_entry pp)
 			open_output_device();
 	}
 
-	prom_openprom = prom_finddevice("/openprom");
-	if (prom_openprom != (void *)-1)
-		get_openprom_build_date();
 	if (prom_get_chosen("stdout", &prom_stdout, sizeof(prom_stdout)) <= 0)
 		prom_exit();
 	if (prom_get_chosen("stdin", &prom_stdin, sizeof(prom_stdin)) <= 0)
