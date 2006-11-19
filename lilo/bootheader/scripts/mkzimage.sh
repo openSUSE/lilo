@@ -18,6 +18,7 @@ options=
 board_type=guess
 kernel_type=guess
 zimage_sh=guess
+proc_mounted=no
 
 until [ "$#" = "0" ] ; do
 	case "$1" in
@@ -127,8 +128,11 @@ case "$(file -Lb $vmlinux)" in
 		exit 1 
 		;;
 esac
+if [ ! -f /proc/cpuinfo ] ; then
+	mount -v -n -t proc proc /proc
+	proc_mounted=yes
+fi
 if [ "$board_type" = "guess" ] ; then
-	test -f /proc/cpuinfo || mount -v -n -t proc proc /proc
 	while read line; do
 		case "$line" in
 		  *MacRISC*)	board_type="pmac" ;;
@@ -143,7 +147,6 @@ if [ "$board_type" = "guess" ] ; then
 	done < /proc/cpuinfo
 fi
 if [ "$board_type" = "guess" ] ; then
-	test -f /proc/cpuinfo || mount -v -n -t proc proc /proc
 	line=`cat < /proc/device-tree/model`
 	case "$line" in
 		Momentum,Maple-D)	board_type="chrp" ;;
@@ -205,4 +208,7 @@ fi
 bash $obj_dir/scripts/$zimage_sh $options --vmlinux "$vmlinux" --output "$output" --objdir "$obj_dir"
 if [ ! -z "$cmdline" ] ; then
 $obj_dir/utils/mkzimage_cmdline -a 1 -c -s "$cmdline" "$output"
+fi
+if [ "$proc_mounted" = "yes" ] ; then
+	umount -v -n /proc
 fi

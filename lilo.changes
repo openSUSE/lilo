@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Nov 19 18:50:25 CET 2006 - olh@suse.de
+
+- rm -rf needs proc now, mount proc in mkzimage
+
+-------------------------------------------------------------------
 Sun Nov 19 18:45:36 CET 2006 - olh@suse.de
 
 - fix another missing newline in yaboots label tab completion
