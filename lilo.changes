@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Nov 19 18:45:36 CET 2006 - olh@suse.de
+
+- fix another missing newline in yaboots label tab completion
+
+-------------------------------------------------------------------
 Tue Nov 14 22:20:49 CET 2006 - olh@suse.de
 
 - update the yaboot 'help' text

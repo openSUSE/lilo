@@ -539,7 +539,7 @@ int cfg_print_images(char *buf, int len, int remaining)
 	while (label_match_count || print_matching_labels == 1);
 
 	added = strlen(tab_completion_buf) - len;
-	if (printl_count == 2 || printl_count == 3)
+	if (printl_count == 2 || printl_count == 3 || (!len && !printl_count))
 		prom_printf("\n");
 	if (len)
 		memcpy(buf, tab_completion_buf, strlen(tab_completion_buf) + 1);
