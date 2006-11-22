@@ -355,11 +355,8 @@ int cfg_parse(char *buff, int len, int cpu)
 	while (1) {
 		if (!cfg_next(&item, &value))
 			break;
-		if (!cfg_set(item, value)) {
-#ifdef DEBUG
-			prom_printf("Can't set item %s to value %s\n", item, value);
-#endif
-		}
+		if (cfg_set(item, value) < 0)
+			break;
 		free(item);
 	}
 	if (tab_completion_len)
