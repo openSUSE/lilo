@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov 22 13:19:58 CET 2006 - olh@suse.de
+
+- print trailing spaces only for the first two labels to avoid
+  line wraps on 80x25 displays
+
+-------------------------------------------------------------------
 Wed Nov 22 11:03:53 CET 2006 - olh@suse.de
 
 - handle malloc errors in yaboot.conf parser
