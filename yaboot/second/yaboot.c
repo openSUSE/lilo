@@ -874,7 +874,7 @@ static enum get_params_result get_params(struct boot_param_t *params, enum get_p
 
 	if (!strcmp(imagename, "help")) {
 		prom_printf("  Press the tab key for a list of defined images.\n"
-			    "  The label marked with a \"*\" is is the default image, press <return> to boot it.\n\n"
+			    "  The label marked with a \"*\" is the default image, press <return> to boot it.\n\n"
 			    "  To boot any other label simply type its name and press <return>.\n"
 			    "  It is also possible to expand a label with the tab key.\n\n"
 			    "  To boot a kernel image which is not defined in the yaboot configuration \n"
