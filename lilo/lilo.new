@@ -776,6 +776,16 @@ rm -rf $TEMP
 mkdir -p $TEMP
 trap "clean_environment" EXIT INT
 
+if test -f /proc/device-tree/openprom/model ; then
+	if grep -q IBM,SLOF /proc/device-tree/openprom/model ; then
+		error "SLOF has no working CLAIM implementation" \
+		"booting CD1/suseboot/inst64 via the network is currently the only way to boot SuSE Linux" \
+		"" \
+		" THIS IS A FIRMWARE BUG! " \
+		"" \
+		"Can not proceed with bootloader installation."
+	fi
+fi
 
 #
 # here we go

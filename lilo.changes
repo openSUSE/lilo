@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Nov 28 00:58:23 CET 2006 - olh@suse.de
+
+- reject Cell SLOF firmware, its not ready for primetime.
+
+-------------------------------------------------------------------
 Mon Nov 27 23:56:34 CET 2006 - olh@suse.de
 
 - cell firmware can not yet resolve aliases, give better error msg
