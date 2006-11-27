@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 27 23:56:34 CET 2006 - olh@suse.de
+
+- cell firmware can not yet resolve aliases, give better error msg
+
+-------------------------------------------------------------------
 Mon Nov 27 23:49:19 CET 2006 - olh@suse.de
 
 - fix ' is is ' typo in yaboot help text

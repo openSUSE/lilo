@@ -130,6 +130,9 @@ int parse_device_path(const char *imagepath, struct path_description *result)
 	case TYPE_NET:
 		parse_net_device(result);
 		break;
+	case TYPE_INVALID:
+		prom_printf("firmware said the path '%s' is invalid\n", result->device);
+		return 0;
 	default:
 		prom_printf("type %d of '%s' not handled\n", result->type, result->device);
 		return 0;
