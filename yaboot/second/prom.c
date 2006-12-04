@@ -194,6 +194,11 @@ void find_type_devices(prom_handle * nodes, const char *type, int max)
 	walk_dev_tree(root, type, nodes);
 }
 
+int prom_getproplen_chosen(const char *name)
+{
+	return prom_getproplen(prom_chosen, name);
+}
+
 int prom_get_chosen(const char *name, void *mem, int len)
 {
 	return prom_getprop(prom_chosen, name, mem, len);

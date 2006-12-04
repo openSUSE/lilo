@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Dec  4 19:52:51 CET 2006 - olh@suse.de
+
+- add prom_getproplen_chosen to yaboot
+
+-------------------------------------------------------------------
 Tue Nov 28 00:58:23 CET 2006 - olh@suse.de
 
 - reject Cell SLOF firmware, its not ready for primetime.
