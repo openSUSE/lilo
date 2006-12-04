@@ -54,12 +54,12 @@ char *cmdlineinit(void)
 	return cmdbuff;
 }
 
-static int tabfunc(char *buf, const int len, void (*func) (const char *p, const int nl))
+static int tabfunc(char *buf, const int len, void (*func) (const char *p))
 {
 	int label_len, print_label, c;
-	int ret_len, pb, nl;
+	int ret_len, pb;
 	char *p;
-	ret_len = nl = 0;
+	ret_len = 0;
 	pb = 1;
 	if (len > 0) {
 		print_label = 0;
@@ -81,15 +81,15 @@ static int tabfunc(char *buf, const int len, void (*func) (const char *p, const 
 			if (ret_len && buf[len + ret_len - 1] == ' ')
 				pb = 0;
 		} else
-			nl = 1;
+			prom_printf("\n");
 	} else
 		cfg_print_images(NULL, 0, 0);
 	if (pb)
-		(*func) (buf, nl);
+		(*func) (buf);
 	return ret_len + len;
 }
 
-static char *buffer_edit(char *buf, void (*func) (const char *p, const int nl))
+static char *buffer_edit(char *buf, void (*func) (const char *p))
 {
 	int len, c;
 	len = strlen(buf);
@@ -137,7 +137,7 @@ char *passwordedit(char *buf)
 	return buffer_edit(buf, NULL);
 }
 
-char *cmdlineedit(char *buf, void (*func) (const char *p, const int nl))
+char *cmdlineedit(char *buf, void (*func) (const char *p))
 {
 	return buffer_edit(buf, func);
 }

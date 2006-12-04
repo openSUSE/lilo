@@ -774,16 +774,16 @@ static void check_password(char *str)
 	prom_interpret("reset-all");
 }
 
-static void print_boot(const char *p, const int nl)
+static void print_boot(const char *p)
 {
-	prom_printf("%sboot: %s", nl ? "\n" : "", p ? p : "");
+	prom_printf("boot: %s", p ? p : "");
 }
 
 static void print_all_labels(void)
 {
 	if (useconf) {
 		cfg_print_images(NULL, 0, 0);
-		print_boot(NULL, 0);
+		print_boot(NULL);
 	}
 }
 enum get_params_result {
@@ -808,7 +808,7 @@ static enum get_params_result get_params(struct boot_param_t *params, enum get_p
 	memset(params, 0, sizeof(*params));
 	params->args = "";
 
-	print_boot(NULL, 0);
+	print_boot(NULL);
 
 	if (gpr == GET_PARAMS_OK && useconf && (p = cfg_get_strg(NULL, "timeout")) && *p) {
 		timeout = simple_strtol(p, NULL, 0);
