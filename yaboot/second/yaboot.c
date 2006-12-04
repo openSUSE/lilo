@@ -54,19 +54,19 @@
 #include <elf.h>
 #include <debug.h>
 
-#if 0
-static void hard_coded_bootpath(char *buf)
+static char *hard_coded_bootpath(char *bootpath)
 {
-	prom_printf("original bootpath: '%s'\n using hardcoded bootpath: ", buf);
-	sprintf(buf, "/pci@8000000f8000000/ide@4,1/disk@0");
-	prom_printf("'%s'\n", buf);
-}
-#else
-#define hard_coded_bootpath(p) do { } while(0)
+#if 0
+	const char path[] = "/pci@8000000f8000000/ide@4,1/disk@0";
+	prom_printf("original bootpath: '%s'\n using hardcoded bootpath: '%s'\n", bootpath, path);
+	bootpath = malloc(strlen(path) + 1);
+	if (bootpath)
+		sprintf(bootpath, path);
 #endif
+	return bootpath;
+}
 
 #define CONFIG_FILE_MAX		0x8000	/* 32k */
-#define BOOTPATH_LEN		1024
 
 #ifdef USE_MD5_PASSWORDS
 #include <md5.h>
@@ -1114,19 +1114,27 @@ static void yaboot_text_ui(void)
 
 static void yaboot_main(void)
 {
-	char *bootpath, *bootargs;
+	char *bootpath = NULL, *bootargs = NULL;
 	char *conf_file_buf, *configfile = NULL;
+	int bootpath_len, bootargs_len;
 	int sz;
 	if (prom_getprop(call_prom("instance-to-package", 1, 1, prom_stdout), "iso6429-1983-colors", NULL, 0) >= 0) {
 		stdout_is_screen = 1;
 		setup_display();
 	}
 
-	bootpath = malloc(BOOTPATH_LEN);
+	bootpath_len = prom_getproplen_chosen("bootpath");
+	bootargs_len = prom_getproplen_chosen("bootargs");
+
+	if (bootpath_len > 0)
+		bootpath = malloc(bootpath_len + 1);
+	if (bootargs_len > 0)
+		bootargs = malloc(bootargs_len + 1);
+
 	if (bootpath) {
-		memset(bootpath, 0, BOOTPATH_LEN);
-		prom_get_chosen("bootpath", bootpath, BOOTPATH_LEN - 1);
-		hard_coded_bootpath(bootpath);
+		memset(bootpath, 0, bootpath_len + 1);
+		prom_get_chosen("bootpath", bootpath, bootpath_len);
+		bootpath = hard_coded_bootpath(bootpath);
 		DEBUG_F("/chosen/bootpath = %s\n", bootpath);
 		if (bootpath[0] == 0) {
 			prom_printf("Couldn't determine boot device\n");
@@ -1140,13 +1148,12 @@ static void yaboot_main(void)
 		prom_set_chosen("yaboot,bootpath", bootpath, strlen(bootpath) + 1);
 	}
 
-	bootargs = malloc(BOOTPATH_LEN);
 	if (bootargs) {
-		memset(bootargs, 0, BOOTPATH_LEN);
-		prom_get_chosen("bootargs", bootargs, BOOTPATH_LEN - 1);
+		memset(bootargs, 0, bootargs_len + 1);
+		prom_get_chosen("bootargs", bootargs, bootargs_len);
 		DEBUG_F("/chosen/bootargs = '%s'\n", bootargs);
 		if (bootargs[0]) {
-			prom_set_chosen("yaboot,bootargs", bootargs, strlen(bootargs) + 1);
+			prom_set_chosen("yaboot,bootargs", bootargs, bootargs_len + 1);
 			configfile = check_manual_config_filepath(bootargs);
 			if (!imagepath_to_path_description(configfile, &default_device, &default_device))
 				configfile = NULL;
