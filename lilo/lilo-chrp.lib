@@ -706,6 +706,9 @@ set +x
 	echo "Converted /etc/lilo.conf to /etc/yaboot.conf"
     fi
 
+    # remove empty yaboot.conf, created by get_of_path check above
+    if [ ! -s /etc/yaboot.conf ] ; then rm -v /etc/yaboot.conf ; fi
+
     # TODO check whether this is neccessary
     if [[ ${p_flags[$boot_partnr]} != *boot* ]]; then
 	parted_call $boot_device set $boot_partnr boot on >& $TEMP/parted.log || error 11
