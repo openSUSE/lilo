@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Dec  8 15:04:07 CET 2006 - olh@suse.de
+
+- recognize iscsi volumes with static ipv4 settings in show_of_path.sh
+  (218773 - LTC28334)
+
+-------------------------------------------------------------------
 Tue Dec  5 12:50:11 CET 2006 - olh@suse.de
 
 - remove empty /etc/yaboot.conf (170338)

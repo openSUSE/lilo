@@ -292,6 +292,15 @@ case "$file_full_sysfs_path" in
 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
 	cd ../../../..
 	;;
+    */host+([0-9])/session+([0-9])/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
+	# iscsi 2.6.16.21 sles10 ga
+	declare spec="${file_full_sysfs_path##*/host+([0-9])\/session+([-0-9:])\/target+([0-9:])/}"
+
+	dbg_show spec
+	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
+	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
+	cd ../..
+	;;
     *)
         # TODO check the rest of the (hardware) world
 	: file_full_sysfs_path $file_full_sysfs_path
@@ -300,6 +309,7 @@ esac
 # ieee1394_id
 fi 
 
+# iscsi has no devspec pointer into the OF device tree
 if [ -f devspec ] ; then
     read file_of_hw_devtype < devspec
     file_of_hw_devtype=/proc/device-tree${file_of_hw_devtype}
@@ -524,6 +534,36 @@ if [ -f devspec ] ; then
 	    ;;
     esac
 else # no 'devspec' found
+   case "$file_full_sysfs_path" in
+	*/host+([0-9])/session+([0-9])/*)
+	iscsi_session="${file_full_sysfs_path%/*}"
+	iscsi_session="${iscsi_session%/*}"
+	iscsi_session="${iscsi_session##*/}"
+	iscsi_connection="${iscsi_session#session*}"
+	# FIXME
+	iscsi_network_interface="` ip -o link show up | awk ' BEGIN { FS=":" ; foo="" } ; /link\/ether/ { if (foo == "") { foo=$2 } } ; END { print foo } ' `"
+	set -- $iscsi_network_interface
+	iscsi_network_interface=$1
+	iscsi_network_card="` cat /sys/class/net/$iscsi_network_interface/device/devspec `"
+	iscsi_itname="` awk ' BEGIN { FS="=" ; foo="" } ; /^InitiatorName=/{ if (foo == "") { foo=$2 } } ; END { print foo } ' /etc/initiatorname.iscsi `"
+	iscsi_ciaddr="` ip addr show dev $iscsi_network_interface | awk ' BEGIN { foo="" } ; / inet /{ if (foo == "") { foo=$2 } } ; END { print foo } ' `"
+	iscsi_giaddr="` ip route show dev $iscsi_network_interface | awk ' BEGIN { foo="" } ; /default via /{ if (foo == "") { foo=$3 } } ; END { print foo } ' `"
+	# FIXME
+	case "$iscsi_ciaddr" in
+		*/8)  iscsi_subnet_mask=255.0.0.0 ;;
+		*/16) iscsi_subnet_mask=255.255.0.0 ;;
+		*/24) iscsi_subnet_mask=255.255.255.0 ;;
+		*)    iscsi_subnet_mask=0.0.0.0 ;;
+	esac
+	iscsi_ciaddr="${iscsi_ciaddr%/*}"
+	iscsi_siaddr="` cat connection$iscsi_connection:0/iscsi_connection:connection$iscsi_connection:0/persistent_address `"
+	iscsi_iname="` cat iscsi_session:$iscsi_session/targetname `"
+	iscsi_iport="` cat connection$iscsi_connection:0/iscsi_connection:connection$iscsi_connection:0/persistent_port `"
+	#FIXME
+	iscsi_ilun=0
+	file_of_hw_path="$iscsi_network_card:iscsi,itname=$iscsi_itname,ciaddr=$iscsi_ciaddr,giaddr=$iscsi_giaddr,subnet-mask=$iscsi_subnet_mask,siaddr=$iscsi_siaddr,iname=$iscsi_iname,iport=$iscsi_iport,ilun=$iscsi_ilun"
+	;;
+	*)
     echo >&2 "WARNING: No devspec file found for $file_full_sysfs_path"
 
 	dbg_show file_full_sysfs_path
@@ -624,7 +664,9 @@ else # no 'devspec' found
 		file_of_hw_path=$(printf  "%s/${dir}@%016x,%016x"  "${of_device_path##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
 		;;
 	esac
+	;;
 	# no "devspec" available
+    esac
 fi
 
 #
