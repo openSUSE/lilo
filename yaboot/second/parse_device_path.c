@@ -109,12 +109,38 @@ static void parse_net_device(struct path_description *result)
 	return;
 }
 
+/**
+ * reset_bootdevice_to_iscsi
+ * When the bootpath contains the string "iscsi", the
+ * firmware needs to be passed the contents of the
+ * "nas-bootdevice" property.
+ */
+static int reset_bootdevice_to_iscsi(const char *imagepath, struct path_description *result)
+{
+	int size = prom_getproplen_chosen("nas-bootdevice");
+
+	if (size > 0) {
+		result->device = malloc(size + 2);
+		if (result->device) {
+			prom_get_chosen("nas-bootdevice", result->device, size);
+			DEBUG_F("nas-bootdevice: <%s>\n", result->device);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 int parse_device_path(const char *imagepath, struct path_description *result)
 {
 	DEBUG_F("imagepath '%s'\n", imagepath);
 	if (!imagepath)
 		return 0;
 
+	/* FIXME */
+	if (strstr(imagepath, "iscsi")) {
+		if (!reset_bootdevice_to_iscsi(imagepath, result))
+			return 0;
+	} else {
 	result->device = malloc(strlen(imagepath) + 2);
 	if (!result->device)
 		return 0;
@@ -122,6 +148,7 @@ int parse_device_path(const char *imagepath, struct path_description *result)
 	result->u.d.s1 = strchr(result->device, ':');
 	if (result->u.d.s1)
 		*result->u.d.s1++ = '\0';
+	}
 	result->type = prom_get_devtype(result->device);
 	switch (result->type) {
 	case TYPE_BLOCK:
