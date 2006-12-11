@@ -778,12 +778,12 @@ trap "clean_environment" EXIT INT
 
 if test -f /proc/device-tree/openprom/model ; then
 	if grep -q IBM,SLOF /proc/device-tree/openprom/model ; then
-		error "SLOF has no working CLAIM implementation" \
-		"booting CD1/suseboot/inst64 via the network is currently the only way to boot SuSE Linux" \
+		warning "Outdated SLOF releases had no working CLAIM implementation." \
+		"Booting CD1/suseboot/inst64 via the network was the only way to boot SuSE Linux." \
 		"" \
-		" THIS IS A FIRMWARE BUG! " \
+		" THIS WAS A FIRMWARE BUG! " \
 		"" \
-		"Can not proceed with bootloader installation."
+		"Update your SLOF firmware to a release from 2007 or later."
 	fi
 fi
 

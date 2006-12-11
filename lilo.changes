@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Dec 11 11:02:32 CET 2006 - olh@suse.de
+
+- relax SLOF check, just print some warning
+
+-------------------------------------------------------------------
 Fri Dec  8 15:21:28 CET 2006 - olh@suse.de
 
 - recognize iscsi boots in yaboot (218773 - LTC28334)
