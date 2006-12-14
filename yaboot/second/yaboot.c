@@ -56,8 +56,8 @@
 
 static char *hard_coded_bootpath(char *bootpath)
 {
-#if 0
-	const char path[] = "/pci@8000000f8000000/ide@4,1/disk@0";
+#ifdef HARD_CODED_BOOTPATH
+	const char path[] = HARD_CODED_BOOTPATH ;
 	prom_printf("original bootpath: '%s'\n using hardcoded bootpath: '%s'\n", bootpath, path);
 	bootpath = malloc(strlen(path) + 1);
 	if (bootpath)

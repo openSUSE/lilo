@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec 14 14:44:23 CET 2006 - olh@suse.de
+
+- add make HARD_CODED_BOOTPATH=ofpath to yaboot make flags
+
+-------------------------------------------------------------------
 Mon Dec 11 11:02:32 CET 2006 - olh@suse.de
 
 - relax SLOF check, just print some warning
