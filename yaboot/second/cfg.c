@@ -27,9 +27,6 @@
 #include <prom.h>
 #include <cmdline.h>
 
-/* Imported functions */
-extern int strcasecmp(const char *s1, const char *s2);
-
 typedef enum {
 	cft_strg, cft_flag, cft_end
 } CONFIG_TYPE;
