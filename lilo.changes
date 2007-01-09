@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan  9 14:34:56 CET 2007 - olh@suse.de
+
+- make removing empty /etc/yaboot.conf less verbose (232821 - LTC30708)
+
+-------------------------------------------------------------------
 Thu Dec 14 14:44:23 CET 2006 - olh@suse.de
 
 - add make HARD_CODED_BOOTPATH=ofpath to yaboot make flags

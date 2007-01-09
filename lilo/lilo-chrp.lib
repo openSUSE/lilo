@@ -707,7 +707,7 @@ set +x
     fi
 
     # remove empty yaboot.conf, created by get_of_path check above
-    if [ ! -s /etc/yaboot.conf ] ; then rm -v /etc/yaboot.conf ; fi
+    if [ ! -s /etc/yaboot.conf ] ; then rm -f /etc/yaboot.conf ; fi
 
     # TODO check whether this is neccessary
     if [[ ${p_flags[$boot_partnr]} != *boot* ]]; then
