@@ -114,6 +114,10 @@ static int msdos_magic_present(char *buffer)
 	return (buffer[510] == 0x55) && (buffer[511] == 0xaa);
 }
 
+static int msdos_is_fat_partition(unsigned char sys_ind)
+{
+	return sys_ind == MSDOS_FAT16;
+}
 static int msdos_is_linux_partition(unsigned char sys_ind)
 {
 	return (sys_ind == LINUX_NATIVE || sys_ind == LINUX_RAID);
@@ -181,7 +185,7 @@ static void partition_msdos_lookup(prom_handle disk, struct partition_t **list)
 
 	DEBUG_F("\n");
 	for (partition = 1; partition <= 4; partition++, part++) {
-		if (msdos_is_linux_partition(part->sys_ind))
+		if (msdos_is_linux_partition(part->sys_ind) || msdos_is_fat_partition(part->sys_ind))
 			add_new_partition(list, partition, le32_to_cpu(part->start), le32_to_cpu(part->size), LABEL_MSDOS, 512,
 					  part->sys_ind);
 		else if (msdos_is_extended_partition(part->sys_ind))

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan  9 20:00:43 CET 2007 - olh@suse.de
+
+- consider also 0x6 FAT partitions on an msdos partition table 
+  in yaboot (230451/232821 - LTC30431/30708)
+
+-------------------------------------------------------------------
 Tue Jan  9 14:34:56 CET 2007 - olh@suse.de
 
 - make removing empty /etc/yaboot.conf less verbose (232821 - LTC30708)
