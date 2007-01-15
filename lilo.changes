@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan 15 12:49:59 CET 2007 - olh@suse.de
+
+- print newline after wrong label in yaboot label tab completion
+
+-------------------------------------------------------------------
 Tue Jan  9 20:00:43 CET 2007 - olh@suse.de
 
 - consider also 0x6 FAT partitions on an msdos partition table 

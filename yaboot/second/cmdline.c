@@ -78,6 +78,8 @@ static int tabfunc(char *buf, const int len, void (*func) (const char *p))
 		if (print_label) {
 			label_len = len - (int)(p - buf);
 			ret_len = cfg_print_images(p, label_len, CMD_LENG - len - 1);
+			if (ret_len == 0)
+				prom_printf("\n");
 			if (ret_len && buf[len + ret_len - 1] == ' ')
 				pb = 0;
 		} else
