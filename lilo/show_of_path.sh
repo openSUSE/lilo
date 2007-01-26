@@ -536,6 +536,15 @@ if [ -f devspec ] ; then
 else # no 'devspec' found
    case "$file_full_sysfs_path" in
 	*/host+([0-9])/session+([0-9])/*)
+	if test -f /etc/initiatorname.iscsi
+	then
+		iscsi_initiatorname_conf=/etc/initiatorname.iscsi
+	elif test -f /etc/iscsi/initiatorname.iscsi
+	then
+		iscsi_initiatorname_conf=/etc/iscsi/initiatorname.iscsi
+	else
+		error "initiatorname.iscsi config file not found"
+	fi
 	iscsi_session="${file_full_sysfs_path%/*}"
 	iscsi_session="${iscsi_session%/*}"
 	iscsi_session="${iscsi_session##*/}"
@@ -545,7 +554,7 @@ else # no 'devspec' found
 	set -- $iscsi_network_interface
 	iscsi_network_interface=$1
 	iscsi_network_card="` cat /sys/class/net/$iscsi_network_interface/device/devspec `"
-	iscsi_itname="` awk ' BEGIN { FS="=" ; foo="" } ; /^InitiatorName=/{ if (foo == "") { foo=$2 } } ; END { print foo } ' /etc/initiatorname.iscsi `"
+	iscsi_itname="` awk ' BEGIN { FS="=" ; foo="" } ; /^InitiatorName=/{ if (foo == "") { foo=$2 } } ; END { print foo } ' "$iscsi_initiatorname_conf" `"
 	iscsi_ciaddr="` ip addr show dev $iscsi_network_interface | awk ' BEGIN { foo="" } ; / inet /{ if (foo == "") { foo=$2 } } ; END { print foo } ' `"
 	iscsi_giaddr="` ip route show dev $iscsi_network_interface | awk ' BEGIN { foo="" } ; /default via /{ if (foo == "") { foo=$3 } } ; END { print foo } ' `"
 	# FIXME

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jan 26 15:04:43 CET 2007 - olh@suse.de
+
+- /etc/initiatorname.iscsi moved to /etc/iscsi/initiatorname.iscsi
+  (238738)
+
+-------------------------------------------------------------------
 Mon Jan 15 12:49:59 CET 2007 - olh@suse.de
 
 - print newline after wrong label in yaboot label tab completion
