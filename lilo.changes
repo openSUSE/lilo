@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan 30 14:38:41 CET 2007 - olh@suse.de
+
+- increase the append= size from 200 to 512 chars in yaboot
+
+-------------------------------------------------------------------
 Fri Jan 26 15:04:43 CET 2007 - olh@suse.de
 
 - /etc/initiatorname.iscsi moved to /etc/iscsi/initiatorname.iscsi
