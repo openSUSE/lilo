@@ -38,7 +38,6 @@ typedef struct {
 } CONFIG;
 
 #define MAX_TOKEN 200
-#define MAX_VAR_NAME MAX_TOKEN
 #define EOF -1
 
 static const char *archimage;
