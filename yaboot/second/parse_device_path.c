@@ -124,6 +124,7 @@ static int reset_bootdevice_to_iscsi(const char *imagepath, struct path_descript
 		if (result->device) {
 			prom_get_chosen("nas-bootdevice", result->device, size);
 			DEBUG_F("nas-bootdevice: <%s>\n", result->device);
+			result->u.b.partition = strrchr(result->device, '@') + 1;
 			return 1;
 		}
 	}
