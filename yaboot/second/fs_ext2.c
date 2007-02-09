@@ -37,7 +37,6 @@
 #include <errors.h>
 #include <debug.h>
 
-#define FAST_VERSION
 #define MAX_READ_RANGE	256
 #undef VERBOSE_DEBUG
 
@@ -55,7 +54,6 @@ static ext2_filsys fs;
 static struct boot_file_t *cur_file;
 static char *block_buffer;
 
-#ifdef FAST_VERSION
 static unsigned long read_range_start;
 static unsigned long read_range_count;
 static unsigned long read_last_logical;
@@ -67,9 +65,6 @@ static char *read_buffer;
 
 static int read_dump_range(void);
 static int read_iterator(ext2_filsys fs, u32 * blocknr, int lg_block, void *private);
-#else				/* FAST_VERSION */
-static struct ext2_inode cur_inode;
-#endif				/* FAST_VERSION */
 
 void com_err(const char *a, long i, const char *fmt, ...)
 {
@@ -167,22 +162,6 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	}
 #endif
 
-#ifndef FAST_VERSION
-	result = ext2fs_read_inode(fs, file->inode, &cur_inode);
-	if (result) {
-
-		DEBUG_F("ext2fs_read_inode error #%d while loading file %s\n", result, file_name);
-		if (result == EXT2_ET_FILE_TOO_BIG)
-			error = FILE_ERR_LENGTH;
-		else if (result == EXT2_ET_LLSEEK_FAILED)
-			error = FILE_CANT_SEEK;
-		else if (result == EXT2_ET_FILE_NOT_FOUND)
-			error = FILE_ERR_NOTFOUND;
-		else
-			error = FILE_IOERR;
-		goto bail;
-	}
-#endif				/* FAST_VERSION */
 	file->pos = 0;
 
 	opened = 1;
@@ -206,7 +185,6 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	return FILE_ERR_OK;
 }
 
-#ifdef FAST_VERSION
 
 static int read_dump_range(void)
 {
@@ -360,13 +338,11 @@ static int read_iterator(ext2_filsys fs, u32 * blocknr, int lg_block, void *priv
 	return 0;
 }
 
-#endif				/* FAST_VERSION */
 
 static int ext2_read(struct boot_file_t *file, unsigned int size, void *buffer)
 {
 	long retval;
 
-#ifdef FAST_VERSION
 	if (!opened)
 		return FILE_IOERR;
 
@@ -396,50 +372,6 @@ static int ext2_read(struct boot_file_t *file, unsigned int size, void *buffer)
 
 	return read_total;
 
-#else				/* FAST_VERSION */
-	int status;
-	unsigned int read = 0;
-
-	if (!opened)
-		return FILE_IOERR;
-
-	DEBUG_F("ext_read() from pos 0x%x, size: 0x%x\n", file->pos, size);
-
-	while (size) {
-		u32 fblock = file->pos / bs;
-		u32 pblock;
-		unsigned int blkorig, s, b;
-
-		pblock = 0;
-		status = ext2fs_bmap(fs, file->inode, &cur_inode, block_buffer, 0, fblock, &pblock);
-		if (status) {
-
-			DEBUG_F("ext2fs_bmap(fblock:%d) return: %d\n", fblock, status);
-			return read;
-		}
-		blkorig = fblock * bs;
-		b = file->pos - blkorig;
-		s = ((bs - b) > size) ? size : (bs - b);
-		if (pblock) {
-			unsigned long long pos = ((unsigned long long)pblock) * (unsigned long long)bs;
-			pos += doff;
-			prom_seek(file->of_device, pos);
-			status = prom_read(file->of_device, block_buffer, bs);
-			if (status != bs) {
-				prom_printf("ext2: io error in read, ex: %d, got: %d\n", bs, status);
-				return read;
-			}
-		} else
-			memset(block_buffer, 0, bs);
-
-		memcpy(buffer, block_buffer + b, s);
-		read += s;
-		size -= s;
-		buffer += s;
-		file->pos += s;
-	}
-	return read;
-#endif				/* FAST_VERSION */
 }
 
 static int ext2_seek(struct boot_file_t *file, unsigned long long newpos)
