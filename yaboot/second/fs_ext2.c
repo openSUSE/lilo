@@ -152,15 +152,6 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 			error = FILE_IOERR;
 		goto bail;
 	}
-#if 0
-	result = ext2fs_follow_link(fs, root, cwd, file->inode, &file->inode);
-	if (result) {
-
-		DEBUG_F("ext2fs_follow_link error #%d while loading file %s\n", result, file_name);
-		error = FILE_ERR_NOTFOUND;
-		goto bail;
-	}
-#endif
 
 	file->pos = 0;
 
