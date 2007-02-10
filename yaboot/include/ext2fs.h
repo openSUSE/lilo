@@ -34,6 +34,7 @@
 #define EXT2_ET_BAD_BLOCK_IN_INODE_TABLE         (2133571394L)
 #define EXT2_ET_UNSUPP_FEATURE                   (2133571395L)
 #define EXT2_ET_RO_UNSUPP_FEATURE                (2133571396L)
+#define EXT2_ET_LLSEEK_FAILED                    (2133571397L)
 #define EXT2_ET_NO_MEMORY                        (2133571398L)
 #define EXT2_ET_INVALID_ARGUMENT                 (2133571399L)
 #define EXT2_ET_NO_DIRECTORY                     (2133571402L)

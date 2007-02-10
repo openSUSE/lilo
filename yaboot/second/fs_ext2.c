@@ -49,6 +49,7 @@ static io_manager linux_io_manager;
 static int opened;		/* We can't open twice ! */
 static unsigned int bs;		/* Blocksize */
 static unsigned long long doff;	/* Byte offset where partition starts */
+static unsigned long long dend;	/* Byte offset where partition ends */
 static u32 root, cwd;
 static ext2_filsys fs;
 static struct boot_file_t *cur_file;
@@ -90,12 +91,18 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	/* We don't care too much about the device block size since we run
 	 * thru the deblocker. We may have to change that if we plan to be
 	 * compatible with older versions of OF
+	 * On the other hand, we do care about the actual size of the
+	 * partition, reads or seeks past the end may cause undefined
+	 * behavior on some devices.  A netapp that tries to seek and
+	 * read past the end of the lun takes ~30 secs to recover per
+	 * attempt.
 	 */
 	bs = 1024;
 	doff = (unsigned long long)(part->part_start) * part->blocksize;
+	dend = doff + (unsigned long long)part->part_size * part->blocksize;
 	cur_file = file;
 
-	DEBUG_F("partition offset: %Lu\n", doff);
+	DEBUG_F("partition offset: %Lx end:%Lx\n", doff, dend);
 
 	/* Open the OF device for the entire disk */
 	sprintf(buffer, "%s:0", dev_name);
@@ -437,6 +444,10 @@ static long linux_read_blk(io_channel channel, unsigned long block, int count, v
 
 	tempb = (((unsigned long long)block) * ((unsigned long long)bs)) + doff;
 	size = (count < 0) ? -count : count * bs;
+	if (dend && (tempb + size) > dend) {
+		prom_printf("bad seek: blk %08lx c %08x\n", block, count);
+		return EXT2_ET_LLSEEK_FAILED;
+	}
 	prom_seek(cur_file->of_device, tempb);
 	size_read = prom_read(cur_file->of_device, data, size);
 	if (size_read != size) {

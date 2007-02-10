@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sat Feb 10 19:51:08 CET 2007 - olh@suse.de
+
+- do not read past the end of an ext2 partition
+
+-------------------------------------------------------------------
 Sat Feb 10 15:48:54 CET 2007 - olh@suse.de
 
 - remove libext2fs.a from yaboot sources and build ext2 support
