@@ -92,7 +92,6 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	 * compatible with older versions of OF
 	 */
 	bs = 1024;
-	doff = 0;
 	doff = (unsigned long long)(part->part_start) * part->blocksize;
 	cur_file = file;
 
