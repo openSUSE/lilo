@@ -71,9 +71,6 @@ LFLAGS		+= -m elf32ppc
 endif
 
 
-# Libraries
-#
-LLIBS = lib/libext2fs.a
 
 # For compiling userland utils
 #
@@ -87,6 +84,9 @@ HOSTCFLAGS = -O1 -g $(CFLAGS) -Wall -W
 ## End of configuration section
 
 OBJS = second/crt0.o second/yaboot.o second/cache.o second/prom.o second/file.o \
+	second/e2fsprogs_lookup.o second/e2fsprogs_freefs.o second/e2fsprogs_read_bb.o second/e2fsprogs_ind_block.o second/e2fsprogs_dirblock.o \
+	second/e2fsprogs_block.o second/e2fsprogs_io_manager.o second/e2fsprogs_badblocks.o second/e2fsprogs_namei.o second/e2fsprogs_openfs.o \
+	second/e2fsprogs_dir_iterate.o second/e2fsprogs_inode.o second/e2fsprogs_closefs.o second/e2fsprogs_bb_inode.o second/e2fsprogs_swapfs.o \
 	second/partition.o second/cfg.o second/setjmp.o second/cmdline.o \
 	second/cputable.o \
 	second/parse_device_path.o \
@@ -112,7 +112,6 @@ AR		:= $(CROSS)ar
 RANLIB		:= $(CROSS)ranlib
 OBJCOPY		:= $(CROSS)objcopy
 
-lext2_objects = openfs.o closefs.o namei.o io_manager.o swapfs.o lookup.o freefs.o inode.o bb_inode.o read_bb.o badblocks.o dir_iterate.o block.o ind_block.o dirblock.o
 
 all yaboot: second/yaboot md5test
 
@@ -122,15 +121,8 @@ second/empty.c:
 
 second/empty.o: second/empty.c
 
-second/yaboot.a: $(OBJS) $(LLIBS)
-	rm -fv $@ $@.~ ; \
-		rm -rf $$$$ ; \
-		mkdir $$$$ ; \
-		cd $$$$ ; \
-		ar x ../lib/libext2fs.a ; \
-		ar ru ../$@.~ $(lext2_objects) ; \
-		cd .. ; \
-		rm -rf $$$$
+second/yaboot.a: $(OBJS)
+	rm -fv $@ $@.~
 	$(AR) ru $@.~ $(OBJS)
 	$(RANLIB) $@.~
 	mv -f $@.~ $@

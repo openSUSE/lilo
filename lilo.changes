@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sat Feb 10 15:48:54 CET 2007 - olh@suse.de
+
+- remove libext2fs.a from yaboot sources and build ext2 support
+  from source (e2fsprogs-1.38) to simplify debugging (243911 - LTC31899)
+
+-------------------------------------------------------------------
 Mon Feb  5 09:40:19 CET 2007 - olh@suse.de
 
 - set partition when booting from iscsi (237543- LTC31266)

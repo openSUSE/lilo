@@ -199,3 +199,64 @@ second/yaboot.o: \
 	include/elf.h \
 	include/debug.h \
 	include/md5.h
+
+second/e2fsprogs_badblocks.o: \
+	second/e2fsprogs_badblocks.c \
+	include/ext2fs.h
+
+second/e2fsprogs_bb_inode.o: \
+	second/e2fsprogs_bb_inode.c \
+	include/ext2fs.h
+
+second/e2fsprogs_block.o: \
+	second/e2fsprogs_block.c \
+	include/ext2fs.h
+
+second/e2fsprogs_closefs.o: \
+	second/e2fsprogs_closefs.c \
+	include/ext2fs.h
+
+second/e2fsprogs_dir_iterate.o: \
+	second/e2fsprogs_dir_iterate.c \
+	include/ext2fs.h
+
+second/e2fsprogs_dirblock.o: \
+	second/e2fsprogs_dirblock.c \
+	include/ext2fs.h
+
+second/e2fsprogs_freefs.o: \
+	second/e2fsprogs_freefs.c \
+	include/ext2fs.h
+
+second/e2fsprogs_ind_block.o: \
+	second/e2fsprogs_ind_block.c \
+	include/ext2fs.h
+
+second/e2fsprogs_inode.o: \
+	second/e2fsprogs_inode.c \
+	include/ext2fs.h
+
+second/e2fsprogs_io_manager.o: \
+	second/e2fsprogs_io_manager.c \
+	include/ext2fs.h
+
+second/e2fsprogs_lookup.o: \
+	second/e2fsprogs_lookup.c \
+	include/ext2fs.h
+
+second/e2fsprogs_namei.o: \
+	second/e2fsprogs_namei.c \
+	include/ext2fs.h
+
+second/e2fsprogs_openfs.o: \
+	second/e2fsprogs_openfs.c \
+	include/ext2fs.h
+
+second/e2fsprogs_read_bb.o: \
+	second/e2fsprogs_read_bb.c \
+	include/ext2fs.h
+
+second/e2fsprogs_swapfs.o: \
+	second/e2fsprogs_swapfs.c \
+	include/ext2fs.h
+
