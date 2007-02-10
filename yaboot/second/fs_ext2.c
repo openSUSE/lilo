@@ -73,7 +73,7 @@ void com_err(const char *a, long i, const char *fmt, ...)
 
 static int ext2_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
-	int result = 0;
+	errcode_t result;
 	int error = FILE_ERR_NOTFOUND;
 	char buffer[1024];
 	int ofopened = 0;
@@ -123,7 +123,7 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 		if (result == EXT2_ET_BAD_MAGIC) {
 			DEBUG_F("ext2fs_open returned bad magic loading file %p\n", file);
 		} else {
-			DEBUG_F("ext2fs_open error #%d while loading file %s\n", result, file_name);
+			DEBUG_F("ext2fs_open error #%ld while loading file %s\n", result, file_name);
 		}
 		error = FILE_ERR_BAD_FSYS;
 		goto bail;
@@ -143,7 +143,7 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	result = ext2fs_namei_follow(fs, root, cwd, file_name, &file->inode);
 	if (result) {
 
-		DEBUG_F("ext2fs_namei error #%d while loading file %s\n", result, file_name);
+		DEBUG_F("ext2fs_namei error #%ld while loading file %s\n", result, file_name);
 		if (result == EXT2_ET_SYMLINK_LOOP)
 			error = FILE_ERR_SYMLINK_LOOP;
 		else if (result == EXT2_ET_FILE_NOT_FOUND)
