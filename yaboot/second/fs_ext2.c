@@ -76,7 +76,6 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	errcode_t result;
 	int error = FILE_ERR_NOTFOUND;
 	char buffer[1024];
-	int ofopened = 0;
 
 	DEBUG_ENTER;
 	DEBUG_OPEN;
@@ -114,7 +113,6 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 		DEBUG_LEAVE(FILE_IOERR);
 		return FILE_IOERR;
 	}
-	ofopened = 1;
 
 	/* Open the ext2 filesystem */
 	result = ext2fs_open(buffer, EXT2_FLAG_RW, 0, 0, linux_io_manager, &fs);
@@ -161,8 +159,7 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 		if (fs)
 			ext2fs_close(fs);
 		fs = NULL;
-		if (ofopened)
-			prom_close(file->of_device);
+		prom_close(file->of_device);
 		if (block_buffer)
 			free(block_buffer);
 		block_buffer = NULL;
