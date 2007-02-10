@@ -435,7 +435,7 @@ static long linux_read_blk(io_channel channel, unsigned long block, int count, v
 	if (count == 0)
 		return 0;
 
-	tempb = (((unsigned long long)block) * ((unsigned long long)bs)) + (unsigned long long)doff;
+	tempb = (((unsigned long long)block) * ((unsigned long long)bs)) + doff;
 	size = (count < 0) ? -count : count * bs;
 	prom_seek(cur_file->of_device, tempb);
 	size_read = prom_read(cur_file->of_device, data, size);
