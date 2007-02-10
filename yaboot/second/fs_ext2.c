@@ -108,8 +108,6 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	DEBUG_F("file->of_device = %p\n", file->of_device);
 
 	if (file->of_device == PROM_INVALID_HANDLE) {
-
-		DEBUG_F("Can't open device %p\n", file->of_device);
 		DEBUG_LEAVE(FILE_IOERR);
 		return FILE_IOERR;
 	}
