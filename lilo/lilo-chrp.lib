@@ -192,7 +192,7 @@ function running_on_chrp () {
     # fi
     echo Boot target is ${OPTION_BOOT}
 
-    # check all CONFIG_IMAGE_FILEs whether they are on ext2/ext2/fat/reiserfs
+    # check all CONFIG_IMAGE_FILEs whether they are on ext2/ext3/fat/reiserfs
     # else they have to be copied to a fat partition
     # You have to create a fat partiton if any has to be copied there
     # fat partition must at least cover yaboot.chrp,yaboot.cnf & default image
@@ -326,7 +326,7 @@ function running_on_chrp () {
 	fat_boot=1
 
     # check for a readable partition containing the config file. yaboot can
-    # only read certain file systems nd partitions
+    # only read certain file systems and partitions
     elif ! is_on_primary "$yaboot_path" || ! can_yaboot_read "/etc/yaboot.conf"; then
 	fat_boot=1
     fi
