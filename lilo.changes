@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb 15 19:06:12 CET 2007 - olh@suse.de
+
+- use built-in yaboot.conf for logical msdos partitions
+  (173487/244397 - LTC31957)
+
+-------------------------------------------------------------------
 Sat Feb 10 19:51:08 CET 2007 - olh@suse.de
 
 - do not read past the end of an ext2 partition

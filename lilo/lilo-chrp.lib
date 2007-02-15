@@ -299,6 +299,7 @@ function running_on_chrp () {
     # now determine whether we could boot from a PReP partition or whether we
     # should better fall back to booting from a FAT partition
     local -i fat_boot=0
+    local -i builtin_yaboot_conf=0
 
     # fat boot requested by config option?
     if [ "$OPTION_FORCEFAT" = "yes" ]; then
@@ -323,12 +324,12 @@ function running_on_chrp () {
     local boot_path=$(get_of_path $OPTION_BOOT)
 
     if [[ "$yaboot_path" != ${boot_path%%:+([0-9])}:* ]]; then
-	fat_boot=1
+	builtin_yaboot_conf=1
 
     # check for a readable partition containing the config file. yaboot can
     # only read certain file systems and partitions
     elif ! is_on_primary "$yaboot_path" || ! can_yaboot_read "/etc/yaboot.conf"; then
-	fat_boot=1
+	builtin_yaboot_conf=1
     fi
 
     if (( fat_boot == 1 )); then
@@ -355,8 +356,6 @@ function running_on_chrp () {
 		;;
 	esac
     fi
-
-    local -i yaboot_size=$(fsize /lib/lilo/chrp/yaboot.chrp)
 
 
     # now create a configuration on all boot partitions requested
@@ -444,6 +443,20 @@ function running_on_chrp () {
 	done
     } > $TEMP/yaboot.conf
 
+    local -i yaboot_size
+    local -i yaboot_conf_size
+    if [ $builtin_yaboot_conf = 1 ] ; then
+	/lib/lilo/scripts/make_yaboot.sh \
+		--configfile $TEMP/yaboot.conf \
+		--addnote \
+		--output $TEMP/yaboot
+	yaboot_conf_size=0
+    else
+	cp /lib/lilo/chrp/yaboot.chrp $TEMP/yaboot
+	yaboot_conf_size=$(fsize $TEMP/yaboot.conf)
+    fi
+    yaboot_size=$(fsize $TEMP/yaboot)
+
     # now set boot_device and boot_partnr to the values parted likes
     boot_device=${boot_partition%%+([0-9])}
     boot_partnr=${boot_partition##+([^0-9])}
@@ -525,7 +538,7 @@ function running_on_chrp () {
 	# to one FAT partition
 
 	# check if default image/initrd fits, add overhead of 180 blocks approx.
-	local -i defaultsize=$(( 180 + yaboot_size + $(fsize $TEMP/yaboot.conf) ));
+	local -i defaultsize=$(( 180 + yaboot_size + yaboot_conf_size ));
 	(( defaultsize += (vmlinux_default==0) ? 0 : $(fsize ${vmlinux_copy[$vmlinux_default]}) ));
 	(( defaultsize += (initrd_default==0) ? 0 : $(fsize ${initrd_copy[$initrd_default]}) ));
 
@@ -700,10 +713,16 @@ set +x
 	    fi
 	fi
 
-	echo Installing /lib/lilo/chrp/yaboot.chrp onto $boot_partition
-	dd if=/lib/lilo/chrp/yaboot.chrp of=$boot_partition 2>/dev/null
-	cp $TEMP/yaboot.conf /etc/yaboot.conf || exit 2
-	echo "Converted /etc/lilo.conf to /etc/yaboot.conf"
+	if [ $builtin_yaboot_conf = 1 ] ; then
+		echo "Using built-in yaboot.conf"
+		dd if=$TEMP/yaboot of=$boot_partition 2>/dev/null
+		rm -f /etc/yaboot.conf
+	else
+		echo Installing /lib/lilo/chrp/yaboot.chrp onto $boot_partition
+		dd if=/lib/lilo/chrp/yaboot.chrp of=$boot_partition 2>/dev/null
+		cp $TEMP/yaboot.conf /etc/yaboot.conf || exit 2
+		echo "Converted /etc/lilo.conf to /etc/yaboot.conf"
+	fi
     fi
 
     # remove empty yaboot.conf, created by get_of_path check above
