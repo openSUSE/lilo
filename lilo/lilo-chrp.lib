@@ -533,6 +533,11 @@ function running_on_chrp () {
 	    eval $fw_workaround || error "Workaround for broken firmware did not work"
 	fi
 	MKDOSFS="-s $SECSPERCLUSTER -F 16"
+	if [ -f /etc/fstab ] ; then
+		# with many FAT partitions, add some hints where the bootloader came from
+		MKDOSFS="$MKDOSFS -n '` sed -n '/^#/d;/[^[:blank:]]\+[[:blank:]]\+\/[[:blank:]]\+/{ s@[[:blank:]].*$@@;s@^LABEL=@@;s@^UUID=@@;s@^.*/@@;s@\(^.\{,11\}\).*@\1@p;q }' < /etc/fstab `' "
+	fi
+	echo "MKDOSFS options: $MKDOSFS"
 
 	# copy all kernels and initrds from non supported file systems
 	# to one FAT partition

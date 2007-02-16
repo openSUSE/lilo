@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 16 13:57:49 CET 2007 - olh@suse.de
+
+- add a label to FAT partitions to keep track where the bootloader
+  came from
+
+-------------------------------------------------------------------
 Thu Feb 15 19:06:12 CET 2007 - olh@suse.de
 
 - use built-in yaboot.conf for logical msdos partitions
