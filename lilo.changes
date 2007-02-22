@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb 22 17:06:35 CET 2007 - olh@suse.de
+
+- move the evms hack before the mkfs.msdos call and update the
+  comment to match the quality of the hack (247739)
+
+-------------------------------------------------------------------
 Fri Feb 16 13:57:49 CET 2007 - olh@suse.de
 
 - add a label to FAT partitions to keep track where the bootloader

@@ -542,6 +542,19 @@ function running_on_chrp () {
 	# copy all kernels and initrds from non supported file systems
 	# to one FAT partition
 
+set -x
+# H@Ck F0R bR0K3N 3Vm$ c0nFiGuR@7i0n
+# rEmOvE 7hi5 @f73R 5L3$10 g@
+{
+# Dm$37uP r3m0v3 k3rN3Ln@m3 0F d3vic3 $BoOt_pArTiTiOn
+bootpartkernelname=${boot_partition#/dev/} #tHiS iZ 0NlY @ gUeSs
+if [[ $(dmsetup ls) == *${bootpartkernelname}* ]]; then
+    dmsetup remove ${bootpartkernelname} || exit 2
+fi
+}
+# !11!1! OMG WTF LOL
+# ...
+set +x
 	# check if default image/initrd fits, add overhead of 180 blocks approx.
 	local -i defaultsize=$(( 180 + yaboot_size + yaboot_conf_size ));
 	(( defaultsize += (vmlinux_default==0) ? 0 : $(fsize ${vmlinux_copy[$vmlinux_default]}) ));
@@ -579,17 +592,6 @@ function running_on_chrp () {
 	mkfs.msdos $MKDOSFS $boot_partition || exit 2
 	cd $TEMP
 	mkdir -p boot || exit 2
-set -x
-# HACK for broken EVMS configuration
-# remove this after SLES10 GA
-{
-# dmsetup remove kernelname of device $boot_partition
-bootpartkernelname=${boot_partition#/dev/} #this is only a guess
-if [[ $(dmsetup ls) == *${bootpartkernelname}* ]]; then
-    dmsetup remove ${bootpartkernelname} || exit 2
-fi
-}
-set +x
 	mount $boot_partition boot || exit 2
 	cp -v /lib/lilo/chrp/yaboot.chrp boot/yaboot || exit 2
 	cp -v $TEMP/yaboot.conf boot/yaboot.cnf || exit 2
