@@ -19,14 +19,15 @@ lilo will use sysfs to determine the real hardware and its OpenFirmware device p
 On iSeries systems, boot= can also describe a kernel slot name and a filename for \fB*STMF\fR.
 The kernel slot name can be either A, B or C.
 .TP
+.B clone=
+specifies other Linux device nodes where the bootinfo should be stored.
+This option is similar to \fBboot=\fR. More than one boot device can be specified, separate them with spaces. If this option is given, the boot partition will be converted to FAT. The intend of this option is to write the boot files to all members of a RAID1 or RAID5 system.
+.TP
 .B activate
 this option will tell lilo to update the OpenFirmware \fBboot-device\fR variable with the full OpenFirmware path pointing to the device specified in \fBboot=\fR. If this option is missing, the system may not boot.
 .TP
 .B no_os_chooser
 this option will tell lilo to use yaboot as boot file instead of a Forth script named \fBos-chooser\fR. The OpenFirmware driver in the nVidia graphics card as shipped with Apple G5 systems will crash if there is no monitor attached. This happens because the Forth script calls the OPEN method to initialize the screen. The same crash happens if one holds down the Apple + Option + o + f keys during boot to get to the OpenFirmware prompt. Oddly enough, it does not happen if one holds down the Option key to get to the graphical bootselector. If this option is missing if no monitor is attached, the system may not boot.
-.TP
-.B clone
-does something wich is not yet documented in this man page
 .TP
 .B force_fat
 does something wich is not yet documented in this man page
