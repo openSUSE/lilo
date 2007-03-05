@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar  5 11:07:52 CET 2007 - olh@suse.de
+
+- remove FAT16 warning from yaboot of_open routine (246077 - LTC32118)
+
+-------------------------------------------------------------------
 Fri Feb 23 16:02:32 CET 2007 - olh@suse.de
 
 - document the clone= feature in lilo.conf(5)
