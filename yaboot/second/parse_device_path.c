@@ -61,6 +61,86 @@ static void parse_block_device(struct path_description *result)
 	}
 }
 
+/**
+ * reset_device_to_iscsi
+ * When the bootpath is on an "iscsi" device,
+ * the firmware needs to be passed the contents of the
+ * "nas-bootdevice" property.
+ */
+static void reset_device_to_iscsi(struct path_description *result)
+{
+	int size = prom_getproplen_chosen("nas-bootdevice");
+
+	if (size > 0) {
+		result->device = malloc(size + 2);
+		if (result->device) {
+			prom_get_chosen("nas-bootdevice", result->device, size);
+			DEBUG_F("nas-bootdevice: <%s>\n", result->device);
+		}
+	}
+}
+
+/*
+ * options for a "network" device, according to "4.3.2 iSCSI Bootstrap"
+ *
+ * iscsi,[dev=block],[ipv6,][dhcp[=diaddr],][bootp,][slp[=SLP­server],][isns=iSNS­server,][itname=init­name,]
+ * [ichapid=init­chapid,][ichappw=init­chappw,]ciaddr=init­addr,[giaddr=gateway­addr,][subnet­mask=net­mask,]
+ * siaddr=target­server,[iport=target­port,]iname=target­name,[ilun=target­lun,][chapid=target­chapid,][chappw=target­chappw,]disk­label args
+ *
+ * fast forward to required iname= option
+ */
+static void parse_iscsi_device(struct path_description *result)
+{
+	char *p, *t;
+
+	p = strchr(result->device, ':');
+	p = strchr(p, ',');
+
+	p = strstr(p, ",ciaddr=");
+	if (!p)
+		return;
+	p = strstr(p, ",siaddr=");
+	if (!p)
+		return;
+	p = strstr(p, ",iname=");
+	if (!p)
+		return;
+	p = strchr(p, ',');
+	if (!p)
+		return;
+	t = p;
+	/* forward to (optional) disk-label args */
+	if (strncmp(",ilun=", t, 6) == 0) {
+		t++;
+		t = strchr(t, ',');
+		if (!t)
+			goto end_of_device;
+	}
+	if (strncmp(",chapid=", t, 8) == 0) {
+		t++;
+		t = strchr(t, ',');
+		if (!t)
+			goto end_of_device;
+	}
+	if (strncmp(",chappw=", t, 8) == 0) {
+		t++;
+		t = strchr(t, ',');
+		if (!t)
+			goto end_of_device;
+	}
+	/* disk-label args */
+	if (t != p)
+		p = t + 1;
+	/* assume 'disk-label args' are in ,disk@0:#partition,/dir/file format */
+	p = strchr(p, ':');
+	if (p)
+		result->u.b.partition = p + 1;
+	parse_block_device(result);
+	reset_device_to_iscsi(result);
+end_of_device:
+	return;
+}
+
 static void parse_net_device(struct path_description *result)
 {
 	char *p;
@@ -79,6 +159,12 @@ static void parse_net_device(struct path_description *result)
 			result->u.n.ip_before_filename[6] = '\0';
 			goto out;
 		}
+		p++;
+	}
+	if (strncmp("promiscuous", p, 11) == 0) {
+		p = strchr(p, ',');
+		if (!p)
+			goto out;
 		p++;
 	}
 	if (strncmp("speed=", p, 6) == 0) {
@@ -109,54 +195,39 @@ static void parse_net_device(struct path_description *result)
 	return;
 }
 
-/**
- * reset_bootdevice_to_iscsi
- * When the bootpath contains the string "iscsi", the
- * firmware needs to be passed the contents of the
- * "nas-bootdevice" property.
- */
-static int reset_bootdevice_to_iscsi(const char *imagepath, struct path_description *result)
-{
-	int size = prom_getproplen_chosen("nas-bootdevice");
-
-	if (size > 0) {
-		result->device = malloc(size + 2);
-		if (result->device) {
-			prom_get_chosen("nas-bootdevice", result->device, size);
-			DEBUG_F("nas-bootdevice: <%s>\n", result->device);
-			result->u.b.partition = strrchr(result->device, '@') + 1;
-			return 1;
-		}
-	}
-	return 0;
-}
-
 int parse_device_path(const char *imagepath, struct path_description *result)
 {
+	char *colon;
 	DEBUG_F("imagepath '%s'\n", imagepath);
 	if (!imagepath)
 		return 0;
 
-	/* FIXME */
-	if (strstr(imagepath, "iscsi")) {
-		if (!reset_bootdevice_to_iscsi(imagepath, result))
-			return 0;
-	} else {
 	result->device = malloc(strlen(imagepath) + 2);
 	if (!result->device)
 		return 0;
 	strcpy(result->device, imagepath);
 	result->u.d.s1 = strchr(result->device, ':');
-	if (result->u.d.s1)
-		*result->u.d.s1++ = '\0';
-	}
+	if (result->u.d.s1) {
+		colon = result->u.d.s1;
+		*result->u.d.s1 = '\0';
+		result->u.d.s1++;
+	} else
+		colon = NULL;
+
 	result->type = prom_get_devtype(result->device);
 	switch (result->type) {
 	case TYPE_BLOCK:
 		parse_block_device(result);
 		break;
 	case TYPE_NET:
-		parse_net_device(result);
+		if (strncmp("iscsi,", result->u.d.s1, 6) == 0) {
+			result->type = TYPE_ISCSI;
+			*colon = ':';
+			result->u.d.s1 = NULL;
+			parse_iscsi_device(result);
+		} else {
+			parse_net_device(result);
+		}
 		break;
 	case TYPE_INVALID:
 		prom_printf("firmware said the path '%s' is invalid\n", result->device);
@@ -239,6 +310,24 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 	comma = dir = "";
 	pathname = NULL;
 	switch (default_device->type) {
+	case TYPE_ISCSI:
+		result->part = default_device->part;
+		pathname = malloc(strlen(default_device->device) + 1);
+		if (!pathname)
+			return 0;
+		strcpy(pathname, default_device->device);
+		result->device = pathname;
+		pathname = malloc(strlen(imagepath) + 1);
+		if (!pathname) {
+			free(result->device);
+			return 0;
+		}
+		strcpy(pathname, imagepath);
+		result->filename = pathname;
+#if defined(DEBUG) || defined(DEVPATH_TEST)
+		prom_printf("hardcoded iscsi path '%s' '%d' '%s'\n", result->device, result->part, result->filename);
+#endif
+		return 1;
 	case TYPE_BLOCK:
 		part[0] = '\0';
 		/* parse_device_path will look for a partition number */

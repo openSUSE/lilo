@@ -43,6 +43,7 @@ enum device_type {
 	TYPE_UNKNOWN,
 	TYPE_INVALID,
 	TYPE_BLOCK,
-	TYPE_NET
+	TYPE_NET,
+	TYPE_ISCSI,
 };
 #endif /* ERRORS_H */

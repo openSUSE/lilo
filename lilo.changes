@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 12 10:49:06 CET 2007 - olh@suse.de
+
+- better fix for iscsi device-path handling (246077 - LTC32118)
+
+-------------------------------------------------------------------
 Mon Mar  5 11:07:52 CET 2007 - olh@suse.de
 
 - remove FAT16 warning from yaboot of_open routine (246077 - LTC32118)
