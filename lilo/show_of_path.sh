@@ -569,7 +569,8 @@ else # no 'devspec' found
 	iscsi_iname="` cat iscsi_session:$iscsi_session/targetname `"
 	iscsi_iport="` cat connection$iscsi_connection:0/iscsi_connection:connection$iscsi_connection:0/persistent_port `"
 	#FIXME
-	iscsi_ilun=0
+	iscsi_ilun="${file_full_sysfs_path##*:}"
+	iscsi_ilun="` printf '%x%012x' $iscsi_ilun 0 `"
 	file_of_hw_path="$iscsi_network_card:iscsi,itname=$iscsi_itname,ciaddr=$iscsi_ciaddr,giaddr=$iscsi_giaddr,subnet-mask=$iscsi_subnet_mask,siaddr=$iscsi_siaddr,iname=$iscsi_iname,iport=$iscsi_iport,ilun=$iscsi_ilun"
 	;;
 	*)

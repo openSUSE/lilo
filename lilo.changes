@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 19 09:58:45 CET 2007 - olh@suse.de
+
+- detect iscsi lun in show_of_path (250969 - LTC32649)
+
+-------------------------------------------------------------------
 Mon Mar 12 10:49:06 CET 2007 - olh@suse.de
 
 - better fix for iscsi device-path handling (246077 - LTC32118)
