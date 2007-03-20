@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Mar 20 12:44:09 CET 2007 - olh@suse.de
+
+- handle new iscsi device type as block device in yaboot
+
+-------------------------------------------------------------------
 Mon Mar 19 09:58:45 CET 2007 - olh@suse.de
 
 - detect iscsi lun in show_of_path (250969 - LTC32649)

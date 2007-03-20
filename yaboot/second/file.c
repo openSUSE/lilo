@@ -148,6 +148,8 @@ int open_file(const struct path_description *spec, struct boot_file_t *file)
 	file->dev_type = prom_get_devtype(spec->device);
 
 	switch (file->dev_type) {
+	case TYPE_ISCSI:
+		DEBUG_F("iscsi, pray!\n");
 	case TYPE_BLOCK:
 		DEBUG_F("device is a block device\n");
 		return file_block_open(file, spec);

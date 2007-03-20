@@ -209,6 +209,7 @@ static int find_and_load_config_file(const struct path_description *b, char *con
 	case TYPE_NET:
 		names = config_file_names_net;
 		break;
+	case TYPE_ISCSI:
 	case TYPE_BLOCK:
 		names = config_file_names_block;
 		break;
