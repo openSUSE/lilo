@@ -87,57 +87,15 @@ static void reset_device_to_iscsi(struct path_description *result)
  * [ichapid=init­chapid,][ichappw=init­chappw,]ciaddr=init­addr,[giaddr=gateway­addr,][subnet­mask=net­mask,]
  * siaddr=target­server,[iport=target­port,]iname=target­name,[ilun=target­lun,][chapid=target­chapid,][chappw=target­chappw,]disk­label args
  *
- * fast forward to required iname= option
+ * There will be no disk-label args because the firmware is unable to load the bootfile from a specified partition.
+ * Only the first 0x41 PReP Boot is considered, /chosen/bootpath will not contain partition, directory and filename
+ * Clear partition and directory string, invalidate partition numer
  */
 static void parse_iscsi_device(struct path_description *result)
 {
-	char *p, *t;
-
-	p = strchr(result->device, ':');
-	p = strchr(p, ',');
-
-	p = strstr(p, ",ciaddr=");
-	if (!p)
-		return;
-	p = strstr(p, ",siaddr=");
-	if (!p)
-		return;
-	p = strstr(p, ",iname=");
-	if (!p)
-		return;
-	p = strchr(p, ',');
-	if (!p)
-		return;
-	t = p;
-	/* forward to (optional) disk-label args */
-	if (strncmp(",ilun=", t, 6) == 0) {
-		t++;
-		t = strchr(t, ',');
-		if (!t)
-			goto end_of_device;
-	}
-	if (strncmp(",chapid=", t, 8) == 0) {
-		t++;
-		t = strchr(t, ',');
-		if (!t)
-			goto end_of_device;
-	}
-	if (strncmp(",chappw=", t, 8) == 0) {
-		t++;
-		t = strchr(t, ',');
-		if (!t)
-			goto end_of_device;
-	}
-	/* disk-label args */
-	if (t != p)
-		p = t + 1;
-	/* assume 'disk-label args' are in ,disk@0:#partition,/dir/file format */
-	p = strchr(p, ':');
-	if (p)
-		result->u.b.partition = p + 1;
-	parse_block_device(result);
+	result->part = -1;
+	result->u.b.directory = result->u.b.partition = "";
 	reset_device_to_iscsi(result);
-end_of_device:
 	return;
 }
 
@@ -253,6 +211,7 @@ char *path_description_to_string(const struct path_description *input)
 	len += strlen(input->filename);
 	len += 1 + 1 + 1;	/* : , \0 */
 	switch (input->type) {
+	case TYPE_ISCSI:
 	case TYPE_BLOCK:
 		if (input->part > 0)
 			sprintf(part, "%d,", input->part);
@@ -327,6 +286,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 		prom_printf("hardcoded iscsi path '%s' '%d' '%s'\n", result->device, result->part, result->filename);
 #endif
+		/* do not call parse_device_path */
 		return 1;
 	case TYPE_BLOCK:
 		part[0] = '\0';

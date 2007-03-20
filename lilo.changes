@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Mar 20 20:42:33 CET 2007 - olh@suse.de
+
+- more iscsi device path handling (246077 - LTC32118)
+  the firmware can not read from filesystems, remove all parsing code
+
+-------------------------------------------------------------------
 Tue Mar 20 12:44:09 CET 2007 - olh@suse.de
 
 - handle new iscsi device type as block device in yaboot
