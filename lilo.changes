@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Mar 25 21:33:27 CEST 2007 - olh@suse.de
+
+- use a zImage instead of yaboot with root on iscsi (246077 - LTC32118)
+
+-------------------------------------------------------------------
 Tue Mar 20 20:42:33 CET 2007 - olh@suse.de
 
 - more iscsi device path handling (246077 - LTC32118)

@@ -203,6 +203,19 @@ function is_on_primary() {
     return 0
 }
 
+function is_on_iscsi() {
+	local path
+
+	path=`get_of_path "$1"`
+	path="${path#*:}"
+	case "$path" in
+		:iscsi,*)
+		return 1
+		;;
+	esac
+	return 0
+}
+
 # convert a number of 512 byte sectors in a format that parted accepts and the
 # other way `round. Behaviour changed in subminor version. Hurray :-(
 if (( PVERSION > 1006022 )); then

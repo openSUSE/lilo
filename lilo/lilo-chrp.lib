@@ -125,6 +125,7 @@ function running_on_chrp () {
 
     # array for all PReP boot and FAT partitions
     local -a prep_part fat_part fat32_part
+    local -i iscsi_bootdevice=0
 
     # find all PReP boot and FAT partitions
     while read; do
@@ -183,6 +184,10 @@ function running_on_chrp () {
     if ! is_on_primary $(get_of_path $OPTION_BOOT); then
 	error "in config file, boot = $OPTION_BOOT is not a primary partition"
     fi
+    if is_on_iscsi $OPTION_BOOT ; then
+    	echo "boot device $OPTION_BOOT is on iscsi"
+	iscsi_bootdevice=1
+    fi
 
     # check whether the boot partition is under device mapper control an throw
     # an error in this case
@@ -202,6 +207,8 @@ function running_on_chrp () {
     local -a vmlinux_copy initrd_copy
     local -i vmlinux_nr=0 initrd_nr=0
     local -i vmlinux_default=0 initrd_default=0
+    # points the the default= entry in CONFIG_IMAGE_FILE[]
+    local -i zimage_nr=0
 
     #
     # check whether any image or initrd needs relocation to a FAT boot partition
@@ -222,7 +229,13 @@ function running_on_chrp () {
 
 	     # check whether the image file lies on a file system that is
 	     # readable by yaboot
-	    if [ "$OPTION_FORCEFAT" != "yes" ] \
+	    if (( iscsi_bootdevice == 1 )) ; then
+	    	if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ]; then
+			zimage_nr=$i
+		fi
+		# avoid overwriting CONFIG_IMAGE_INITRD[i] with a firmware device path...
+		:
+	    elif [ "$OPTION_FORCEFAT" != "yes" ] \
 		&& [ "$path_image" ] \
 		&& can_yaboot_read "$image";
 	    then
@@ -253,7 +266,10 @@ function running_on_chrp () {
 
 	    # check whether the image file lies on a file system that is
 	    # readable by yaboot
-	    if [ "$OPTION_FORCEFAT" != "yes" ] \
+	    if (( iscsi_bootdevice == 1 )) ; then
+		# avoid overwriting CONFIG_IMAGE_INITRD[i] with a firmware device path...
+	    	:
+	    elif [ "$OPTION_FORCEFAT" != "yes" ] \
 		&& [ "$path_image" ] \
 		&& can_yaboot_read "$image";
 	    then
@@ -332,7 +348,14 @@ function running_on_chrp () {
 	builtin_yaboot_conf=1
     fi
 
-    if (( fat_boot == 1 )); then
+    # create a zImage.initrd
+    if (( iscsi_bootdevice == 1 )) ; then
+	fat_boot=0
+	builtin_yaboot_conf=0
+	if (( zimage_nr == 0 )) ; then
+	    zimage_nr=1
+	fi
+    elif (( fat_boot == 1 )); then
 	# check CHRP machine against list of fully functional firmware
 	# implementations. There are various bugs out there which IBM
 	# consistently resists to fix.
@@ -445,7 +468,14 @@ function running_on_chrp () {
 
     local -i yaboot_size
     local -i yaboot_conf_size
-    if [ $builtin_yaboot_conf = 1 ] ; then
+    if (( iscsi_bootdevice == 1 )) ; then
+	mkzimage \
+		--vmlinux "${CONFIG_IMAGE_FILE[$zimage_nr]}" \
+		--initrd "${CONFIG_IMAGE_INITRD[$zimage_nr]}" \
+		--cmdline "root=${CONFIG_IMAGE_ROOT[$zimage_nr]} ${CONFIG_IMAGE_APPEND[$zimage_nr]}" \
+		--output $TEMP/yaboot
+	yaboot_conf_size=0
+    elif [ $builtin_yaboot_conf = 1 ] ; then
 	/lib/lilo/scripts/make_yaboot.sh \
 		--configfile $TEMP/yaboot.conf \
 		--addnote \
@@ -695,8 +725,9 @@ set +x
 
 	local    resize_errmsg=""
 
-	# shrink PReP boot partition if bigger than 4MB
-	if (( (p_end[boot_partnr]-p_start[boot_partnr]) > 4000 )); then
+	# shrink PReP boot partition if bigger than 11MB
+	# a free memory region on RS6K is between 64K and 12M
+	if (( (p_end[boot_partnr]-p_start[boot_partnr]) > 22528 )); then
 	    warning "Shrinking PReP boot partition $boot_partition, avoiding firmware confusion"
 	    resize_errmsg="Partition shrink failed for $boot_partition"
 	fi
@@ -720,7 +751,11 @@ set +x
 	    fi
 	fi
 
-	if [ $builtin_yaboot_conf = 1 ] ; then
+	if [ $iscsi_bootdevice = 1 ] ; then
+		echo "Using zImage"
+		dd if=$TEMP/yaboot of=$boot_partition 2>/dev/null
+		rm -f /etc/yaboot.conf
+	elif [ $builtin_yaboot_conf = 1 ] ; then
 		echo "Using built-in yaboot.conf"
 		dd if=$TEMP/yaboot of=$boot_partition 2>/dev/null
 		rm -f /etc/yaboot.conf
