@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 28 14:22:54 CEST 2007 - olh@suse.de
+
+- remove obsolete SLOF warning from lilo
+
+-------------------------------------------------------------------
 Sun Mar 25 21:33:27 CEST 2007 - olh@suse.de
 
 - use a zImage instead of yaboot with root on iscsi (246077 - LTC32118)
