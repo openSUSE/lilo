@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr  3 13:11:03 CEST 2007 - olh@suse.de
+
+- fix logic error in is_on_iscsi() (260223)
+
+-------------------------------------------------------------------
 Tue Apr  3 08:48:18 CEST 2007 - olh@suse.de
 
 - handle empty gateway in iscsi path (260089 - LTC33555)
