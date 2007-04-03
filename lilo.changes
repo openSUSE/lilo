@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr  3 14:03:41 CEST 2007 - olh@suse.de
+
+- fix path pattern in is_on_iscsi
+
+-------------------------------------------------------------------
 Tue Apr  3 13:11:03 CEST 2007 - olh@suse.de
 
 - fix logic error in is_on_iscsi() (260223)

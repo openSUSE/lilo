@@ -218,7 +218,7 @@ function is_on_iscsi() {
 	path=`get_of_path "$1"`
 	path="${path#*:}"
 	case "$path" in
-		:iscsi,*)
+		iscsi,*)
 		return 0
 		;;
 	esac
