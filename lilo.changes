@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr  3 08:46:41 CEST 2007 - olh@suse.de
+
+- parted --version output changed with 1.8
+
+-------------------------------------------------------------------
 Wed Mar 28 14:22:54 CEST 2007 - olh@suse.de
 
 - remove obsolete SLOF warning from lilo

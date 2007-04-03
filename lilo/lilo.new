@@ -47,8 +47,17 @@ shopt -s extglob
 
 FDISK=/sbin/fdisk
 PARTED="/usr/sbin/parted -s"
-PVERSION=$($PARTED --version)		# e.g 'GNU Parted 1.6.22'
-PVERSION=${PVERSION#GNU Parted}
+# the parted kids keep the userinterface stable:
+#-
+# GNU Parted 1.6.25.1
+#-
+# GNU Parted 1.7.1
+#-
+# parted (GNU parted) 1.8.6
+# Copyright (C) 2007 Free Software Foundation, Inc.
+# more useless blurb
+#-
+PVERSION=$($PARTED --version | sed -n '/^GNU Parted /s@GNU Parted @@p;/^parted (GNU parted) /s@parted (GNU parted) @@p')
 read a b c d e f  <<< "${PVERSION//./ }"
 PVERSION=$(( a*1000000 + b*1000 + c ))	# e.g. 1006022
 STAT_CMD=/usr/bin/stat
