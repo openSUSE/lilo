@@ -557,6 +557,10 @@ else # no 'devspec' found
 	iscsi_itname="` awk ' BEGIN { FS="=" ; foo="" } ; /^InitiatorName=/{ if (foo == "") { foo=$2 } } ; END { print foo } ' "$iscsi_initiatorname_conf" `"
 	iscsi_ciaddr="` ip addr show dev $iscsi_network_interface | awk ' BEGIN { foo="" } ; / inet /{ if (foo == "") { foo=$2 } } ; END { print foo } ' `"
 	iscsi_giaddr="` ip route show dev $iscsi_network_interface | awk ' BEGIN { foo="" } ; /default via /{ if (foo == "") { foo=$3 } } ; END { print foo } ' `"
+	if test -z "$iscsi_giaddr"
+	then
+		iscsi_giaddr=0.0.0.0
+	fi
 	# FIXME
 	case "$iscsi_ciaddr" in
 		*/8)  iscsi_subnet_mask=255.0.0.0 ;;

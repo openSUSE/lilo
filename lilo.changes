@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Apr  3 08:48:18 CEST 2007 - olh@suse.de
+
+- handle empty gateway in iscsi path (260089 - LTC33555)
+
+-------------------------------------------------------------------
 Tue Apr  3 08:46:41 CEST 2007 - olh@suse.de
 
 - parted --version output changed with 1.8
