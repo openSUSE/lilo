@@ -345,11 +345,13 @@ function device_nr () {
 
 
 function fsize() { # get file size in blocks
-    local s f r
+    local s r
     if [ -z "$1" ]; then
 	echo 0
     else
-	read s f r < <(ls -Ls --block-size=512 $1)
+    	# can not use ls -s because the zimage is a sparse file
+	read s r < <( wc -c < $1 )
+	s=$(( ( $s / 512 ) + 1 ))
 	echo $s
     fi
 }

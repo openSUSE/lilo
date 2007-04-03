@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Apr  3 15:57:32 CEST 2007 - olh@suse.de
+
+- do not use ls -s to get the filesize, use wc -c instead
+  ls reports not enough blocks for a sparse file
+
+-------------------------------------------------------------------
 Tue Apr  3 14:03:41 CEST 2007 - olh@suse.de
 
 - fix path pattern in is_on_iscsi
