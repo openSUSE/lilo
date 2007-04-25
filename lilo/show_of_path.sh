@@ -60,7 +60,6 @@ function warning() {
 	echo 1>&2 "WARNING: $1"
 	shift;
     done
-    exit 1
 }
 
 # assert that /proc is mounted, else try to mount, on fail complain
