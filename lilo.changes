@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr 25 16:28:06 CEST 2007 - olh@suse.de
+
+- remove :suseboot:yaboot.cnf, to force yaboot.conf
+
+-------------------------------------------------------------------
 Wed Apr 25 14:03:40 CEST 2007 - olh@suse.de
 
 - define a function warning() in show_of_path. (267871)

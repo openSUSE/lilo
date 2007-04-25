@@ -298,6 +298,9 @@ function running_on_pmac_new () {
     hmkdir $HFS_BOOTFOLDER 2>/dev/null
     hattrib -b $HFS_BOOTFOLDER
     hcd $HFS_BOOTFOLDER
+    # yaboot looks for yaboot.cnf, yaboot.conf, /etc/yaboot.conf
+    # force yaboot.conf
+    hdel :yaboot.cnf  2>/dev/null
     hcopy $TEMP/yaboot.conf :yaboot.conf
     hcopy /lib/lilo/pmac/yaboot :yaboot
     hcopy /lib/lilo/pmac/Finder.bin :Finder
