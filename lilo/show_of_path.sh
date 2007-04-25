@@ -41,6 +41,28 @@ trap '{
     [ $_proc_mounted ] && umount /proc
 }' EXIT
 
+shopt -s extglob
+read d myversion d <<< "$Date$"
+
+
+function error() {
+    [ "$quietmode" ] && set --
+    while [ "$1" ]; do
+	echo 1>&2 "ERROR: $1"
+	shift;
+    done
+    exit 1
+}
+
+function warning() {
+    [ "$quietmode" ] && set --
+    while [ "$1" ]; do
+	echo 1>&2 "WARNING: $1"
+	shift;
+    done
+    exit 1
+}
+
 # assert that /proc is mounted, else try to mount, on fail complain
 if test -d /proc/1; then
     :
@@ -60,19 +82,6 @@ else
     error "sysfs not mounted on /sys and attempt to mount failed" "may be no kernel 2.6.x?"
 fi
 
-
-shopt -s extglob
-read d myversion d <<< "$Date$"
-
-
-function error() {
-    [ "$quietmode" ] && set --
-    while [ "$1" ]; do
-	echo 1>&2 "ERROR: $1"
-	shift;
-    done
-    exit 1
-}
 
 
 

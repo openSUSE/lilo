@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Apr 25 14:03:40 CEST 2007 - olh@suse.de
+
+- define a function warning() in show_of_path. (267871)
+  define error() function before use.
+
+-------------------------------------------------------------------
 Wed Apr 25 11:43:21 CEST 2007 - olh@suse.de
 
 - update to mkzimage ld scripts to provide an ELF section for
