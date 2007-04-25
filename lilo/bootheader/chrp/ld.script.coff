@@ -2,6 +2,10 @@
 OUTPUT_ARCH(powerpc)
 SECTIONS
 {
+	/*
+	 * OldWorld PowerMacs need alignment in COFF image
+	 * they also like only .text, .data and .bss sections
+	 */
 	.text	:
 	{
 		*(.text)
@@ -25,15 +29,10 @@ SECTIONS
 		*(.uts_string)
 		_uts_string_end = .;
 
-	}
-	.vmlinuz	:
-	{
 		_vmlinuz_start = .;
 		*(.vmlinuz)
 		_vmlinuz_end = .;
-	}
-	.initrd	:
-	{
+
 		_initrd_start = .;
 		*(.initrd)
 		_initrd_end = .;

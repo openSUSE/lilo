@@ -112,7 +112,7 @@ ld \
 	-m elf32ppc \
 	-Ttext 0x01000000 \
 	-e _coff_start \
-	-T $obj_dir/chrp/ld.script \
+	-T $obj_dir/chrp/ld.script.coff \
 	-o $tmp/output \
 	-Bstatic \
 	$obj_dir/chrp/crt0.o \
