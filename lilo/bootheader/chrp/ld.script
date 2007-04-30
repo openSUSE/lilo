@@ -26,16 +26,16 @@ SECTIONS
 		_uts_string_end = .;
 
 	}
-	.vmlinuz	:
+	.kernel:vmlinux.strip	:
 	{
 		_vmlinuz_start = .;
-		*(.vmlinuz)
+		*(.kernel:vmlinux.strip)
 		_vmlinuz_end = .;
 	}
-	.initrd	:
+	.kernel:initrd	:
 	{
 		_initrd_start = .;
-		*(.initrd)
+		*(.kernel:initrd)
 		_initrd_end = .;
 	}
 	_edata = .;
