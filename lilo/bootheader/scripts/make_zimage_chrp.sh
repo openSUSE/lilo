@@ -101,13 +101,13 @@ objcopy $tmp/empty.o \
 	--set-section-flags=.uts_string=contents,alloc,load,readonly,data
 #
 objcopy $tmp/empty.o \
-	--add-section=.vmlinuz=$tmp/vmlinux.gz \
-	--set-section-flags=.vmlinuz=contents,alloc,load,readonly,data
+	--add-section=.kernel:vmlinux.strip=$tmp/vmlinux.gz \
+	--set-section-flags=.kernel:vmlinux.strip=contents,alloc,load,readonly,data
 #
 if [ ! -z "$initrd" ] ; then
 objcopy $tmp/empty.o \
-	--add-section=.initrd=$initrd \
-	--set-section-flags=.initrd=contents,alloc,load,readonly,data
+	--add-section=.kernel:initrd=$initrd \
+	--set-section-flags=.kernel:initrd=contents,alloc,load,readonly,data
 fi
 #
 rm -f $tmp/output

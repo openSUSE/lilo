@@ -26,12 +26,14 @@ SECTIONS
 		_uts_string_end = .;
 
 	}
+	/* if this sections gets renamed, update also the mkzimage scripts */
 	.kernel:vmlinux.strip	:
 	{
 		_vmlinuz_start = .;
 		*(.kernel:vmlinux.strip)
 		_vmlinuz_end = .;
 	}
+	/* if this sections gets renamed, update also the mkzimage scripts */
 	.kernel:initrd	:
 	{
 		_initrd_start = .;

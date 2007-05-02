@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed May  2 10:01:57 CEST 2007 - olh@suse.de
+
+- if the ELF sections in the linker script get renamed, the ld calls
+  must be updated as well.
+
+-------------------------------------------------------------------
 Mon Apr 30 10:50:25 CEST 2007 - olh@suse.de
 
 - rename the ELF sections for kernel to match the mainline section

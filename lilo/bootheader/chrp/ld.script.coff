@@ -30,11 +30,13 @@ SECTIONS
 		_uts_string_end = .;
 
 		_vmlinuz_start = .;
-		*(.vmlinuz)
+		/* if this sections gets renamed, update also the mkzimage scripts */
+		*(.kernel:vmlinux.strip)
 		_vmlinuz_end = .;
 
 		_initrd_start = .;
-		*(.initrd)
+		/* if this sections gets renamed, update also the mkzimage scripts */
+		*(.kernel:initrd)
 		_initrd_end = .;
 	}
 	_edata = .;
