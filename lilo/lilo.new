@@ -392,6 +392,7 @@ function check_arch () {
 	# * chrp
 	# * pegasos
 	# * prep
+	# * ps3
 	# or nothing at all if the boardtype is not recognized
 	# 
 	local prop
@@ -433,6 +434,9 @@ function check_arch () {
 				;;
 			Pegasos2)
 				board_type=pegasos
+				;;
+			PS3PF)
+				board_type=ps3
 				;;
 		esac
 		if test "$board_type" = "pmac"
@@ -723,7 +727,7 @@ function check_config_file () {
 	#   work around a YaST bug, which comes from a certain kind of
 	#   intel-architecture blindness, some architectures can guess boot
 	#   drive :-)
-	if [[ "$MACHINE" != @(chrp|prep|pegasos) ]]; then
+	if [[ "$MACHINE" != @(chrp|prep|pegasos|ps3) ]]; then
 	    error "boot=<partition> is not specified!"
 	fi
     else
@@ -812,6 +816,55 @@ fi
 parse_config_file
 check_config_file
 
+function running_on_ps3() {
+local device
+local kernel_filename
+local initrd_filename 
+local root_mount boot_mount
+local file_majorminor file_major file_minor
+local file_sysfs_path
+	
+	if [ -f /etc/kboot.conf ]; then
+		return
+	fi
+
+	root_mount=`stat -L -c %D /`
+	boot_mount=`stat -L -c %D /boot/vmlinux`
+
+	if [ "$root_mount" = "$boot_mount" ]; then
+		kernel_filename=/boot/vmlinux
+		initrd_filename=/boot/initrd
+	else
+		kernel_filename=/vmlinux
+		initrd_filename=/initrd
+	fi
+
+    	file_majorminor=$(/usr/bin/stat --format="%d" "/boot/vmlinux")
+    	file_major="$[file_majorminor >> 8]"
+    	file_minor="$[file_majorminor & 255]"
+
+    	file_majorminor=$file_major:$file_minor
+
+
+	for i in $(find /sys/block -name dev); do
+    		: looking at $i
+    		if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
+	done
+
+	if [ -z "$file_sysfs_path" ] ; then
+    		error "can not find major:minor $file_majorminor for $file"
+	fi
+	file_sysfs_path="${file_sysfs_path%/dev}"
+	file_sysfs_path="${file_sysfs_path##*/}"
+	device=/dev/$file_sysfs_path
+
+	cat > /etc/kboot.conf <<EOF
+default=openSuSE
+openSuSE="$device:$kernel_filename initrd=$device:$initrd_filename quiet panic=42 sysrq=1"
+EOF
+
+}
+
 case "$MACHINE" in
     pmac_new)  running_on_pmac_new ;;
     pmac_old)  running_on_pmac_old ;;
@@ -819,6 +872,7 @@ case "$MACHINE" in
     prep)      running_on_prep     ;;
     iseries)   running_on_iseries  ;;
     pegasos)   running_on_pegasos  ;;
+    ps3)       running_on_ps3      ;;
 esac
 
 #

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu May 10 14:15:54 CEST 2007 - sassmann@suse.de
+
+- added support for ps3 in lilo.new
+
+-------------------------------------------------------------------
 Wed May  2 10:01:57 CEST 2007 - olh@suse.de
 
 - if the ELF sections in the linker script get renamed, the ld calls
