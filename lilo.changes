@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul  2 15:06:20 CEST 2007 - olh@suse.de
+
+- use stat -c %s instead of wc -c to get filesize
+
+-------------------------------------------------------------------
 Mon Jul  2 12:51:17 CEST 2007 - olh@suse.de
 
 - remove shebang from bash library

@@ -350,7 +350,7 @@ function fsize() { # get file size in blocks
 	echo 0
     else
     	# can not use ls -s because the zimage is a sparse file
-	read s r < <( wc -c < $1 )
+	read s r < <( $STAT_CMD -c %s "$1" )
 	s=$(( ( $s / 512 ) + 1 ))
 	echo $s
     fi
