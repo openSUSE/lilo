@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul  2 22:02:45 CEST 2007 - olh@suse.de
+
+- change lilo error 'ist not a regular file' to -ENOENT
+
+-------------------------------------------------------------------
 Mon Jul  2 15:12:57 CEST 2007 - olh@suse.de
 
 - use $STAT_CMD also in ps3 code

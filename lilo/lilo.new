@@ -747,17 +747,17 @@ function check_config_file () {
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	if [ ! -f ${CONFIG_IMAGE_FILE[$i]} ] ; then
 	    if [ ${CONFIG_IMAGE_OPTIONAL[$i]} = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
-		error   "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]} ist not a regular file"
+		error   "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
 	    else
-		warning "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]} ist not a regular file"
+		warning "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
 		CONFIG_IMAGE_OPTIONAL[$i]="skip"
 	    fi
 	fi
 	if [ ! -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
 	    if [ ${CONFIG_IMAGE_OPTIONAL[$i]} = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
-		error   "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
+		error   "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
 	    else
-		warning "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]} ist not a regular file"
+		warning "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
 		CONFIG_IMAGE_OPTIONAL[$i]="skip"
 	    fi
 	fi
