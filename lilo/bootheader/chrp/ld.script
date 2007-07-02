@@ -1,5 +1,5 @@
 /* $Id$ */
-OUTPUT_ARCH(powerpc)
+OUTPUT_ARCH(powerpc:common)
 SECTIONS
 {
 	.text	:

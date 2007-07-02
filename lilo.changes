@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul  2 12:35:48 CEST 2007 - olh@suse.de
+
+- use OUTPUT_ARCH(powerpc:common) in ld scripts for 64bit compiles
+
+-------------------------------------------------------------------
 Thu May 10 14:15:54 CEST 2007 - sassmann@suse.de
 
 - added support for ps3 in lilo.new
