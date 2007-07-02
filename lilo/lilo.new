@@ -435,7 +435,7 @@ function check_arch () {
 			Pegasos2)
 				board_type=pegasos
 				;;
-			PS3PF)
+			PS3PF|sony,ps3|SonyPS3)
 				board_type=ps3
 				;;
 		esac

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul  2 15:10:08 CEST 2007 - olh@suse.de
+
+- recognize also model SonyPS3, compatible sony,ps3
+
+-------------------------------------------------------------------
 Mon Jul  2 15:06:20 CEST 2007 - olh@suse.de
 
 - use stat -c %s instead of wc -c to get filesize
