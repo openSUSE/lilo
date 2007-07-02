@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul  2 15:12:57 CEST 2007 - olh@suse.de
+
+- use $STAT_CMD also in ps3 code
+
+-------------------------------------------------------------------
 Mon Jul  2 15:10:08 CEST 2007 - olh@suse.de
 
 - recognize also model SonyPS3, compatible sony,ps3

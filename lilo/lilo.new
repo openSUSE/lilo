@@ -828,8 +828,8 @@ local file_sysfs_path
 		return
 	fi
 
-	root_mount=`stat -L -c %D /`
-	boot_mount=`stat -L -c %D /boot/vmlinux`
+	root_mount=`$STAT_CMD -L -c %D /`
+	boot_mount=`$STAT_CMD -L -c %D /boot/vmlinux`
 
 	if [ "$root_mount" = "$boot_mount" ]; then
 		kernel_filename=/boot/vmlinux
@@ -839,7 +839,7 @@ local file_sysfs_path
 		initrd_filename=/initrd
 	fi
 
-    	file_majorminor=$(/usr/bin/stat --format="%d" "/boot/vmlinux")
+    	file_majorminor=$($STAT_CMD --format="%d" "/boot/vmlinux")
     	file_major="$[file_majorminor >> 8]"
     	file_minor="$[file_majorminor & 255]"
 
