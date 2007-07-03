@@ -571,7 +571,6 @@ function running_on_chrp () {
 	# copy all kernels and initrds from non supported file systems
 	# to one FAT partition
 
-set -x
 # H@Ck F0R bR0K3N 3Vm$ c0nFiGuR@7i0n
 # rEmOvE 7hi5 @f73R 5L3$10 g@
 {
@@ -583,7 +582,6 @@ fi
 }
 # !11!1! OMG WTF LOL
 # ...
-set +x
 	# check if default image/initrd fits, add overhead of 180 blocks approx.
 	local -i defaultsize=$(( 180 + yaboot_size + yaboot_conf_size ));
 	(( defaultsize += (vmlinux_default==0) ? 0 : $(fsize ${vmlinux_copy[$vmlinux_default]}) ));

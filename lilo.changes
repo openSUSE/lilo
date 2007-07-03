@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul  3 09:18:14 CEST 2007 - olh@suse.de
+
+- remove set -/+ in lilo-chrp.lib
+
+-------------------------------------------------------------------
 Mon Jul  2 22:02:45 CEST 2007 - olh@suse.de
 
 - change lilo error 'ist not a regular file' to -ENOENT
