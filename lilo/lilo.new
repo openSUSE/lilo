@@ -565,7 +565,7 @@ function parse_config_file () {
     # OPTION_APPEND contains the global or local append= strings
     # OPTION_INITRD containes the global or local initrd filename
     # OPTION_IMAGE_COPY contains a flag to force copy to the boot partition
-    # CONFIG_PARSE_HASIMAGE is a flag if we have a image section.
+    # CONFIG_PARSE_HASIMAGE is a flag if an image/other section exists
     # CONFIG_IMAGE_FILE array contains the kernel image for a section
     # CONFIG_IMAGE_OTHER array contains the device of MacOS
     # CONFIG_IMAGE_COPY array contains copy flag for images on macs
@@ -573,12 +573,12 @@ function parse_config_file () {
     # CONFIG_IMAGE_COUNT is a simple counter of image sections
     declare option
     local separator value
+    local CONFIG_PARSE_HASIMAGE
 
     if [ ! -f $CONFIG_LILO_CONF ]; then
 	error "Config file $CONFIG_LILO_CONF not found"
     fi
 
-    unset CONFIG_PARSE_HASIMAGE
     CONFIG_IMAGE_COUNT=0
     OPTION_BOOT_COUNT=0
     while read; do
