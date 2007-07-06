@@ -32,6 +32,9 @@
 # Language kills all parsing effort
 unset LANG
 unset LC_CTYPE
+# parted uses readline, which sends control chars if TERM=xterm
+# this breaks parted --version
+export TERM=dumb
 
 CONFIG_LILO_CONF=/etc/lilo.conf
 SHOW_OF_PATH="/bin/show_of_path.sh --quiet"

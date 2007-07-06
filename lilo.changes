@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul  6 13:23:53 CEST 2007 - olh@suse.de
+
+- export TERM=dumb to fix parted --version parsing (289049)
+
+-------------------------------------------------------------------
 Tue Jul  3 09:18:14 CEST 2007 - olh@suse.de
 
 - remove set -/+ in lilo-chrp.lib
