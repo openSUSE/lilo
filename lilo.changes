@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 16 10:20:02 CEST 2007 - olh@suse.de
+
+- handle mptsas device in show_of_path.sh (290871 - LTC36211)
+
+-------------------------------------------------------------------
 Fri Jul  6 13:23:53 CEST 2007 - olh@suse.de
 
 - export TERM=dumb to fix parted --version parsing (289049)

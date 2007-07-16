@@ -309,6 +309,15 @@ case "$file_full_sysfs_path" in
 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
 	cd ../..
 	;;
+    */host+([0-9])/port-+([0-9]):+([0-9])/end_device-+([0-9]):+([0-9])/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
+	# sas layout
+	declare spec="${file_full_sysfs_path##*/host+([0-9])/port-+([0-9]):+([0-9])/end_device-+([0-9]):+([0-9])/target+([0-9:])/}"
+
+	: spec $spec
+	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
+	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
+	cd ../../../../..
+	;;
     *)
         # TODO check the rest of the (hardware) world
 	: file_full_sysfs_path $file_full_sysfs_path
@@ -449,12 +458,26 @@ if [ -f devspec ] ; then
 	    )
 	    ;;
         sas)
+	    vendor_id=$(read_int ${file_of_hw_devtype%%/sas}/vendor-id)
+	    if (( vendor_id == 0x1000 )); then
+		# PCI_VENDOR_ID_LSI_LOGIC==0x1000
+		end_device="${file_full_sysfs_path##*/host+([0-9])/port-+([0-9]):+([0-9])/}"
+		end_device="${end_device%%/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9])}"
+		sas_address="/sys/class/sas_device/${end_device}/sas_address"
+		if [ -f "$sas_address" ]; then
+		    of_disk_addr=$(< $sas_address)
+		fi
+
+	    else
+		(( of_disk_addr = ( (of_disk_scsi_chan<<16) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) )); #
+	    fi
+
+	    dbg_show of_disk_addr
 	    if [ -d ${file_of_hw_devtype}/disk ]; then
 		of_disk_scsi_dir=disk
 	    else
 		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
 	    fi
-	    (( of_disk_addr = ( (of_disk_scsi_chan<<16) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) )); #
 
 	    file_of_hw_path=$(
 		printf "%s/%s@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" \
