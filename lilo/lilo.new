@@ -315,7 +315,7 @@ function device_of_file () {
 	return;
     fi
     
-    $STAT_CMD --format="%d" $f
+    $STAT_CMD -L --format="%d" $f
 }
 
 
@@ -343,7 +343,7 @@ function device_nr () {
 	return;
     fi
 
-    echo $[ $($STAT_CMD --dereference --format "0x%t*256 + 0x%T" $d) ]
+    echo $[ $($STAT_CMD -L --format "0x%t*256 + 0x%T" $d) ]
 }
 
 
@@ -353,7 +353,7 @@ function fsize() { # get file size in blocks
 	echo 0
     else
     	# can not use ls -s because the zimage is a sparse file
-	read s r < <( $STAT_CMD -c %s "$1" )
+	read s r < <( $STAT_CMD  -L -c %s "$1" )
 	s=$(( ( $s / 512 ) + 1 ))
 	echo $s
     fi
@@ -842,7 +842,7 @@ local file_sysfs_path
 		initrd_filename=/initrd
 	fi
 
-    	file_majorminor=$($STAT_CMD --format="%d" "/boot/vmlinux")
+    	file_majorminor=$($STAT_CMD -L --format="%d" "/boot/vmlinux")
     	file_major="$[file_majorminor >> 8]"
     	file_minor="$[file_majorminor & 255]"
 
