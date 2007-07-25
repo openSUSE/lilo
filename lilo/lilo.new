@@ -285,26 +285,6 @@ function parted_call() {
     return $ret
 }
 
-function real_device () {
-    # print the real device i.e. map partitions to disks
-    local -i dev=$1 real=0
-    local -i major minor
-    local range
-    local IFS=:
-
-    while read range; do
-	read major minor < ${range/range/dev}
-	(( real = major * 256 + minor ))
-	range=$(<$range)
-	if (( dev >= real && dev < real + range )); then
-	    echo $real
-	    return;
-	fi
-    done < <( find /sys/block -name range )
-
-    echo 0000
-}
-
 declare -a _filesystem
 
 # check whether a file lies on a file system that is
