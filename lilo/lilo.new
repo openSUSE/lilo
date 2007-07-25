@@ -305,47 +305,6 @@ function real_device () {
     echo 0000
 }
 
-function device_of_file () {
-    # print device number in decimal given a file path
-    local f="$1";
-    
-    if [ ! -x $STAT_CMD -o -z "$f" ]; then
-	# be nice if /usr not mounted
-	echo 0000
-	return;
-    fi
-    
-    $STAT_CMD -L --format="%d" $f
-}
-
-
-function device_nr () {
-    # print device number in decimal given a path to a device node
-    local d="$1"
-    
-    # /dev/root is an alias to the root file system
-    if [ "$d" == "/dev/root" ]; then
-	device_of_file /
-	return;
-    fi
-
-    if [ ! -x $STAT_CMD ]; then
-	# be nice if /usr not mounted
-	echo 0000
-	return;
-    fi
-
-    # test whether its a block device ?
-    if [ ! -b "$d" ]; then
-	# this should never happen
-	echo >&2 "Path '$d' does not point to a block device node!"
-	echo 0000
-	return;
-    fi
-
-    echo $[ $($STAT_CMD -L --format "0x%t*256 + 0x%T" $d) ]
-}
-
 declare -a _filesystem
 
 # check whether a file lies on a file system that is
@@ -363,7 +322,7 @@ function can_yaboot_read () {
 
 	while read device mount type opts; do
 	    if [ "${device:0:1}" = "/" ]; then
-		local -i dn=$(device_nr $device)
+		local -i dn=$(( `stat -L --format="0x%D" $mount` ))
 		(( dn == 0 )) && continue;
 		_filesystem[$dn]="$type";
 	    fi
@@ -371,7 +330,7 @@ function can_yaboot_read () {
 	_filesystem[0]="invalid"
     fi
 
-    local fs=${_filesystem[$(device_of_file $path)]}
+    local fs=${_filesystem[$(( ` stat -L --format="0x%D" $path` ))]}
 
     # check for a file system yaboot can handle
     [[ "$fs" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]] || return 1;
