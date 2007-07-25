@@ -346,6 +346,39 @@ function device_nr () {
     echo $[ $($STAT_CMD -L --format "0x%t*256 + 0x%T" $d) ]
 }
 
+declare -a _filesystem
+
+# check whether a file lies on a file system that is
+# readable by yaboot
+function can_yaboot_read () {
+    local path="$1"
+
+    # check for invalid path
+    [ -e "$path" ] || return 1;
+
+    # initialize _filesystem array when needed
+    if [ "${_filesystem[0]}" != "invalid" ]; then
+        # check all mounted local partitions and remember file systems
+	local device mount type opts
+
+	while read device mount type opts; do
+	    if [ "${device:0:1}" = "/" ]; then
+		local -i dn=$(device_nr $device)
+		(( dn == 0 )) && continue;
+		_filesystem[$dn]="$type";
+	    fi
+	done < /proc/mounts
+	_filesystem[0]="invalid"
+    fi
+
+    local fs=${_filesystem[$(device_of_file $path)]}
+
+    # check for a file system yaboot can handle
+    [[ "$fs" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]] || return 1;
+
+    # return true finally
+    return 0
+}
 
 function fsize() { # get file size in blocks
     local s r
