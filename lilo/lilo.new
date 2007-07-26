@@ -699,10 +699,8 @@ function parse_config_file () {
 
 function check_config_file () {
     if [ -z $OPTION_BOOT ]; then
-	#   work around a YaST bug, which comes from a certain kind of
-	#   intel-architecture blindness, some architectures can guess boot
-	#   drive :-)
-	if [[ "$MACHINE" != @(chrp|prep|pegasos|ps3) ]]; then
+	# only pegasos and PS3 do not need boot=
+	if [[ "$MACHINE" != @(pegasos|ps3) ]]; then
 	    error "boot=<partition> is not specified!"
 	fi
     else

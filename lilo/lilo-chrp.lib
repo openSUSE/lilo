@@ -108,13 +108,9 @@ function running_on_chrp () {
 	      fat32_part=(${fat32_part[*]} $device)
 	      ;;
 	esac
-	# please note: an empty boot= will cause a full disk scan of
-	# the system
     done < <( $FDISK -l $OPTION_BOOT_DISK_DEVICE_NODE )
 
     # only the device is given and dd to the raw device is a bad idea
-    # Note: An empty boot= results in an empty OPTION_BOOT_PARTITION_NUMBER which triggers
-    # the guessing magic
     if [ -z "$OPTION_BOOT_PARTITION_NUMBER" ] ; then
 	echo guessing the chrp boot device
 	case $[${#prep_part[*]} + ${#fat_part[*]}] in

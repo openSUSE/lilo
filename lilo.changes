@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jul 26 11:50:04 CEST 2007 - olh@suse.de
+
+- required a boot= in lilo.conf on chrp/prep, so that fdisk does
+  not pick up an 41 PReP boot partition on a random disk
+
+-------------------------------------------------------------------
 Wed Jul 25 16:03:28 CEST 2007 - olh@suse.de
 
 - use stat in function can_yaboot_read
