@@ -366,6 +366,7 @@ function fsize() { # get file size in blocks
 }
 
 function find_interrupt_controller_property() {
+	local f
 	# to be called with "/proc/device-tree" as entry directory
 	for f in "$1"/*
 	do
@@ -705,6 +706,7 @@ function parse_config_file () {
 
 
 function check_config_file () {
+    local i
     if [ -z $OPTION_BOOT ]; then
 	# only pegasos and PS3 do not need boot=
 	if [[ "$MACHINE" != @(pegasos|ps3) ]]; then
