@@ -156,7 +156,7 @@ function running_on_iseries () {
     
 	if [ "$ISERIES_TARGET" = "block_dev" ]; then
 	    #only the device is given and dd to the raw device is a bad idea
-	    if [ -z "${OPTION_PARTITION[$i]}" ]; then
+	    if [ -z "${OPTION_BOOT_PARTITION_NUMBER[$i]}" ]; then
 		echo guess the PReP boot device 
 		PART=`$FDISK -l $ISERIES_DEVICE | fgrep "PPC PReP"`
 		if [ -z "$PART" ] ; then

@@ -113,9 +113,9 @@ function running_on_chrp () {
     done < <( $FDISK -l $OPTION_DEVICE )
 
     # only the device is given and dd to the raw device is a bad idea
-    # Note: An empty boot= results in an empty OPTION_PARTITION which triggers
+    # Note: An empty boot= results in an empty OPTION_BOOT_PARTITION_NUMBER which triggers
     # the guessing magic
-    if [ -z "$OPTION_PARTITION" ] ; then
+    if [ -z "$OPTION_BOOT_PARTITION_NUMBER" ] ; then
 	echo guessing the chrp boot device
 	case $[${#prep_part[*]} + ${#fat_part[*]}] in
 	    1)
@@ -770,7 +770,7 @@ function running_on_prep () {
     echo running on PReP
     #only the device is given and dd to the raw device is a bad idea
     
-    if [ -z "$OPTION_PARTITION" ] ; then
+    if [ -z "$OPTION_BOOT_PARTITION_NUMBER" ] ; then
 	echo guess the PReP boot device 
 	PART=`$FDISK -l $OPTION_DEVICE | fgrep "PPC PReP"`
 	if [ -z "$PART" ] ; then
