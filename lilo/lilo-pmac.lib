@@ -162,7 +162,6 @@ function running_on_pmac_new () {
     # BOOT_DEVICEPATH=$(get_of_path $OPTION_BOOT)
     BOOT_DEVICEPATH="&device;:&partition;"
     OTHER_DEVICEPATH=$(get_of_path $OPTION_OTHER)
-    TIMEOUT=${OPTION_MACOSTIMEOUT:-5}
 
     echo "BOOT_DEVICEPATH  = $BOOT_DEVICEPATH"
     echo "OTHER_DEVICEPATH = $OTHER_DEVICEPATH"
@@ -250,7 +249,7 @@ function running_on_pmac_new () {
 			" "(0d 0a)" fb8-write drop
 			" "(0d 0a)" fb8-write drop
 			" "(09)  press space to boot $SPACE_BAR_HINT ... " fb8-write drop
-			get-msecs d# $TIMEOUT 3E8 * +
+			get-msecs d# $OPTION_MACOSTIMEOUT 3E8 * +
 			begin
 			  key? if
 			    key case

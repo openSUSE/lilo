@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jul 26 14:23:59 CEST 2007 - olh@suse.de
+
+- initialize and document global arrays in lilo
+
+-------------------------------------------------------------------
 Thu Jul 26 14:03:26 CEST 2007 - olh@suse.de
 
 - remove the global option 'force', it was used for firmware check

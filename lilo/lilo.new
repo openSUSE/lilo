@@ -41,13 +41,65 @@ SHOW_OF_PATH="/bin/show_of_path.sh --quiet"
 DEFAULT_BOOTFOLDER=suseboot
 TEMP="${TMPDIR:-/tmp}/ppc_lilo"
 MACHINE=
-OPTION_USE_OS_CHOOSER=yes
 _sysfs_mounted=
 _proc_mounted=
 
 shopt -s extglob
 
+# OPTION_BOOT is an array to contains the bootloader partition and/or targets
+declare -a OPTION_BOOT
+# OPTION_BOOT_COUNT is a counter to the array above
+declare -i OPTION_BOOT_COUNT
+# OPTION_BOOT_DISK_DEVICE_NODE is the device node of a whole bootdisk
+declare -a OPTION_BOOT_DISK_DEVICE_NODE
+# OPTION_BOOT_PARTITION_NUMBER is the partition number
+declare -a OPTION_BOOT_PARTITION_NUMBER
+# OPTION_CLONE contains a space separated list of additional boot partitions
+OPTION_CLONE=
+# OPTION_OTHER contains the MacOS partition
+OPTION_OTHER=
+# OPTION_BOOTFOLDER contains the MacOS folder with the bootstuff
+OPTION_BOOTFOLDER=
+# OPTION_ACTIVATE is a flag whether or not the boot partition must be set active in OF
+OPTION_ACTIVATE=
+# OPTION_USE_OS_CHOOSER is a flag whether or not the Forth script used as bootfile will open the screen
+OPTION_USE_OS_CHOOSER=yes
+# OPTION_FORCEFAT is a flag wether the bootloader on chrp should be on a 0xc FAT partition
+OPTION_FORCEFAT=no
+# OPTION_TIMEOUT contains the timeout variable in seconds
+declare -i OPTION_TIMEOUT
+# OPTION_MACOSTIMEOUT contains the timeout between linux/macos in seconds
+declare -i OPTION_MACOSTIMEOUT=5
+# OPTION_DEFAULT contains the default label
+OPTION_DEFAULT=
+# OPTION_ROOT contains the global or local root= device
+OPTION_ROOT=
+# OPTION_APPEND contains the global or local append= strings
+OPTION_APPEND=
+# OPTION_INITRD containes the global or local initrd filename
+OPTION_INITRD=
+# CONFIG_PARSE_HASOTHER is a flag for os-chooser creation
+CONFIG_PARSE_HASOTHER=
+# CONFIG_IMAGE_FILE array contains the kernel image for a section
+declare -a CONFIG_IMAGE_FILE
+# CONFIG_IMAGE_OTHER array contains the device of MacOS
+declare -a CONFIG_IMAGE_OTHER
+# CONFIG_IMAGE_LABEL array contains the name of the section
+declare -a CONFIG_IMAGE_LABEL
+# CONFIG_IMAGE_INITRD array contains the (optional) initrd file
+declare -a CONFIG_IMAGE_INITRD
+# CONFIG_IMAGE_APPEND array contains the (optional) kernel commandline options
+declare -a CONFIG_IMAGE_APPEND
+# CONFIG_IMAGE_COPY array contains copy flag for images on macs
+declare -a CONFIG_IMAGE_COPY
+# CONFIG_IMAGE_OPTIONAL array contains flag about image/initrd availibility
+declare -a CONFIG_IMAGE_OPTIONAL
+# CONFIG_IMAGE_COUNT is a simple counter of image sections
+declare -i CONFIG_IMAGE_COUNT
+# used by can_yaboot_read function
+declare -a _filesystem
 
+err_var1=
 FDISK=/sbin/fdisk
 PARTED="/usr/sbin/parted -s"
 # the parted kids keep the userinterface stable:
@@ -268,7 +320,6 @@ function parted_call() {
     return $ret
 }
 
-declare -a _filesystem
 
 # check whether a file lies on a file system that is
 # readable by yaboot
@@ -502,28 +553,9 @@ function running_on_pmac_new () {
 
 function parse_config_file () {
     # parse the lilo.conf and place it in CONFIG_IMAGE_FILE[]
-    # other vars:
-    # OPTION_BOOT is an array to contains the bootloader partition and/or targets
-    # OPTION_BOOT_COUNT is a counter to the array above
-    # OPTION_OTHER contains the MacOS partition
-    # OPTION_BOOTFOLDER contains the MacOS folder with the bootstuff
-    # OPTION_ACTIVATE is a flag whether or not the boot partition must be set active in OF
-    # OPTION_USE_OS_CHOOSER is a flag whether or not the Forth script used as bootfile will open the screen
-    # OPTION_TIMEOUT contains the timeout variable in seconds
-    # OPTION_MACOSTIMEOUT contains the timeout between linux/macos in seconds
-    # OPTION_DEFAULT contains the default label
-    # OPTION_ROOT contains the global or local root= device
-    # OPTION_APPEND contains the global or local append= strings
-    # OPTION_INITRD containes the global or local initrd filename
-    # OPTION_IMAGE_COPY contains a flag to force copy to the boot partition
-    # CONFIG_PARSE_HASIMAGE is a flag if an image/other section exists
-    # CONFIG_IMAGE_FILE array contains the kernel image for a section
-    # CONFIG_IMAGE_OTHER array contains the device of MacOS
-    # CONFIG_IMAGE_COPY array contains copy flag for images on macs
-    # CONFIG_IMAGE_OPTIONAL array contains flag about image/initrd availibility
-    # CONFIG_IMAGE_COUNT is a simple counter of image sections
     declare option
     local separator value
+    # CONFIG_PARSE_HASIMAGE is a flag if an image/other section exists
     local CONFIG_PARSE_HASIMAGE
 
     if [ ! -f $CONFIG_LILO_CONF ]; then
