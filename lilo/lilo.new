@@ -353,6 +353,91 @@ function can_yaboot_read () {
     return 0
 }
 
+
+function collect_path_info() {
+	local querytype
+	local direntry
+	local direntry_majorminor
+	local direntry_major direntry_minor
+	local dev
+	local direntry_sysfspath
+	local direntry_kernel_disk_name
+	local direntry_kernel_partition_name
+	local direntry_kernel_partition_number
+
+	querytype=$1
+	direntry=$2
+
+	# get major:minor pair
+	if test -c "$direntry"
+	then
+		echo >&2 "'$direntry' is a char device"
+		return 1
+	elif test -b "$direntry"
+	then
+		direntry_majorminor=`$STAT_CMD -L --format="0x%t 0x%T" "$direntry"`
+		direntry_majorminor=`printf '%d:%d' $direntry_majorminor`
+	else
+		direntry_majorminor=`$STAT_CMD -L --format="%d" "$direntry"`
+		direntry_major="$[direntry_majorminor >> 8]"
+		direntry_minor="$[direntry_majorminor & 255]"
+		direntry_majorminor=$direntry_major:$direntry_minor
+	fi
+	# find kernel name for major:minor pair
+	: direntry_majorminor $direntry_majorminor
+	for dev in $(find /sys/block -name dev)
+	do
+		: looking at $dev
+		if test "$(< $dev)" = "$direntry_majorminor"
+		then
+			direntry_sysfspath=$dev
+			break
+		fi
+	done
+	if test -z "$direntry_sysfspath"
+	then
+		echo >&2 "'$direntry' has no sysfs entry for major:minor $direntry_majorminor"
+		return 1
+	fi
+	# collect names and numbers
+	if test -f "${direntry_sysfspath%/dev}/range"
+	then
+		direntry_kernel_disk_name="${direntry_sysfspath%/dev}"
+		direntry_kernel_disk_name="${direntry_kernel_disk_name##*/}"
+		direntry_kernel_partition_name=
+		direntry_kernel_partition_number=
+	elif test -f "${direntry_sysfspath%/dev}/../range"
+	then
+		direntry_kernel_partition_name="${direntry_sysfspath%/dev}"
+		direntry_kernel_partition_name="${direntry_kernel_partition_name##*/}"
+		direntry_kernel_disk_name="${direntry_sysfspath%/dev}"
+		direntry_kernel_disk_name="${direntry_kernel_disk_name%/*}"
+		direntry_kernel_disk_name="${direntry_kernel_disk_name##*/}"
+		direntry_kernel_partition_number="${direntry_kernel_partition_name%%+([0-9])}"
+		direntry_kernel_partition_number="${direntry_kernel_partition_name#$direntry_kernel_partition_number}"
+	else
+		echo >&2 "can not find sysfs info for '$direntry' due to changed interfaces"
+		return 1
+	fi
+	# return info
+	case "$querytype" in
+		partition_number)
+		echo "$direntry_kernel_partition_number"
+		return 0
+		;;
+		partition_name)
+		echo "$direntry_kernel_partition_name"
+		return 0
+		;;
+		disk_name)
+		echo "$direntry_kernel_disk_name"
+		return 0
+		;;
+	esac
+	echo >&2 "'$querytype' not handled for '$direntry'"
+	return 1
+}
+
 function fsize() { # get file size in blocks
     local s r
     if [ -z "$1" ]; then
@@ -749,8 +834,9 @@ function check_config_file () {
     #  loop for multiple OPTION_BOOT entries
     #
     for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
-	OPTION_BOOT_DISK_DEVICE_NODE[$i]="${OPTION_BOOT[$i]%%+([0-9])}"	 # split boot option to
-	OPTION_BOOT_PARTITION_NUMBER[$i]="${OPTION_BOOT[$i]##*[^0-9]}"	 # dev & part for parted
+	# this will fail if the kernel device name contains a '!'
+	OPTION_BOOT_DISK_DEVICE_NODE[$i]="/dev/`collect_path_info disk_name ${OPTION_BOOT[$i]}`"
+	OPTION_BOOT_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${OPTION_BOOT[$i]}`"
     done
 } #end function check_config_file
 
