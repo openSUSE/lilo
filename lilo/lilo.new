@@ -164,23 +164,6 @@ function _error() {
 		echo "${_severity}: parted complains:"
 		cat $TEMP/parted.log
 		;;
-	    12)
-	       	echo '************************************************************'
-		echo '*  We cannot guarantee a proper reboot with your current   *'
-		echo '* non trivial boot configuration which relies on a working *'
-		echo '*               FAT firmware driver from IBM               *'
-		echo '*                                                          *'
-	  	echo '* Please consult your local IBM representative so that he  *'
-		echo '*     can take the appropriate steps to help you out.      *'
-	       	echo '************************************************************'
-		;;
-	    42)
-	        if [ "$OPTION_FORCE" ]; then return; fi
-		echo
-		echo "If you really want to try this on your own risk, you can add"
-		echo "a line saying      \"force\"      into the global section of"
-		echo "your /etc/lilo.conf and rerun /sbin/lilo"
-		;;
 	
 	    *)  # plain custom string
 	        echo "${_severity}: $1"
@@ -598,10 +581,6 @@ function parse_config_file () {
 	    force_fat)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
 		OPTION_FORCEFAT="yes"
-		;;
-	    force)
-		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
-		OPTION_FORCE="yes"
 		;;
 	    bootfolder)
 		[ "$CONFIG_PARSE_HASIMAGE" ] && error 7
