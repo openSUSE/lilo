@@ -742,7 +742,7 @@ function check_config_file () {
     #  loop for multiple OPTION_BOOT entries
     #
     for (( i=0; i<OPTION_BOOT_COUNT; i++ )); do
-	OPTION_DEVICE[$i]="${OPTION_BOOT[$i]%%+([0-9])}"	 # split boot option to
+	OPTION_BOOT_DISK_DEVICE_NODE[$i]="${OPTION_BOOT[$i]%%+([0-9])}"	 # split boot option to
 	OPTION_BOOT_PARTITION_NUMBER[$i]="${OPTION_BOOT[$i]##*[^0-9]}"	 # dev & part for parted
     done
 } #end function check_config_file

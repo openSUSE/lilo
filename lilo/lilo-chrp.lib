@@ -110,7 +110,7 @@ function running_on_chrp () {
 	esac
 	# please note: an empty boot= will cause a full disk scan of
 	# the system
-    done < <( $FDISK -l $OPTION_DEVICE )
+    done < <( $FDISK -l $OPTION_BOOT_DISK_DEVICE_NODE )
 
     # only the device is given and dd to the raw device is a bad idea
     # Note: An empty boot= results in an empty OPTION_BOOT_PARTITION_NUMBER which triggers
@@ -772,7 +772,7 @@ function running_on_prep () {
     
     if [ -z "$OPTION_BOOT_PARTITION_NUMBER" ] ; then
 	echo guess the PReP boot device 
-	PART=`$FDISK -l $OPTION_DEVICE | fgrep "PPC PReP"`
+	PART=`$FDISK -l $OPTION_BOOT_DISK_DEVICE_NODE | fgrep "PPC PReP"`
 	if [ -z "$PART" ] ; then
 	    err_var1=$OPTION_BOOT; error 9 4
 	fi
@@ -783,8 +783,8 @@ function running_on_prep () {
 	read P dummy <<< "$PART"
     else
 	#we have the device, but better safe than sorry
-	echo Boot target is $OPTION_DEVICE
-	PART=`$FDISK -l $OPTION_DEVICE | grep $OPTION_BOOT | fgrep "PPC PReP"`
+	echo Boot target is $OPTION_BOOT_DISK_DEVICE_NODE
+	PART=`$FDISK -l $OPTION_BOOT_DISK_DEVICE_NODE | grep $OPTION_BOOT | fgrep "PPC PReP"`
 	if [ -z "$PART" ] ; then
 	    err_var1=$OPTION_BOOT; error 9 4
 	fi

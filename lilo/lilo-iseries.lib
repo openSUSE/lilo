@@ -157,7 +157,7 @@ function running_on_iseries () {
 	    #only the device is given and dd to the raw device is a bad idea
 	    if [ -z "${OPTION_BOOT_PARTITION_NUMBER[$i]}" ]; then
 		echo guess the PReP boot device 
-		PART=`$FDISK -l ${OPTION_DEVICE[$i]} | fgrep "PPC PReP"`
+		PART=`$FDISK -l ${OPTION_BOOT_DISK_DEVICE_NODE[$i]} | fgrep "PPC PReP"`
 		if [ -z "$PART" ] ; then
 		    err_var1="$ISERIES_BOOT"
 		    error 9 3
@@ -169,8 +169,8 @@ function running_on_iseries () {
 		read P dummy <<< "$PART"
 	    else
 		#we have the device, but better safe than sorry
-		echo Boot target is ${OPTION_DEVICE[$i]}
-		PART=`$FDISK -l ${OPTION_DEVICE[$i]} | grep $ISERIES_BOOT | fgrep "PPC PReP"`
+		echo Boot target is ${OPTION_BOOT_DISK_DEVICE_NODE[$i]}
+		PART=`$FDISK -l ${OPTION_BOOT_DISK_DEVICE_NODE[$i]} | grep $ISERIES_BOOT | fgrep "PPC PReP"`
 		if [ -z "$PART" ] ; then
 		    err_var1=$ISERIES_BOOT; error 9 3
 		fi
