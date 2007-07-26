@@ -244,11 +244,10 @@ function running_on_chrp () {
 	fat_boot=1
     fi
 
-    # check whether yaboot.conf is on the same disk as yaboot
+    # check whether /etc/yaboot.conf is on the same disk as yaboot
     # (i.e. disk with the PReP partition), yaboot only implicitely scans that
     # disk for a config file
-    echo -n >> /etc/yaboot.conf
-    local yaboot_path=$(get_of_path /etc/yaboot.conf)
+    local yaboot_path=$(get_of_path /etc/)
     local boot_path=$(get_of_path $OPTION_BOOT)
 
     if [[ "$yaboot_path" != ${boot_path%%:+([0-9])}:* ]]; then
@@ -256,7 +255,7 @@ function running_on_chrp () {
 
     # check for a readable partition containing the config file. yaboot can
     # only read certain file systems and partitions
-    elif ! is_on_primary "$yaboot_path" || ! can_yaboot_read "/etc/yaboot.conf"; then
+    elif ! is_on_primary "$yaboot_path" || ! can_yaboot_read "/etc/"; then
 	builtin_yaboot_conf=1
     fi
 
@@ -653,9 +652,6 @@ fi
 		echo "Converted /etc/lilo.conf to /etc/yaboot.conf"
 	fi
     fi
-
-    # remove empty yaboot.conf, created by get_of_path check above
-    if [ ! -s /etc/yaboot.conf ] ; then rm -f /etc/yaboot.conf ; fi
 
     # TODO check whether this is neccessary
     if [[ ${p_flags[$boot_partnr]} != *boot* ]]; then
