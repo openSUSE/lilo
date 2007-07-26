@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jul 26 12:52:44 CEST 2007 - olh@suse.de
+
+- remove unused chrp firmware check
+
+-------------------------------------------------------------------
 Thu Jul 26 11:50:04 CEST 2007 - olh@suse.de
 
 - required a boot= in lilo.conf on chrp/prep, so that fdisk does

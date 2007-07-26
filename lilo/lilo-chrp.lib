@@ -3,58 +3,11 @@
 #
 #  library for CHRP routines
 
-unset firmware_status
 unset running_on_chrp
 unset running_on_prep
 unset running_on_pegasos
 
-FW_STATUS_FILE=/lib/lilo/chrp/firmware_status.chrp
 
-function firmware_status () {
-    # Always return ok if status file is missing
-    if ! [ -f "$FW_STATUS_FILE" ]; then
-        echo tested
-        return
-    fi
-    local mymodel="$(</proc/device-tree/model)"
-    if [ -f /proc/device-tree/ibm,vpd ]; then
-	dummy=$(tr '\0-\037' '[ *]'  < /proc/device-tree/ibm,vpd)
-	dummy=${dummy#*RM }
-	local myfwlvl=${dummy%% *}
-    else
-	local myfwlvl="$(</proc/device-tree/openprom/ibm,fw-vernum_encoded)"
-    fi
-
-    while read; do
-        REPLY=${REPLY%%#*}
-        REPLY=${REPLY%%+([ 	])}
-        REPLY=${REPLY##+([ 	])}
-        if [ -z "$REPLY" ]; then continue; fi
-        read model status fwlevel workaround <<< "$REPLY"
-	if [ "$model" == "$mymodel" ]; then
-	    # check whether firmware level is ok.
-	    local op="${fwlevel%%+([^<>=\!])}"
-	    [ "$op" ] || op="=="
-	    fwlevel="${fwlevel##+([<>=\!])}"
-	    if [[ "$op" != @(<=|>=|<|>|\!=|==) ]]; then
-	        echo badformat $mymodel $myfwlvl#
-		return
-	    fi
-	    if [[ "$op" == @(<=|>=) ]]; then
-	        if [ "$myfwlvl" == "$fwlevel" ]; then
-	            echo $status $mymodel $myfwlvl $workaround
-	            return
-	        fi
-		op=${op:0:1}
-	    fi
-	    if [ "$myfwlvl" $op "$fwlevel" ]; then
-	        echo $status $mymodel $myfwlvl $workaround
-	        return
-	    fi
-	fi
-    done < $FW_STATUS_FILE
-    echo unknown $mymodel $myfwlvl
-}
 
 # try to strip off a device path preferrable including patition number from a
 # given open firmware path and return the simplyfied path 
@@ -314,29 +267,6 @@ function running_on_chrp () {
 	if (( zimage_nr == 0 )) ; then
 	    zimage_nr=1
 	fi
-    elif (( fat_boot == 1 )); then
-	# check CHRP machine against list of fully functional firmware
-	# implementations. There are various bugs out there which IBM
-	# consistently resists to fix.
-	local fw_status model fw_level fw_workaround
-	read fw_status model fw_level fw_workaround <<< "$(firmware_status)"
-	case "$fw_status" in
-	    broken)
-	        error "Broken FAT driver in IBM firmware detected $model/$fw_level." 12 42
-		;;
-	    untested)
-	        error "Untested IBM machine/firmware $model/$fw_level." 12 42
-		;;
-	    unknown)
-	        error "Unknown IBM machine $model/$fw_level." 12 42
-		;;
-	    tested)
-	        # hurray a tested and working machine
-		;;
-	    *)
-	    	error "Corrupted firmware status table for $model/$fw_level"
-		;;
-	esac
     fi
 
 
