@@ -56,8 +56,6 @@ declare -a OPTION_BOOT_DISK_DEVICE_NODE
 declare -a OPTION_BOOT_PARTITION_NUMBER
 # OPTION_CLONE contains a space separated list of additional boot partitions
 OPTION_CLONE=
-# OPTION_OTHER contains the MacOS partition
-OPTION_OTHER=
 # OPTION_BOOTFOLDER contains the MacOS folder with the bootstuff
 OPTION_BOOTFOLDER=
 # OPTION_ACTIVATE is a flag whether or not the boot partition must be set active in OF
@@ -737,7 +735,6 @@ function parse_config_file () {
 		CONFIG_PARSE_HASOTHER=true
 		let CONFIG_IMAGE_COUNT++
 		CONFIG_IMAGE_OTHER[$CONFIG_IMAGE_COUNT]=$value
-		OPTION_OTHER=$value
 		;;
 	    root)
 		# FIXME: fix some common typos like missing quotes of spaces
