@@ -70,6 +70,7 @@ function running_on_chrp () {
 	    1)
 	       	OPTION_BOOT=$prep_part
 	       	[ "$OPTION_BOOT" ] || OPTION_BOOT=$fat_part
+		update_option_boot 0
 	       	;;
             0)
 		# special case: YaST2 does not give the option for FAT16 but
@@ -77,6 +78,7 @@ function running_on_chrp () {
 		
 		if [ ${#fat32_part[*]} == 1 ]; then
 		    OPTION_BOOT=$fat32_part
+		    update_option_boot 0
 		else
 	            err_var1=$OPTION_BOOT; error 9 1
 		fi
