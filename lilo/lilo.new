@@ -868,7 +868,7 @@ function check_config_file () {
 	    CONFIG_IMAGE_FILE_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_FILE[$i]}`"
 	    CONFIG_IMAGE_FILE_PATH_ON_FILESYSTEM[$i]="`get_relative_path_on_filesystem ${CONFIG_IMAGE_FILE[$i]}`"
 	else
-	    if [ ${CONFIG_IMAGE_OPTIONAL[$i]} = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
+	    if [ "${CONFIG_IMAGE_OPTIONAL[$i]}" = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
 		error   "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
 	    else
 		warning "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
@@ -880,7 +880,7 @@ function check_config_file () {
 	    CONFIG_IMAGE_INITRD_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_INITRD[$i]}`"
 	    CONFIG_IMAGE_INITRD_PATH_ON_FILESYSTEM[$i]="`get_relative_path_on_filesystem ${CONFIG_IMAGE_INITRD[$i]}`"
 	else
-	    if [ ${CONFIG_IMAGE_OPTIONAL[$i]} = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
+	    if [ "${CONFIG_IMAGE_OPTIONAL[$i]}" = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
 		error   "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
 	    else
 		warning "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
