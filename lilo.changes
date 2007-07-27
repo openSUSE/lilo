@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul 27 11:58:58 CEST 2007 - olh@suse.de
+
+- fix escape in bootinfo-linux string
+
+-------------------------------------------------------------------
 Fri Jul 27 11:46:11 CEST 2007 - olh@suse.de
 
 - remove unneeded test -f checks from lilo

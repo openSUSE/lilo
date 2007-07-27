@@ -643,7 +643,7 @@ fi
     fi
 
     if (( fat_boot == 1 )); then
-        nvsetenv bootinfo-linux "${boot_path},\ppc\bootinfo.txt"
+        nvsetenv bootinfo-linux "${boot_path},\\ppc\\bootinfo.txt"
         boot_path=${boot_path},yaboot
     elif [[ "${p_flags[*]}" != *type=41*type=41* ]]; then
         # open firmware is confused about more than one PReP partition, in that
