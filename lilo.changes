@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul 27 15:25:33 CEST 2007 - olh@suse.de
+
+- remove duplicate global initrd= from yaboot.conf on pmac
+
+-------------------------------------------------------------------
 Fri Jul 27 15:11:07 CEST 2007 - olh@suse.de
 
 - fix of by one in lilo check_config_file function

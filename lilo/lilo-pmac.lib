@@ -136,7 +136,6 @@ function running_on_pmac_new () {
 	
 	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
-	test -z "$OPTION_INITRD"  || echo "initrd = $OPTION_INITRD"
 	test -z "$OPTION_INITRD"  || echo "initrd = initrd.def"
 
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
