@@ -85,8 +85,14 @@ function running_on_pmac_old () {
 function running_on_pmac_new () {
     echo running on pmac_new
     local other
+    local other_disk other_partition
 
     other="${CONFIG_IMAGE_OTHER[*]}"
+    other="${other%% *}"
+    other_disk="${CONFIG_IMAGE_OTHER_DISK_DEVICE[*]}"
+    other_disk="${other_disk%% *}"
+    other_partition="${CONFIG_IMAGE_OTHER_PARTITION_NUMBER[*]}"
+    other_partition="${other_partition%% *}"
     # build the temp yaboot.conf
 
     # build the pathnames, copy the files to bootfolder if / is not bootable
@@ -159,7 +165,17 @@ function running_on_pmac_new () {
     } > $TEMP/yaboot.conf
 
     BOOT_DEVICEPATH="&device;:&partition;"
-    OTHER_DEVICEPATH=$(get_of_path ${other%% *})
+    if test -z "$other"
+    then
+	OTHER_DEVICEPATH=
+    else
+	if test "/dev/$other_disk" = "$OPTION_BOOT_DISK_DEVICE_NODE"
+	then
+	    OTHER_DEVICEPATH="&device;:$other_partition"
+	else
+	    OTHER_DEVICEPATH=$(get_of_path ${other})
+	fi
+    fi
 
     echo "BOOT_DEVICEPATH  = $BOOT_DEVICEPATH"
     echo "OTHER_DEVICEPATH = $OTHER_DEVICEPATH"

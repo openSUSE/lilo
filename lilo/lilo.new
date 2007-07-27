@@ -88,6 +88,8 @@ declare -a CONFIG_IMAGE_FILE_PARTITION_NUMBER
 declare -a CONFIG_IMAGE_FILE_PATH_ON_FILESYSTEM
 # CONFIG_IMAGE_OTHER array contains the device of MacOS
 declare -a CONFIG_IMAGE_OTHER
+declare -a CONFIG_IMAGE_OTHER_DISK_DEVICE
+declare -a CONFIG_IMAGE_OTHER_PARTITION_NUMBER
 # CONFIG_IMAGE_LABEL array contains the name of the section
 declare -a CONFIG_IMAGE_LABEL
 # CONFIG_IMAGE_INITRD array contains the (optional) initrd file
@@ -772,6 +774,8 @@ function parse_config_file () {
 		CONFIG_PARSE_HASOTHER=true
 		let CONFIG_IMAGE_COUNT++
 		CONFIG_IMAGE_OTHER[$CONFIG_IMAGE_COUNT]=$value
+		CONFIG_IMAGE_OTHER_DISK_DEVICE[$CONFIG_IMAGE_COUNT]="`collect_path_info disk_name $value`"
+		CONFIG_IMAGE_OTHER_PARTITION_NUMBER[$CONFIG_IMAGE_COUNT]="`collect_path_info partition_number $value`"
 		;;
 	    root)
 		# FIXME: fix some common typos like missing quotes of spaces

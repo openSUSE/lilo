@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul 27 14:37:48 CEST 2007 - olh@suse.de
+
+- use &device; instead of full path for other= on pmac (194118)
+
+-------------------------------------------------------------------
 Fri Jul 27 13:55:25 CEST 2007 - olh@suse.de
 
 - add get_relative_path_on_filesystem function to lilo
