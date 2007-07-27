@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul 27 15:11:07 CEST 2007 - olh@suse.de
+
+- fix of by one in lilo check_config_file function
+
+-------------------------------------------------------------------
 Fri Jul 27 14:37:48 CEST 2007 - olh@suse.de
 
 - use &device; instead of full path for other= on pmac (194118)
