@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul 27 13:55:25 CEST 2007 - olh@suse.de
+
+- add get_relative_path_on_filesystem function to lilo
+
+-------------------------------------------------------------------
 Fri Jul 27 11:58:58 CEST 2007 - olh@suse.de
 
 - fix escape in bootinfo-linux string
