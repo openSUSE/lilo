@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul 27 11:46:11 CEST 2007 - olh@suse.de
+
+- remove unneeded test -f checks from lilo
+
+-------------------------------------------------------------------
 Thu Jul 26 15:19:28 CEST 2007 - olh@suse.de
 
 - add collect_path_info function to lilo, for simpler location matching

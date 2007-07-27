@@ -135,9 +135,6 @@ function running_on_chrp () {
 	    continue
 	fi
 
-	# check for existence of image file
-	#
-	if [ -f ${CONFIG_IMAGE_FILE[$i]} ]; then
 	    local image="${CONFIG_IMAGE_FILE[$i]}"
 	    local path_image=$(get_of_path $image)
 
@@ -164,17 +161,8 @@ function running_on_chrp () {
 		vmlinux_copy[$vmlinux_nr]="$image"
 		CONFIG_IMAGE_FILE[$i]=$(printf "vmlinux.%03d\n" $vmlinux_nr)
 	    fi
-	else
-	    warning "image ${CONFIG_IMAGE_FILE[$i]} in " \
-		"${CONFIG_IMAGE_LABEL[$i]} is missing" \
-		"Entry ignored"
-	    unset CONFIG_IMAGE_FILE[$i]
-	    continue
-	fi
 
-	# check for existence of initrd file if applicable
-	#
-	if [ "${CONFIG_IMAGE_INITRD[$i]}" -a -f "${CONFIG_IMAGE_INITRD[$i]}" ]; then
+	if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
 	    local image="${CONFIG_IMAGE_INITRD[$i]}"
 	    local path_image=$(get_of_path $image)
 
@@ -198,14 +186,11 @@ function running_on_chrp () {
 		initrd_copy[$initrd_nr]="$image"
 		CONFIG_IMAGE_INITRD[$i]=$(printf "initrd.%03d\n" $initrd_nr)
 	    fi
-	else
-	    unset CONFIG_IMAGE_INITRD[$i]
 	fi
     done # for (( i=1; i<=CONFIG_IMAGE_COUNT ...
     #
     # same for global initrd option
     if [ "$OPTION_INITRD" ]; then
-	if [ -f "$OPTION_INITRD" ]; then
 	    local path_image=$(get_of_path $OPTION_INITRD)
 	    # check whether the initrd file lies on a file system that is
 	    # readable by yaboot
@@ -221,9 +206,6 @@ function running_on_chrp () {
 		initrd_copy[$initrd_nr]="$OPTION_INITRD"
 		OPTION_INITRD=$(printf "initrd.%03d\n" $initrd_nr)
 	    fi
-	else
-	    error "global initrd file '$OPTION_INITRD' not found"
-	fi
     fi
 
     # now determine whether we could boot from a PReP partition or whether we

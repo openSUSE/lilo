@@ -95,10 +95,7 @@ function running_on_pmac_new () {
 	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 	unset FILE_PATH
 
-	# check if the file is a real file
-	if [ -f "${CONFIG_IMAGE_FILE[$i]}" ]; then
-	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_FILE[$i]} | grep -v /pci[0-9])
-	fi
+	FILE_PATH=$(get_of_path ${CONFIG_IMAGE_FILE[$i]} | grep -v /pci[0-9])
 	if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
 	    CONFIG_IMAGE_PATH[$i]="copy"
 	else
