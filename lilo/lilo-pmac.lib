@@ -86,6 +86,7 @@ function running_on_pmac_new () {
     echo running on pmac_new
     local other
     local other_disk other_partition
+    local FILE_PATH
 
     other="${CONFIG_IMAGE_OTHER[*]}"
     other="${other%% *}"
@@ -99,7 +100,6 @@ function running_on_pmac_new () {
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 	test -z ${CONFIG_IMAGE_FILE[$i]} && continue
 	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-	unset FILE_PATH
 
 	FILE_PATH=$(get_of_path ${CONFIG_IMAGE_FILE[$i]} | grep -v /pci[0-9])
 	if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
@@ -107,7 +107,6 @@ function running_on_pmac_new () {
 	else
 	    CONFIG_IMAGE_PATH[$i]=$FILE_PATH
 	fi
-	unset FILE_PATH
 	if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then 
 	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_INITRD[$i]} | grep -v /pci[0-9])
 	    if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
@@ -116,7 +115,6 @@ function running_on_pmac_new () {
 		CONFIG_IMAGE_INITRDPATH[$i]=$FILE_PATH
 	    fi
 	fi
-	unset FILE_PATH
     done
 
     # starting the work
