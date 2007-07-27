@@ -76,16 +76,22 @@ OPTION_ROOT=
 OPTION_APPEND=
 # OPTION_INITRD containes the global or local initrd filename
 OPTION_INITRD=
+OPTION_INITRD_DISK_DEVICE=
+OPTION_INITRD_PARTITION_NUMBER=
 # CONFIG_PARSE_HASOTHER is a flag for os-chooser creation
 CONFIG_PARSE_HASOTHER=
 # CONFIG_IMAGE_FILE array contains the kernel image for a section
 declare -a CONFIG_IMAGE_FILE
+declare -a CONFIG_IMAGE_FILE_DISK_DEVICE
+declare -a CONFIG_IMAGE_FILE_PARTITION_NUMBER
 # CONFIG_IMAGE_OTHER array contains the device of MacOS
 declare -a CONFIG_IMAGE_OTHER
 # CONFIG_IMAGE_LABEL array contains the name of the section
 declare -a CONFIG_IMAGE_LABEL
 # CONFIG_IMAGE_INITRD array contains the (optional) initrd file
 declare -a CONFIG_IMAGE_INITRD
+declare -a CONFIG_IMAGE_INITRD_DISK_DEVICE
+declare -a CONFIG_IMAGE_INITRD_PARTITION_NUMBER
 # CONFIG_IMAGE_APPEND array contains the (optional) kernel commandline options
 declare -a CONFIG_IMAGE_APPEND
 # CONFIG_IMAGE_COPY array contains copy flag for images on macs
@@ -773,7 +779,13 @@ function parse_config_file () {
 		;;
 	    initrd)
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
-		    OPTION_INITRD=$value
+		    if [ -f "$value" ] ; then
+			OPTION_INITRD=$value
+			OPTION_INITRD_DISK_DEVICE="`collect_path_info disk_name $value`"
+			OPTION_INITRD_PARTITION_NUMBER="`collect_path_info partition_number $value`"
+		    else
+			error "global initrd $value: No such file or directory"
+		    fi
 		else
 		    CONFIG_IMAGE_INITRD[$CONFIG_IMAGE_COUNT]=$value
 		fi
@@ -815,7 +827,10 @@ function check_config_file () {
     fi
     
     for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-	if [ ! -f ${CONFIG_IMAGE_FILE[$i]} ] ; then
+	if [ -f ${CONFIG_IMAGE_FILE[$i]} ] ; then
+	    CONFIG_IMAGE_FILE_DISK_DEVICE[$i]="`collect_path_info disk_name ${CONFIG_IMAGE_FILE[$i]}`"
+	    CONFIG_IMAGE_FILE_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_FILE[$i]}`"
+	else
 	    if [ ${CONFIG_IMAGE_OPTIONAL[$i]} = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
 		error   "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
 	    else
@@ -823,7 +838,10 @@ function check_config_file () {
 		CONFIG_IMAGE_OPTIONAL[$i]="skip"
 	    fi
 	fi
-	if [ ! -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
+	if [ -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
+	    CONFIG_IMAGE_INITRD_DISK_DEVICE[$i]="`collect_path_info disk_name ${CONFIG_IMAGE_INITRD[$i]}`"
+	    CONFIG_IMAGE_INITRD_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_INITRD[$i]}`"
+	else
 	    if [ ${CONFIG_IMAGE_OPTIONAL[$i]} = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
 		error   "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
 	    else
