@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 30 10:10:39 CEST 2007 - olh@suse.de
+
+- add vim: ts=4 to shell scripts
+
+-------------------------------------------------------------------
 Fri Jul 27 15:25:33 CEST 2007 - olh@suse.de
 
 - remove duplicate global initrd= from yaboot.conf on pmac

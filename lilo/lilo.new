@@ -1,4 +1,5 @@
 #! /bin/bash
+# vim: syntax=sh ts=4
 # $Id$
 #
 # a simple lilo to store the boot loader and the kernel images 
