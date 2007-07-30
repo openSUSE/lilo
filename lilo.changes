@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 30 11:47:44 CEST 2007 - olh@suse.de
+
+- use &device; instead of full path for image/initrd= on pmac (194118)
+
+-------------------------------------------------------------------
 Mon Jul 30 11:08:28 CEST 2007 - olh@suse.de
 
 - reformat shell scripts  for ts=4

@@ -101,18 +101,33 @@ function running_on_pmac_new () {
 		test -z ${CONFIG_IMAGE_FILE[$i]} && continue
 		test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 
+		# device-tree nodes with pci0123 have no boot rom
 		FILE_PATH=$(get_of_path ${CONFIG_IMAGE_FILE[$i]} | grep -v /pci[0-9])
-		if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
-			CONFIG_IMAGE_PATH[$i]="copy"
+		test -z "$FILE_PATH" && "${CONFIG_IMAGE_COPY[$i]}" = "true"
+		if test "${CONFIG_IMAGE_COPY[$i]}" = "true"
+		then
+			CONFIG_IMAGE_FILE_YABOOT_CONF_PATH[$i]="$(printf 'vmlinux.%03d' $i)"
 		else
-			CONFIG_IMAGE_PATH[$i]=$FILE_PATH
+			if test "$OPTION_BOOT_DISK_DEVICE_NAME" = "${CONFIG_IMAGE_FILE_DISK_DEVICE[$i]}"
+			then
+				CONFIG_IMAGE_FILE_YABOOT_CONF_PATH[$i]="&device;:${CONFIG_IMAGE_FILE_PARTITION_NUMBER[$i]},${CONFIG_IMAGE_FILE_PATH_ON_FILESYSTEM[$i]}"
+			else
+				CONFIG_IMAGE_FILE_YABOOT_CONF_PATH[$i]="$FILE_PATH"
+			fi
 		fi
 		if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then 
 			FILE_PATH=$(get_of_path ${CONFIG_IMAGE_INITRD[$i]} | grep -v /pci[0-9])
-			if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
-				CONFIG_IMAGE_INITRDPATH[$i]="copy"
+			test -z "$FILE_PATH" && "${CONFIG_IMAGE_COPY[$i]}" = "true"
+			if test "${CONFIG_IMAGE_COPY[$i]}" = "true"
+			then
+				CONFIG_IMAGE_INITRD_YABOOT_CONF_PATH[$i]="$(printf 'initrd.%03d' $i)"
 			else
-				CONFIG_IMAGE_INITRDPATH[$i]=$FILE_PATH
+				if test "$OPTION_BOOT_DISK_DEVICE_NAME" = "${CONFIG_IMAGE_INITRD_DISK_DEVICE[$i]}"
+				then
+					CONFIG_IMAGE_INITRD_YABOOT_CONF_PATH[$i]="&device;:${CONFIG_IMAGE_INITRD_PARTITION_NUMBER[$i]},${CONFIG_IMAGE_INITRD_PATH_ON_FILESYSTEM[$i]}"
+				else
+					CONFIG_IMAGE_INITRD_YABOOT_CONF_PATH[$i]="$FILE_PATH"
+				fi
 			fi
 		fi
 	done
@@ -141,22 +156,14 @@ function running_on_pmac_new () {
 		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 			[ "${CONFIG_IMAGE_OTHER[$i]}" ] &&  continue
 			test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-			if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
-				echo "image = "$(printf "vmlinux.%03d" $i)
-			else
-				echo "image = ${CONFIG_IMAGE_PATH[$i]}"
-			fi
+			echo "image = ${CONFIG_IMAGE_FILE_YABOOT_CONF_PATH[$i]}"
 
 			test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "	label = ${CONFIG_IMAGE_LABEL[$i]}"
 			test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "	root = ${CONFIG_IMAGE_ROOT[$i]}"
 			test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "	append = \"${CONFIG_IMAGE_APPEND[$i]}\""
 
 			if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
-				if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
-					echo "	initrd = $(printf "initrd.%03d" $i)" 
-				else 
-					echo "	initrd = ${CONFIG_IMAGE_INITRDPATH[$i]}" 
-				fi
+				echo "	initrd = ${CONFIG_IMAGE_INITRD_YABOOT_CONF_PATH[$i]}"
 			fi
 		done
 	} > $TEMP/yaboot.conf
@@ -328,12 +335,12 @@ function running_on_pmac_new () {
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 		test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
 		test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-		if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
-			hcopy ${CONFIG_IMAGE_FILE[$i]} :$(printf "vmlinux.%03d" $i)
+		if [ "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
+			hcopy "${CONFIG_IMAGE_FILE[$i]}" ":${CONFIG_IMAGE_FILE_YABOOT_CONF_PATH[$i]}"
 		fi
 		test -z "${CONFIG_IMAGE_INITRD[$i]}" || (
-			if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
-				hcopy ${CONFIG_IMAGE_INITRD[$i]} :$(printf "initrd.%03d" $i)
+			if [ "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
+				hcopy "${CONFIG_IMAGE_INITRD[$i]}" ":${CONFIG_IMAGE_INITRD_YABOOT_CONF_PATH[$i]}"
 			fi
 		)
 	done
