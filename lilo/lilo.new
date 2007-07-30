@@ -841,7 +841,7 @@ function update_option_boot () {
 	local i=$1
 	# this will fail if the kernel device name contains a '!'
 	OPTION_BOOT_DISK_DEVICE_NAME[$i]="`collect_path_info disk_name ${OPTION_BOOT[$i]}`"
-	OPTION_BOOT_DISK_DEVICE_NODE[$i]="/dev/`${OPTION_BOOT_DISK_DEVICE_NAME[$i]}`"
+	OPTION_BOOT_DISK_DEVICE_NODE[$i]="/dev/${OPTION_BOOT_DISK_DEVICE_NAME[$i]}"
 	OPTION_BOOT_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${OPTION_BOOT[$i]}`"
 }
 
