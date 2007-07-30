@@ -50,6 +50,8 @@ shopt -s extglob
 declare -a OPTION_BOOT
 # OPTION_BOOT_COUNT is a counter to the array above
 declare -i OPTION_BOOT_COUNT
+# OPTION_BOOT_DISK_DEVICE_NAME is the kernel device name of the whole bootdisk
+declare -a OPTION_BOOT_DISK_DEVICE_NAME
 # OPTION_BOOT_DISK_DEVICE_NODE is the device node of a whole bootdisk
 declare -a OPTION_BOOT_DISK_DEVICE_NODE
 # OPTION_BOOT_PARTITION_NUMBER is the partition number
@@ -837,7 +839,8 @@ function parse_config_file () {
 function update_option_boot () {
 	local i=$1
 	# this will fail if the kernel device name contains a '!'
-	OPTION_BOOT_DISK_DEVICE_NODE[$i]="/dev/`collect_path_info disk_name ${OPTION_BOOT[$i]}`"
+	OPTION_BOOT_DISK_DEVICE_NAME[$i]="`collect_path_info disk_name ${OPTION_BOOT[$i]}`"
+	OPTION_BOOT_DISK_DEVICE_NODE[$i]="/dev/`${OPTION_BOOT_DISK_DEVICE_NAME[$i]}`"
 	OPTION_BOOT_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${OPTION_BOOT[$i]}`"
 }
 
