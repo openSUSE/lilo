@@ -9,353 +9,354 @@ HOME=$TEMP	# make hmount et al. happy
 
 
 function running_on_pmac_old () {
-    echo running on pmac_old
+	echo running on pmac_old
 
-    echo "generating $TEMP/miboot.conf ..."
-    echo
+	echo "generating $TEMP/miboot.conf ..."
+	echo
 
-    if [ "$OPTION_BOOTFOLDER" ] ; then
+	if [ "$OPTION_BOOTFOLDER" ] ; then
 	HFS_BOOTFOLDER=":$OPTION_BOOTFOLDER"
-    else
+	else
 	HFS_BOOTFOLDER=":$DEFAULT_BOOTFOLDER"
-    fi
-    echo HFS_BOOTFOLDER $HFS_BOOTFOLDER
-    echo OPTION_BOOTFOLDER $OPTION_BOOTFOLDER
+	fi
+	echo HFS_BOOTFOLDER $HFS_BOOTFOLDER
+	echo OPTION_BOOTFOLDER $OPTION_BOOTFOLDER
 
-    # starting the work
-    {
+	# starting the work
+	{
 	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
 	test -z "$OPTION_DEFAULT" || echo "default = $OPTION_DEFAULT"
-	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
+	test -z "$OPTION_ROOT"	|| echo "root = $OPTION_ROOT"
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 	test -z "$OPTION_INITRD"  || echo "initrd = ${HFS_BOOTFOLDER}:initrd.def"
 	echo
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-	    test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-	    test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-	    echo "image = ${HFS_BOOTFOLDER}:" $(printf "vmlinux.%03d" $i)
-	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
-	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
-	    test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
-	    test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "    initrd = ${HFS_BOOTFOLDER}:"$(printf "initrd.%03d" $i)
-	    echo
+		test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+		test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
+		echo "image = ${HFS_BOOTFOLDER}:" $(printf "vmlinux.%03d" $i)
+		test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "	label = ${CONFIG_IMAGE_LABEL[$i]}"
+		test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "	root = ${CONFIG_IMAGE_ROOT[$i]}"
+		test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "	append = \"${CONFIG_IMAGE_APPEND[$i]}\""
+		test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "	initrd = ${HFS_BOOTFOLDER}:"$(printf "initrd.%03d" $i)
+		echo
 	done
 	echo
-    } > $TEMP/miboot.conf
+	} > $TEMP/miboot.conf
 
-    # umount the boot = partition, or exit if that fails
-    mount | grep -q "$OPTION_BOOT"
-    if [ "$?" = "0" ] ; then 
-	echo "unmount $OPTION_BOOT" ; umount $OPTION_BOOT || exit 1
-    fi
-    humount $OPTION_BOOT 2>/dev/null
-    humount $OPTION_BOOT 2>/dev/null
-    
-    hmount $OPTION_BOOT || {
-	echo "Mounting of $OPTION_BOOT failed, trying again after formatting"
-	hformat -l "Linux boot partition" $OPTION_BOOT
-	hmount $OPTION_BOOT || exit 1
-    }
-    echo using bootfolder \'$HFS_BOOTFOLDER\' on volume `hpwd` on $OPTION_BOOT 
-    hmkdir $HFS_BOOTFOLDER 2>/dev/null
-    hattrib -b $HFS_BOOTFOLDER
-    hcd $HFS_BOOTFOLDER
-    hcopy /lib/lilo/pmac/Finder.bin :Finder
-    hcopy /lib/lilo/pmac/System.bin :System
-    hcopy -r $TEMP/miboot.conf :
-    hattrib -t TEXT -c "R*ch" :miboot.conf
-    hattrib -t FNDR -c MACS Finder
-    hattrib -t zsys -c MACS System
-    [ "$OPTION_INITRD" ] && hcopy $OPTION_INITRD :initrd.def
-    
-    for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-	test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-	hcopy ${CONFIG_IMAGE_FILE[$i]} :$(printf "vmlinux.%03d" $i)
-	if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
-	    hcopy ${CONFIG_IMAGE_INITRD[$i]} :$(printf "initrd.%03d" $i)
+	# umount the boot = partition, or exit if that fails
+	mount | grep -q "$OPTION_BOOT"
+	if [ "$?" = "0" ] ; then 
+		echo "unmount $OPTION_BOOT" ; umount $OPTION_BOOT || exit 1
 	fi
-    done
-    hpwd
-    hls -ltr
-    humount
+	humount $OPTION_BOOT 2>/dev/null
+	humount $OPTION_BOOT 2>/dev/null
+	
+	hmount $OPTION_BOOT || {
+		echo "Mounting of $OPTION_BOOT failed, trying again after formatting"
+		hformat -l "Linux boot partition" $OPTION_BOOT
+		hmount $OPTION_BOOT || exit 1
+	}
+	echo using bootfolder \'$HFS_BOOTFOLDER\' on volume `hpwd` on $OPTION_BOOT 
+	hmkdir $HFS_BOOTFOLDER 2>/dev/null
+	hattrib -b $HFS_BOOTFOLDER
+	hcd $HFS_BOOTFOLDER
+	hcopy /lib/lilo/pmac/Finder.bin :Finder
+	hcopy /lib/lilo/pmac/System.bin :System
+	hcopy -r $TEMP/miboot.conf :
+	hattrib -t TEXT -c "R*ch" :miboot.conf
+	hattrib -t FNDR -c MACS Finder
+	hattrib -t zsys -c MACS System
+	[ "$OPTION_INITRD" ] && hcopy $OPTION_INITRD :initrd.def
+	
+	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+		test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+		test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
+		hcopy ${CONFIG_IMAGE_FILE[$i]} :$(printf "vmlinux.%03d" $i)
+		if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
+			hcopy ${CONFIG_IMAGE_INITRD[$i]} :$(printf "initrd.%03d" $i)
+		fi
+	done
+	hpwd
+	hls -ltr
+	humount
 }
 
 
 function running_on_pmac_new () {
-    echo running on pmac_new
-    local other
-    local other_disk other_partition
-    local FILE_PATH
+	echo running on pmac_new
+	local other
+	local other_disk other_partition
+	local FILE_PATH
 
-    other="${CONFIG_IMAGE_OTHER[*]}"
-    other="${other%% *}"
-    other_disk="${CONFIG_IMAGE_OTHER_DISK_DEVICE[*]}"
-    other_disk="${other_disk%% *}"
-    other_partition="${CONFIG_IMAGE_OTHER_PARTITION_NUMBER[*]}"
-    other_partition="${other_partition%% *}"
-    # build the temp yaboot.conf
+	other="${CONFIG_IMAGE_OTHER[*]}"
+	other="${other%% *}"
+	other_disk="${CONFIG_IMAGE_OTHER_DISK_DEVICE[*]}"
+	other_disk="${other_disk%% *}"
+	other_partition="${CONFIG_IMAGE_OTHER_PARTITION_NUMBER[*]}"
+	other_partition="${other_partition%% *}"
+	# build the temp yaboot.conf
 
-    # build the pathnames, copy the files to bootfolder if / is not bootable
-    for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-	test -z ${CONFIG_IMAGE_FILE[$i]} && continue
-	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-
-	FILE_PATH=$(get_of_path ${CONFIG_IMAGE_FILE[$i]} | grep -v /pci[0-9])
-	if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
-	    CONFIG_IMAGE_PATH[$i]="copy"
-	else
-	    CONFIG_IMAGE_PATH[$i]=$FILE_PATH
-	fi
-	if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then 
-	    FILE_PATH=$(get_of_path ${CONFIG_IMAGE_INITRD[$i]} | grep -v /pci[0-9])
-	    if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
-        	CONFIG_IMAGE_INITRDPATH[$i]="copy"
-	    else
-		CONFIG_IMAGE_INITRDPATH[$i]=$FILE_PATH
-	    fi
-	fi
-    done
-
-    # starting the work
-    {
-	test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
-	if [ "$OPTION_DEFAULT" ]; then
-	    if [[ "$OPTION_DEFAULT" = @(macos|macosx) ]] ; then
-		# yaboot.conf gets the first available image= label as default
-		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-		    test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-		    echo "default = ${CONFIG_IMAGE_LABEL[$i]}"
-		    break
-		done
-	    else
-		# a image = label is the default
-		echo "default = $OPTION_DEFAULT"
-	    fi
-	fi
-	
-	test -z "$OPTION_ROOT"    || echo "root = $OPTION_ROOT"
-	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
-	test -z "$OPTION_INITRD"  || echo "initrd = initrd.def"
-
+	# build the pathnames, copy the files to bootfolder if / is not bootable
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-	    [ "${CONFIG_IMAGE_OTHER[$i]}" ] &&  continue
-	    test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-	    if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
-		echo "image = "$(printf "vmlinux.%03d" $i)
-	    else
-		echo "image = ${CONFIG_IMAGE_PATH[$i]}"
-	    fi
+		test -z ${CONFIG_IMAGE_FILE[$i]} && continue
+		test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
 
-	    test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "    label = ${CONFIG_IMAGE_LABEL[$i]}"
-	    test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "    root = ${CONFIG_IMAGE_ROOT[$i]}"
-	    test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "    append = \"${CONFIG_IMAGE_APPEND[$i]}\""
-
-	    if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
-		if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
-		    echo "    initrd = $(printf "initrd.%03d" $i)" 
-		else 
-		    echo "    initrd = ${CONFIG_IMAGE_INITRDPATH[$i]}" 
+		FILE_PATH=$(get_of_path ${CONFIG_IMAGE_FILE[$i]} | grep -v /pci[0-9])
+		if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
+			CONFIG_IMAGE_PATH[$i]="copy"
+		else
+			CONFIG_IMAGE_PATH[$i]=$FILE_PATH
 		fi
-	    fi
+		if [ -n "${CONFIG_IMAGE_INITRD[$i]}" ] ; then 
+			FILE_PATH=$(get_of_path ${CONFIG_IMAGE_INITRD[$i]} | grep -v /pci[0-9])
+			if [ -z "$FILE_PATH" -o "${CONFIG_IMAGE_COPY[$i]}" = "true" ] ; then
+				CONFIG_IMAGE_INITRDPATH[$i]="copy"
+			else
+				CONFIG_IMAGE_INITRDPATH[$i]=$FILE_PATH
+			fi
+		fi
 	done
-    } > $TEMP/yaboot.conf
 
-    BOOT_DEVICEPATH="&device;:&partition;"
-    if test -z "$other"
-    then
-	OTHER_DEVICEPATH=
-    else
-	if test "$other_disk" = "$OPTION_BOOT_DISK_DEVICE_NAME"
+	# starting the work
+	{
+		test -z "$OPTION_TIMEOUT" || echo "timeout = $OPTION_TIMEOUT"
+		if [ "$OPTION_DEFAULT" ]; then
+			if [[ "$OPTION_DEFAULT" = @(macos|macosx) ]] ; then
+			# yaboot.conf gets the first available image= label as default
+			for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+				test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+				echo "default = ${CONFIG_IMAGE_LABEL[$i]}"
+				break
+			done
+			else
+				# a image = label is the default
+				echo "default = $OPTION_DEFAULT"
+			fi
+		fi
+
+		test -z "$OPTION_ROOT"	|| echo "root = $OPTION_ROOT"
+		test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
+		test -z "$OPTION_INITRD"  || echo "initrd = initrd.def"
+
+		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+			[ "${CONFIG_IMAGE_OTHER[$i]}" ] &&  continue
+			test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
+			if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
+				echo "image = "$(printf "vmlinux.%03d" $i)
+			else
+				echo "image = ${CONFIG_IMAGE_PATH[$i]}"
+			fi
+
+			test -z "${CONFIG_IMAGE_LABEL[$i]}"  || echo "	label = ${CONFIG_IMAGE_LABEL[$i]}"
+			test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "	root = ${CONFIG_IMAGE_ROOT[$i]}"
+			test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "	append = \"${CONFIG_IMAGE_APPEND[$i]}\""
+
+			if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
+				if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
+					echo "	initrd = $(printf "initrd.%03d" $i)" 
+				else 
+					echo "	initrd = ${CONFIG_IMAGE_INITRDPATH[$i]}" 
+				fi
+			fi
+		done
+	} > $TEMP/yaboot.conf
+
+	BOOT_DEVICEPATH="&device;:&partition;"
+	if test -z "$other"
 	then
-	    OTHER_DEVICEPATH="&device;:$other_partition"
+		OTHER_DEVICEPATH=
 	else
-	    OTHER_DEVICEPATH=$(get_of_path ${other})
+		if test "$other_disk" = "$OPTION_BOOT_DISK_DEVICE_NAME"
+		then
+			OTHER_DEVICEPATH="&device;:$other_partition"
+		else
+			OTHER_DEVICEPATH=$(get_of_path ${other})
+		fi
 	fi
-    fi
 
-    echo "BOOT_DEVICEPATH  = $BOOT_DEVICEPATH"
-    echo "OTHER_DEVICEPATH = $OTHER_DEVICEPATH"
-    {
-	cat <<-EOF
-	<CHRP-BOOT>
-	<COMPATIBLE>
-	MacRISC MacRISC3 MacRISC4
-	</COMPATIBLE>
-	<DESCRIPTION>
-	Linux/PPC Yaboot bootloader
-	</DESCRIPTION>
-	<BOOT-SCRIPT>
-	EOF
-	if [ "$OPTION_USE_OS_CHOOSER" = "yes" ] ; then
+	echo "BOOT_DEVICEPATH  = $BOOT_DEVICEPATH"
+	echo "OTHER_DEVICEPATH = $OTHER_DEVICEPATH"
+	{
 		cat <<-EOF
-		dev /chosen 0 0 " yaboot,do-not-open-screen" property device-end
-		output-device find-device
-		" device_type" active-package get-package-property
-		not
-		if
-			decode-string
-			2swap
-			2drop
-			" display" $=
+		<CHRP-BOOT>
+		<COMPATIBLE>
+		MacRISC MacRISC3 MacRISC4
+		</COMPATIBLE>
+		<DESCRIPTION>
+		Linux/PPC Yaboot bootloader
+		</DESCRIPTION>
+		<BOOT-SCRIPT>
+		EOF
+		if [ "$OPTION_USE_OS_CHOOSER" = "yes" ] ; then
+			cat <<-EOF
+			dev /chosen 0 0 " yaboot,do-not-open-screen" property device-end
+			output-device find-device
+			" device_type" active-package get-package-property
+			not
 			if
-				" display-cfg" active-package get-package-property
-				dup
-				not
+				decode-string
+				2swap
+				2drop
+				" display" $=
 				if
-					drop
-					decode-int
-					2rot
-					2drop
-					-1 =
+					" display-cfg" active-package get-package-property
+					dup
 					not
-				then
-				if
-					output-device output
-					output-device select-dev
-					" "(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)" drop 0  7 " set-colors" my-self \$call-method
-					" "(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)" drop 8 15 " set-colors" my-self \$call-method
-					f to foreground-color
-					0 to background-color
+					if
+						drop
+						decode-int
+						2rot
+						2drop
+						-1 =
+						not
+					then
+					if
+						output-device output
+						output-device select-dev
+						" "(0000000000aa00aa0000aaaaaa0000aa00aaaa5500aaaaaa)" drop 0  7 " set-colors" my-self \$call-method
+						" "(5555555555ff55ff5555ffffff5555ff55ffffff55ffffff)" drop 8 15 " set-colors" my-self \$call-method
+						f to foreground-color
+						0 to background-color
+					then
 				then
 			then
-		then
-		EOF
-
-		if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
-			MY_MACOS_STRING=
-			for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-				if [ -n "${CONFIG_IMAGE_OTHER[$i]}" ] ; then
-					if [ "${CONFIG_IMAGE_LABEL[$i]}" = "macosx" ] ; then
-						MY_MACOS_STRING="\" Booting Mac OS X ...\" cr \" boot $OTHER_DEVICEPATH,System\\Library\\CoreServices\\BootX\" eval"
-					else
-						MY_MACOS_STRING="\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
-					fi
-					break
-				fi
-			done
-			MY_YABOOT_STRING="\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval "
-			if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
-				# macos or macosx is the default
-				MY_STRING_WITH_SPACE_BAR=$MY_YABOOT_STRING
-				MY_STRING_WITHOUT_SPACE_BAR=$MY_MACOS_STRING
-				SPACE_BAR_HINT="Linux"
-			else
-				#yaboot is the default
-				MY_STRING_WITH_SPACE_BAR=$MY_MACOS_STRING
-				MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
-				SPACE_BAR_HINT="MacOS"
-			fi
-			# 5 is the timeout
-			cat <<-EOF
-			" "(0C)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(0d 0a)" fb8-write drop
-			" "(09)  press space to boot $SPACE_BAR_HINT ... " fb8-write drop
-			get-msecs d# $OPTION_MACOSTIMEOUT 3E8 * +
-			begin
-			  key? if
-			    key case
-			      hex 20 of $MY_STRING_WITH_SPACE_BAR  endof
-			    endcase
-			  then
-			  dup get-msecs &lt;
-			until
-			drop
-			$MY_STRING_WITHOUT_SPACE_BAR
 			EOF
+
+			if [ "$CONFIG_PARSE_HASOTHER" = "true" ] ; then
+				MY_MACOS_STRING=
+				for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+					if [ -n "${CONFIG_IMAGE_OTHER[$i]}" ] ; then
+						if [ "${CONFIG_IMAGE_LABEL[$i]}" = "macosx" ] ; then
+							MY_MACOS_STRING="\" Booting Mac OS X ...\" cr \" boot $OTHER_DEVICEPATH,System\\Library\\CoreServices\\BootX\" eval"
+						else
+							MY_MACOS_STRING="\" Booting MacOS ...\" cr \" boot $OTHER_DEVICEPATH,\\\\:tbxi\" eval"
+						fi
+						break
+					fi
+				done
+				MY_YABOOT_STRING="\" Booting Yaboot ...\" cr \" boot $BOOT_DEVICEPATH,\\\\yaboot\" eval "
+				if [ "$OPTION_DEFAULT" = "macos" -o "$OPTION_DEFAULT" = "macosx" ] ; then
+					# macos or macosx is the default
+					MY_STRING_WITH_SPACE_BAR=$MY_YABOOT_STRING
+					MY_STRING_WITHOUT_SPACE_BAR=$MY_MACOS_STRING
+					SPACE_BAR_HINT="Linux"
+				else
+					#yaboot is the default
+					MY_STRING_WITH_SPACE_BAR=$MY_MACOS_STRING
+					MY_STRING_WITHOUT_SPACE_BAR=$MY_YABOOT_STRING
+					SPACE_BAR_HINT="MacOS"
+				fi
+				# 5 is the timeout
+				cat <<-EOF
+				" "(0C)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(0d 0a)" fb8-write drop
+				" "(09)  press space to boot $SPACE_BAR_HINT ... " fb8-write drop
+				get-msecs d# $OPTION_MACOSTIMEOUT 3E8 * +
+				begin
+					key? if
+						key case
+							hex 20 of $MY_STRING_WITH_SPACE_BAR  endof
+						endcase
+					then
+					dup get-msecs &lt;
+				until
+				drop
+				$MY_STRING_WITHOUT_SPACE_BAR
+				EOF
+			else
+				cat <<-EOF
+				load $BOOT_DEVICEPATH,\\\\yaboot
+				go
+				EOF
+			fi
 		else
 			cat <<-EOF
+			dev /chosen 0 0 " yaboot,do-not-open-screen" property device-end
 			load $BOOT_DEVICEPATH,\\\\yaboot
 			go
 			EOF
 		fi
-	else
-		cat <<-EOF
-		dev /chosen 0 0 " yaboot,do-not-open-screen" property device-end
-		load $BOOT_DEVICEPATH,\\\\yaboot
-		go
-		EOF
+		echo "</BOOT-SCRIPT>"
+		cat /lib/lilo/pmac/os-badge-icon
+		echo "</CHRP-BOOT>"
+	} > $TEMP/os-chooser
+
+	# umount the boot = partition, or exit if that fails
+	if [ "$(</proc/mounts)" == *$OPTION_BOOT\ * ] ; then 
+		echo "unmount $OPTION_BOOT"
+		umount $OPTION_BOOT || exit 1
 	fi
-	echo "</BOOT-SCRIPT>"
-	cat /lib/lilo/pmac/os-badge-icon
-	echo "</CHRP-BOOT>"
-    } > $TEMP/os-chooser
+	humount $OPTION_BOOT 2>/dev/null
+	humount $OPTION_BOOT 2>/dev/null
+	
+	hmount $OPTION_BOOT || {
+		echo "Mounting of $OPTION_BOOT failed, trying again after formatting"
+		hformat -l "Linux boot partition" $OPTION_BOOT
+		hmount $OPTION_BOOT || exit 1
+	}
 
-    # umount the boot = partition, or exit if that fails
-    if [ "$(</proc/mounts)" == *$OPTION_BOOT\ * ] ; then 
-	echo "unmount $OPTION_BOOT"
-	umount $OPTION_BOOT || exit 1
-    fi
-    humount $OPTION_BOOT 2>/dev/null
-    humount $OPTION_BOOT 2>/dev/null
-    
-    hmount $OPTION_BOOT || {
-	echo "Mounting of $OPTION_BOOT failed, trying again after formatting"
-	hformat -l "Linux boot partition" $OPTION_BOOT
-	hmount $OPTION_BOOT || exit 1
-    }
+	HFS_BOOTFOLDER="${OPTION_BOOTFOLDER:-$DEFAULT_BOOTFOLDER}"
+	hmkdir $HFS_BOOTFOLDER 2>/dev/null
+	hattrib -b $HFS_BOOTFOLDER
+	hcd $HFS_BOOTFOLDER
+	# yaboot looks for yaboot.cnf, yaboot.conf, /etc/yaboot.conf
+	# force yaboot.conf
+	hdel :yaboot.cnf  2>/dev/null
+	hcopy $TEMP/yaboot.conf :yaboot.conf
+	hcopy /lib/lilo/pmac/yaboot :yaboot
+	hcopy /lib/lilo/pmac/Finder.bin :Finder
+	hcopy /lib/lilo/pmac/System.bin :System
+	hattrib -t BINA -c UNIX "Mac OS Rom" 2>/dev/null
+	hattrib -t BINA -c UNIX "install"	2>/dev/null
+	hattrib -t FNDR -c MACS Finder
+	hattrib -t zsys -c MACS System
+	hattrib -t TEXT -c "R*ch" yaboot.conf
+	hcopy $TEMP/os-chooser :os-chooser
+	hattrib -t BINA -c UNIX yaboot
+	hattrib -t tbxi -c chrp os-chooser
+	[ "$OPTION_INITRD" ] && hcopy $OPTION_INITRD :initrd.def
 
-    HFS_BOOTFOLDER="${OPTION_BOOTFOLDER:-$DEFAULT_BOOTFOLDER}"
-    hmkdir $HFS_BOOTFOLDER 2>/dev/null
-    hattrib -b $HFS_BOOTFOLDER
-    hcd $HFS_BOOTFOLDER
-    # yaboot looks for yaboot.cnf, yaboot.conf, /etc/yaboot.conf
-    # force yaboot.conf
-    hdel :yaboot.cnf  2>/dev/null
-    hcopy $TEMP/yaboot.conf :yaboot.conf
-    hcopy /lib/lilo/pmac/yaboot :yaboot
-    hcopy /lib/lilo/pmac/Finder.bin :Finder
-    hcopy /lib/lilo/pmac/System.bin :System
-    hattrib -t BINA -c UNIX "Mac OS Rom" 2>/dev/null
-    hattrib -t BINA -c UNIX "install"    2>/dev/null
-    hattrib -t FNDR -c MACS Finder
-    hattrib -t zsys -c MACS System
-    hattrib -t TEXT -c "R*ch" yaboot.conf
-    hcopy $TEMP/os-chooser :os-chooser
-    hattrib -t BINA -c UNIX yaboot
-    hattrib -t tbxi -c chrp os-chooser
-    [ "$OPTION_INITRD" ] && hcopy $OPTION_INITRD :initrd.def
+	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
+		test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
+		test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
+		if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
+			hcopy ${CONFIG_IMAGE_FILE[$i]} :$(printf "vmlinux.%03d" $i)
+		fi
+		test -z "${CONFIG_IMAGE_INITRD[$i]}" || (
+			if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
+				hcopy ${CONFIG_IMAGE_INITRD[$i]} :$(printf "initrd.%03d" $i)
+			fi
+		)
+	done
+	hpwd
+	hls -ltr
+	humount
 
-    for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
-	test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
-	test "${CONFIG_IMAGE_OPTIONAL[$i]}" = "skip" && continue
-	if [ "${CONFIG_IMAGE_PATH[$i]}" = "copy" ] ; then
-	    hcopy ${CONFIG_IMAGE_FILE[$i]} :$(printf "vmlinux.%03d" $i)
+	if [ "$OPTION_ACTIVATE" = "yes" ] ; then
+		NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
+		echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
+		nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
 	fi
-	test -z "${CONFIG_IMAGE_INITRD[$i]}" || (
-	if [ "${CONFIG_IMAGE_INITRDPATH[$i]}" = "copy" ] ; then
-	    hcopy ${CONFIG_IMAGE_INITRD[$i]} :$(printf "initrd.%03d" $i)
-	fi )
-    done
-    hpwd
-    hls -ltr
-    humount
-
-    if [ "$OPTION_ACTIVATE" = "yes" ] ; then
-	NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
-	echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
-	nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
-    fi
 }
 
 
 #
 # Local variables:
-#     mode: sh
-#     mode: font-lock
-#     mode: auto-fill
-#     sh-indent: 4
-#     sh-multiline-offset: 2
-#     sh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
-#     fill-column: 78
+#	 mode: sh
+#	 mode: font-lock
+#	 mode: auto-fill
+#	 sh-indent: 4
+#	 sh-multiline-offset: 2
+#	 sh-if-re: "\\s *\\b\\(if\\)\\b[^=]"
+#	 fill-column: 78
 # End:
 #

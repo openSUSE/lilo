@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 30 11:08:28 CEST 2007 - olh@suse.de
+
+- reformat shell scripts  for ts=4
+
+-------------------------------------------------------------------
 Mon Jul 30 10:10:39 CEST 2007 - olh@suse.de
 
 - add vim: ts=4 to shell scripts
