@@ -239,9 +239,15 @@ if [ -f devspec ] ; then
     file_of_hw_devtype=/proc/device-tree${file_of_hw_devtype}
     dbg_show file_of_hw_devtype
     if ! [ -f ${file_of_hw_devtype}/device_type ]; then
-	# check for scsi@$of_disk_scsi_chan/device_type else bail out ..
-	file_of_hw_devtype=$(printf "%s/scsi@%x" $file_of_hw_devtype $of_disk_scsi_chan)
-	dbg_show file_of_hw_devtype
+	if ! [ -d ${file_of_hw_devtype}/sas ]; then
+                # check for scsi@$of_disk_scsi_chan/device_type else bail out ..
+                file_of_hw_devtype=$(printf "%s/scsi@%x" $file_of_hw_devtype $of_disk_scsi_chan)
+                dbg_show file_of_hw_devtype
+        else
+                # check for sas/device_type else bail out ..
+                file_of_hw_devtype=$(printf "%s/sas" $file_of_hw_devtype)
+                dbg_show file_of_hw_devtype
+        fi
     fi
     if ! [ -f ${file_of_hw_devtype}/device_type ] ; then
 	error "no device_type found in ${file_of_hw_devtype}"
@@ -270,6 +276,9 @@ if [ -f devspec ] ; then
 	    ;;
 	scsi*)
 	    file_storage_type=scsi
+	    ;;
+	sas*)
+	    file_storage_type=sas
 	    ;;
 	ide|ata)
 	    # TODO
@@ -339,6 +348,31 @@ if [ -f devspec ] ; then
 	    file_of_hw_path=$(
 		printf "%s/%s@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" \
 		    $of_disk_scsi_dir $of_disk_scsi_id $of_disk_scsi_lun
+	    )
+	    ;;
+        sas)
+	    vendor_id=$(read_int ${file_of_hw_devtype%%/sas}/vendor-id)
+	    if (( vendor_id == 0x1000 )); then
+		# PCI_VENDOR_ID_LSI_LOGIC==0x1000
+		sas_address="${file_sysfs_dir}/device/suse_sas_address"
+		if [ -f "$sas_address" ]; then
+		    of_disk_addr=$(< $sas_address)
+		fi
+	    else
+		(( of_disk_addr = ( (of_disk_scsi_chan<<16) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) )); #
+
+	    fi
+
+	    dbg_show of_disk_addr
+	    if [ -d ${file_of_hw_devtype}/disk ]; then
+		of_disk_scsi_dir=disk
+	    else
+		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
+	    fi
+
+	    file_of_hw_path=$(
+		printf "%s/%s@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" \
+		    $of_disk_scsi_dir $of_disk_addr $of_disk_scsi_lun
 	    )
 	    ;;
         fcp)
@@ -489,6 +523,10 @@ else # no 'devspec' found
 		;;
 	    scsi)
 		file_of_hw_path=$(printf  "%s/sd@%x,%x"  "${of_device_path##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)
+		;;
+	    sas)
+		(( of_disk_addr = ( (of_disk_scsi_chan<<16) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) )); #
+		file_of_hw_path=$(printf  "%s/disk@%x,%x"  "${of_device_path##/proc/device-tree}" $of_disk_addr $of_disk_scsi_lun)
 		;;
 	    sata)
 		file_of_hw_path="${of_device_path##/proc/device-tree}"

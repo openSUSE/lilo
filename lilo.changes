@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Aug  3 10:57:17 CEST 2007 - olh@suse.de
+
+- handle mptsas device in show_of_path.sh (288545 - LTC35907)
+  use suse_sas_address sysfs property
+
+-------------------------------------------------------------------
 Thu Nov 10 17:19:20 CET 2005 - jplack@suse.de
 
 -  handle multiple prep partitions properly (installation blocker)
