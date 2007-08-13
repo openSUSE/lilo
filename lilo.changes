@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 13 14:31:25 CEST 2007 - olh@suse.de
+
+- increase yaboot tftp buffer size from 12 to 16MB (feat. 302195)
+
+-------------------------------------------------------------------
 Mon Jul 30 11:47:44 CEST 2007 - olh@suse.de
 
 - use &device; instead of full path for image/initrd= on pmac (194118)
