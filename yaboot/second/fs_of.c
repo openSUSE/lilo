@@ -115,7 +115,7 @@ static int of_net_download(unsigned char **buffer, ihandle of_device)
 		goto out;
 	}
 	memset(p, 0, LOAD_BUFFER_SIZE);
-	DEBUG_F("TFP...\n");
+	DEBUG_F("TFTP...\n");
 	ret = prom_loadmethod(of_device, p);
 	DEBUG_F("result: %d\n", ret);
 	if (ret > 0)
