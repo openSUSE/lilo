@@ -1203,6 +1203,7 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 {
 	void *malloc_base;
 	prom_handle cpus[1];
+	unsigned long addr;
 
 	memset(__bss_start, 0, _end - __bss_start);
 
@@ -1215,10 +1216,17 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 	if (prom_claim(_start, _end - _start, 0) == _start)
 		prom_printf("brokenfirmware did not claim executable memory, fixed it myself\n");
 
-	/* Allocate some memory for malloc'ator */
-	malloc_base = prom_claim((void *)MALLOCADDR, MALLOCSIZE, 0);
+	for (addr = 64*1024; addr < CLAIM_END - MALLOCSIZE; addr += 64*1024) {
+		/* overlap check */
+		if ((addr < (unsigned long)_end || addr + MALLOCSIZE < (unsigned long)_end) && (addr >= (unsigned long)_start || addr + MALLOCSIZE >= (unsigned long)_start))
+			continue;
+		/* Allocate some memory for malloc'ator */
+		malloc_base = prom_claim((void*)addr , MALLOCSIZE, 0);
+		if (malloc_base && malloc_base != (void*) -1)
+			break;
+	}
 	if (malloc_base == (void *)-1) {
-		prom_printf("Can't claim malloc buffer (%x bytes at %08x)\n", MALLOCSIZE, MALLOCADDR);
+		prom_printf("Can't claim malloc buffer (%x bytes between %08x and %08x)\n", MALLOCSIZE, 64*1024, CLAIM_END - MALLOCSIZE);
 		goto exit;
 	}
 	malloc_init(malloc_base, MALLOCSIZE);
