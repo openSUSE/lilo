@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 13 16:14:06 CEST 2007 - olh@suse.de
+
+- link yaboot at 64k
+
+-------------------------------------------------------------------
 Mon Aug 13 14:31:25 CEST 2007 - olh@suse.de
 
 - increase yaboot tftp buffer size from 12 to 16MB (feat. 302195)
