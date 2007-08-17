@@ -289,6 +289,16 @@ case "$file_full_sysfs_path" in
 
 	read of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun <<< ${spec//:/ }
 	dbg_show of_disk_scsi_host of_disk_scsi_chan of_disk_scsi_id of_disk_scsi_lun
+
+	if test -f type
+	then
+		read sysfs_ide_media_type < type
+	fi
+	: sysfs_ide_media_type $sysfs_ide_media_type
+	# simplified for pegasos
+	ide_port=$of_disk_scsi_host
+	ide_channel=$of_disk_scsi_id
+
 	cd ../../..
 	;;
     */host+([0-9])/rport-+([0-9]):+([0-9])-+([0-9])/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
@@ -529,10 +539,10 @@ if [ -f devspec ] ; then
 	;;
 	spi-ide)
 	case "$sysfs_ide_media_type" in
-		cdrom)
+		cdrom|5)
 		of_ide_media_type=cdrom
 		;;
-		disk)
+		disk|0)
 		of_ide_media_type=disk
 		;;
 		*)

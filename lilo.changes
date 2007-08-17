@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 17 22:26:24 CEST 2007 - olh@suse.de
+
+- handle pata_via on pegasos
+
+-------------------------------------------------------------------
 Mon Aug 13 16:17:37 CEST 2007 - olh@suse.de
 
 - change the fixed malloc buffer location to a dynamic one
