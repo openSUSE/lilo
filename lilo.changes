@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 17 22:30:01 CEST 2007 - olh@suse.de
+
+- handle the sysfs layout of the week: /sys/block may be a symlink
+
+-------------------------------------------------------------------
 Fri Aug 17 22:26:24 CEST 2007 - olh@suse.de
 
 - handle pata_via on pegasos

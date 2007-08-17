@@ -73,7 +73,7 @@ fi
 
 
 # assert that /sys is mounted, else try to mount, on fail complain
-if test -d /sys/block; then
+if test -d /sys/block/; then
     :
 elif mount -t sysfs sysfs /sys; then
     _sysfs_mounted=1
@@ -204,7 +204,7 @@ dbg_show file_majorminor
 
 file_sysfs_path=
 
-for i in $(find /sys/block -name dev); do
+for i in $(find /sys/block/ -name dev); do
     : looking at $i
     if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
 done
