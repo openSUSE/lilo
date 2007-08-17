@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 17 22:41:04 CEST 2007 - olh@suse.de
+
+- recognize the lilo -R "boot once" cmdline option
+
+-------------------------------------------------------------------
 Fri Aug 17 22:30:01 CEST 2007 - olh@suse.de
 
 - handle the sysfs layout of the week: /sys/block may be a symlink
