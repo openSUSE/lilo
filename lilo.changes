@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug 23 11:46:59 CEST 2007 - olh@suse.de
+
+- implement the lilo -R 'boot once' functionality (268527)
+
+-------------------------------------------------------------------
 Fri Aug 17 22:41:04 CEST 2007 - olh@suse.de
 
 - recognize the lilo -R "boot once" cmdline option

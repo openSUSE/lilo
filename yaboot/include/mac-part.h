@@ -54,5 +54,10 @@ struct mac_driver_desc {
     u16	signature;	/* expected to be MAC_DRIVER_MAGIC */
     u16	block_size;
     u32	block_count;
-    /* ... more stuff */
+    u16 dev_type;
+    u16 dev_id;
+    u32 data;
+    u16 driver_count;
+    u8 driverlist[488];
+    u16 padding[3];
 };

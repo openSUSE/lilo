@@ -334,12 +334,10 @@ int prom_read(prom_handle file, void *buf, int n)
 	return result;
 }
 
-#if 0
 int prom_write(prom_handle file, void *buf, int n)
 {
 	return (int)call_prom("write", 3, 1, file, buf, n);
 }
-#endif
 
 int prom_seek(prom_handle file, unsigned long long pos)
 {

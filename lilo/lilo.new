@@ -157,7 +157,7 @@ Known options are:
     --get-arch      returns the board type lilo is running on
                     known values are:
 		    iseries chrp pmac_new pmac_old pegasos
-    -R "label opts" set default command line for next reboot
+    -R "label opts" set default command line for next reboot (boot once)
     --version | -v  displays the version number
     --help          displays this help text
 EOHELP
@@ -909,6 +909,92 @@ function check_config_file () {
     done
 } #end function check_config_file
 
+function setup_boot_once () {
+	local blah
+	local boot_once
+	local -i driver_count_offset=16
+	local -i driverlist_offset=18
+	local -i driverlist_entry_size=8
+	local -i driver_count
+	local -i writing_to_disk_from_firmware_is_broken
+
+	boot_once=$1
+	if test -z "$boot_once"
+	then
+		return
+	fi
+	pushd "/sys/block/${OPTION_BOOT_DISK_DEVICE_NAME[0]}/device" > /dev/null
+	cd `pwd -P`
+	until test "$PWD" = "/"
+	do
+		if test -f devspec
+		then
+			blah="`cat devspec`"
+			echo "devspec '$blah' in $PWD"
+			blah="`cat /proc/device-tree/$blah/device_type`"
+			echo "device_type is '$blah'"
+			break
+		fi
+		cd ..
+	done
+	popd > /dev/null
+	case "$blah" in
+		pci-ide|pci-ata)
+			# pci-ide is the CMD646 onboard controller in B&W (untested)
+			# and early G4 (tested) models. Writing to disk from yaboot
+			# will corrupt the first 32k with random data
+			echo "The firmware can not write reliable to ${OPTION_BOOT_DISK_DEVICE_NAME[0]}."
+			writing_to_disk_from_firmware_is_broken=1
+		;;
+		ata)
+			# ata is used on pmac (tested) and QS22
+			writing_to_disk_from_firmware_is_broken=0
+		;;
+		ide)
+			# ide is used on first gen iMac (untested) and JS20
+			writing_to_disk_from_firmware_is_broken=2
+		;;
+		*)
+			# everything else is untested and will cause data integrity issues
+			writing_to_disk_from_firmware_is_broken=2
+		;;
+	esac
+	if test $writing_to_disk_from_firmware_is_broken = 0
+	then
+		echo "The dubios lilo-once feature will most likely work with your firmware."
+		echo "But better fix YaST to not force reboot after first stage."
+		echo "Its pointless. Its wrong. It does not fix anything."
+	elif test $writing_to_disk_from_firmware_is_broken = 1
+	then
+		echo "The firmware disk driver will corrupt your disk when writing to the first disk block"
+		echo "$0 -R is disabled"
+		return
+	else
+		echo "The firmware disk driver may corrupt your disk when writing to the first disk block"
+		echo "$0 -R is disabled because this system is untested."
+		return
+	fi
+	return
+	if test "`dd if=${OPTION_BOOT_DISK_DEVICE_NODE[0]} count=2 bs=1 2>/dev/null`" != "ER"
+	then
+		echo "Block zero does not start with 'ER', no mac label on ${OPTION_BOOT_DISK_DEVICE_NODE[0]}"
+		return
+	fi
+	if test "`dd if=${OPTION_BOOT_DISK_DEVICE_NODE[0]} count=2 bs=1 skip=512 2>/dev/null`" != "PM"
+	then
+		echo "Block one does not start with 'PM', no (or empty) mac label on ${OPTION_BOOT_DISK_DEVICE_NODE[0]}"
+		return
+	fi
+	echo "reading driver_count from ${OPTION_BOOT_DISK_DEVICE_NODE[0]}"
+	read blah driver_count < <( dd if="${OPTION_BOOT_DISK_DEVICE_NODE[0]}" bs=1 skip=$driver_count_offset count=2 2>/dev/null | od --read-bytes=2 --width=2 -t x2 )
+	echo "driver_count is $driver_count"
+	offset_into_driverlist=$(( ($driver_count * $driverlist_entry_size) + $driverlist_offset))
+	echo "offset into driverlist is $offset_into_driverlist"
+	if test "$offset_into_driverlist" -lt 512
+	then
+		echo -n $boot_once | dd of=${OPTION_BOOT_DISK_DEVICE_NODE[0]} bs=1 seek=$(( $offset_into_driverlist )) count=$(( 512 - $offset_into_driverlist  ))
+	fi
+}
 
 # check for requirements:
 #   /proc
@@ -953,6 +1039,10 @@ fi
 parse_config_file
 check_config_file
 
+if [ "$boot_once" ]; then
+	setup_boot_once "$boot_once"
+	exit 0
+fi
 function running_on_ps3() {
 local device
 local kernel_filename

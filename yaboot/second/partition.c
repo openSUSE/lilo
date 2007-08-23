@@ -77,18 +77,34 @@ static int mac_magic_present(char *block_buffer)
 	return desc->signature == MAC_DRIVER_MAGIC;
 }
 
-static void partition_mac_lookup(prom_handle disk, struct partition_t **list)
+#define driverlist_entry_size 8
+char lilo_once_cmdline[512];
+static int mac_write_once;
+static void partition_mac_lookup(prom_handle disk, struct partition_t **list, char *buf)
 {
 	int block, map_size;
 
-	/* block_buffer contains block 0 from the partitions_lookup() stage */
-	struct mac_partition *part = (struct mac_partition *)block_buffer;
-	unsigned short ptable_block_size = ((struct mac_driver_desc *)block_buffer)->block_size;
+	/* buf contains block 0 from the partitions_lookup() stage */
+	struct mac_driver_desc *desc = (struct mac_driver_desc*)buf;
+	struct mac_partition *part = (struct mac_partition *)buf;
+	unsigned short ptable_block_size = desc->block_size;
+	unsigned int lilo_once_string;
 
 	DEBUG_F("\n");
+	if (!mac_write_once++) {
+		lilo_once_string = offsetof(struct mac_driver_desc, driverlist) + (desc->driver_count * driverlist_entry_size);
+		if (lilo_once_string < 512 && buf[lilo_once_string] >= ' ' && buf[lilo_once_string] <= '~') {
+				memcpy(lilo_once_cmdline, buf + lilo_once_string, 512 - lilo_once_string);
+				memset(buf + lilo_once_string, 0, 512 - lilo_once_string);
+				prom_printf("Cleaning lilo -R 'label args' signature\n");
+				prom_printf("seek  returned %08x\n", prom_seek(disk, 0));
+				prom_printf("write returned %08x\n", prom_write(disk, buf, 512));
+				prom_sleep(3);
+		}
+	}
 	map_size = 1;
 	for (block = 1; block < map_size + 1; block++) {
-		if (prom_readblocks(disk, block, 1, block_buffer) != 1) {
+		if (prom_readblocks(disk, block, 1, buf) != 1) {
 			prom_printf("Can't read partition %d\n", block);
 			break;
 		}
@@ -354,7 +370,7 @@ struct partition_t *partitions_lookup(const char *device)
 	}
 	if (mac_magic_present(block_buffer)) {
 		/* pdisk partition format */
-		partition_mac_lookup(disk, &list);
+		partition_mac_lookup(disk, &list, block_buffer);
 	} else if (msdos_magic_present(block_buffer)) {
 		/* msdos partition format */
 		partition_msdos_lookup(disk, &list);

@@ -44,5 +44,6 @@ struct partition_t {
 
 extern struct partition_t*	partitions_lookup(const char *device);
 extern void			partitions_free(struct partition_t* list);
+extern char lilo_once_cmdline[];
 
 #endif

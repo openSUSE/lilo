@@ -53,6 +53,7 @@
 #include <yaboot.h>
 #include <elf.h>
 #include <debug.h>
+#include <partition.h>
 
 static char *hard_coded_bootpath(char *bootpath)
 {
@@ -811,38 +812,46 @@ static enum get_params_result get_params(struct boot_param_t *params, enum get_p
 
 	print_boot(NULL);
 
-	if (gpr == GET_PARAMS_OK && useconf && (p = cfg_get_strg(NULL, "timeout")) && *p) {
-		timeout = simple_strtol(p, NULL, 0);
-		if (timeout > 0) {
-			timeout = prom_getms() + 100 * timeout;
-			do {
-				c = prom_nbgetchar();
-			} while (c == -1 && prom_getms() <= timeout);
-		}
-		if (c == -1 || !c)
-			c = '\n';
-		else if (!char_is_newline(c) && !char_is_tab(c) && !char_is_backspace(c)) {
-			cmdbuff[0] = c = char_to_ascii(c);
-			cmdbuff[1] = 0;
-		}
-	}
-
-	if (char_is_newline(c)) {
-		imagename = cfg_get_default();
-		if (imagename)
-			prom_printf("%s", imagename);
-		prom_printf("\n");
+	if (lilo_once_cmdline[0]) {
+		strcpy(cmdbuff, lilo_once_cmdline);
+		lilo_once_cmdline[0] = '\0';
+		imagename = cmdbuff;
+		prom_printf("lilo once: '%s'\n", imagename);
+		word_split(&imagename, &params->args);
 	} else {
-		if (c >= ' ' && useconf && cfg_get_flag(cmdbuff, "single-key")) {
-			imagename = cmdbuff;
-			prom_printf("%s\n", cmdbuff);
-		} else {
-			if (char_is_tab(c))
-				print_all_labels();
-			cmdlineedit(cmdbuff, print_boot);
+		if (gpr == GET_PARAMS_OK && useconf && (p = cfg_get_strg(NULL, "timeout")) && *p) {
+			timeout = simple_strtol(p, NULL, 0);
+			if (timeout > 0) {
+				timeout = prom_getms() + 100 * timeout;
+				do {
+					c = prom_nbgetchar();
+				} while (c == -1 && prom_getms() <= timeout);
+			}
+			if (c == -1 || !c)
+				c = '\n';
+			else if (!char_is_newline(c) && !char_is_tab(c) && !char_is_backspace(c)) {
+				cmdbuff[0] = c = char_to_ascii(c);
+				cmdbuff[1] = 0;
+			}
+		}
+
+		if (char_is_newline(c)) {
+			imagename = cfg_get_default();
+			if (imagename)
+				prom_printf("%s", imagename);
 			prom_printf("\n");
-			imagename = cmdbuff;
-			word_split(&imagename, &params->args);
+		} else {
+			if (c >= ' ' && useconf && cfg_get_flag(cmdbuff, "single-key")) {
+				imagename = cmdbuff;
+				prom_printf("%s\n", cmdbuff);
+			} else {
+				if (char_is_tab(c))
+					print_all_labels();
+				cmdlineedit(cmdbuff, print_boot);
+				prom_printf("\n");
+				imagename = cmdbuff;
+				word_split(&imagename, &params->args);
+			}
 		}
 	}
 
