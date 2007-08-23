@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Aug 23 15:40:23 CEST 2007 - olh@suse.de
+
+- fix variable assignment in lilo-pmac.lib to fix 'copy' option
+  for root on lvm
+
+-------------------------------------------------------------------
 Thu Aug 23 11:52:42 CEST 2007 - olh@suse.de
 
 - handle the sysfs layout of the week: /sys/block contains symlinks
