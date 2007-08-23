@@ -204,7 +204,8 @@ dbg_show file_majorminor
 
 file_sysfs_path=
 
-for i in $(find /sys/block/ -name dev); do
+for i in /sys/block/*/*/dev /sys/block/*/dev
+do
     : looking at $i
     if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
 done

@@ -429,7 +429,7 @@ function collect_path_info() {
 	fi
 	# find kernel name for major:minor pair
 	: direntry_majorminor $direntry_majorminor
-	for dev in $(find /sys/block/ -name dev)
+	for dev in /sys/block/*/*/dev /sys/block/*/dev
 	do
 		: looking at $dev
 		if test "$(< $dev)" = "$direntry_majorminor"
@@ -1073,7 +1073,8 @@ local file_sysfs_path
     	file_majorminor=$file_major:$file_minor
 
 
-	for i in $(find /sys/block/ -name dev); do
+	for i in /sys/block/*/*/dev /sys/block/*/dev
+	do
     		: looking at $i
     		if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
 	done

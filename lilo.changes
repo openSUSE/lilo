@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Aug 23 11:52:42 CEST 2007 - olh@suse.de
+
+- handle the sysfs layout of the week: /sys/block contains symlinks
+
+-------------------------------------------------------------------
 Thu Aug 23 11:46:59 CEST 2007 - olh@suse.de
 
 - implement the lilo -R 'boot once' functionality (268527)
