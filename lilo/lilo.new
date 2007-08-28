@@ -1091,6 +1091,7 @@ local file_sysfs_path
 
 	cat > /etc/kboot.conf <<EOF
 default=openSuSE
+timeout=20
 openSuSE="$device:$kernel_filename initrd=$device:$initrd_filename quiet panic=42 sysrq=1"
 EOF
 

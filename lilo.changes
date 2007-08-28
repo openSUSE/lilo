@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 28 13:32:46 CEST 2007 - olh@suse.de
+
+- add a timeout=20 to initial kboot.conf on PS3
+
+-------------------------------------------------------------------
 Tue Aug 28 13:30:42 CEST 2007 - olh@suse.de
 
 - handle iSeries kernel slots in collect_path_info
