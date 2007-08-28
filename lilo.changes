@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Aug 28 13:30:42 CEST 2007 - olh@suse.de
+
+- handle iSeries kernel slots in collect_path_info
+
+-------------------------------------------------------------------
 Thu Aug 23 15:40:23 CEST 2007 - olh@suse.de
 
 - fix variable assignment in lilo-pmac.lib to fix 'copy' option

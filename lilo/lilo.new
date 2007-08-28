@@ -412,6 +412,9 @@ function collect_path_info() {
 	querytype=$1
 	direntry=$2
 
+	# iSeries slots
+	[[ "$direntry" == [ABCD] ]] && return
+
 	# get major:minor pair
 	if test -c "$direntry"
 	then
