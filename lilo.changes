@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jul 16 10:20:02 CEST 2007 - olh@suse.de
+
+- handle mptsas device in show_of_path.sh (290871 - LTC36211)
+
+-------------------------------------------------------------------
 Tue Apr  3 15:57:32 CEST 2007 - olh@suse.de
 
 - do not use ls -s to get the filesize, use wc -c instead
