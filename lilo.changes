@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Sep 11 11:55:58 CEST 2007 - olh@suse.de
+
+- add quotes about shell variables, and handle missing initrd
+
+-------------------------------------------------------------------
 Tue Aug 28 13:32:46 CEST 2007 - olh@suse.de
 
 - add a timeout=20 to initial kboot.conf on PS3

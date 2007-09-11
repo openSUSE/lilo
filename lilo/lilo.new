@@ -878,7 +878,7 @@ function check_config_file () {
     fi
     
     for (( i=1; i < CONFIG_IMAGE_COUNT; i++ )); do
-	if [ -f ${CONFIG_IMAGE_FILE[$i]} ] ; then
+	if [ -f "${CONFIG_IMAGE_FILE[$i]}" ] ; then
 	    CONFIG_IMAGE_FILE_DISK_DEVICE[$i]="`collect_path_info disk_name ${CONFIG_IMAGE_FILE[$i]}`"
 	    CONFIG_IMAGE_FILE_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_FILE[$i]}`"
 	    CONFIG_IMAGE_FILE_PATH_ON_FILESYSTEM[$i]="`get_relative_path_on_filesystem ${CONFIG_IMAGE_FILE[$i]}`"
@@ -890,17 +890,19 @@ function check_config_file () {
 		CONFIG_IMAGE_OPTIONAL[$i]="skip"
 	    fi
 	fi
-	if [ -f ${CONFIG_IMAGE_INITRD[$i]} ] ; then
-	    CONFIG_IMAGE_INITRD_DISK_DEVICE[$i]="`collect_path_info disk_name ${CONFIG_IMAGE_INITRD[$i]}`"
-	    CONFIG_IMAGE_INITRD_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_INITRD[$i]}`"
-	    CONFIG_IMAGE_INITRD_PATH_ON_FILESYSTEM[$i]="`get_relative_path_on_filesystem ${CONFIG_IMAGE_INITRD[$i]}`"
-	else
-	    if [ "${CONFIG_IMAGE_OPTIONAL[$i]}" = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
-		error   "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
-	    else
-		warning "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
-		CONFIG_IMAGE_OPTIONAL[$i]="skip"
-	    fi
+	if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
+		if [ -f "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
+		    CONFIG_IMAGE_INITRD_DISK_DEVICE[$i]="`collect_path_info disk_name ${CONFIG_IMAGE_INITRD[$i]}`"
+		    CONFIG_IMAGE_INITRD_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_INITRD[$i]}`"
+		    CONFIG_IMAGE_INITRD_PATH_ON_FILESYSTEM[$i]="`get_relative_path_on_filesystem ${CONFIG_IMAGE_INITRD[$i]}`"
+		else
+		    if [ "${CONFIG_IMAGE_OPTIONAL[$i]}" = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
+				error   "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
+		    else
+				warning "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
+				CONFIG_IMAGE_OPTIONAL[$i]="skip"
+		    fi
+		fi
 	fi
     done
     
