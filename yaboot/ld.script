@@ -3,7 +3,7 @@ OUTPUT_ARCH(powerpc:common)
 ENTRY(_yaboot_start)
 SECTIONS
 {
-	. = (64*1024);
+	. = ( 4 * 64 * 1024 );
 	_start = .;
 	.text	:
 	{

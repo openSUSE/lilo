@@ -112,7 +112,7 @@ fi
 #
 rm -f $tmp/output
 #
-link_addr=`printf '0x%08x\n' $(( ( 64 * 1024 )  ))`
+link_addr=`printf '0x%08x\n' $(( ( 4 * 64 * 1024 )  ))`
 ld \
 	-m elf32ppc \
 	-Ttext $link_addr \

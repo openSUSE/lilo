@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Sep 14 10:11:19 CEST 2007 - olh@suse.de
+
+- change the link address of yaboot and the chrp zImage from 64k
+  to 256k to fix the boot binary with SLOF on Cell 
+
+-------------------------------------------------------------------
 Tue Sep 11 11:55:58 CEST 2007 - olh@suse.de
 
 - add quotes about shell variables, and handle missing initrd
