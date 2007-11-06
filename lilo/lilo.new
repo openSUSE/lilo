@@ -58,6 +58,8 @@ declare -a OPTION_BOOT_DISK_DEVICE_NAME
 declare -a OPTION_BOOT_DISK_DEVICE_NODE
 # OPTION_BOOT_PARTITION_NUMBER is the partition number
 declare -a OPTION_BOOT_PARTITION_NUMBER
+# OPTION_BOOT_PARTITION_SYSFS_PATH is the partition number
+declare -a OPTION_BOOT_PARTITION_SYSFS_PATH
 # OPTION_CLONE contains a space separated list of additional boot partitions
 OPTION_CLONE=
 # OPTION_BOOTFOLDER contains the MacOS folder with the bootstuff
@@ -480,6 +482,10 @@ function collect_path_info() {
 		echo "$direntry_kernel_disk_name"
 		return 0
 		;;
+		sysfspath)
+		echo "${direntry_sysfspath%/dev}"
+		return 0
+		;;
 	esac
 	echo >&2 "'$querytype' not handled for '$direntry'"
 	return 1
@@ -854,6 +860,7 @@ function update_option_boot () {
 	OPTION_BOOT_DISK_DEVICE_NAME[$i]="`collect_path_info disk_name ${OPTION_BOOT[$i]}`"
 	OPTION_BOOT_DISK_DEVICE_NODE[$i]="/dev/${OPTION_BOOT_DISK_DEVICE_NAME[$i]}"
 	OPTION_BOOT_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${OPTION_BOOT[$i]}`"
+	OPTION_BOOT_PARTITION_SYSFS_PATH[$i]="`collect_path_info sysfspath ${OPTION_BOOT[$i]}`"
 }
 
 function check_config_file () {

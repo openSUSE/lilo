@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Nov  6 14:26:57 CET 2007 - olh@suse.de
+
+- format the hfs boot partition if the size is less than 1MB (338300)
+  remove old vmlinux.00N files
+
+-------------------------------------------------------------------
 Fri Sep 14 10:11:19 CEST 2007 - olh@suse.de
 
 - change the link address of yaboot and the chrp zImage from 64k

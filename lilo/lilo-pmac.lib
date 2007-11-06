@@ -87,6 +87,8 @@ function running_on_pmac_new () {
 	local other
 	local other_disk other_partition
 	local FILE_PATH
+	local hfs_boot_partition_size
+	declare -i hfs_boot_partition_size
 
 	other="${CONFIG_IMAGE_OTHER[*]}"
 	other="${other%% *}"
@@ -297,19 +299,33 @@ function running_on_pmac_new () {
 		echo "</CHRP-BOOT>"
 	} > $TEMP/os-chooser
 
-	# umount the boot = partition, or exit if that fails
-	if [ "$(</proc/mounts)" == *$OPTION_BOOT\ * ] ; then 
-		echo "unmount $OPTION_BOOT"
-		umount $OPTION_BOOT || exit 1
+	umount $OPTION_BOOT &>/dev/null
+	rm -f $HOME/.hcwd
+
+	if test -f $OPTION_BOOT_PARTITION_SYSFS_PATH/size
+	then
+		read hfs_boot_partition_size < $OPTION_BOOT_PARTITION_SYSFS_PATH/size
+		if test $(( $hfs_boot_partition_size * 512 )) -lt $(( 1 * 1024 * 1024 ))
+		then
+			echo " Making new HFS filesystem on $OPTION_BOOT"
+			hformat -l "SuSE Linux boot partition" $OPTION_BOOT || exit 1
+		fi
 	fi
-	humount $OPTION_BOOT 2>/dev/null
-	humount $OPTION_BOOT 2>/dev/null
-	
-	hmount $OPTION_BOOT || {
+
+	if ! hmount $OPTION_BOOT > $TEMP/hmount.txt 2>&1
+	then
+		cat $TEMP/hmount.txt
 		echo "Mounting of $OPTION_BOOT failed, trying again after formatting"
-		hformat -l "Linux boot partition" $OPTION_BOOT
-		hmount $OPTION_BOOT || exit 1
-	}
+		hformat -l "SuSE Linux boot partition" $OPTION_BOOT || exit 1
+		hmount $OPTION_BOOT > $TEMP/hmount.txt 2>&1 || exit 1
+	fi
+	cat $TEMP/hmount.txt
+	if grep -Eq ' \(locked\)$' $TEMP/hmount.txt
+	then
+		echo "$OPTION_BOOT is read-only"
+		humount
+		exit 1
+	fi
 
 	HFS_BOOTFOLDER="${OPTION_BOOTFOLDER:-$DEFAULT_BOOTFOLDER}"
 	hmkdir $HFS_BOOTFOLDER 2>/dev/null
@@ -318,6 +334,12 @@ function running_on_pmac_new () {
 	# yaboot looks for yaboot.cnf, yaboot.conf, /etc/yaboot.conf
 	# force yaboot.conf
 	hdel :yaboot.cnf  2>/dev/null
+	hdel :initrd.def  2>/dev/null
+	for i in `seq 1 9`
+	do
+		hdel vmlinux.`printf %03d $i` &>/dev/null
+		hdel initrd.`printf %03d $i` &>/dev/null
+	done
 	hcopy $TEMP/yaboot.conf :yaboot.conf
 	hcopy /lib/lilo/pmac/yaboot :yaboot
 	hcopy /lib/lilo/pmac/Finder.bin :Finder
