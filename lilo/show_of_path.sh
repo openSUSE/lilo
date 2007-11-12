@@ -351,6 +351,7 @@ if [ -f devspec ] ; then
 	    )
 	    ;;
         sas)
+	    lun_format="%x"     # fallback LUN encoding
 	    vendor_id=$(read_int ${file_of_hw_devtype%%/sas}/vendor-id)
 	    if (( vendor_id == 0x1000 )); then
 		# PCI_VENDOR_ID_LSI_LOGIC==0x1000
@@ -358,6 +359,8 @@ if [ -f devspec ] ; then
 		if [ -f "$sas_address" ]; then
 		    of_disk_addr=$(< $sas_address)
 		fi
+
+		lun_format="%x000000000000"
 	    else
 		(( of_disk_addr = ( (of_disk_scsi_chan<<16) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) )); #
 
@@ -371,7 +374,7 @@ if [ -f devspec ] ; then
 	    fi
 
 	    file_of_hw_path=$(
-		printf "%s/%s@%x,%x"  "${file_of_hw_devtype##/proc/device-tree}" \
+		printf "%s/%s@%x,${lun_format}"  "${file_of_hw_devtype##/proc/device-tree}" \
 		    $of_disk_scsi_dir $of_disk_addr $of_disk_scsi_lun
 	    )
 	    ;;

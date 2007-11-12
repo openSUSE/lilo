@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 12 10:02:06 CET 2007 - olh@suse.de
+
+- handle non-zero luns on mptsas (288545 - LTC35907)
+
+-------------------------------------------------------------------
 Fri Aug  3 10:57:17 CEST 2007 - olh@suse.de
 
 - handle mptsas device in show_of_path.sh (288545 - LTC35907)
