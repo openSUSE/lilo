@@ -63,6 +63,7 @@ struct path_description {
 		struct {
 			char *ip_before_filename;
 			char *ip_after_filename;
+			unsigned char mac[6];
 		} n;
 		struct {
 			char *s1;

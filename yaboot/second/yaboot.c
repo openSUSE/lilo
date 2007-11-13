@@ -112,8 +112,11 @@ extern char _end[];
 extern char _yaboot_conf_start[];
 extern char _yaboot_conf_end[];
 
+static const char config_file_name_ether_mac_template[] = "yaboot.conf-%02x-%02x-%02x-%02x-%02x-%02x";
+static char config_file_name_ether_mac[] = "yaboot.conf-xx-xx-xx-xx-xx-xx";
 static const char conf_token[] = "conf=";
 static const char *config_file_names_net[] = {
+	config_file_name_ether_mac,
 	"yaboot.conf",
 	NULL
 };
@@ -209,6 +212,14 @@ static int find_and_load_config_file(const struct path_description *b, char *con
 	switch (b->type) {
 	case TYPE_NET:
 		names = config_file_names_net;
+		for (i = 0; i < 6; i++)
+			if (b->u.n.mac[i]) {
+				sprintf(config_file_name_ether_mac, config_file_name_ether_mac_template,
+					b->u.n.mac[0], b->u.n.mac[1],
+					b->u.n.mac[2], b->u.n.mac[3],
+					b->u.n.mac[4], b->u.n.mac[5]);
+				break;
+			}
 		break;
 	case TYPE_ISCSI:
 	case TYPE_BLOCK:

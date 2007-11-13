@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Nov 13 09:45:11 CET 2007 - olh@suse.de
+
+- search for yaboot.conf-xx-xx-xx-xx-xx-xx on the tftp server
+  zImage.initrd is now too large, so yaboot has to be used to load
+  files from network (feat. 302195) 
+
+-------------------------------------------------------------------
 Tue Nov  6 15:07:01 CET 2007 - olh@suse.de
 
 - Fixed issue with SAS devices on different topologies and non-zero

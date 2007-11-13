@@ -153,6 +153,21 @@ static void parse_net_device(struct path_description *result)
 	return;
 }
 
+static void get_mac_address(struct path_description *result)
+{
+	phandle dev = prom_finddevice(result->device);
+	if (dev != PROM_INVALID_HANDLE) {
+		if (prom_getprop(dev, "mac-address", &result->u.n.mac, 6) == -1)
+			prom_getprop(dev, "local-mac-address", &result->u.n.mac, 6);
+		prom_printf("MAC for %s: %02x:%02x:%02x:%02x:%02x:%02x\n",
+				result->device,
+				result->u.n.mac[0], result->u.n.mac[1],
+				result->u.n.mac[2], result->u.n.mac[3],
+				result->u.n.mac[4], result->u.n.mac[5]
+				);
+	}
+}
+
 int parse_device_path(const char *imagepath, struct path_description *result)
 {
 	char *colon;
@@ -185,6 +200,7 @@ int parse_device_path(const char *imagepath, struct path_description *result)
 			parse_iscsi_device(result);
 		} else {
 			parse_net_device(result);
+			get_mac_address(result);
 		}
 		break;
 	case TYPE_INVALID:
