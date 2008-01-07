@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Jan  7 16:06:54 CET 2008 - olh@suse.de
+
+- replace ! in kernel device name with / to fix install on iseries
+
+-------------------------------------------------------------------
 Tue Nov 13 09:45:11 CET 2007 - olh@suse.de
 
 - search for yaboot.conf-xx-xx-xx-xx-xx-xx on the tftp server

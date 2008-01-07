@@ -462,6 +462,7 @@ function collect_path_info() {
 		direntry_kernel_disk_name="${direntry_sysfspath%/dev}"
 		direntry_kernel_disk_name="${direntry_kernel_disk_name%/*}"
 		direntry_kernel_disk_name="${direntry_kernel_disk_name##*/}"
+		direntry_kernel_disk_name="${direntry_kernel_disk_name//!//}"
 		direntry_kernel_partition_number="${direntry_kernel_partition_name%%+([0-9])}"
 		direntry_kernel_partition_number="${direntry_kernel_partition_name#$direntry_kernel_partition_number}"
 	else
