@@ -363,15 +363,16 @@ static int is_elf64(loadinfo_t * loadinfo)
 
 static int load_elf32(struct boot_file_t *file, loadinfo_t * loadinfo)
 {
-	int i;
+	int i, j;
 	Elf32_Ehdr *e = &(loadinfo->elf.elf32hdr);
 	Elf32_Phdr *p, *ph;
 	int size = sizeof(Elf32_Ehdr) - sizeof(Elf_Ident);
 	unsigned long addr, loadaddr;
 
 	/* Read the rest of the Elf header... */
-	if ((*(file->fs->read)) (file, size, &e->e_version) < size) {
-		prom_printf("\nCan't read Elf32 image header\n");
+	j = (*(file->fs->read)) (file, size, &e->e_version);
+	if (j < size) {
+		prom_printf("\nCan't read Elf32 image header: %08x/%08x\n", j, size);
 		return 0;
 	}
 
@@ -405,8 +406,9 @@ static int load_elf32(struct boot_file_t *file, loadinfo_t * loadinfo)
 		prom_printf("seek error\n");
 		return 0;
 	}
-	if ((*(file->fs->read)) (file, sizeof(Elf32_Phdr) * e->e_phnum, ph) != sizeof(Elf32_Phdr) * e->e_phnum) {
-		prom_printf("read error\n");
+	j = (*(file->fs->read)) (file, sizeof(Elf32_Phdr) * e->e_phnum, ph);
+	if (j != sizeof(Elf32_Phdr) * e->e_phnum) {
+		prom_printf("read error: %08x/%08x\n", j, sizeof(Elf32_Phdr) * e->e_phnum);
 		return 0;
 	}
 
@@ -464,8 +466,9 @@ static int load_elf32(struct boot_file_t *file, loadinfo_t * loadinfo)
 			return 0;
 		}
 		offset = p->p_vaddr - loadinfo->load_loc;
-		if ((*(file->fs->read)) (file, p->p_filesz, loadinfo->base + offset) != p->p_filesz) {
-			prom_printf("Read failed\n");
+		j = (*(file->fs->read)) (file, p->p_filesz, loadinfo->base + offset);
+		if (j != p->p_filesz) {
+			prom_printf("Read failed: %08x/%08x\n", j, p->p_filesz);
 			prom_release(loadinfo->base, loadinfo->memsize);
 			return 0;
 		}
@@ -479,15 +482,16 @@ static int load_elf32(struct boot_file_t *file, loadinfo_t * loadinfo)
 
 static int load_elf64(struct boot_file_t *file, loadinfo_t * loadinfo)
 {
-	int i;
+	int i, j;
 	Elf64_Ehdr *e = &(loadinfo->elf.elf64hdr);
 	Elf64_Phdr *p, *ph;
 	int size = sizeof(Elf64_Ehdr) - sizeof(Elf_Ident);
 	unsigned long addr, loadaddr;
 
 	/* Read the rest of the Elf header... */
-	if ((*(file->fs->read)) (file, size, &e->e_version) < size) {
-		prom_printf("\nCan't read Elf64 image header\n");
+	j = (*(file->fs->read)) (file, size, &e->e_version);
+	if (j < size) {
+		prom_printf("\nCan't read Elf64 image header: %08x/%08x\n", j, size);
 		return 0;
 	}
 
@@ -521,8 +525,9 @@ static int load_elf64(struct boot_file_t *file, loadinfo_t * loadinfo)
 		prom_printf("Seek error\n");
 		return 0;
 	}
-	if ((*(file->fs->read)) (file, sizeof(Elf64_Phdr) * e->e_phnum, ph) != sizeof(Elf64_Phdr) * e->e_phnum) {
-		prom_printf("Read error\n");
+	j = (*(file->fs->read)) (file, sizeof(Elf64_Phdr) * e->e_phnum, ph);
+	if (j != sizeof(Elf64_Phdr) * e->e_phnum) {
+		prom_printf("Read error: %08x/%08x\n", j, sizeof(Elf64_Phdr) * e->e_phnum);
 		return 0;
 	}
 
@@ -578,8 +583,9 @@ static int load_elf64(struct boot_file_t *file, loadinfo_t * loadinfo)
 			return 0;
 		}
 		offset = p->p_vaddr - loadinfo->load_loc;
-		if ((*(file->fs->read)) (file, p->p_filesz, loadinfo->base + offset) != p->p_filesz) {
-			prom_printf("Read failed\n");
+		j = (*(file->fs->read)) (file, p->p_filesz, loadinfo->base + offset);
+		if (j != p->p_filesz) {
+			prom_printf("Read failed: %08x/%08llx\n", j, p->p_filesz);
 			prom_release(loadinfo->base, loadinfo->memsize);
 			return 0;
 		}

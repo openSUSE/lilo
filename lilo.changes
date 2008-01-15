@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan 15 10:21:43 CET 2008 - olh@suse.de
+
+- add debug output to ELF read functions (350212)
+
+-------------------------------------------------------------------
 Mon Jan  7 16:06:54 CET 2008 - olh@suse.de
 
 - replace ! in kernel device name with / to fix install on iseries
