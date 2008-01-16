@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jan 16 13:55:13 CET 2008 - olh@suse.de
+
+- boot the same kernel if the pSeries CSA has to reboot to 
+  reconfigure the device-tree (353676 - LTC34053)
+
+-------------------------------------------------------------------
 Wed Jan 16 09:38:04 CET 2008 - olh@suse.de
 
 - add functions to access /options/ properties to yaboot (353676)

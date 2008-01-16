@@ -875,6 +875,16 @@ static enum get_params_result get_params(struct boot_param_t *params, enum get_p
 	if (useconf && (!imagename || imagename[0] == 0))
 		imagename = cfg_get_default();
 
+	/* Now we have an image or label name and additional cmdline options.
+	   Store them in nvram in case the pSeries firmware has to reboot */
+	c = strlen(imagename) + 1 + strlen(params->args) + 1;
+	p = malloc(c);
+	if (p) {
+		sprintf(p, "%s %s", imagename, params->args[0] ? params->args[0] : "");
+		prom_set_options("boot-last-label", p, c);
+		free(p);
+	}
+
 	if (useconf) {
 		set_default_device(cfg_get_strg(NULL, "device"), cfg_get_strg(NULL, "partition"), &img_def_device);
 		if (cfg_get_flag(NULL, "restricted"))
@@ -985,6 +995,7 @@ static void yaboot_text_ui(void)
 	loadinfo_t loadinfo;
 	void *initrd_more, *initrd_want;
 	unsigned long initrd_read;
+	char fw_nbr_reboots[4];
 	char *msg;
 
 	make_params_buffer = malloc(2048);
@@ -992,6 +1003,13 @@ static void yaboot_text_ui(void)
 		return;
 	loadinfo.load_loc = 0;
 	gpr = GET_PARAMS_OK;
+
+	memset(fw_nbr_reboots, 0, sizeof(fw_nbr_reboots));
+	if (prom_get_options("ibm,client-architecture-support-reboot", &fw_nbr_reboots, sizeof(fw_nbr_reboots)) == -1)
+		prom_get_options("ibm,fw-nbr-reboots", &fw_nbr_reboots, sizeof(fw_nbr_reboots));
+	result = simple_strtol(fw_nbr_reboots, &msg, 10);
+	if (result > 0)
+		prom_get_options("boot-last-label", lilo_once_cmdline, 512);
 
 	for (;;) {
 		initrd_size = 0;
