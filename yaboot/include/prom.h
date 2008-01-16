@@ -108,6 +108,10 @@ int prom_getproplen_chosen(const char *name);
 int prom_get_chosen(const char *name, void *mem, int len);
 int prom_set_chosen(const char *name, const void *mem, int len);
 
+int prom_getproplen_options(const char *name);
+int prom_get_options(const char *name, void *mem, int len);
+int prom_set_options(const char *name, const void *mem, int len);
+
 extern int prom_getms(void);
 extern void prom_pause(void);
 

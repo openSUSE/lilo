@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jan 16 09:38:04 CET 2008 - olh@suse.de
+
+- add functions to access /options/ properties to yaboot (353676)
+
+-------------------------------------------------------------------
 Tue Jan 15 10:21:43 CET 2008 - olh@suse.de
 
 - add debug output to ELF read functions (350212)

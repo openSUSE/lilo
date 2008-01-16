@@ -43,6 +43,7 @@ int stdout_is_screen;
 
 static ihandle prom_mmu;
 static ihandle prom_chosen;
+static ihandle prom_options;
 
 struct prom_args {
 	const char *service;
@@ -209,6 +210,21 @@ int prom_set_chosen(const char *name, const void *mem, int len)
 	return prom_setprop(prom_chosen, name, mem, len);
 }
 
+int prom_getproplen_options(const char *name)
+{
+	return prom_getproplen(prom_options, name);
+}
+
+int prom_get_options(const char *name, void *mem, int len)
+{
+	return prom_getprop(prom_options, name, mem, len);
+}
+
+int prom_set_options(const char *name, const void *mem, int len)
+{
+	return prom_setprop(prom_options, name, mem, len);
+}
+
 enum device_type prom_get_devtype(const char *device)
 {
 	phandle dev;
@@ -286,6 +302,8 @@ void prom_init(prom_entry pp)
 	prom_chosen = prom_finddevice("/chosen");
 	if (prom_chosen == (void *)-1)
 		prom_exit();
+
+	prom_options = prom_finddevice("/options");
 
 	/* this must be done before looking for stdout, for whatever reason */
 	len = prom_getprop(prom_finddevice("/"), "compatible", cmptbl, sizeof(cmptbl) - 1);
