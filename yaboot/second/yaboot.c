@@ -880,7 +880,7 @@ static enum get_params_result get_params(struct boot_param_t *params, enum get_p
 	c = strlen(imagename) + 1 + strlen(params->args) + 1;
 	p = malloc(c);
 	if (p) {
-		sprintf(p, "%s %s", imagename, params->args[0] ? params->args[0] : "");
+		sprintf(p, "%s %s", imagename, params->args[0] ? params->args : "");
 		prom_set_options("boot-last-label", p, c);
 		free(p);
 	}
