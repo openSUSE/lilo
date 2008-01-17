@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jan 17 09:00:30 CET 2008 - olh@suse.de
+
+- add debug output to TFTP download function (350212)
+
+-------------------------------------------------------------------
 Wed Jan 16 13:55:13 CET 2008 - olh@suse.de
 
 - boot the same kernel if the pSeries CSA has to reboot to 

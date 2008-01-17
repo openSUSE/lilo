@@ -118,9 +118,10 @@ static int of_net_download(unsigned char **buffer, ihandle of_device)
 	DEBUG_F("TFTP...\n");
 	ret = prom_loadmethod(of_device, p);
 	DEBUG_F("result: %d\n", ret);
-	if (ret > 0)
+	if (ret > 0) {
 		*buffer = p;
-	else
+		prom_printf("yaboot downloaded %08x bytes via network\n", ret);
+	} else
 		prom_release(p, LOAD_BUFFER_SIZE);
       out:
 	DEBUG_LEAVE_F(ret);
