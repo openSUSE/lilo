@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jan 29 14:32:57 CET 2008 - olh@suse.de
+
+- mark Emulex HBA adapter 0xfa00 as tested in show_of_path.sh
+
+-------------------------------------------------------------------
 Thu Jan 17 09:00:30 CET 2008 - olh@suse.de
 
 - add debug output to TFTP download function (350212)

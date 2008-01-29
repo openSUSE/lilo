@@ -523,7 +523,7 @@ if [ -f devspec ] ; then
 	if (( vendor_id == 0x10df )); then
 		# PCI_VENDOR_ID_EMULEX==0x10df
 		id=$(printf "%04x" $device_id)
-		if [[ $id == @(f901|f981|f982|fa00|fa01) ]]; then
+		if [[ $id == @(f901|f981|f982|fa01) ]]; then
 		warning "Emulex FC HBA with device id 0x$id not yet tested." \
 			"Reboot may fail."
 		fi
