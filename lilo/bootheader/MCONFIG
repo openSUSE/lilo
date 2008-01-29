@@ -37,6 +37,7 @@ REQFLAGS = $(ARCHREQFLAGS) \
 	   -Os \
 	   -fPIC \
 	   -Wall -Wstrict-prototypes \
+	   -I. \
 	   $(INCLUDE)
 DEBUG   = 0
 ifeq ($(DEBUG),1)

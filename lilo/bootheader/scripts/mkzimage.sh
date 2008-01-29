@@ -1,7 +1,7 @@
 #!/bin/bash
 # $Id$
 set -e
-# set -x
+#set -x
 
 export LANG=C
 export LC_ALL=C
@@ -139,6 +139,7 @@ if [ "$board_type" = "guess" ] ; then
 		  *CHRP*)  	board_type="chrp";;
 		  *PReP*)  	board_type="prep";;
 		  *iSeries*)    board_type="iseries";;
+		  *PS3*)	board_type="ps3";;
 		  pmac-generation*)
 			set -- $line
 			board_type=$3
@@ -166,6 +167,9 @@ case "$kernel_type" in
 			pmac|NewWorld)
 			zimage_sh=make_zimage_pmac_newworld.sh
 			;;
+			ps3)
+			zimage_sh=make_zimage_ps3.sh
+			;;
 			*)
 			echo "ERROR: boardtype \"$board_type\" not supported as 64bit"
 			exec $0 --help
@@ -185,6 +189,9 @@ case "$kernel_type" in
 			;;
 			pmac|NewWorld)
 			zimage_sh=make_zimage_pmac_newworld.sh
+			;;
+			ps3)
+			zimage_sh=make_zimage_ps3.sh
 			;;
 			*)
 			echo "ERROR: boardtype \"$board_type\" not supported as 32bit"

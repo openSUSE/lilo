@@ -1,5 +1,5 @@
 # $Id$
-SUBDIRS = chrp common prep scripts utils man
+SUBDIRS = chrp common prep scripts utils man ps3
 SRCROOT = .
 export LANG=C
 export LC_ALL=C
