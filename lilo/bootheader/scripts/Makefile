@@ -7,6 +7,7 @@ SCRIPTS= \
 	make_zimage_pmac_newworld.sh \
 	make_zimage_prep.sh \
 	make_zimage_iseries.sh \
+	make_zimage_ps3.sh \
 	make_zimage_pmac_oldworld_coff.sh
 
 
