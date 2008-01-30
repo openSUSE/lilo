@@ -106,6 +106,7 @@ exit 0
 %dir /lib/lilo/pmac
 %dir /lib/lilo/prep
 %dir /lib/lilo/chrp
+%dir /lib/lilo/ps3
 %dir /lib/lilo/common
 %dir /lib/lilo/scripts
 %dir /lib/lilo/utils
@@ -116,6 +117,7 @@ exit 0
 %attr(755,root,root) %config /lib/lilo/pmac/os-badge-icon
 %attr(644,root,root) /lib/lilo/pmac/*.bin
 %attr(644,root,root) /lib/lilo/pmac/yaboot*
+%attr(644,root,root) /lib/lilo/ps3/*
 %attr(644,root,root) /lib/lilo/*/*.o
 %attr(644,root,root) /lib/lilo/*/*.a
 %attr(644,root,root) %config /lib/lilo/*/*ld.script*
