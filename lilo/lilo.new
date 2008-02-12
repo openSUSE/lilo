@@ -183,60 +183,59 @@ function _error() {
     # argument list consists of a list of msg numbers and custom strings
     until  [ "$#" = 0 ] ; do
 	case "$1" in
-	    1)
-	        echo '************************************************************'
-	       	echo '* You must create a PPC PReP Boot partition (type 0x41) or *'
-	       	echo '* a FAT partition for the CHRP bootloader to be installed. *'
-	       	echo '************************************************************'
+		1)
+		echo '************************************************************'
+		echo '* You must create a PPC PReP Boot partition (type 0x41) or *'
+		echo '* a FAT partition for the CHRP bootloader to be installed. *'
+		echo '************************************************************'
 		;;
-	    2)
-	       	echo '************************************************************'
-	       	echo '* There is more than one PPC PReP Boot (type 0x41) or FAT  *'
-	       	echo '* on this system. Please specify the boot partition NUMBER *'
-	       	printf '* in boot= %-30s                  *\n' $err_var1
-	       	echo '************************************************************'
+		2)
+		echo '************************************************************'
+		echo '* There is more than one PPC PReP Boot (type 0x41) or FAT  *'
+		echo '* on this system. Please specify the boot partition NUMBER *'
+		printf '* in boot= %-30s                  *\n' $err_var1
+		echo '************************************************************'
 		;;
-	    3)
-	        echo '************************************************************'
+		3)
+		echo '************************************************************'
 		echo '* You have to create a PPC PReP Boot partition (type 0x41) *'
 		echo '* for the kernel binary to be installed.                   *'
 		echo '************************************************************'
 		;;
-	    4)
-       	    	echo '************************************************************'
-	    	echo '* You have to create a PPC PReP Boot partition (type 0x41) *'
-	    	echo '* for the CHRP bootloader to be installed.                 *'
-	    	echo '************************************************************'
+		4)
+		echo '************************************************************'
+		echo '* You have to create a PPC PReP Boot partition (type 0x41) *'
+		echo '* for the CHRP bootloader to be installed.                 *'
+		echo '************************************************************'
 		;;
-	    5)
-	       	echo '************************************************************'
-	       	echo '* There is more than one PPC PReP Boot partition (type     *'
-	       	echo '* 0x41) on this system. Please specify the boot partition  *'
-	        printf '* NUMBER in boot = %-30s          *\n' $err_var1
-	       	echo '************************************************************'
+		5)
+		echo '************************************************************'
+		echo '* There is more than one PPC PReP Boot partition (type     *'
+		echo '* 0x41) on this system. Please specify the boot partition  *'
+		printf '* NUMBER in boot = %-30s          *\n' $err_var1
+		echo '************************************************************'
 		;;
-	    6)
-	        echo "${_severity}: in config file, no label in section image/other = $err_var1"
+		6)
+		echo "${_severity}: in config file, no label in section image/other = $err_var1"
 		;;
-	    7)
-	        echo "${_severity}: in config file, $option option must not be in an image/other section!"
+		7)
+		echo "${_severity}: in config file, $option option must not be in an image/other section!"
 		;;
-	    8)
+		8)
 		echo "${_severity}: in config file, $option option has to be in an image/other section!"
 		;;
-	    9)
-	        echo "${_severity}: in config file, boot = $err_var1 is not 41 PReP"
+		9)
+		echo "${_severity}: in config file, boot = $err_var1 is not 41 PReP"
 		;;
-	    10)
-	        echo "${_severity}: in config file, guessing of boot partition failed"
+		10)
+		echo "${_severity}: in config file, guessing of boot partition failed"
 		;;
-	    11)
+		11)
 		echo "${_severity}: parted complains:"
 		cat $TEMP/parted.log
 		;;
-	
-	    *)  # plain custom string
-	        echo "${_severity}: $1"
+		*)  # plain custom string
+		echo "${_severity}: $1"
 		;;
 	esac >&2
 	shift
