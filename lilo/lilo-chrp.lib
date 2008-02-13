@@ -424,9 +424,6 @@ function running_on_chrp () {
 				))
 			done
 
-			if [ "$fw_workaround" ]; then
-				eval $fw_workaround || error "Workaround for broken firmware did not work"
-			fi
 			MKDOSFS="-s $SECSPERCLUSTER -F 16"
 			if [ -f /etc/fstab ] ; then
 				# with many FAT partitions, add some hints where the bootloader came from
