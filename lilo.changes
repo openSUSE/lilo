@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Feb 14 11:18:47 CET 2008 - olh@suse.de
+
+- make dtc optional during build
+
+-------------------------------------------------------------------
 Wed Jan 30 12:02:06 CET 2008 - sassmann@suse.de
 
 - change MCONFIG to search for includes in local directory first

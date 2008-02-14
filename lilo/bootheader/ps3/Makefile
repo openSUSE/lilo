@@ -26,7 +26,13 @@ PS3_OBJS   := $(patsubst %,%.o,$(PS3_SRC))
 PS3        := ps3.a
 PS3_DTB = ps3.dtb
 $(PS3_DTB): ps3.dts
-	dtc -O dtb -o ps3.dtb -b 0 -V 16 ps3.dts
+	set -x ; dtc="$$(type -p dtc)" ; \
+	if test "$$dtc" = "" ; then \
+		echo 'dtc was not available while building $@' > $@ ; \
+	else \
+		$$dtc -O dtb -o $@ -b 0 -V 16 $< ; \
+	fi
+
 
 all:	$(PS3) $(PS3_DTB)
 

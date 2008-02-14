@@ -7,7 +7,9 @@ License:      BSD, Other License(s), see package
 Summary:      The LInux LOader, a boot menu
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 Obsoletes:    yaboot activate quik 
+%if 0%{?suse_version} > 1020
 BuildRequires:dtc
+%endif
 Requires:     hfsutils
 Requires:     dosfstools
 Requires:     gawk sed coreutils
