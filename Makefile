@@ -7,6 +7,7 @@ BUILD_ROOT=/abuild/buildsystem.$$HOST.$$LOGNAME
 BUILD_DIR=$(BUILD_ROOT)/usr/src/packages/RPMS
 PKG=lilo
 D=
+T=
 
 
 .PHONY:	export build submit rpm clean
@@ -31,7 +32,10 @@ submit:	.submitted
 	@rm -f .built .submitted
 	set -e ; \
 	export LANG=C ; export LC_ALL=C ; export TZ=UTC ; \
+	if test "$(T)" = "" ; then \
 	tmpdir=`mktemp -d /tmp/temp.XXXXXX`/lilo ; \
+	else tmpdir="$(T)" ; rm -rf "$$tmpdir" ; mkdir "$$tmpdir" ; tmpdir="$$tmpdir/lilo" ; \
+	fi  ; \
 	lv=`cat version` ; \
 	yv=$$lv-r`svn info yaboot | sed -n "/^Last Changed Rev:[[:blank:]]\+/s@^[^:]\+:[[:blank:]]\+@@p"` ; \
 	svn export . $$tmpdir ; \
