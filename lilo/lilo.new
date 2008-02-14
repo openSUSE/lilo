@@ -894,7 +894,7 @@ function check_config_file () {
 				error   "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
 			else
 				warning "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
-			CONFIG_IMAGE_OPTIONAL[$i]="skip"
+				CONFIG_IMAGE_OPTIONAL[$i]="skip"
 			fi
 		fi
 		if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
@@ -907,7 +907,7 @@ function check_config_file () {
 					error   "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
 				else
 					warning "${CONFIG_IMAGE_LABEL[$i]}: initrd = ${CONFIG_IMAGE_INITRD[$i]}: No such file or directory"
-				CONFIG_IMAGE_OPTIONAL[$i]="skip"
+					CONFIG_IMAGE_OPTIONAL[$i]="skip"
 				fi
 			fi
 		fi
