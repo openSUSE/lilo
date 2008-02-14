@@ -864,26 +864,27 @@ function update_option_boot () {
 }
 
 function check_config_file () {
-    local i
-    if [ -z $OPTION_BOOT ]; then
-	# only pegasos and PS3 do not need boot=
-	if [[ "$MACHINE" != @(pegasos|ps3) ]]; then
-	    error "boot=<partition> is not specified!"
+	local i
+	if [ -z $OPTION_BOOT ] ; then
+		# only pegasos and PS3 do not need boot=
+		if [[ "$MACHINE" != @(pegasos|ps3) ]]
+		then
+			error "boot=<partition> is not specified!"
+		fi
+	else
+		if [ "$MACHINE" != "iseries" -a "$MACHINE"  != "pegasos" ] ; then
+			if [ ! -b $OPTION_BOOT ] ; then
+				error "boot = $OPTION_BOOT is not a valid block device"
+			fi
+			if [ $OPTION_BOOT_COUNT -ne 1 ] ; then
+				error "only one boot= line allowed here!"
+			fi
+		fi
 	fi
-    else
-	if [ "$MACHINE" != "iseries" -a "$MACHINE"  != "pegasos" ]; then
-	    if [ ! -b $OPTION_BOOT ]; then
-		error "boot = $OPTION_BOOT is not a valid block device"
-	    fi
-	    if [ $OPTION_BOOT_COUNT -ne 1 ]; then
-		error "only one boot= line allowed here!"
-	    fi
+	if [ "$CONFIG_IMAGE_COUNT" = 0 ] ; then
+		error "no image section is specified"
 	fi
-    fi
-    if [ "$CONFIG_IMAGE_COUNT" = 0 ] ; then
-	error "no image section is specified"
-    fi
-    
+
     for (( i=1; i < CONFIG_IMAGE_COUNT; i++ )); do
 	if [ -f "${CONFIG_IMAGE_FILE[$i]}" ] ; then
 	    CONFIG_IMAGE_FILE_DISK_DEVICE[$i]="`collect_path_info disk_name ${CONFIG_IMAGE_FILE[$i]}`"
