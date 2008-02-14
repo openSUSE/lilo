@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Jan 30 12:02:06 CET 2008 - sassmann@suse.de
+
+- change MCONFIG to search for includes in local directory first
+- add make_zimage_ps3.sh to build ps3 zImage
+- new directory ps3 containing all files for building ps3 zImage
+- add dtc to BuildRequires in spec file
+- add make_zimage_ps3.sh to scripts Makefile
+
+-------------------------------------------------------------------
 Tue Jan 29 14:32:57 CET 2008 - olh@suse.de
 
 - mark Emulex HBA adapter 0xfa00 as tested in show_of_path.sh
