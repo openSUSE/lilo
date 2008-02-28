@@ -9,7 +9,6 @@ PKG=lilo
 D=
 T=
 
-
 .PHONY:	export build submit rpm clean
 
 all:
