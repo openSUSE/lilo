@@ -328,11 +328,7 @@ function parted_call() {
     local ret=$?
 
     # wait for pending triggered udev events.
-    # until we know how to do better, just wait for _all_ events to finish
-    local loop=300	# wait for a maximum of 30sec
-    while [ -d /dev/.udev/queue ] && (( loop-- > 0 )); do
-	sleep 0.1
-    done
+	/sbin/udevsettle --timeout=5
 
     return $ret
 }

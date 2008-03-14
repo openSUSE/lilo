@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar 14 17:38:51 CET 2008 - olh@suse.de
+
+- use udevsettle to wait for all pending background events
+  udev will remove and add identical device nodes at random times
+  (bnc#369834 - LTC43004)
+
+-------------------------------------------------------------------
 Thu Feb 14 11:18:47 CET 2008 - olh@suse.de
 
 - make dtc optional during build
