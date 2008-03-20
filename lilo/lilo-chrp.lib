@@ -140,7 +140,15 @@ function running_on_chrp () {
 
 		# check whether the image file lies on a file system that is
 		# readable by yaboot
-		if (( iscsi_bootdevice == 1 )) ; then
+
+		# if the default image is on iscsi, force zImage
+		# boot= can point to non-iscsi devices
+		# the firmware has to understand iscsi, but currently firmware only pretents iscsi knowledge
+		if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] && is_on_iscsi "$image" ; then
+				zimage_nr=$i
+				iscsi_bootdevice=1
+		# if the boot device points to iscsi, force zImage
+		elif (( iscsi_bootdevice == 1 )) ; then
 			if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ]; then
 				zimage_nr=$i
 			fi

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Mar 20 16:14:29 CET 2008 - olh@suse.de
+
+- use zimage instead of yaboot if the boot= device points to a
+  physical device and the default image= is on iscsi
+
+-------------------------------------------------------------------
 Thu Mar 20 15:45:48 CET 2008 - olh@suse.de
 
 - fix uninitialized variable in ps3/gunzip_util.c
