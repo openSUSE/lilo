@@ -76,9 +76,9 @@ void gunzip_start(struct gunzip_state *state, void *src, int srclen)
 
 		/* remove zlib call - not needed for ps3 
 		r = zlib_inflateInit2(&state->s, -MAX_WBITS);
-		*/ 
 		if (r != Z_OK)
 			fatal("inflateInit2 returned %d\n\r", r);
+		*/ 
 	}
 
 	state->s.total_in = hdrlen;
@@ -114,9 +114,9 @@ int gunzip_partial(struct gunzip_state *state, void *dst, int dstlen)
 		state->s.avail_out = dstlen;
 		/* remove zlib call - not needed for ps3
 		r = zlib_inflate(&state->s, Z_FULL_FLUSH);
-		*/
 		if (r != Z_OK && r != Z_STREAM_END)
 			fatal("inflate returned %d msg: %s\n\r", r, state->s.msg);
+		*/
 		len = state->s.next_out - (unsigned char *)dst;
 	} else {
 		/* uncompressed image */

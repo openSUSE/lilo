@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Mar 20 15:45:48 CET 2008 - olh@suse.de
+
+- fix uninitialized variable in ps3/gunzip_util.c
+
+-------------------------------------------------------------------
 Fri Mar 14 17:38:51 CET 2008 - olh@suse.de
 
 - use udevsettle to wait for all pending background events
