@@ -576,7 +576,7 @@ function check_arch () {
 			Momentum,Maple)
 				board_type=chrp
 				;;
-			Pegasos2)
+			Pegasos2|EFIKA5K2)
 				board_type=pegasos
 				;;
 			PS3PF|sony,ps3|SonyPS3)

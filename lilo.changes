@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Jun  2 14:54:55 CEST 2008 - olh@suse.de
+
+- handle Efika as pegaos to allow bootloader configuration
+  during installation (bnc#376310)
+
+-------------------------------------------------------------------
 Thu Mar 20 16:14:29 CET 2008 - olh@suse.de
 
 - use zimage instead of yaboot if the boot= device points to a
