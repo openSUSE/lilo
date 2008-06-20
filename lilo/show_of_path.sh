@@ -207,7 +207,9 @@ file_sysfs_path=
 for i in /sys/block/*/*/dev /sys/block/*/dev
 do
     : looking at $i
-    if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
+	if [ -f $i ] ; then
+		if [ "$(< $i)" = "$file_majorminor" ] ; then file_sysfs_path=$i ; break ; fi
+	fi
 done
 
 if [ -z "$file_sysfs_path" ] ; then

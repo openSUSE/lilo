@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jun 20 15:45:26 CEST 2008 - olh@suse.de
+
+- fix show_of_path.sh to check for existance of /sys/block/*/*/dev
+
+-------------------------------------------------------------------
 Mon Jun  2 14:54:55 CEST 2008 - olh@suse.de
 
 - handle Efika as pegaos to allow bootloader configuration
