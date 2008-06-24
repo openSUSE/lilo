@@ -103,7 +103,7 @@ int main(int argc, char **argv)
 	unsigned long ramStartOffs;
 	unsigned long ramPages;
 	unsigned long roundedKernelPages;
-	unsigned long hvReleaseData;
+	u_int32_t hvReleaseData;
 	u_int32_t eyeCatcher = 0xc8a5d9c4;
 	unsigned long naca;
 	unsigned long xRamDisk;

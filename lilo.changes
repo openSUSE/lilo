@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jun 24 17:09:12 CEST 2008 - olh@suse.de
+
+- fix size of hvReleaseData in iseries-addRamDisk
+
+-------------------------------------------------------------------
 Fri Jun 20 15:45:26 CEST 2008 - olh@suse.de
 
 - fix show_of_path.sh to check for existance of /sys/block/*/*/dev
