@@ -240,7 +240,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	 */
 	vmlinux.memsize += 3 * 1024 * 1024;
 	vmlinux.addr = try_claim(vmlinux.memsize);
-	if (vmlinux.addr == 0)
+	if (vmlinux.addr == 0 || vmlinux.addr == -1)
 		abort("Can't allocate memory for kernel image !\n");
 
 	printf("Allocated %08lx bytes for kernel @ %08lx\n",
@@ -253,7 +253,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	initrd.memsize = initrd.size;
 	if (initrd.size > 0) {
 		initrd.addr = try_claim(initrd.size);
-		if (initrd.addr == 0)
+		if (initrd.addr == 0 || initrd.addr == -1)
 			abort
 			    ("Can't allocate memory for initial ramdisk !\n");
 		printf("Allocated %08lx bytes for initrd @ %08lx\n",

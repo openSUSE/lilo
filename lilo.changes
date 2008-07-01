@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul  1 17:21:00 CEST 2008 - olh@suse.de
+
+- handle also -1 as claim error value in bootheader
+
+-------------------------------------------------------------------
 Tue Jul  1 17:19:01 CEST 2008 - olh@suse.de
 
 - handle gzipped vmlinux files in mkzimage
