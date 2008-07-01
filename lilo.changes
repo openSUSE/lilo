@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul  1 16:13:38 CEST 2008 - olh@suse.de
+
+- handle sas devices on Cell blades (bnc#390804 - LTC45678)
+
+-------------------------------------------------------------------
 Tue Jun 24 17:09:12 CEST 2008 - olh@suse.de
 
 - fix size of hvReleaseData in iseries-addRamDisk

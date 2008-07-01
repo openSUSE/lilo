@@ -87,17 +87,23 @@ fi
 function read_qbyte() {
     local file=$1;
     local count=$2;
+    local width=$3
 
     [ -r $file ] || return;
     while (( count-- )) && read addr val; do
 	echo $val
-    done < <(od --read-bytes=$[4*count] --width=4 -t x4 $file)
+    done < <(od --read-bytes=$[width*count] --width=$width -t x$width $file)
 }
 
 
 function read_int() {
     [ "$1" ] || return;
-    echo $(( 0x$(read_qbyte "$1" 1) ))
+    echo $(( 0x$(read_qbyte "$1" 1 4) ))
+}
+
+function read_u64() {
+    [ "$1" ] || return;
+    echo $(( 0x$(read_qbyte "$1" 1 8) ))
 }
 
 function get_port () {
@@ -323,8 +329,9 @@ case "$file_full_sysfs_path" in
 	cd ../..
 	;;
     */end_device-[0-9]*:[0-9]*:[0-9]*/*)
-	# sas layout
+	: sas layout
 	of_disk_scsi_lun="${file_full_sysfs_path##*:}"
+	file_storage_type=sas
 	dbg_show of_disk_scsi_lun
 	until test -f devspec
 	do
@@ -363,6 +370,7 @@ if [ -f devspec ] ; then
 	error "no device_type found in ${file_of_hw_devtype}"
     fi
 
+    : looking at $(< ${file_of_hw_devtype}/device_type)
     case "$(< ${file_of_hw_devtype}/device_type)" in
 	k2-sata-root)
 	: found k2-sata-root, guessing channel
@@ -385,7 +393,9 @@ if [ -f devspec ] ; then
 	file_storage_type=sata
 	;;
 	scsi*)
-	file_storage_type=scsi
+	if [ "$file_storage_type" = "" ] ; then
+		file_storage_type=scsi
+	fi
 	;;
 	sas*)
 	file_storage_type=sas
@@ -493,16 +503,30 @@ if [ -f devspec ] ; then
 	fi
 
 	dbg_show of_disk_addr
+	: $file_of_hw_devtype
 	if [ -d ${file_of_hw_devtype}/disk ]; then
 		of_disk_scsi_dir=disk
-	else
-		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
-	fi
-
-	file_of_hw_path=$(
+		file_of_hw_path=$(
 		printf "%s/%s@%x,${lun_format}"  "${file_of_hw_devtype##/proc/device-tree}" \
 		$of_disk_scsi_dir $of_disk_addr $of_disk_scsi_lun
-	)
+		)
+	else
+		for i in ${file_of_hw_devtype}/disk*/sas-address ; do
+			if test -f "$i" ; then
+			  : looking at $i
+			  f=$(read_u64 $i)
+			  : f $f of_disk_addr $of_disk_addr
+			  if (( f == $((of_disk_addr)) )) ; then
+				f=${i%/*}
+				file_of_hw_path=${f%,*},$of_disk_scsi_lun
+			    break
+			  fi
+			else
+				error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
+			fi
+		done
+	fi
+
 	;;
         fcp)
 	declare of_disk_fc_dir
@@ -671,7 +695,7 @@ else # no 'devspec' found
 		for i in $of_device_list
 		do
 		: working on $i
-		read dummy high low < <(read_qbyte $i/assigned-addresses 3)
+		read dummy high low < <(read_qbyte $i/assigned-addresses 3 4)
 		addr="0x${high}${low}"
 
 		: addr $addr , pure guess ...
