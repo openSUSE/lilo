@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul  1 17:19:01 CEST 2008 - olh@suse.de
+
+- handle gzipped vmlinux files in mkzimage
+
+-------------------------------------------------------------------
 Tue Jul  1 17:16:37 CEST 2008 - olh@suse.de
 
 - change chrp link address to 64MB, move OF real-base to 32MB

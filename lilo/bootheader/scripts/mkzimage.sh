@@ -116,6 +116,19 @@ if [ -z "$output" ] ; then
 fi
 #
 case "$(file -Lb $vmlinux)" in
+	gzip\ compressed\ data*)
+		if [ -z "$tmp" ] ; then
+			tmp=`mktemp -d ${TMPDIR:-/tmp}/mkzimage.$$.XXXXXX`
+		else
+			tmp=`mktemp -d $tmp/mkzimage.$$.XXXXXX`
+		fi
+		gzip -c -d -v $vmlinux > $tmp/vmlinux.mkzimage
+		vmlinux="$tmp/vmlinux.mkzimage"
+	;;
+	*)
+	;;
+esac
+case "$(file -Lb $vmlinux)" in
 	ELF\ 64-bit*)
 		kernel_type=64bit
 		;;
