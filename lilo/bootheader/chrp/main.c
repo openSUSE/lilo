@@ -24,7 +24,7 @@ extern void flush_cache(void *, unsigned long);
 extern int identify_cpu(void);
 
 /* Value picked to match that used by yaboot */
-#define PROG_START	0x01400000
+#define PROG_START	0x20000000
 #define RAM_END		(128<<20)	// Fixme: use OF */
 
 extern char _coff_start[];
@@ -155,7 +155,7 @@ static int check_elf64(void *p)
 	return 64;
 }
 
-static unsigned long claim_base /* = PROG_START */ ;
+static unsigned long claim_base  = PROG_START ;
 
 static unsigned long try_claim(unsigned long size)
 {

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul  1 17:16:37 CEST 2008 - olh@suse.de
+
+- change chrp link address to 64MB, move OF real-base to 32MB
+
+-------------------------------------------------------------------
 Tue Jul  1 16:13:38 CEST 2008 - olh@suse.de
 
 - handle sas devices on Cell blades (bnc#390804 - LTC45678)
