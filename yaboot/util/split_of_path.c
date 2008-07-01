@@ -94,6 +94,7 @@ static const char *net_paths[] = {
 	"network:speed=auto,duplex=auto,4.3.2.1,yaboot,1.2.3.42,1.2.1.1",
 	"network:speed=100,duplex=full,4.3.2.1,yaboot,1.2.3.42,1.2.1.1",
 	"network:000.000.000.000,,000.000.000.000,000.000.000.000,00",
+	"network:speed=auto,duplex=auto,000.000.000.000,,000.000.000.000,000.000.000.000,5,5,255.255.255.000,512"
 	NULL,
 };
 static const char *file_paths[] = {
