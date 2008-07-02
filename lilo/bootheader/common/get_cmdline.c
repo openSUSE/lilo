@@ -4,13 +4,14 @@
 #include <cmdline.h>
 
 #undef DEBUG
+#define seconds 10
 
 int get_cmdline(char *p, int l, int max)
 {
 	int c, escape, tmp, len = l;
 
-	printf("edit kernel cmdline within 10 seconds and press RETURN:\n%s", p);
-	tmp = 100;
+	printf("edit kernel cmdline within %d seconds and press RETURN:\n%s", seconds, p);
+	tmp = 10 * seconds;
 	do {
 		c = getchar(0);
 		if (c)
