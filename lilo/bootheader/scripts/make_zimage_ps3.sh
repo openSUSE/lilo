@@ -1,7 +1,7 @@
 #!/bin/bash
 # $Id: make_zimage_ps3.sh 1024 2007-09-14 08:12:50Z olh $
 set -e
-set -x
+# set -x
 
 obj_dir=/lib/lilo
 
