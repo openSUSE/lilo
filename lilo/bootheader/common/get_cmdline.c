@@ -41,6 +41,9 @@ int get_cmdline(char *p, int l, int max)
 						p[--len] = '\0';
 					}
 				}
+				/* ^c */
+				else if ('\003' == c)
+					abort("\nCTRL c pressed, leaving zImage. type 'reset-all' to reboot.\n");
 				/* ^x or ^u */
 				else if ('\030' == c || '\025' == c) {
 					while (len) {

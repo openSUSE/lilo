@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul  2 13:28:59 CEST 2008 - olh@suse.de
+
+- add ctrl c handling to bootheader, drops back into firmware
+
+-------------------------------------------------------------------
 Tue Jul  1 17:21:00 CEST 2008 - olh@suse.de
 
 - handle also -1 as claim error value in bootheader
