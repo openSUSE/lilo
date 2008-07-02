@@ -85,7 +85,7 @@ fi
 #
 
 objcopy  -O binary $vmlinux "$tmp/vmlinux.bin"
-strings $tmp/vmlinux.bin | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt
+strings $tmp/vmlinux.bin | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txtp || echo "grep for string 'Linux version' in vmlinux failed, continuing anyway"
 echo -ne "\000" >> $tmp/uts_string.txt
 gzip -9 "$tmp/vmlinux.bin"
 

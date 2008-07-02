@@ -93,7 +93,7 @@ strip -o $tmp/vmlinux $vmlinux
 gzip -c9 $tmp/vmlinux > $tmp/vmlinux.gz
 #
 #
-strings $tmp/vmlinux | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt
+strings $tmp/vmlinux | grep -E 'Linux version .* .gcc' > $tmp/uts_string.txt || echo "grep for string 'Linux version' in vmlinux failed, continuing anyway"
 echo -ne "\000" >> $tmp/uts_string.txt
 cp $obj_dir/common/empty.o $tmp/empty.o
 objcopy $tmp/empty.o \

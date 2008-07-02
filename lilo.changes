@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jul  2 15:41:41 CEST 2008 - olh@suse.de
+
+- mkzimage: handle missing 'Linux version' string in vmlinux binary
+
+-------------------------------------------------------------------
 Wed Jul  2 13:28:59 CEST 2008 - olh@suse.de
 
 - add ctrl c handling to bootheader, drops back into firmware
