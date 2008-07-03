@@ -103,11 +103,24 @@ objcopy $tmp/empty.o \
 objcopy $tmp/empty.o \
 	--add-section=.kernel:vmlinux.strip=$tmp/vmlinux.gz \
 	--set-section-flags=.kernel:vmlinux.strip=contents,alloc,load,readonly,data
+
+md5sum $tmp/vmlinux.gz | awk '{print $1"\000"}' > $tmp/vmlinuz_md5.txt
+echo -n "vmlinuz md5sum: "
+strings $tmp/vmlinuz_md5.txt
+objcopy $tmp/empty.o \
+	--add-section=.vmlinuz_md5=$tmp/vmlinuz_md5.txt \
+	--set-section-flags=.vmlinuz_md5=contents,alloc,load,readonly,data
 #
 if [ ! -z "$initrd" ] ; then
 objcopy $tmp/empty.o \
 	--add-section=.kernel:initrd=$initrd \
 	--set-section-flags=.kernel:initrd=contents,alloc,load,readonly,data
+md5sum $initrd | awk '{print $1"\000"}' > $tmp/initrd_md5.txt
+echo -n "initrd md5sum: "
+strings $tmp/initrd_md5.txt
+objcopy $tmp/empty.o \
+	--add-section=.initrd_md5=$tmp/initrd_md5.txt \
+	--set-section-flags=.initrd_md5=contents,alloc,load,readonly,data
 fi
 #
 rm -f $tmp/output

@@ -21,6 +21,13 @@ SECTIONS
 		*(.got2)
 		__got2_end = .;
 
+		_vmlinuz_md5_start = .;
+		*(.vmlinuz_md5)
+		_vmlinuz_md5_end = .;
+		_initrd_md5_start = .;
+		*(.initrd_md5)
+		_initrd_md5_end = .;
+
 		_uts_string_start = .;
 		*(.uts_string)
 		_uts_string_end = .;

@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <prom.h>
 #include <cmdline.h>
+#include <md5.h>
 
 extern void flush_cache(void *, unsigned long);
 extern int identify_cpu(void);
@@ -35,6 +36,11 @@ extern char _vmlinuz_start[];
 extern char _vmlinuz_end[];
 extern char _initrd_start[];
 extern char _initrd_end[];
+extern char _vmlinuz_md5_start[];
+extern char _vmlinuz_md5_end[];
+extern char _initrd_md5_start[];
+extern char _initrd_md5_end[];
+
 
 struct addr_range {
 	unsigned long addr;
@@ -180,6 +186,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	phandle bootcpu_phandle[1];
 	kernel_entry_t kernel_entry;
 	int cputype, elftype;
+	char *actual_md5;
 
 	/* Clear out the BSS as per ANSI C requirements */
 	memset(__bss_start, 0, _end - __bss_start);
@@ -188,6 +195,30 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 
 	printf("\nSuSE Linux zImage starting: loaded at %p-%p (%lx/%lx/%p; sp: %p)\n",
 	       _coff_start, _end, a1, a2, promptr, sp);
+
+	/* if the zImage is too big, firmware may only load parts of it */
+	if (_vmlinuz_md5_start != _vmlinuz_md5_end) {
+		actual_md5 = md5sum_string(_vmlinuz_start, _vmlinuz_end - _vmlinuz_start);
+		if (strcmp(_vmlinuz_md5_start, actual_md5)) {
+			printf("\nvmlinuz CORRUPTION. memory range %p %p\n"
+					"Expected md5 %s\n"
+					"Got md5      %s\n",
+					_vmlinuz_start, _vmlinuz_end,
+					_vmlinuz_md5_start, actual_md5);
+			abort("\nvmlinuz corrupted\n");
+		}
+	}
+	if (_initrd_md5_start != _initrd_md5_end) {
+		actual_md5 = md5sum_string(_initrd_start, _initrd_end - _initrd_start);
+		if (strcmp(_initrd_md5_start, actual_md5)) {
+			printf("\ninitrd CORRUPTION. memory range %p %p\n"
+					"Expected md5 %s\n"
+					"Got md5      %s\n",
+					_initrd_start, _initrd_end,
+					_initrd_md5_start, actual_md5);
+			abort("\ninitrd corrupted\n");
+		}
+	}
 
 	/* Maple firmware returns memory which is still in use for message passing
 	 * Thats why claim_base is set to 32MB

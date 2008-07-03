@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jul  3 10:03:40 CEST 2008 - olh@suse.de
+
+- add md5sum check for vmlinuz/initrd to bootheader
+  openfirmware truncates large bootfiles if real-base is at 32MB
+
+-------------------------------------------------------------------
 Wed Jul  2 15:41:41 CEST 2008 - olh@suse.de
 
 - mkzimage: handle missing 'Linux version' string in vmlinux binary
