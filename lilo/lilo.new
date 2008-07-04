@@ -323,14 +323,20 @@ else
 fi
 
 function parted_call() {
-    # call parted binary
-    $PARTED "$@"
-    local ret=$?
+	local timeout=10
+	# call parted binary
+	$PARTED "$@"
+	local ret=$?
+	if test -x /sbin/udevsettle ; then
+		# wait for pending triggered udev events.
+		/sbin/udevsettle --timeout=$timeout
+	elif test -x /sbin/udevadm ; then
+		/sbin/udevadm trigger --timeout=$timeout
+	else
+		sleep $timeout
+	fi
 
-    # wait for pending triggered udev events.
-	/sbin/udevsettle --timeout=5
-
-    return $ret
+	return $ret
 }
 
 
