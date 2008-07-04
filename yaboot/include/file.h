@@ -64,6 +64,14 @@ struct path_description {
 			char *ip_before_filename;
 			char *ip_after_filename;
 			unsigned char mac[6];
+			char *dev_options;
+			u32 client_ip;
+			u32 server_ip;
+			u32 gateway_ip;
+			u32 netmask;
+			u32 bootp_retry;
+			u32 tftp_retry;
+			u32 tftp_blocksize;
 		} n;
 		struct {
 			char *s1;
