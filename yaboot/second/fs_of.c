@@ -44,8 +44,8 @@
 #include <errors.h>
 #include <debug.h>
 
-#define LOAD_BUFFER_BASE (42*1024*1024)
-#define LOAD_BUFFER_SIZE (16*1024*1024)
+#define LOAD_BUFFER_BASE (24*1024*1024)
+#define LOAD_BUFFER_SIZE (24*1024*1024)
 #define LOAD_BUFFER_TRIES 42
 
 static int of_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
