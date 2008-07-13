@@ -3,7 +3,7 @@ Sun Jul 13 16:30:16 CEST 2008 - olh@suse.de
 
 -  openSuSE buildservice, unlike autobuild, can not handle two
    different arch specific packages with the same name:
-   merge x86 lilo, drop all patches, except persistant devicename
+   merge x86 lilo-22.8, drop all patches, except persistant devicename
    patch, none is required.
    drop unneeded lilo-doc package
 
