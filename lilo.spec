@@ -1,12 +1,14 @@
 # norootforbuild
 
 Name:         lilo
+ExclusiveArch: ppc ppc64 %ix86 x86_64
 %define yaboot_vers 0
 Group:        System/Boot
 License:      BSD, Other License(s), see package
 Summary:      The LInux LOader, a boot menu
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 Obsoletes:    yaboot activate quik 
+%ifarch ppc ppc64
 %if 0%{?suse_version} > 1020
 BuildRequires:dtc
 %endif
@@ -16,21 +18,43 @@ Requires:     gawk sed coreutils
 Requires:     powerpc-utils
 Requires:     binutils
 Requires:     parted
+%endif
+%ifarch %ix86 x86_64
+BuildRequires:  bin86 nasm
+%endif
+%ifarch x86_64
+BuildRequires:  gcc-32bit glibc-devel-32bit libgcc42-32bit libmudflap42-32bit
+%endif
 Version:      0
 Release:      0
-Source0:      lilo-%{version}.tar.bz2
+Source0:      lilo-ppc-%{version}.tar.bz2
 Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
+Source86:     lilo-%{version}.src.tar.bz2
+Patch8601:    lilo.x86.mount_by_persistent_name.patch
+Patch8602:    lilo.x86.array-bounds.patch
 
 # $Id$
 %description
 lilo for ppc
 
 %prep
-%setup -q -T -c -a 0 -a 1
-mv lilo-%{version} lilo.ppc
+%setup -q -T -c -a 0 -a 1 -a 86
+mv lilo-ppc-%{version} lilo.ppc
 mv yaboot-%{yaboot_vers} yaboot
+cd lilo-%{version}
+%patch8601 -p1
+%patch8602 -p1
 
 %build
+%ifarch %ix86 x86_64
+cd lilo-%{version}
+cflags="$RPM_OPT_FLAGS -fno-strict-aliasing"
+%ifarch x86_64
+cflags="$cflags -m32"
+%endif
+make CC="gcc $cflags" MAN_DIR=/usr/share/man all activate
+# powerpc
+%else
 cd yaboot
 #
 make clean
@@ -49,15 +73,22 @@ cd ..
 cd lilo.ppc
 cd bootheader
 make HOST_CFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
+%endif
 
 %install
+%ifarch %ix86 x86_64
+cd lilo-%{version}
+make MAN_DIR=/usr/share/man install ROOT=$RPM_BUILD_ROOT
+install -m 0755 activate $RPM_BUILD_ROOT/sbin
+rm -rfv $RPM_BUILD_ROOT/boot
+%else
+# powerpc
 # get rid of /usr/lib/rpm/brp-strip-debug 
 # it kills the zImage.chrp-rs6k 
 export NO_BRP_STRIP_DEBUG=true
 # do not strip binaries, keep debug info
 export NO_DEBUGINFO_STRIP_DEBUG=true
 #
-rm -rfv $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/pmac
 mkdir -p $RPM_BUILD_ROOT/lib/lilo/chrp
 mkdir -p $RPM_BUILD_ROOT/sbin
@@ -94,6 +125,8 @@ cp -av make_yaboot.sh $RPM_BUILD_ROOT/lib/lilo/scripts/
 cp -av man/bootstrap.8 man/yaboot.8 $RPM_BUILD_ROOT%{_mandir}/man8
 cp -av man/yaboot.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5
 cd ..
+#powerpc
+%endif
 
 %triggerpostun  -- lilo < 0.0.10
 # for manual updates
@@ -104,6 +137,12 @@ exit 0
 
 %files
 %defattr (-,root,root)
+%ifarch %ix86 x86_64
+/sbin/*
+/usr/sbin/*
+%else
+#powerpc
+
 %dir /lib/lilo
 %dir /lib/lilo/pmac
 %dir /lib/lilo/prep
@@ -130,4 +169,5 @@ exit 0
 %attr(755,root,root) %config /sbin/lilo
 
 %doc %{_docdir}/lilo
+%endif
 %doc %{_mandir}/*/*

@@ -48,11 +48,12 @@ submit:	.submitted
 	touch --reference=lilo/lilo.new lilo.spec ; \
 	sed -i "s:@VERSION@:$$lv:" lilo/lilo.new ; \
 	touch --reference=lilo.spec lilo/lilo.new ; \
-	mv -v lilo lilo-$$lv ; \
-	tar cfj lilo-$$lv.tar.bz2 lilo-$$lv ; \
+	mv -v lilo lilo-ppc-$$lv ; \
+	mv -v x86/lilo-$$lv.src.tar.bz2 x86/*.patch . ; \
+	tar cfj lilo-ppc-$$lv.tar.bz2 lilo-ppc-$$lv ; \
 	sed -i "s/^Version:.*/Version: $$lv/" lilo.spec ; \
 	sed -i "s/^%define yaboot_vers.*/%define yaboot_vers $$yv/" lilo.spec ; \
-	rm -rf version Makefile lilo-$$lv lilo.spec.in \
+	rm -rf version Makefile lilo-ppc-$$lv lilo.spec.in x86 \
 	yaboot-$$yv ; \
 	if test "$(D)" != "" ; then \
 	echo '#!/bin/bash' > get_release_number.sh ; \
