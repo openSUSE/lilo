@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Jul 18 16:03:20 CEST 2008 - olh@suse.de
+
+- fix a parser bug in CAS tftp options,
+  use full options even if the firmware provided not all options
+
+-------------------------------------------------------------------
 Sun Jul 13 16:30:16 CEST 2008 - olh@suse.de
 
 -  openSuSE buildservice, unlike autobuild, can not handle two

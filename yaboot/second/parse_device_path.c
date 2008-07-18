@@ -275,6 +275,7 @@ static void hack_boot_path_for_CAS(struct path_description *result)
 	p++;
 	tftp_blocksize = p;
 
+end_parse:
 	s = sizeof(buf) + 1 + sizeof(buf) + 1 + strlen(bootp_retry) + 1 + strlen(tftp_retry) + 1 + sizeof(buf) + 1 + strlen(tftp_blocksize) + 1;
 	p = malloc(s);
 	if (p) {
@@ -292,7 +293,6 @@ static void hack_boot_path_for_CAS(struct path_description *result)
 		ipv4_to_ascii(buf, result->u.n.netmask);
 		sprintf(p, "%s,%s", buf, tftp_blocksize ? tftp_blocksize : "512");
 	}
-end_parse:
 	return;
 }
 
