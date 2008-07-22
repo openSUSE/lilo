@@ -303,7 +303,7 @@ static void parse_net_device(struct path_description *result)
 	prom_printf("%s\n", __FUNCTION__);
 #endif
 	if (!result->u.n.ip_before_filename)
-		return;
+		goto out;
 
 	p = result->u.n.ip_before_filename;
 
@@ -345,9 +345,9 @@ static void parse_net_device(struct path_description *result)
 		*p = '\0';
 		p++;
 		result->u.n.ip_after_filename = p;
-		hack_boot_path_for_CAS(result);
 	}
       out:
+	hack_boot_path_for_CAS(result);
 	return;
 }
 
