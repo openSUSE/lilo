@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Jul 22 16:40:33 CEST 2008 - olh@suse.de
+
+- fix incorrect variable size in iseries-addRamDisk
+
+-------------------------------------------------------------------
 Tue Jul 22 15:16:34 CEST 2008 - olh@suse.de
 
 - look also for CAS bootp reply if there are no device options 

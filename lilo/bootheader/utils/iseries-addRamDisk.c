@@ -74,7 +74,7 @@ void put4k(FILE *file, char *buf )
 
 void death(const char *msg, FILE *fdesc, const char *fname) 
 {
-	fprintf(stderr, msg);
+	fprintf(stderr, "ERROR: %s", msg);
 	fclose(fdesc);
 	unlink(fname);
 	exit(1);
@@ -100,14 +100,14 @@ int main(int argc, char **argv)
 	unsigned long actualKernelLen;
 	unsigned long round;
 	unsigned long roundedKernelLen;
-	unsigned long ramStartOffs;
-	unsigned long ramPages;
+	u_int32_t ramStartOffs;
+	u_int32_t ramPages;
 	unsigned long roundedKernelPages;
 	u_int32_t hvReleaseData;
 	u_int32_t eyeCatcher = 0xc8a5d9c4;
-	unsigned long naca;
-	unsigned long xRamDisk;
-	unsigned long xRamDiskSize;
+	u_int32_t naca;
+	u_int32_t xRamDisk;
+	u_int32_t xRamDiskSize;
 	long padPages;
   
   
