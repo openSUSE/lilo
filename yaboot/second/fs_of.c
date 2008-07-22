@@ -97,6 +97,7 @@ static int of_open(struct boot_file_t *file, const char *dev_name, struct partit
 
 static int of_net_download(unsigned char **buffer, ihandle of_device)
 {
+	int ms;
 	int ret = LOAD_BUFFER_TRIES;
 	unsigned char *p, *mem = (unsigned char *)LOAD_BUFFER_BASE;
 
@@ -115,12 +116,25 @@ static int of_net_download(unsigned char **buffer, ihandle of_device)
 		goto out;
 	}
 	memset(p, 0, LOAD_BUFFER_SIZE);
+	ms = prom_getms();
 	DEBUG_F("TFTP...\n");
 	ret = prom_loadmethod(of_device, p);
 	DEBUG_F("result: %d\n", ret);
 	if (ret > 0) {
 		*buffer = p;
-		prom_printf("yaboot downloaded %08x bytes via network\n", ret);
+		ms = prom_getms() - ms;
+		if (ms < 1000) {
+			ms = 1000 / ms;
+			ms *= ret;
+		} else {
+			ms /= 1000;
+			ms = ret / ms;
+		}
+		ms /= 1000;
+		prom_printf("yaboot downloaded %08x bytes via network, download rate %d KB/s.\n", ret, ms);
+		if (ms > 42 && ms < 666)
+			prom_printf("\n A download rate of %d KB/s is really slow, isn't it? \n\n", ms);
+
 	} else
 		prom_release(p, LOAD_BUFFER_SIZE);
       out:
