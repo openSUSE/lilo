@@ -331,7 +331,7 @@ function parted_call() {
 		# wait for pending triggered udev events.
 		/sbin/udevsettle --timeout=$timeout
 	elif test -x /sbin/udevadm ; then
-		/sbin/udevadm trigger --timeout=$timeout
+		/sbin/udevadm settle --timeout=$timeout
 	else
 		sleep $timeout
 	fi

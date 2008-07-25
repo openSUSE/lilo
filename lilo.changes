@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul 25 10:52:16 CEST 2008 - olh@suse.de
+
+- use correct udevadm option for settle
+
+-------------------------------------------------------------------
 Tue Jul 22 16:40:33 CEST 2008 - olh@suse.de
 
 - fix incorrect variable size in iseries-addRamDisk
@@ -43,7 +48,7 @@ Fri Jul  4 16:23:58 CEST 2008 - olh@suse.de
 -------------------------------------------------------------------
 Fri Jul  4 09:19:15 CEST 2008 - olh@suse.de
 
-- use either udevtrigger or udevadm trigger, or sleep
+- use either udevsettle or udevadm settle, or sleep
 
 -------------------------------------------------------------------
 Thu Jul  3 10:03:40 CEST 2008 - olh@suse.de
