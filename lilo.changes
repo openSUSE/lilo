@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 29 09:59:00 CEST 2008 - olh@suse.de
+
+- require powerpc-utils only in SLES10 or later, for nvsetenv
+
+-------------------------------------------------------------------
 Fri Jul 25 10:52:16 CEST 2008 - olh@suse.de
 
 - use correct udevadm option for settle

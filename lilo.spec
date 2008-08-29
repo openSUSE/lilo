@@ -15,7 +15,12 @@ BuildRequires:dtc
 Requires:     hfsutils
 Requires:     dosfstools
 Requires:     gawk sed coreutils
+# for nvsetenv
+%if 0%{?suse_version} > 1000
 Requires:     powerpc-utils
+%else
+Requires:     util-linux
+%endif
 Requires:     binutils
 Requires:     parted
 %endif
