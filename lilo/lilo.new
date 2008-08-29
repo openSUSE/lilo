@@ -327,8 +327,9 @@ function parted_call() {
 	# call parted binary
 	$PARTED "$@"
 	local ret=$?
+	echo "Waiting for udev to settle, sleeping up to $timeout seconds"
+	# wait for pending triggered udev events.
 	if test -x /sbin/udevsettle ; then
-		# wait for pending triggered udev events.
 		/sbin/udevsettle --timeout=$timeout
 	elif test -x /sbin/udevadm ; then
 		/sbin/udevadm settle --timeout=$timeout
