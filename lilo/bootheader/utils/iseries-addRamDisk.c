@@ -30,7 +30,8 @@ static int check_elf64(void *p, int size, struct addr_range *r)
 	    elf64->e_ident[EI_MAG3] != ELFMAG3 ||
 	    elf64->e_ident[EI_CLASS] != ELFCLASS64 ||
 	    elf64->e_ident[EI_DATA] != ELFDATA2MSB ||
-	    elf64->e_type != ET_EXEC || elf64->e_machine != EM_PPC64)
+	    !(elf64->e_type == ET_EXEC || elf64->e_type == ET_DYN) ||
+	    elf64->e_machine != EM_PPC64)
 		return 0;
 
 	if ((elf64->e_phoff + sizeof(Elf64_Phdr)) > size)

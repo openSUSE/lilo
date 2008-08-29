@@ -84,7 +84,8 @@ static int check_elf32(void *p)
 	    elf32->e_ident[EI_MAG3] != ELFMAG3 ||
 	    elf32->e_ident[EI_CLASS] != ELFCLASS32 ||
 	    elf32->e_ident[EI_DATA] != ELFDATA2MSB ||
-	    elf32->e_type != ET_EXEC || elf32->e_machine != EM_PPC)
+	    !(elf32->e_type == ET_EXEC || elf32->e_type == ET_DYN) ||
+	    elf32->e_machine != EM_PPC)
 		return 0;
 
 	elf32ph = (Elf32_Phdr *) ((unsigned long)elf32 +
@@ -131,7 +132,8 @@ static int check_elf64(void *p)
 	    elf64->e_ident[EI_MAG3] != ELFMAG3 ||
 	    elf64->e_ident[EI_CLASS] != ELFCLASS64 ||
 	    elf64->e_ident[EI_DATA] != ELFDATA2MSB ||
-	    elf64->e_type != ET_EXEC || elf64->e_machine != EM_PPC64)
+	    !(elf64->e_type == ET_EXEC || elf64->e_type == ET_DYN) ||
+	    elf64->e_machine != EM_PPC64)
 		return 0;
 
 	elf64ph = (Elf64_Phdr *) ((unsigned long)elf64 +
