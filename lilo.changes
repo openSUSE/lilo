@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Aug 29 13:46:39 CEST 2008 - olh@suse.de
+
+- change printf format strings in iseries-addRamDisk to u32
+
+-------------------------------------------------------------------
 Fri Aug 29 13:26:30 CEST 2008 - olh@suse.de
 
 - also allow ELF binaries with type ET_DYN, required for

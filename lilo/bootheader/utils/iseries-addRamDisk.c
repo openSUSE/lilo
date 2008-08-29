@@ -202,7 +202,7 @@ int main(int argc, char **argv)
 	/* Input Ram Disk file */
 	// Set the offset that the ram disk will be started at.
 	ramStartOffs = offset_end;  /* determined from the input vmlinux file and the system map */
-	printf("Ram Disk will start at offset = 0x%lx \n", ramStartOffs);
+	printf("Ram Disk will start at offset = 0x%08x \n", ramStartOffs);
   
 	fseek(ramDisk, 0, SEEK_END);
 	ramFileLen = ftell(ramDisk);
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 
 	printf("Rounded RAM disk size is %ld/0x%lx \n", ramLen, ramLen);
 	ramPages = ramLen / 4096;
-	printf("RAM disk pages to copy = %ld/0x%lx\n", ramPages, ramPages);
+	printf("RAM disk pages to copy = %d/0x%08x\n", ramPages, ramPages);
 
 
 
@@ -264,7 +264,7 @@ int main(int argc, char **argv)
 		death("Could not read hvReleaseData pointer\n", outputVmlinux, out_name);
 	}
 	hvReleaseData = ntohl(hvReleaseData); /* Convert to native int */
-	printf("hvReleaseData is at %08lx\n", hvReleaseData);
+	printf("hvReleaseData is at %08x\n", hvReleaseData);
 
 	/* fseek to the hvReleaseData */
 	fseek(outputVmlinux, ElfHeaderSize + hvReleaseData, SEEK_SET);
@@ -277,7 +277,7 @@ int main(int argc, char **argv)
 	}
 	/* Get the naca pointer */
 	naca = ntohl(*((u_int32_t*) &inbuf[0x0C])) - KERNELBASE;
-	printf("Naca is at offset 0x%lx \n", naca);
+	printf("Naca is at offset 0x%08x \n", naca);
 
 	/* fseek to the naca */
 	fseek(outputVmlinux, ElfHeaderSize + naca, SEEK_SET);
@@ -300,7 +300,7 @@ int main(int argc, char **argv)
 	if (fwrite(inbuf, 0x18, 1, outputVmlinux) != 1) {
 		death("Could not write naca\n", outputVmlinux, out_name);
 	}
-	printf("Ram Disk of 0x%lx pages is attached to the kernel at offset 0x%08lx\n",
+	printf("Ram Disk of 0x%08x pages is attached to the kernel at offset 0x%08x\n",
 	       ramPages, ramStartOffs);
 
 	/* Done */
