@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep  5 13:59:32 CEST 2008 - olh@suse.de
+
+- let yaboot boot SLES9 zImage files by allocating runtime memory at 4MB
+
+-------------------------------------------------------------------
 Fri Aug 29 13:46:39 CEST 2008 - olh@suse.de
 
 - change printf format strings in iseries-addRamDisk to u32

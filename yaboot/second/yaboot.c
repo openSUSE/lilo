@@ -77,6 +77,8 @@ static char *hard_coded_bootpath(char *bootpath)
 #define _ALIGN(addr,size)	(((addr)+size-1)&(~(size-1)))
 #define MAX_HEADERS	32
 
+#define SLES9_ZIMAGE_BASE ((4 * 1024 * 1024)) /* the zImage header used in SLES8/9 is not relocatable */
+#define SLES9_ZIMAGE_SIZE ((7 * 1024 * 1024)) /* its a binary blob from 2.4 kernel source ... */
 #define MALLOCADDR ((2 * 1024 * 1024) + (512 * 1024))
 #define MALLOCSIZE ((1 * 1024 * 1024) + (512 * 1024))
 #define CLAIM_END (128 * 1024 * 1024)	/* FIXME: look at /memory/reg */
@@ -103,6 +105,7 @@ extern int identify_cpu(void);
 /* Locals & globals */
 int useconf;
 static char *password;
+static void *sles9_base;
 static struct path_description default_device;
 static int _cpu;
 
@@ -445,14 +448,18 @@ static int load_elf32(struct boot_file_t *file, loadinfo_t * loadinfo)
 	else
 		loadaddr = 32 * 1024 * 1024;
 
-	for (addr = loadaddr; addr < CLAIM_END; addr += 0x100000) {
-		loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
-		if (loadinfo->base != (void *)-1)
-			break;
-	}
-	if (loadinfo->base == (void *)-1) {
-		prom_printf("Claim error, can't allocate kernel memory\n");
-		return 0;
+	if (sles9_base && loadinfo->memsize <= SLES9_ZIMAGE_SIZE)
+		loadinfo->base = sles9_base;
+	else {
+		for (addr = loadaddr; addr < CLAIM_END; addr += 0x100000) {
+			loadinfo->base = prom_claim((void *)addr, loadinfo->memsize, 0);
+			if (loadinfo->base != (void *)-1)
+				break;
+		}
+		if (loadinfo->base == (void *)-1) {
+			prom_printf("Claim error, can't allocate kernel memory\n");
+			return 0;
+		}
 	}
 	prom_printf("Allocated %08lx bytes for executable @ %p\n", loadinfo->memsize, loadinfo->base);
 
@@ -1264,7 +1271,16 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 	if (prom_claim(_start, _end - _start, 0) == _start)
 		prom_printf("brokenfirmware did not claim executable memory, fixed it myself\n");
 
-	for (addr = 64*1024; addr < CLAIM_END - MALLOCSIZE; addr += 64*1024) {
+	sles9_base = prom_claim((void *)SLES9_ZIMAGE_BASE, SLES9_ZIMAGE_SIZE, 0);
+	if (sles9_base == (void*) - 1)
+		sles9_base = NULL;
+	DEBUG_F("Allocated %08x bytes @ %p for SLES8/9 install file", SLES9_ZIMAGE_SIZE, sles9_base);
+
+	if (sles9_base)
+		addr = SLES9_ZIMAGE_BASE + SLES9_ZIMAGE_SIZE;
+	else
+		addr = 64 * 1024;
+	for ( ; addr < CLAIM_END - MALLOCSIZE; addr += 64*1024) {
 		/* overlap check */
 		if ((addr < (unsigned long)_end || addr + MALLOCSIZE < (unsigned long)_end) && (addr >= (unsigned long)_start || addr + MALLOCSIZE >= (unsigned long)_start))
 			continue;
