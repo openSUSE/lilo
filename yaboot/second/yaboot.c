@@ -1274,7 +1274,7 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 	sles9_base = prom_claim((void *)SLES9_ZIMAGE_BASE, SLES9_ZIMAGE_SIZE, 0);
 	if (sles9_base == (void*) - 1)
 		sles9_base = NULL;
-	DEBUG_F("Allocated %08x bytes @ %p for SLES8/9 install file", SLES9_ZIMAGE_SIZE, sles9_base);
+	DEBUG_F("Allocated %08x bytes @ %p for SLES8/9 install file\n", SLES9_ZIMAGE_SIZE, sles9_base);
 
 	if (sles9_base)
 		addr = SLES9_ZIMAGE_BASE + SLES9_ZIMAGE_SIZE;
