@@ -96,6 +96,7 @@ static const char *net_paths[] = {
 	"network:000.000.000.000,,000.000.000.000,000.000.000.000,00",
 	"network:speed=auto,duplex=auto,0.0.0.0,,0.0.0.0,0.0.0.0"
 	"network:speed=auto,duplex=auto,000.000.000.000,,000.000.000.000,000.000.000.000,5,5,255.255.255.000,512"
+	"network::bootp,0.0.0.0,,0.0.0.0"
 	NULL,
 };
 static const char *file_paths[] = {
