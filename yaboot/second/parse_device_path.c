@@ -71,7 +71,7 @@ void __dump_path_description(const char *fn, int l, const struct path_descriptio
 
 static void parse_block_device(struct path_description *result)
 {
-	char *ip;
+	char *ip, *pf;
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
@@ -89,14 +89,15 @@ static void parse_block_device(struct path_description *result)
 	if (',' == ip[0])
 		ip++;
 	result->u.b.directory = ip;
-	result->filename = strrchr(result->u.b.directory, '/');
-	if (!result->filename)
-		result->filename = strrchr(result->u.b.directory, '\\');
-	if (result->filename) {
-		memmove(result->filename + 2, result->filename + 1, strlen(result->filename + 1) + 1);
-		result->filename++;
-		result->filename[0] = '\0';
-		result->filename++;
+	pf = strrchr(result->u.b.directory, '/');
+	if (!pf)
+		pf = strrchr(result->u.b.directory, '\\');
+	if (pf) {
+		memmove(pf + 2, pf + 1, strlen(pf + 1) + 1);
+		pf++;
+		pf[0] = '\0';
+		pf++;
+		result->filename = pf;
 	} else {
 		result->filename = result->u.b.directory;
 		result->u.b.directory = "";
