@@ -63,6 +63,7 @@ struct path_description {
 		struct {
 #define path_net_before(x) (x)->u.n.ip_before_filename
 			char *ip_before_filename;
+#define path_net_after(x) (x)->u.n.ip_after_filename
 			char *ip_after_filename;
 			unsigned char mac[6];
 			char *dev_options;

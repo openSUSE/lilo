@@ -159,9 +159,9 @@ static int of_net_open(struct boot_file_t *file, const struct path_description *
 			*p = '\\';
 		p++;
 	}
-	if (spec->u.n.ip_after_filename && strlen(spec->u.n.ip_after_filename)) {
+	if (path_net_after(spec) && strlen(path_net_after(spec))) {
 		strcat(buffer, ",");
-		strcat(buffer, spec->u.n.ip_after_filename);
+		strcat(buffer, path_net_after(spec));
 	}
 
 	DEBUG_F("Opening: \"%s\"\n", buffer);

@@ -239,7 +239,7 @@ static void hack_boot_path_for_CAS(struct path_description *result)
 		sprintf(p,"%s", buf);
 	}
 
-	clientip = result->u.n.ip_after_filename;
+	clientip = path_net_after(result);
 
 	p = strchr(clientip, ',');
 	if (!p)
@@ -280,7 +280,7 @@ end_parse:
 	s = sizeof(buf) + 1 + sizeof(buf) + 1 + strlen(bootp_retry) + 1 + strlen(tftp_retry) + 1 + sizeof(buf) + 1 + strlen(tftp_blocksize) + 1;
 	p = malloc(s);
 	if (p) {
-		result->u.n.ip_after_filename = p;
+		path_net_after(result) = p;
 		ipv4_to_ascii(buf, result->u.n.client_ip);
 		sprintf(p, "%s,", buf);
 		p += strlen(p);
@@ -345,7 +345,7 @@ static void parse_net_device(struct path_description *result)
 	if (p) {
 		*p = '\0';
 		p++;
-		result->u.n.ip_after_filename = p;
+		path_net_after(result) = p;
 	}
       out:
 	hack_boot_path_for_CAS(result);
@@ -442,16 +442,16 @@ char *path_description_to_string(const struct path_description *input)
 		break;
 	case TYPE_NET:
 		len += strlen(path_net_before(input));
-		if (input->u.n.ip_after_filename) {
+		if (path_net_after(input)) {
 			len++;
-			len += strlen(input->u.n.ip_after_filename);
+			len += strlen(path_net_after(input));
 		}
 		path = malloc(len);
 		if (path)
 			sprintf(path, "%s:%s,%s%s%s", input->device,
 				path_net_before(input), path_filename(input),
-				input->u.n.ip_after_filename ? "," : "",
-				input->u.n.ip_after_filename ? input->u.n.ip_after_filename : "");
+				path_net_after(input) ? "," : "",
+				path_net_after(input) ? path_net_after(input) : "");
 		break;
 	default:
 		break;
@@ -534,8 +534,8 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 				len += strlen(path_net_before(default_device));
 			len++;
 			len += strlen(imagepath);
-			if (default_device->u.n.ip_after_filename) {
-				len += 1 + strlen(default_device->u.n.ip_after_filename);
+			if (path_net_after(default_device)) {
+				len += 1 + strlen(path_net_after(default_device));
 				comma = ",";
 			}
 		}
@@ -545,7 +545,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 			sprintf(pathname, "%s:%s,%s%s%s", default_device->device,
 				path_net_before(default_device) ? path_net_before(default_device) : "",
 				past_device ? past_device : imagepath, comma,
-				default_device->u.n.ip_after_filename ? default_device->u.n.ip_after_filename : "");
+				path_net_after(default_device) ? path_net_after(default_device) : "");
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 		prom_printf("parsing net path '%s'\n", pathname);
 #endif
