@@ -999,6 +999,7 @@ static void yaboot_text_ui(void)
 	int result;
 	enum get_params_result gpr;
 	struct boot_param_t params;
+	struct path_description *kernel, *rd;
 	void *claim_base;
 	void *initrd_base;
 	unsigned long initrd_size;
@@ -1009,6 +1010,8 @@ static void yaboot_text_ui(void)
 	char fw_nbr_reboots[4];
 	char *msg;
 
+	kernel = &params.kernel;
+	rd = &params.rd;
 	make_params_buffer = malloc(2048);
 	if (!make_params_buffer)
 		return;
@@ -1034,8 +1037,8 @@ static void yaboot_text_ui(void)
 
 		prom_printf("Please wait, loading kernel...\n");
 
-		msg = path_description_to_string(&params.kernel);
-		result = open_file(&params.kernel, &file);
+		msg = path_description_to_string(kernel);
+		result = open_file(kernel, &file);
 		if (result != FILE_ERR_OK) {
 			if (msg) {
 				prom_perror(result, msg);
@@ -1070,7 +1073,7 @@ static void yaboot_text_ui(void)
 			}
 			prom_printf("   Elf64 kernel loaded...\n");
 		} else {
-			prom_printf("%s: Not a valid ELF image\n", params.kernel.filename);
+			prom_printf("%s: Not a valid ELF image\n", kernel->filename);
 			file.fs->close(&file);
 			gpr = GET_PARAMS_STOP;
 			continue;
@@ -1085,10 +1088,10 @@ static void yaboot_text_ui(void)
 		 * can't tell the size it will be so we claim an arbitrary amount
 		 * of 4Mb.
 		 */
-		if (params.rd.filename) {
+		if (rd->filename) {
 			prom_printf("Loading ramdisk...\n");
-			msg = path_description_to_string(&params.rd);
-			result = open_file(&params.rd, &file);
+			msg = path_description_to_string(rd);
+			result = open_file(rd, &file);
 			if (result != FILE_ERR_OK) {
 				if (msg) {
 					prom_perror(result, msg);
