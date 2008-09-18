@@ -44,6 +44,26 @@ struct default_device {
 	int part;
 };
 
+enum flags {
+	may_have_equal_sign,
+	needs_equal_sign,
+	got_COMMAND,
+	got_QUALIFIER,
+	got_FILENAME,
+	do_ISCSI,
+	do_IPV6,
+	do_something,
+};
+
+#define FLAG_MAYBE_EQUALSIGN    (1 << may_have_equal_sign)
+#define FLAG_NEEDS_EQUALSIGN    (1 << needs_equal_sign)
+#define FLAG_COMMAND    (1 << got_COMMAND)
+#define FLAG_QUALIFIER  (1 << got_QUALIFIER)
+#define FLAG_FILENAME   (1 << got_FILENAME)
+#define FLAG_ISCSI      (1 << do_ISCSI)
+#define FLAG_IPV6       (1 << do_IPV6)
+#define FLAG_SOMETHING  (1 << do_something)
+
 /* describes individual parts of a firmware path
  * block:   <device>:<partition>,<directory/><filename>
  * network: <device>:<before_filename>,<filename>,<after_filename>
@@ -52,6 +72,8 @@ struct path_description {
 	int part;		/* Partition number or -1 */
 
 	enum device_type type;
+#define path_flags(x) (x)->flags
+	unsigned int flags;
 
 	char *device;
 
