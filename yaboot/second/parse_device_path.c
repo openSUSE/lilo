@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #define DHCP_UDP_OVERHEAD	(20 + /* IP header */                   \
-				 8)   /* UDP header */
+				 8)	/* UDP header */
 #define DHCP_SNAME_LEN		64
 #define DHCP_FILE_LEN		128
 #define DHCP_FIXED_NON_UDP	236
@@ -23,28 +23,27 @@
 #define DHCP_MIN_LEN		548
 
 struct dhcp_packet {
-	u8 op;		/* 0: Message opcode/type */
-	u8 htype;	/* 1: Hardware addr type (net/if_types.h) */
-	u8 hlen;	/* 2: Hardware addr length */
-	u8 hops;	/* 3: Number of relay agent hops from client */
-	u32 xid;	/* 4: Transaction ID */
-	u16 secs;	/* 8: Seconds since client started looking */
-	u16 flags;	/* 10: Flag bits */
-	u32 ciaddr;	/* 12: Client IP address (if already in use) */
-	u32 yiaddr;	/* 16: Client IP address */
-	u32 siaddr;	/* 18: IP address of next server to talk to */
-	u32 giaddr;	/* 20: DHCP relay agent IP address */
-	unsigned char chaddr [16];	/* 24: Client hardware address */
-	char sname [DHCP_SNAME_LEN];	/* 40: Server name */
-	char file [DHCP_FILE_LEN];	/* 104: Boot filename */
-	unsigned char options [DHCP_OPTION_LEN];
+	u8 op;			/* 0: Message opcode/type */
+	u8 htype;		/* 1: Hardware addr type (net/if_types.h) */
+	u8 hlen;		/* 2: Hardware addr length */
+	u8 hops;		/* 3: Number of relay agent hops from client */
+	u32 xid;		/* 4: Transaction ID */
+	u16 secs;		/* 8: Seconds since client started looking */
+	u16 flags;		/* 10: Flag bits */
+	u32 ciaddr;		/* 12: Client IP address (if already in use) */
+	u32 yiaddr;		/* 16: Client IP address */
+	u32 siaddr;		/* 18: IP address of next server to talk to */
+	u32 giaddr;		/* 20: DHCP relay agent IP address */
+	unsigned char chaddr[16];	/* 24: Client hardware address */
+	char sname[DHCP_SNAME_LEN];	/* 40: Server name */
+	char file[DHCP_FILE_LEN];	/* 104: Boot filename */
+	unsigned char options[DHCP_OPTION_LEN];
 	/* 212: Optional parameters
-	(actual length dependent on MTU). */
+	   (actual length dependent on MTU). */
 };
 
 /* DHCP options */
-enum dhcp_options
-{
+enum dhcp_options {
 	DHCP_PAD = 0,
 	DHCP_NETMASK = 1,
 	DHCP_ROUTERS = 3,
@@ -141,6 +140,7 @@ static void parse_iscsi_device(struct path_description *result)
 	reset_device_to_iscsi(result);
 	return;
 }
+
 /*
  * pmac and older chrp (up to power5) can request any file from the tfp server
  * Newer IBM firmware requires a boot path with static ip addresses and the
@@ -155,22 +155,18 @@ static void parse_iscsi_device(struct path_description *result)
 static void ipv4_to_ascii(char *buf, u32 ip)
 {
 	if (buf)
-		sprintf(buf,"%u.%u.%u.%u",
-			(ip & 0xff000000) >> 24,
-			(ip & 0x00ff0000) >> 16,
-			(ip & 0x0000ff00) >> 8,
-			(ip & 0x000000ff));
+		sprintf(buf, "%u.%u.%u.%u", (ip & 0xff000000) >> 24, (ip & 0x00ff0000) >> 16, (ip & 0x0000ff00) >> 8, (ip & 0x000000ff));
 }
 
-static void get_dhcp_options(const struct dhcp_packet *dp, int size, u32 *netmask, u32 *gateway)
+static void get_dhcp_options(const struct dhcp_packet *dp, int size, u32 * netmask, u32 * gateway)
 {
 	unsigned char *p, value, len;
 	u32 i;
 
 	/* add 4 byte cookie offset */
-	i =offsetof(struct dhcp_packet, options) + 4;
+	i = offsetof(struct dhcp_packet, options) + 4;
 	if (size >= i) {
-		p = (unsigned char*)dp;
+		p = (unsigned char *)dp;
 		p += i;
 		size -= i;
 		while (size > 0) {
@@ -233,10 +229,10 @@ static void hack_boot_path_for_CAS(struct path_description *result)
 	if (p) {
 		path_net_before(result) = p;
 		if (result->u.n.dev_options) {
-			sprintf(p,"%s,", result->u.n.dev_options);
+			sprintf(p, "%s,", result->u.n.dev_options);
 			p += strlen(p);
 		}
-		sprintf(p,"%s", buf);
+		sprintf(p, "%s", buf);
 	}
 
 	clientip = path_net_after(result);
@@ -268,7 +264,7 @@ static void hack_boot_path_for_CAS(struct path_description *result)
 	*p = '\0';
 	p++;
 	netmask = p;
-	
+
 	p = strchr(p, ',');
 	if (!p)
 		goto end_parse;
@@ -276,7 +272,7 @@ static void hack_boot_path_for_CAS(struct path_description *result)
 	p++;
 	tftp_blocksize = p;
 
-end_parse:
+      end_parse:
 	s = sizeof(buf) + 1 + sizeof(buf) + 1 + strlen(bootp_retry) + 1 + strlen(tftp_retry) + 1 + sizeof(buf) + 1 + strlen(tftp_blocksize) + 1;
 	p = malloc(s);
 	if (p) {
@@ -359,11 +355,8 @@ static void get_mac_address(struct path_description *result)
 		if (prom_getprop(dev, "mac-address", &result->u.n.mac, 6) == -1)
 			prom_getprop(dev, "local-mac-address", &result->u.n.mac, 6);
 		prom_printf("MAC for %s: %02x:%02x:%02x:%02x:%02x:%02x\n",
-				result->device,
-				result->u.n.mac[0], result->u.n.mac[1],
-				result->u.n.mac[2], result->u.n.mac[3],
-				result->u.n.mac[4], result->u.n.mac[5]
-				);
+			    result->device, result->u.n.mac[0], result->u.n.mac[1], result->u.n.mac[2], result->u.n.mac[3], result->u.n.mac[4], result->u.n.mac[5]
+		    );
 	}
 }
 
@@ -449,9 +442,7 @@ char *path_description_to_string(const struct path_description *input)
 		path = malloc(len);
 		if (path)
 			sprintf(path, "%s:%s,%s%s%s", input->device,
-				path_net_before(input), path_filename(input),
-				path_net_after(input) ? "," : "",
-				path_net_after(input) ? path_net_after(input) : "");
+				path_net_before(input), path_filename(input), path_net_after(input) ? "," : "", path_net_after(input) ? path_net_after(input) : "");
 		break;
 	default:
 		break;
@@ -459,8 +450,7 @@ char *path_description_to_string(const struct path_description *input)
 	return path;
 }
 
-int imagepath_to_path_description(const char *imagepath, struct path_description *result,
-				  const struct path_description *default_device)
+int imagepath_to_path_description(const char *imagepath, struct path_description *result, const struct path_description *default_device)
 {
 	char *past_device, *comma, *dir, *pathname;
 	char part[42];
@@ -519,8 +509,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 		len += 2;
 		pathname = malloc(len);
 		if (pathname)
-			sprintf(pathname, "%s:%s%s%s%s", default_device->device, part, comma, dir,
-				past_device ? past_device : imagepath);
+			sprintf(pathname, "%s:%s%s%s%s", default_device->device, part, comma, dir, past_device ? past_device : imagepath);
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 		prom_printf("parsing block path '%s'\n", pathname);
 #endif
@@ -544,8 +533,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 		if (pathname)
 			sprintf(pathname, "%s:%s,%s%s%s", default_device->device,
 				path_net_before(default_device) ? path_net_before(default_device) : "",
-				past_device ? past_device : imagepath, comma,
-				path_net_after(default_device) ? path_net_after(default_device) : "");
+				past_device ? past_device : imagepath, comma, path_net_after(default_device) ? path_net_after(default_device) : "");
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 		prom_printf("parsing net path '%s'\n", pathname);
 #endif
