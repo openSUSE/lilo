@@ -213,10 +213,10 @@ static void hack_boot_path_for_CAS(struct path_description *result)
 	clientip = gatewayip = bootp_retry = tftp_retry = netmask = tftp_blocksize = NULL;
 	prom_get_chosen("bootp-response", dp, size);
 
-	p = strrchr(result->u.n.ip_before_filename, ',');
+	p = strrchr(path_net_before(result), ',');
 	if (p) {
 		*p = '\0';
-		result->u.n.dev_options = result->u.n.ip_before_filename;
+		result->u.n.dev_options = path_net_before(result);
 	}
 
 	result->u.n.server_ip = dp->siaddr;
@@ -231,7 +231,7 @@ static void hack_boot_path_for_CAS(struct path_description *result)
 	s += strlen(buf) + 1;
 	p = malloc(s);
 	if (p) {
-		result->u.n.ip_before_filename = p;
+		path_net_before(result) = p;
 		if (result->u.n.dev_options) {
 			sprintf(p,"%s,", result->u.n.dev_options);
 			p += strlen(p);
@@ -303,16 +303,16 @@ static void parse_net_device(struct path_description *result)
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
-	if (!result->u.n.ip_before_filename)
+	if (!path_net_before(result))
 		goto out;
 
-	p = result->u.n.ip_before_filename;
+	p = path_net_before(result);
 
 	if (strncmp("bootp", p, 5) == 0) {
 		p = strchr(p, ',');
 		if (!p) {
-			result->u.n.ip_before_filename[5] = ',';
-			result->u.n.ip_before_filename[6] = '\0';
+			path_net_before(result)[5] = ',';
+			path_net_before(result)[6] = '\0';
 			goto out;
 		}
 		p++;
@@ -441,7 +441,7 @@ char *path_description_to_string(const struct path_description *input)
 			sprintf(path, "%s:%s%s%s", input->device, part, input->u.b.directory, path_filename(input));
 		break;
 	case TYPE_NET:
-		len += strlen(input->u.n.ip_before_filename);
+		len += strlen(path_net_before(input));
 		if (input->u.n.ip_after_filename) {
 			len++;
 			len += strlen(input->u.n.ip_after_filename);
@@ -449,7 +449,7 @@ char *path_description_to_string(const struct path_description *input)
 		path = malloc(len);
 		if (path)
 			sprintf(path, "%s:%s,%s%s%s", input->device,
-				input->u.n.ip_before_filename, path_filename(input),
+				path_net_before(input), path_filename(input),
 				input->u.n.ip_after_filename ? "," : "",
 				input->u.n.ip_after_filename ? input->u.n.ip_after_filename : "");
 		break;
@@ -530,8 +530,8 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 			len = strlen(default_device->device) + 1 + strlen(past_device);
 		else {
 			len = strlen(default_device->device) + 1;
-			if (default_device->u.n.ip_before_filename)
-				len += strlen(default_device->u.n.ip_before_filename);
+			if (path_net_before(default_device))
+				len += strlen(path_net_before(default_device));
 			len++;
 			len += strlen(imagepath);
 			if (default_device->u.n.ip_after_filename) {
@@ -543,7 +543,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 		pathname = malloc(len);
 		if (pathname)
 			sprintf(pathname, "%s:%s,%s%s%s", default_device->device,
-				default_device->u.n.ip_before_filename ? default_device->u.n.ip_before_filename : "",
+				path_net_before(default_device) ? path_net_before(default_device) : "",
 				past_device ? past_device : imagepath, comma,
 				default_device->u.n.ip_after_filename ? default_device->u.n.ip_after_filename : "");
 #if defined(DEBUG) || defined(DEVPATH_TEST)
