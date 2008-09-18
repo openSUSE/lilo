@@ -49,7 +49,7 @@ struct default_device {
  * network: <device>:<before_filename>,<filename>,<after_filename>
  */
 struct path_description {
-	int	part;		/* Partition number or -1 */
+	int part;		/* Partition number or -1 */
 
 	enum device_type type;
 
@@ -88,32 +88,30 @@ struct path_description {
 struct boot_file_t {
 
 	/* File access methods */
-        const struct fs_t *fs;
+	const struct fs_t *fs;
 
 	/* Filesystem private (to be broken once we have a
 	 * better malloc'ator)
 	 */
 
 	enum device_type dev_type;
-	ihandle		of_device;
-	u32		inode;
-	u64           pos;
-	unsigned char*	buffer;
-	u64   	len;
-//	unsigned int	dev_blk_size;
-//	unsigned int	part_start;
-//	unsigned int	part_count;
+	ihandle of_device;
+	u32 inode;
+	u64 pos;
+	unsigned char *buffer;
+	u64 len;
+//      unsigned int    dev_blk_size;
+//      unsigned int    part_start;
+//      unsigned int    part_count;
 };
 
-extern int
-open_file(const struct path_description*	spec,
-	  struct boot_file_t*		file);
+extern int open_file(const struct path_description *spec, struct boot_file_t *file);
 
 char *path_description_to_string(const struct path_description *input);
 int imagepath_to_path_description(const char *imagepath, struct path_description *result, const struct path_description *default_device);
 int parse_device_path(const char *imagepath, struct path_description *result);
 void set_default_device(const char *dev, const char *partition, struct path_description *default_device);
 #define dump_path_description(p) do { __dump_path_description(__FUNCTION__,__LINE__,p); } while(0)
-void __dump_path_description (const char *fn, int l, const struct path_description *p);
+void __dump_path_description(const char *fn, int l, const struct path_description *p);
 
 #endif
