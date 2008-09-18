@@ -3,8 +3,6 @@
  *
  *  Copyright (C) 2001 Ethan Benson
  *
- *  parse_device_path()
- *
  *  Copyright (C) 2001 Colin Walters
  *
  *  Copyright (C) 1999 Benjamin Herrenschmidt
@@ -131,8 +129,8 @@ extern int open_file(const struct path_description *spec, struct boot_file_t *fi
 
 char *path_description_to_string(const struct path_description *input);
 int imagepath_to_path_description(const char *imagepath, struct path_description *result, const struct path_description *default_device);
-int parse_device_path(const char *imagepath, struct path_description *result);
 void set_default_device(const char *dev, const char *partition, struct path_description *default_device);
+extern int yaboot_set_bootpath(const char *imagepath, struct path_description *default_device);
 #define dump_path_description(p) do { __dump_path_description(__FUNCTION__,__LINE__,p); } while(0)
 void __dump_path_description(const char *fn, int l, const struct path_description *p);
 

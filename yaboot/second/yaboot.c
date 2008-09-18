@@ -1200,7 +1200,7 @@ static void yaboot_main(void)
 			return;
 		}
 
-		if (!parse_device_path(bootpath, &default_device)) {
+		if (!yaboot_set_bootpath(bootpath, &default_device)) {
 			prom_printf("%s: Unable to parse\n", bootpath);
 			return;
 		}

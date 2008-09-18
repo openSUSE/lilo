@@ -360,7 +360,7 @@ static void get_mac_address(struct path_description *result)
 	}
 }
 
-int parse_device_path(const char *imagepath, struct path_description *result)
+static int parse_device_path(const char *imagepath, struct path_description *result)
 {
 	char *colon;
 	DEBUG_F("imagepath '%s'\n", imagepath);
@@ -573,4 +573,8 @@ void set_default_device(const char *dev, const char *partition, struct path_desc
 			default_device->part = n;
 		}
 	}
+}
+int yaboot_set_bootpath(const char *imagepath, struct path_description *result)
+{
+	return parse_device_path(imagepath, result);
 }
