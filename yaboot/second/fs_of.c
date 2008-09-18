@@ -153,7 +153,7 @@ static int of_net_open(struct boot_file_t *file, const struct path_description *
 
 	sprintf(buffer, "%s:%s,", spec->device, spec->u.n.ip_before_filename);
 	p = p + strlen(buffer);
-	strcat(buffer, spec->filename);
+	strcat(buffer, path_filename(spec));
 	while (*p) {
 		if (*p == '/')
 			*p = '\\';

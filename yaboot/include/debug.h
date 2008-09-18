@@ -36,7 +36,7 @@
                              file_name)
 # define DEBUG_OPEN_NEW do { const struct path_description *s = spec; \
 				DEBUG_F("dev='%s', s1='%s', s2='%s', filename='%s'\n",\
-				s->device, s->u.d.s1, s->u.d.s2, s->filename); \
+				s->device, s->u.d.s1, s->u.d.s2, path_filename(s)); \
 			} while (0)
 # define DEBUG_SLEEP prom_sleep(3)
 #else

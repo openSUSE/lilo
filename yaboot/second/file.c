@@ -82,7 +82,7 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 	int partition = spec->part;
 
 	parts = partitions_lookup(spec->device);
-	sprintf(f, "%s%s", spec->u.b.directory, spec->filename);
+	sprintf(f, "%s%s", spec->u.b.directory, path_filename(spec));
 	DEBUG_F("filename '%s'\n", f);
 	fserrorno = FILE_ERR_BADDEV;
 	if (parts) {

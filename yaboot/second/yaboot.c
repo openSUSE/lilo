@@ -1073,7 +1073,7 @@ static void yaboot_text_ui(void)
 			}
 			prom_printf("   Elf64 kernel loaded...\n");
 		} else {
-			prom_printf("%s: Not a valid ELF image\n", kernel->filename);
+			prom_printf("%s: Not a valid ELF image\n", path_filename(kernel));
 			file.fs->close(&file);
 			gpr = GET_PARAMS_STOP;
 			continue;
@@ -1088,7 +1088,7 @@ static void yaboot_text_ui(void)
 		 * can't tell the size it will be so we claim an arbitrary amount
 		 * of 4Mb.
 		 */
-		if (rd->filename) {
+		if (path_filename(rd)) {
 			prom_printf("Loading ramdisk...\n");
 			msg = path_description_to_string(rd);
 			result = open_file(rd, &file);

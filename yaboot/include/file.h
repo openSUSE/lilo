@@ -79,6 +79,7 @@ struct path_description {
 		} d;
 	} u;
 
+#define path_filename(x) (x)->filename
 	char *filename;
 };
 

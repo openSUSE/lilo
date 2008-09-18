@@ -97,9 +97,9 @@ static void parse_block_device(struct path_description *result)
 		pf++;
 		pf[0] = '\0';
 		pf++;
-		result->filename = pf;
+		path_filename(result) = pf;
 	} else {
-		result->filename = result->u.b.directory;
+		path_filename(result) = result->u.b.directory;
 		result->u.b.directory = "";
 	}
 }
@@ -340,7 +340,7 @@ static void parse_net_device(struct path_description *result)
 		goto out;
 	*p = '\0';
 	p++;
-	result->filename = p;
+	path_filename(result) = p;
 	p = strchr(p, ',');
 	if (p) {
 		*p = '\0';
@@ -423,7 +423,7 @@ char *path_description_to_string(const struct path_description *input)
 	dump_path_description(input);
 	path = NULL;
 	len = strlen(input->device);
-	len += strlen(input->filename);
+	len += strlen(path_filename(input));
 	len += 1 + 1 + 1;	/* : , \0 */
 	switch (input->type) {
 	case TYPE_ISCSI:
@@ -438,7 +438,7 @@ char *path_description_to_string(const struct path_description *input)
 		len += strlen(input->u.b.directory);
 		path = malloc(len);
 		if (path)
-			sprintf(path, "%s:%s%s%s", input->device, part, input->u.b.directory, input->filename);
+			sprintf(path, "%s:%s%s%s", input->device, part, input->u.b.directory, path_filename(input));
 		break;
 	case TYPE_NET:
 		len += strlen(input->u.n.ip_before_filename);
@@ -449,7 +449,7 @@ char *path_description_to_string(const struct path_description *input)
 		path = malloc(len);
 		if (path)
 			sprintf(path, "%s:%s,%s%s%s", input->device,
-				input->u.n.ip_before_filename, input->filename,
+				input->u.n.ip_before_filename, path_filename(input),
 				input->u.n.ip_after_filename ? "," : "",
 				input->u.n.ip_after_filename ? input->u.n.ip_after_filename : "");
 		break;
@@ -497,9 +497,9 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 			return 0;
 		}
 		strcpy(pathname, imagepath);
-		result->filename = pathname;
+		path_filename(result) = pathname;
 #if defined(DEBUG) || defined(DEVPATH_TEST)
-		prom_printf("hardcoded iscsi path '%s' '%d' '%s'\n", result->device, result->part, result->filename);
+		prom_printf("hardcoded iscsi path '%s' '%d' '%s'\n", result->device, result->part, path_filename(result));
 #endif
 		/* do not call parse_device_path */
 		return 1;
