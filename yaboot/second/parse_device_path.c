@@ -576,5 +576,6 @@ void set_default_device(const char *dev, const char *partition, struct path_desc
 }
 int yaboot_set_bootpath(const char *imagepath, struct path_description *result)
 {
+	result->type = TYPE_UNSET;
 	return parse_device_path(imagepath, result);
 }
