@@ -87,10 +87,10 @@ static void parse_block_device(struct path_description *result)
 	}
 	if (',' == ip[0])
 		ip++;
-	result->u.b.directory = ip;
-	pf = strrchr(result->u.b.directory, '/');
+	path_directory(result) = ip;
+	pf = strrchr(path_directory(result), '/');
 	if (!pf)
-		pf = strrchr(result->u.b.directory, '\\');
+		pf = strrchr(path_directory(result), '\\');
 	if (pf) {
 		memmove(pf + 2, pf + 1, strlen(pf + 1) + 1);
 		pf++;
@@ -98,8 +98,8 @@ static void parse_block_device(struct path_description *result)
 		pf++;
 		path_filename(result) = pf;
 	} else {
-		path_filename(result) = result->u.b.directory;
-		result->u.b.directory = "";
+		path_filename(result) = path_directory(result);
+		path_directory(result) = "";
 	}
 }
 
@@ -136,7 +136,7 @@ static void reset_device_to_iscsi(struct path_description *result)
 static void parse_iscsi_device(struct path_description *result)
 {
 	result->part = -1;
-	result->u.b.directory = path_partition(result) = "";
+	path_directory(result) = path_partition(result) = "";
 	reset_device_to_iscsi(result);
 	return;
 }
@@ -428,10 +428,10 @@ char *path_description_to_string(const struct path_description *input)
 			part[1] = '\0';
 		}
 		len += strlen(part);
-		len += strlen(input->u.b.directory);
+		len += strlen(path_directory(input));
 		path = malloc(len);
 		if (path)
-			sprintf(path, "%s:%s%s%s", path_device(input), part, input->u.b.directory, path_filename(input));
+			sprintf(path, "%s:%s%s%s", path_device(input), part, path_directory(input), path_filename(input));
 		break;
 	case TYPE_NET:
 		len += strlen(path_net_before(input));
@@ -502,8 +502,8 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 			if (default_device->part > 0)
 				sprintf(part, "%d", default_device->part);
 			comma = ",";
-			if (imagepath[0] != '/' && imagepath[0] != '\\' && default_device->u.b.directory)
-				dir = default_device->u.b.directory;
+			if (imagepath[0] != '/' && imagepath[0] != '\\' && path_directory(default_device))
+				dir = path_directory(default_device);
 			len = strlen(path_device(default_device)) + 1 + strlen(part) + 1 + strlen(dir) + strlen(imagepath);
 		}
 		len += 2;

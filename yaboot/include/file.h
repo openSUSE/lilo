@@ -80,6 +80,7 @@ struct path_description {
 		struct {
 #define path_partition(x) (x)->u.b.partition
 			char *partition;
+#define path_directory(x) (x)->u.b.directory
 			char *directory;
 		} b;
 		struct {
