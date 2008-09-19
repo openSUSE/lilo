@@ -145,7 +145,7 @@ static void parse_block_device(struct path_description *result, const char *bloc
 		/* skip the filesystem delimiter */
 		pf++;
 	} else
-		pf = blockdev_options;	/* path contains only the filename */
+		pf = pd;	/* path contains only the filename */
 	path_filename(result) = strdup(pf);
 }
 
