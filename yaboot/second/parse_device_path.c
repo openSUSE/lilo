@@ -114,10 +114,10 @@ static void reset_device_to_iscsi(struct path_description *result)
 	int size = prom_getproplen_chosen("nas-bootdevice");
 
 	if (size > 0) {
-		result->device = malloc(size + 2);
-		if (result->device) {
-			prom_get_chosen("nas-bootdevice", result->device, size);
-			DEBUG_F("nas-bootdevice: <%s>\n", result->device);
+		path_device(result) = malloc(size + 2);
+		if (path_device(result)) {
+			prom_get_chosen("nas-bootdevice", path_device(result), size);
+			DEBUG_F("nas-bootdevice: <%s>\n", path_device(result));
 		}
 	}
 }
@@ -350,12 +350,12 @@ static void parse_net_device(struct path_description *result)
 
 static void get_mac_address(struct path_description *result)
 {
-	phandle dev = prom_finddevice(result->device);
+	phandle dev = prom_finddevice(path_device(result));
 	if (dev != PROM_INVALID_HANDLE) {
 		if (prom_getprop(dev, "mac-address", &result->u.n.mac, 6) == -1)
 			prom_getprop(dev, "local-mac-address", &result->u.n.mac, 6);
 		prom_printf("MAC for %s: %02x:%02x:%02x:%02x:%02x:%02x\n",
-			    result->device, result->u.n.mac[0], result->u.n.mac[1], result->u.n.mac[2], result->u.n.mac[3], result->u.n.mac[4], result->u.n.mac[5]
+			    path_device(result), result->u.n.mac[0], result->u.n.mac[1], result->u.n.mac[2], result->u.n.mac[3], result->u.n.mac[4], result->u.n.mac[5]
 		    );
 	}
 }
@@ -367,11 +367,11 @@ static int parse_device_path(const char *imagepath, struct path_description *res
 	if (!imagepath)
 		return 0;
 
-	result->device = malloc(strlen(imagepath) + 2);
-	if (!result->device)
+	path_device(result) = malloc(strlen(imagepath) + 2);
+	if (!path_device(result))
 		return 0;
-	strcpy(result->device, imagepath);
-	result->u.d.s1 = strchr(result->device, ':');
+	strcpy(path_device(result), imagepath);
+	result->u.d.s1 = strchr(path_device(result), ':');
 	if (result->u.d.s1) {
 		colon = result->u.d.s1;
 		*result->u.d.s1 = '\0';
@@ -379,7 +379,7 @@ static int parse_device_path(const char *imagepath, struct path_description *res
 	} else
 		colon = NULL;
 
-	result->type = prom_get_devtype(result->device);
+	result->type = prom_get_devtype(path_device(result));
 	switch (result->type) {
 	case TYPE_BLOCK:
 		parse_block_device(result);
@@ -396,10 +396,10 @@ static int parse_device_path(const char *imagepath, struct path_description *res
 		}
 		break;
 	case TYPE_INVALID:
-		prom_printf("firmware said the path '%s' is invalid\n", result->device);
+		prom_printf("firmware said the path '%s' is invalid\n", path_device(result));
 		return 0;
 	default:
-		prom_printf("type %d of '%s' not handled\n", result->type, result->device);
+		prom_printf("type %d of '%s' not handled\n", result->type, path_device(result));
 		return 0;
 	}
 	dump_path_description(result);
@@ -415,7 +415,7 @@ char *path_description_to_string(const struct path_description *input)
 		return NULL;
 	dump_path_description(input);
 	path = NULL;
-	len = strlen(input->device);
+	len = strlen(path_device(input));
 	len += strlen(path_filename(input));
 	len += 1 + 1 + 1;	/* : , \0 */
 	switch (input->type) {
@@ -431,7 +431,7 @@ char *path_description_to_string(const struct path_description *input)
 		len += strlen(input->u.b.directory);
 		path = malloc(len);
 		if (path)
-			sprintf(path, "%s:%s%s%s", input->device, part, input->u.b.directory, path_filename(input));
+			sprintf(path, "%s:%s%s%s", path_device(input), part, input->u.b.directory, path_filename(input));
 		break;
 	case TYPE_NET:
 		len += strlen(path_net_before(input));
@@ -441,7 +441,7 @@ char *path_description_to_string(const struct path_description *input)
 		}
 		path = malloc(len);
 		if (path)
-			sprintf(path, "%s:%s,%s%s%s", input->device,
+			sprintf(path, "%s:%s,%s%s%s", path_device(input),
 				path_net_before(input), path_filename(input), path_net_after(input) ? "," : "", path_net_after(input) ? path_net_after(input) : "");
 		break;
 	default:
@@ -476,20 +476,20 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 	switch (default_device->type) {
 	case TYPE_ISCSI:
 		result->part = default_device->part;
-		pathname = malloc(strlen(default_device->device) + 1);
+		pathname = malloc(strlen(path_device(default_device)) + 1);
 		if (!pathname)
 			return 0;
-		strcpy(pathname, default_device->device);
-		result->device = pathname;
+		strcpy(pathname, path_device(default_device));
+		path_device(result) = pathname;
 		pathname = malloc(strlen(imagepath) + 1);
 		if (!pathname) {
-			free(result->device);
+			free(path_device(result));
 			return 0;
 		}
 		strcpy(pathname, imagepath);
 		path_filename(result) = pathname;
 #if defined(DEBUG) || defined(DEVPATH_TEST)
-		prom_printf("hardcoded iscsi path '%s' '%d' '%s'\n", result->device, result->part, path_filename(result));
+		prom_printf("hardcoded iscsi path '%s' '%d' '%s'\n", path_device(result), result->part, path_filename(result));
 #endif
 		/* do not call parse_device_path */
 		return 1;
@@ -497,28 +497,28 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 		part[0] = '\0';
 		/* parse_device_path will look for a partition number */
 		if (past_device)
-			len = strlen(default_device->device) + 1 + strlen(past_device);
+			len = strlen(path_device(default_device)) + 1 + strlen(past_device);
 		else {
 			if (default_device->part > 0)
 				sprintf(part, "%d", default_device->part);
 			comma = ",";
 			if (imagepath[0] != '/' && imagepath[0] != '\\' && default_device->u.b.directory)
 				dir = default_device->u.b.directory;
-			len = strlen(default_device->device) + 1 + strlen(part) + 1 + strlen(dir) + strlen(imagepath);
+			len = strlen(path_device(default_device)) + 1 + strlen(part) + 1 + strlen(dir) + strlen(imagepath);
 		}
 		len += 2;
 		pathname = malloc(len);
 		if (pathname)
-			sprintf(pathname, "%s:%s%s%s%s", default_device->device, part, comma, dir, past_device ? past_device : imagepath);
+			sprintf(pathname, "%s:%s%s%s%s", path_device(default_device), part, comma, dir, past_device ? past_device : imagepath);
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 		prom_printf("parsing block path '%s'\n", pathname);
 #endif
 		break;
 	case TYPE_NET:
 		if (past_device)
-			len = strlen(default_device->device) + 1 + strlen(past_device);
+			len = strlen(path_device(default_device)) + 1 + strlen(past_device);
 		else {
-			len = strlen(default_device->device) + 1;
+			len = strlen(path_device(default_device)) + 1;
 			if (path_net_before(default_device))
 				len += strlen(path_net_before(default_device));
 			len++;
@@ -531,7 +531,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 		len += 2;
 		pathname = malloc(len);
 		if (pathname)
-			sprintf(pathname, "%s:%s,%s%s%s", default_device->device,
+			sprintf(pathname, "%s:%s,%s%s%s", path_device(default_device),
 				path_net_before(default_device) ? path_net_before(default_device) : "",
 				past_device ? past_device : imagepath, comma, path_net_after(default_device) ? path_net_after(default_device) : "");
 #if defined(DEBUG) || defined(DEVPATH_TEST)
@@ -558,11 +558,11 @@ void set_default_device(const char *dev, const char *partition, struct path_desc
 		endp = strdup(dev);
 		if (!endp)
 			return;
-		default_device->device = endp;
-		endp = strchr(default_device->device, ':');
+		path_device(default_device) = endp;
+		endp = strchr(path_device(default_device), ':');
 		if (endp)
 			endp[0] = '\0';
-		default_device->type = prom_get_devtype(default_device->device);
+		default_device->type = prom_get_devtype(path_device(default_device));
 	}
 
 	if (partition) {

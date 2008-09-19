@@ -73,6 +73,7 @@ struct path_description {
 #define path_flags(x) (x)->flags
 	unsigned int flags;
 
+#define path_device(x) (x)->device
 	char *device;
 
 	union {

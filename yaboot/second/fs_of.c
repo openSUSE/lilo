@@ -151,7 +151,7 @@ static int of_net_open(struct boot_file_t *file, const struct path_description *
 	DEBUG_ENTER;
 	DEBUG_OPEN_NEW;
 
-	sprintf(buffer, "%s:%s,", spec->device, path_net_before(spec));
+	sprintf(buffer, "%s:%s,", path_device(spec), path_net_before(spec));
 	p = p + strlen(buffer);
 	strcat(buffer, path_filename(spec));
 	while (*p) {

@@ -81,7 +81,7 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 	int fserrorno;
 	int partition = spec->part;
 
-	parts = partitions_lookup(spec->device);
+	parts = partitions_lookup(path_device(spec));
 	sprintf(f, "%s%s", spec->u.b.directory, path_filename(spec));
 	DEBUG_F("filename '%s'\n", f);
 	fserrorno = FILE_ERR_BADDEV;
@@ -92,7 +92,7 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 		for (p = parts; p; p = p->next) {
 			DEBUG_F("#%02d, start: %08lx, length: %08lx\n", p->part_number, p->part_start, p->part_size);
 			if (partition == -1 || partition == p->part_number) {
-				if (fs_open(file, spec->device, p, f)) {
+				if (fs_open(file, path_device(spec), p, f)) {
 					fserrorno = FILE_ERR_OK;
 					break;
 				}
@@ -103,7 +103,7 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 #ifdef DEBUG
 		prom_printf("no partitions found.\n");
 #endif
-		fserrorno = of_filesystem.open(file, spec->device, NULL, f);
+		fserrorno = of_filesystem.open(file, path_device(spec), NULL, f);
 		if (fserrorno == FILE_ERR_OK)
 			file->fs = &of_filesystem;
 	}
@@ -145,7 +145,7 @@ int open_file(const struct path_description *spec, struct boot_file_t *file)
 {
 	memset(file, 0, sizeof(struct boot_file_t));
 	file->fs = &fs_default;
-	file->dev_type = prom_get_devtype(spec->device);
+	file->dev_type = prom_get_devtype(path_device(spec));
 
 	switch (file->dev_type) {
 	case TYPE_ISCSI:
