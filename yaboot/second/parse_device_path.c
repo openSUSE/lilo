@@ -74,16 +74,16 @@ static void parse_block_device(struct path_description *result)
 #if 0
 	prom_printf("%s\n", __FUNCTION__);
 #endif
-	if (!result->u.b.partition)
+	if (!path_partition(result))
 		return;
 
-	result->part = strtol(result->u.b.partition, &ip, 10);
-	DEBUG_F("part '%d', partition '%s', ip '%s'\n", result->part, result->u.b.partition, ip);
+	result->part = strtol(path_partition(result), &ip, 10);
+	DEBUG_F("part '%d', partition '%s', ip '%s'\n", result->part, path_partition(result), ip);
 	if (result->part)
 		*ip++ = '\0';
 	else {
 		result->part = -1;
-		result->u.b.partition = "";
+		path_partition(result) = "";
 	}
 	if (',' == ip[0])
 		ip++;
@@ -136,7 +136,7 @@ static void reset_device_to_iscsi(struct path_description *result)
 static void parse_iscsi_device(struct path_description *result)
 {
 	result->part = -1;
-	result->u.b.directory = result->u.b.partition = "";
+	result->u.b.directory = path_partition(result) = "";
 	reset_device_to_iscsi(result);
 	return;
 }

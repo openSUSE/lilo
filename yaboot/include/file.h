@@ -78,6 +78,7 @@ struct path_description {
 
 	union {
 		struct {
+#define path_partition(x) (x)->u.b.partition
 			char *partition;
 			char *directory;
 		} b;
