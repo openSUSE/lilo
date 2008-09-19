@@ -90,14 +90,6 @@ struct path_description {
 #define path_net_after(x) (x)->u.n.ip_after_filename
 			char *ip_after_filename;
 			unsigned char mac[6];
-			char *dev_options;
-			u32 client_ip;
-			u32 server_ip;
-			u32 gateway_ip;
-			u32 netmask;
-			u32 bootp_retry;
-			u32 tftp_retry;
-			u32 tftp_blocksize;
 		} n;
 		struct {
 			char *s1;

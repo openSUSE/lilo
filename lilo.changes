@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 19 16:14:58 CEST 2008 - olh@suse.de
+
+- rewrite /chosen/bootpath parser to support IPv6 TFTP (bnc#417538)
+
+-------------------------------------------------------------------
 Fri Sep  5 13:59:32 CEST 2008 - olh@suse.de
 
 - let yaboot boot SLES9 zImage files by allocating runtime memory at 4MB

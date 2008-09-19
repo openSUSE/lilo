@@ -9,6 +9,46 @@
 #include <string.h>
 #include <stdlib.h>
 
+struct option {
+	const char *name;
+	unsigned int flag;
+};
+
+/* Device Support Extensions */
+static struct option interface_options[] = {
+	{.name = "duplex",.flag = FLAG_MAYBE_EQUALSIGN},
+	{.name = "speed",.flag = FLAG_MAYBE_EQUALSIGN},
+	{.name = "promiscuous"},
+	{}
+};
+
+/* do TFTP unless one command is given */
+static struct option command_keywords[] = {
+	{.name = "iscsi",.flag = FLAG_COMMAND | FLAG_ISCSI},
+	{}
+};
+
+static struct option qualifier_options[] = {
+	{.name = "rawio",.flag = FLAG_QUALIFIER},
+	{.name = "ipv6",.flag = FLAG_QUALIFIER | FLAG_IPV6},
+	{.name = "bootp",.flag = FLAG_QUALIFIER},
+	{.name = "dhcpv6",.flag = FLAG_QUALIFIER | FLAG_MAYBE_EQUALSIGN},
+	{.name = "isns",.flag = FLAG_QUALIFIER | FLAG_MAYBE_EQUALSIGN},
+	{.name = "slp",.flag = FLAG_QUALIFIER | FLAG_MAYBE_EQUALSIGN},
+	{}
+};
+
+static struct option tftp_ipv6_boostrap_options[] = {
+	{.name = "dhcpv6",.flag = FLAG_MAYBE_EQUALSIGN},
+	{.name = "ciaddr",.flag = FLAG_NEEDS_EQUALSIGN},
+	{.name = "giaddr",.flag = FLAG_NEEDS_EQUALSIGN},
+	{.name = "siaddr",.flag = FLAG_NEEDS_EQUALSIGN},
+	{.name = "filename",.flag = FLAG_NEEDS_EQUALSIGN | FLAG_FILENAME},
+	{.name = "tftp-retries",.flag = FLAG_NEEDS_EQUALSIGN},
+	{.name = "blksize",.flag = FLAG_NEEDS_EQUALSIGN},
+	{}
+};
+
 #define DHCP_UDP_OVERHEAD	(20 + /* IP header */                   \
 				 8)	/* UDP header */
 #define DHCP_SNAME_LEN		64
@@ -68,103 +108,214 @@ void __dump_path_description(const char *fn, int l, const struct path_descriptio
 #undef S
 #undef I
 
-static void parse_block_device(struct path_description *result)
+static void parse_block_device(struct path_description *result, const char *blockdev_options)
 {
-	char *ip, *pf;
-#if 0
-	prom_printf("%s\n", __FUNCTION__);
-#endif
-	if (!path_partition(result))
+	const char *pd, *pf;
+	char *p;
+	int part;
+	size_t len;
+
+	DEBUG_F("options '%s'\n", blockdev_options);
+	part = strtol(blockdev_options, &p, 10);
+	/* if there is no partition number, ignore it */
+	if (part <= 0)
+		part = -1;
+	path_part(result) = part;
+	/* find the comma after the partition number */
+	pd = strchr(blockdev_options, ',');
+	/* there is a comma, hopefully its not part of a filesystem path */
+	if (pd)
+		pd++;		/* skip it */
+	else
+		pd = blockdev_options;	/* path may begin with a directory */
+	/* find the last filesystem delimiter, can be either /, or \ for firmware pathnames */
+	pf = strrchr(pd, '/');
+	if (!pf)
+		pf = strrchr(pd, '\\');
+	if (pf) {
+		len = pf - pd;
+		/* the delimiter itself is also required */
+		len++;
+		p = malloc(len + 1);
+		if (p) {
+			memcpy(p, pd, len);
+			p[len] = '\0';
+			path_directory(result) = p;
+		}
+		/* skip the filesystem delimiter */
+		pf++;
+	} else
+		pf = blockdev_options;	/* path contains only the filename */
+	path_filename(result) = strdup(pf);
+}
+
+/*
+ * search options listed in *opt
+ * set flags in path for all options found
+ * stop at first unknown string, or if stopflag is found
+ * return the len of found options at offset
+ * FIXME: len still includes the trailing comma
+ */
+size_t parse_options(const char *string, size_t offset, struct path_description *path, struct option *opt, unsigned int stopflag)
+{
+	struct option *opt_save;
+	char b[64], *eq;
+	const char *pos;
+	int match;
+	size_t ol, sl, new_offset;
+
+	if (!string || !*string)
+		return 0;
+
+	ol = sl = 0;
+	new_offset = offset;
+
+	opt_save = opt;
+	do {
+		match = 0;
+
+		/* check how long the current option is */
+		pos = strchr(string + new_offset, ',');
+		if (pos)
+			sl = pos - (string + new_offset);
+		else
+			sl = strlen(string + new_offset);
+
+		/* its too long or there is nothing up to the next comma */
+		if (!sl || sl > (sizeof(b) - 1))
+			continue;
+
+		memcpy(b, string + new_offset, sl);
+		b[sl] = '\0';
+		eq = strchr(b, '=');
+
+		while (opt->name) {
+			ol = strlen(opt->name);
+			/* option must be at least as long as the string */
+			if (sl >= ol) {
+				/* truncate at the equal sign to simplify matching */
+				if (eq)
+					*eq = '\0';
+				match = strcmp(opt->name, b) == 0;
+				if (eq)
+					*eq = '=';
+				if (match) {
+					/* skip if option needs an equalsign */
+					if (!(!eq && opt->flag & FLAG_NEEDS_EQUALSIGN)) {
+						path_flags(path) |= opt->flag;
+						if (opt->flag & stopflag) {
+							/* forward offset up to the = */
+							new_offset += ol + 1;
+							/* get out of the loop */
+							match = 0;
+						} else {
+							if (pos) {
+								new_offset += sl;	/* up to the end of the option */
+								new_offset++;	/* skip the comma after current match */
+							}
+						}
+						break;
+					}
+				}
+			}
+			opt++;
+		}
+		opt = opt_save;
+	} while (match && pos);	/* one or more match, or no more data */
+	/* return the difference */
+	return new_offset - offset;
+}
+
+/*
+ * When the bootpath is on an "iscsi" device,
+ * the firmware needs to be passed the contents of the * "nas-bootdevice" property.
+ * It points to a block device with options.
+ * keep this path+options as the full devicepath to a block device
+ */
+static const char nas[] = "nas-bootdevice";
+static void get_iscsi_options(struct path_description *path, const char *netdev_options, size_t offset)
+{
+	char *p;
+	int size;
+	prom_printf("                                                                          \n"
+		    "                *** This is the yaboot iSCSI codepath. ***                \n"
+		    "                                                                          \n"
+		    "                *** How exactly did you get that far?! ***                \n"
+		    "                                                                          \n");
+	path->type = TYPE_ISCSI;
+	size = prom_getproplen_chosen(nas);
+	if (size <= 0) {
+		prom_printf("'%s' property missing for iSCSI boot\n", nas);
+		return;
+	}
+	p = malloc(size + 2);	/* FIXME: fix the additional 2 */
+	if (p) {
+		prom_get_chosen(nas, p, size);
+		DEBUG_F("%s: <%s>\n", nas, p);
+	} else
+		p = "";
+	path_device(path) = p;
+}
+
+static void get_tftp_ipv6_options(struct path_description *path, const char *netdev_options, size_t offset)
+{
+	char *p, *pf;
+	size_t len;
+
+	/* stop parsing at filename= */
+	len = parse_options(netdev_options, offset, path, &tftp_ipv6_boostrap_options[0], FLAG_FILENAME);
+	/*
+	 * need SOME data to let firmware download from IPv6 TFTP server
+	 * relies on parser to return the len of filename= itself
+	 */
+	if (!len)
 		return;
 
-	path_part(result) = strtol(path_partition(result), &ip, 10);
-	DEBUG_F("part '%d', partition '%s', ip '%s'\n", path_part(result), path_partition(result), ip);
-	if (path_part(result))
-		*ip++ = '\0';
-	else {
-		path_part(result) = -1;
-		path_partition(result) = "";
+	/* forward offset to include all options including filename= */
+	offset += len;
+	p = malloc(offset + 1);
+	if (p) {
+		memcpy(p, netdev_options, offset);
+		p[offset] = '\0';
+		path_net_before(path) = p;
 	}
-	if (',' == ip[0])
-		ip++;
-	path_directory(result) = ip;
-	pf = strrchr(path_directory(result), '/');
-	if (!pf)
-		pf = strrchr(path_directory(result), '\\');
-	if (pf) {
-		memmove(pf + 2, pf + 1, strlen(pf + 1) + 1);
-		pf++;
-		pf[0] = '\0';
-		pf++;
-		path_filename(result) = pf;
-	} else {
-		path_filename(result) = path_directory(result);
-		path_directory(result) = "";
-	}
-}
-
-/**
- * reset_device_to_iscsi
- * When the bootpath is on an "iscsi" device,
- * the firmware needs to be passed the contents of the
- * "nas-bootdevice" property.
- */
-static void reset_device_to_iscsi(struct path_description *result)
-{
-	int size = prom_getproplen_chosen("nas-bootdevice");
-
-	if (size > 0) {
-		path_device(result) = malloc(size + 2);
-		if (path_device(result)) {
-			prom_get_chosen("nas-bootdevice", path_device(result), size);
-			DEBUG_F("nas-bootdevice: <%s>\n", path_device(result));
+	/* find len of filename value */
+	p = strchr(netdev_options + offset, ',');
+	if (!p) {
+		/* no more options, use filename value */
+		pf = malloc(strlen(netdev_options + offset) + 1);
+		if (pf) {
+			strcpy(pf, netdev_options + offset);
+			path_filename(path) = pf;
 		}
+	} else {
+		len = p - (netdev_options + offset);
+		pf = malloc(len + 1);
+		if (pf) {
+			memcpy(pf, netdev_options + offset, len);
+			pf[len] = '\0';
+			path_filename(path) = pf;
+		}
+		/* skip the comma */
+		p++;
+		/* use all whats left */
+		path_net_after(path) = strdup(p);
 	}
 }
 
-/*
- * options for a "network" device, according to "4.3.2 iSCSI Bootstrap"
- *
- * iscsi,[dev=block],[ipv6,][dhcp[=diaddr],][bootp,][slp[=SLP­server],][isns=iSNS­server,][itname=init­name,]
- * [ichapid=init­chapid,][ichappw=init­chappw,]ciaddr=init­addr,[giaddr=gateway­addr,][subnet­mask=net­mask,]
- * siaddr=target­server,[iport=target­port,]iname=target­name,[ilun=target­lun,][chapid=target­chapid,][chappw=target­chappw,]disk­label args
- *
- * There will be no disk-label args because the firmware is unable to load the bootfile from a specified partition.
- * Only the first 0x41 PReP Boot is considered, /chosen/bootpath will not contain partition, directory and filename
- * Clear partition and directory string, invalidate partition numer
- */
-static void parse_iscsi_device(struct path_description *result)
-{
-	path_part(result) = -1;
-	path_directory(result) = path_partition(result) = "";
-	reset_device_to_iscsi(result);
-	return;
-}
-
-/*
- * pmac and older chrp (up to power5) can request any file from the tfp server
- * Newer IBM firmware requires a boot path with static ip addresses and the
- * desired filename. If /chosen/bootpath is reused, the bootfile (yaboot) itself
- * is loaded again and again.
- * pmac uses dhcp-response
- * chrp uses bootpreply-packet
- * power6 CAS firmware use bootp-response
- * build a static IP data from the bootp server response
- * format is <device>:<interfaceoption,interfaceoption,>tftpserver,filename,client,gateway,bootp-retry,tftp-retry,netmask,tftp-blocksize
- */
 static void ipv4_to_ascii(char *buf, u32 ip)
 {
 	if (buf)
 		sprintf(buf, "%u.%u.%u.%u", (ip & 0xff000000) >> 24, (ip & 0x00ff0000) >> 16, (ip & 0x0000ff00) >> 8, (ip & 0x000000ff));
 }
 
-static void get_dhcp_options(const struct dhcp_packet *dp, int size, u32 * netmask, u32 * gateway)
+static void get_dhcp_ipv4_options(const struct dhcp_packet *dp, int size, u32 * netmask, u32 * gateway)
 {
 	unsigned char *p, value, len;
 	u32 i;
-
 	/* add 4 byte cookie offset */
 	i = offsetof(struct dhcp_packet, options) + 4;
+	*netmask = *gateway = 0;
 	if (size >= i) {
 		p = (unsigned char *)dp;
 		p += i;
@@ -192,160 +343,226 @@ static void get_dhcp_options(const struct dhcp_packet *dp, int size, u32 * netma
 	}
 }
 
-static void hack_boot_path_for_CAS(struct path_description *result)
+/*
+ * pmac and older chrp (up to power5) can request any file from the tfp server
+ * Newer IBM firmware requires a boot path with static ip addresses and the
+ * desired filename. If /chosen/bootpath is reused, the bootfile (yaboot) itself
+ * is loaded again and again.
+ * pmac uses dhcp-response
+ * chrp uses bootpreply-packet
+ * power6 CAS firmware use bootp-response
+ * build a static IP data from the bootp server response
+ * format is <device>:<interfaceoption,interfaceoption,>tftpserver,filename,client,gateway,bootp-retry,tftp-retry,netmask,tftp-blocksize
+ */
+
+/*
+ * If booted via bootp/dhcp, all IPv4 addresses may be zero
+ * The new IBM CAS firmware expects that we construct a new bootpath based on the bootp response packet
+ * Assume all data was supplied manually if the property does not exist
+ */
+static int get_tftp_ipv4_ibm_CAS(struct path_description *path, const char *netdev_options, size_t offset)
 {
-	char *p, buf[sizeof("000.000.000.000")];
-	char *clientip, *gatewayip, *bootp_retry, *tftp_retry, *netmask, *tftp_blocksize;
+	const char *p;
+	char *p1, *pf, buf[sizeof("000.000.000.000")];
+	int bootp_retry, tftp_retry, tftp_blocksize;
 	struct dhcp_packet *dp;
-	int size, s;
+	u32 netmask_ipv4, gateway_ipv4;
+	int size, i;
 
 	size = prom_getproplen_chosen("bootp-response");
 	if (size <= 0)
-		return;
-
+		return 0;
+	/* IPv4 data via DHCP */
 	dp = malloc(size);
 	if (!dp)
-		return;
-	clientip = gatewayip = bootp_retry = tftp_retry = netmask = tftp_blocksize = NULL;
+		return 0;
 	prom_get_chosen("bootp-response", dp, size);
 
-	p = strrchr(path_net_before(result), ',');
-	if (p) {
-		*p = '\0';
-		result->u.n.dev_options = path_net_before(result);
-	}
+	bootp_retry = tftp_retry = 5;
+	tftp_blocksize = 512;
 
-	result->u.n.server_ip = dp->siaddr;
-	result->u.n.client_ip = dp->yiaddr;
-	result->u.n.gateway_ip = dp->giaddr;
-	get_dhcp_options(dp, size, &result->u.n.netmask, &result->u.n.gateway_ip);
-
-	ipv4_to_ascii(buf, dp->siaddr);
-	s = 0;
-	if (result->u.n.dev_options)
-		s += strlen(result->u.n.dev_options) + 1;
-	s += strlen(buf) + 1;
-	p = malloc(s);
+	p = netdev_options + offset;
+	/* find comma after server IPv4 */
+	p = strchr(p, ',');
 	if (p) {
-		path_net_before(result) = p;
-		if (result->u.n.dev_options) {
-			sprintf(p, "%s,", result->u.n.dev_options);
-			p += strlen(p);
+		p++;
+		/* find comma after filename */
+		p1 = strchr(p, ',');
+		if (p1) {
+			i = p1 - p;
+			pf = malloc(i + 1);
+			if (pf) {
+				memcpy(pf, p, i);
+				pf[i] = '\0';
+				path_filename(path) = pf;
+			}
+			p1++;	/* skip comma */
+			p = p1;
+			/* skip client IPv4 and gateway IPv4, move forward after comma  */
+			for (i = 0; i < 2; i++) {
+				p = strchr(p, ',');
+				if (!p)
+					break;
+				p++;
+			}
 		}
-		sprintf(p, "%s", buf);
 	}
-
-	clientip = path_net_after(result);
-
-	p = strchr(clientip, ',');
-	if (!p)
-		goto end_parse;
-	*p = '\0';
-	p++;
-	gatewayip = p;
-
-	p = strchr(p, ',');
-	if (!p)
-		goto end_parse;
-	*p = '\0';
-	p++;
-	bootp_retry = p;
-
-	p = strchr(p, ',');
-	if (!p)
-		goto end_parse;
-	*p = '\0';
-	p++;
-	tftp_retry = p;
-
-	p = strchr(p, ',');
-	if (!p)
-		goto end_parse;
-	*p = '\0';
-	p++;
-	netmask = p;
-
-	p = strchr(p, ',');
-	if (!p)
-		goto end_parse;
-	*p = '\0';
-	p++;
-	tftp_blocksize = p;
-
-      end_parse:
-	s = sizeof(buf) + 1 + sizeof(buf) + 1 + strlen(bootp_retry) + 1 + strlen(tftp_retry) + 1 + sizeof(buf) + 1 + strlen(tftp_blocksize) + 1;
-	p = malloc(s);
 	if (p) {
-		path_net_after(result) = p;
-		ipv4_to_ascii(buf, result->u.n.client_ip);
-		sprintf(p, "%s,", buf);
-		p += strlen(p);
-		ipv4_to_ascii(buf, result->u.n.gateway_ip);
-		sprintf(p, "%s,", buf);
-		p += strlen(p);
-		sprintf(p, "%s,", bootp_retry ? bootp_retry : "5");
-		p += strlen(p);
-		sprintf(p, "%s,", tftp_retry ? tftp_retry : "5");
-		p += strlen(p);
-		ipv4_to_ascii(buf, result->u.n.netmask);
-		sprintf(p, "%s,%s", buf, tftp_blocksize ? tftp_blocksize : "512");
+		bootp_retry = strtol(p, &p1, 10);
+		if (bootp_retry == 0 && (p == p1))
+			bootp_retry = 5;
+		if (p1)
+			p = p1;
+		/* find comma after bootp-retry */
+		p = strchr(p, ',');
+		if (p) {
+			p++;
+			tftp_retry = strtol(p, &p1, 10);
+			if (tftp_retry == 0 && (p == p1))
+				tftp_retry = 5;
+			if (p1)
+				p = p1;
+			/* find comma after tftp-retry */
+			p = strchr(p, ',');
+			if (p) {
+				p++;
+				/* find comma after netmask */
+				p = strchr(p, ',');
+				if (p) {
+					p++;
+					tftp_blocksize = strtol(p, &p1, 10);
+					if (tftp_blocksize == 0 && (p == p1))
+						tftp_blocksize = 512;
+
+				}
+			}
+		}
 	}
-	return;
+	get_dhcp_ipv4_options(dp, size, &netmask_ipv4, &gateway_ipv4);
+	ipv4_to_ascii(buf, dp->siaddr);
+	i = offset + 1 + strlen(buf) + 1;	/* options + comma + server IPv4 + null */
+	p1 = malloc(i);
+	if (p1) {
+		memcpy(p1, netdev_options, offset);	/* FIXME: this includes trailing comma */
+		memcpy(p1 + offset, buf, strlen(buf) + 1);	/* this includes trailing NUL */
+		path_net_before(path) = p1;
+	}
+	i = 3 * sizeof(buf) + 3 * sizeof(buf) + 5 + 1;	/* 3 * IPv4 + 3 * int + 5 comma + null */
+	p1 = malloc(i);
+	if (p1) {
+		ipv4_to_ascii(buf, dp->yiaddr);
+		i = strlen(buf);
+		memcpy(p1, buf, i);
+		p1[i] = ',';
+		i++;
+
+		ipv4_to_ascii(buf, gateway_ipv4);
+		memcpy(p1 + i, buf, strlen(buf));
+		i += strlen(buf);
+		p1[i] = ',';
+		i++;
+
+		ipv4_to_ascii(buf, netmask_ipv4);
+
+		sprintf(p1 + i, "%d,%d,%s,%d", bootp_retry, tftp_retry, buf, tftp_blocksize);
+
+		path_net_after(path) = p1;
+	}
+	return 1;
 }
 
-static void parse_net_device(struct path_description *result)
+static void get_tftp_ipv4_options(struct path_description *path, const char *netdev_options, size_t offset)
 {
-	char *p;
-#if 0
-	prom_printf("%s\n", __FUNCTION__);
-#endif
-	if (!path_net_before(result))
-		goto out;
+	char *p, *pf;
+	size_t i;
 
-	p = path_net_before(result);
-
-	if (strncmp("bootp", p, 5) == 0) {
-		p = strchr(p, ',');
-		if (!p) {
-			path_net_before(result)[5] = ',';
-			path_net_before(result)[6] = '\0';
-			goto out;
+	if (netdev_options[offset]) {
+		if (get_tftp_ipv4_ibm_CAS(path, netdev_options, offset) == 0) {
+			/* find comma after server IPv4 */
+			p = strchr(netdev_options + offset, ',');
+			DEBUG_F("comma after server IPv4 '%s' -> '%s'\n", netdev_options + offset, p);
+			if (p) {
+				offset = p - netdev_options;
+				p = malloc(offset + 1);
+				if (p) {
+					/* keep everything up to the filename */
+					memcpy(p, netdev_options, offset);
+					p[offset] = '\0';
+					path_net_before(path) = p;
+				}
+				offset++;	/* skip the comma before the filename */
+				p = strchr(netdev_options + offset, ',');	/* comma after the filename */
+				DEBUG_F("comma after filename '%s'\n", p);
+				if (p) {
+					i = p - (netdev_options + offset);
+					pf = malloc(i + 1);
+					if (pf) {
+						memcpy(pf, netdev_options + offset, i);
+						pf[i] = '\0';
+						path_filename(path) = pf;
+					}
+					offset = p - netdev_options;
+					offset++;	/* skip the comma after the filename */
+					i = strlen(netdev_options + offset);
+					p = malloc(i + 1);
+					if (p) {
+						strcpy(p, netdev_options + offset);
+						path_net_after(path) = p;
+					}
+				} else {
+					/* nothing after filename */
+					path_filename(path) = strdup(netdev_options + offset);
+				}
+			} else {
+				/* no filename was provided */
+				i = strlen(netdev_options + offset);
+				p = malloc(i + 1);
+				if (p) {
+					strcpy(p, netdev_options + offset);
+					path_net_before(path) = p;
+				}
+			}
 		}
-		p++;
+	} else {
+		/* maybe pmac, booted without any options */
+		p = malloc(offset + 1);
+		if (p) {
+			strcpy(p, netdev_options);
+			path_net_before(path) = p;
+		}
 	}
-	if (strncmp("promiscuous", p, 11) == 0) {
-		p = strchr(p, ',');
-		if (!p)
-			goto out;
-		p++;
-	}
-	if (strncmp("speed=", p, 6) == 0) {
-		p = strchr(p, ',');
-		if (!p)
-			goto out;
-		p++;
-	}
-	if (strncmp("duplex=", p, 7) == 0) {
-		p = strchr(p, ',');
-		if (!p)
-			goto out;
-		p++;
-	}
-	p = strchr(p, ',');
-	if (!p)
-		goto out;
-	*p = '\0';
-	p++;
-	path_filename(result) = p;
-	p = strchr(p, ',');
-	if (p) {
-		*p = '\0';
-		p++;
-		path_net_after(result) = p;
-	}
-      out:
-	hack_boot_path_for_CAS(result);
-	return;
+}
+
+static void get_tftp_options(struct path_description *path, const char *netdev_options, size_t offset)
+{
+	DEBUG_F("ipv%d tftp: netdev_options '%s' offset '%s'\n", path_flags(path) & FLAG_IPV6 ? 6 : 4, netdev_options, netdev_options + offset);
+	if (path_flags(path) & FLAG_IPV6)
+		get_tftp_ipv6_options(path, netdev_options, offset);
+	else
+		get_tftp_ipv4_options(path, netdev_options, offset);
+}
+
+static void parse_net_device(struct path_description *path, const char *netdev_options)
+{
+	size_t offset, newlen;
+
+	offset = 0;
+	newlen = parse_options(netdev_options, offset, path, &interface_options[0], 0);
+	if (newlen)
+		offset += newlen;
+
+	newlen = parse_options(netdev_options, offset, path, &command_keywords[0], 0);
+	if (newlen)
+		offset += newlen;
+
+	newlen = parse_options(netdev_options, offset, path, &qualifier_options[0], 0);
+	if (newlen)
+		offset += newlen;
+
+	if (path_flags(path) & FLAG_ISCSI)
+		get_iscsi_options(path, netdev_options, offset);
+	else
+		get_tftp_options(path, netdev_options, offset);
 }
 
 static void get_mac_address(struct path_description *result)
@@ -354,46 +571,48 @@ static void get_mac_address(struct path_description *result)
 	if (dev != PROM_INVALID_HANDLE) {
 		if (prom_getprop(dev, "mac-address", &result->u.n.mac, 6) == -1)
 			prom_getprop(dev, "local-mac-address", &result->u.n.mac, 6);
-		prom_printf("MAC for %s: %02x:%02x:%02x:%02x:%02x:%02x\n",
-			    path_device(result), result->u.n.mac[0], result->u.n.mac[1], result->u.n.mac[2], result->u.n.mac[3], result->u.n.mac[4], result->u.n.mac[5]
-		    );
+		prom_printf("MAC for %s: %02x:%02x:%02x:%02x:%02x:%02x\n", path_device(result),
+			    result->u.n.mac[0], result->u.n.mac[1], result->u.n.mac[2], result->u.n.mac[3], result->u.n.mac[4], result->u.n.mac[5]);
 	}
 }
 
+/*
+ * split the full image path into device and options part
+ * parse options depending on the device type
+ */
 static int parse_device_path(const char *imagepath, struct path_description *result)
 {
-	char *colon;
+	char *colon, *p;
+	size_t offset;
 	DEBUG_F("imagepath '%s'\n", imagepath);
 	if (!imagepath)
 		return 0;
 
-	path_device(result) = malloc(strlen(imagepath) + 2);
-	if (!path_device(result))
-		return 0;
-	strcpy(path_device(result), imagepath);
-	result->u.d.s1 = strchr(path_device(result), ':');
-	if (result->u.d.s1) {
-		colon = result->u.d.s1;
-		*result->u.d.s1 = '\0';
-		result->u.d.s1++;
-	} else
-		colon = NULL;
+	offset = 0;
+	if (result->type == TYPE_UNSET) {
+		colon = strchr(imagepath, ':');
+		if (colon)
+			offset = colon - imagepath;
+		else
+			offset = strlen(imagepath);
+		p = malloc(offset + 1);
+		if (!p)
+			return 0;
+		memcpy(p, imagepath, offset);
+		p[offset] = '\0';
+		if (colon)
+			offset++;	/* skip the colon */
+		path_device(result) = p;
 
-	result->type = prom_get_devtype(path_device(result));
+		result->type = prom_get_devtype(path_device(result));
+	}
 	switch (result->type) {
 	case TYPE_BLOCK:
-		parse_block_device(result);
+		parse_block_device(result, imagepath + offset);
 		break;
 	case TYPE_NET:
-		if (strncmp("iscsi,", result->u.d.s1, 6) == 0) {
-			result->type = TYPE_ISCSI;
-			*colon = ':';
-			result->u.d.s1 = NULL;
-			parse_iscsi_device(result);
-		} else {
-			parse_net_device(result);
-			get_mac_address(result);
-		}
+		get_mac_address(result);
+		parse_net_device(result, imagepath + offset);
 		break;
 	case TYPE_INVALID:
 		prom_printf("firmware said the path '%s' is invalid\n", path_device(result));
@@ -441,8 +660,10 @@ char *path_description_to_string(const struct path_description *input)
 		}
 		path = malloc(len);
 		if (path)
-			sprintf(path, "%s:%s,%s%s%s", path_device(input),
-				path_net_before(input), path_filename(input), path_net_after(input) ? "," : "", path_net_after(input) ? path_net_after(input) : "");
+			sprintf(path, "%s:%s%s%s%s%s", path_device(input),
+				path_net_before(input),
+				path_flags(input) & FLAG_IPV6 ? "" : ",",
+				path_filename(input), path_net_after(input) ? "," : "", path_net_after(input) ? path_net_after(input) : "");
 		break;
 	default:
 		break;
@@ -450,6 +671,12 @@ char *path_description_to_string(const struct path_description *input)
 	return path;
 }
 
+/*
+ * Take the full or relative imagepath and build a full path
+ * If its a relative path, use the device yaboot was loaded from as a base
+ * Handle special string '&device;' as device yaboot was loaded from
+ * returns 0 if something cant be parsed
+ */
 int imagepath_to_path_description(const char *imagepath, struct path_description *result, const struct path_description *default_device)
 {
 	char *past_device, *comma, *dir, *pathname;
@@ -476,18 +703,14 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 	switch (default_device->type) {
 	case TYPE_ISCSI:
 		path_part(result) = path_part(default_device);
-		pathname = malloc(strlen(path_device(default_device)) + 1);
-		if (!pathname)
+		path_device(result) = strdup(path_device(default_device));
+		if (!path_device(result))
 			return 0;
-		strcpy(pathname, path_device(default_device));
-		path_device(result) = pathname;
-		pathname = malloc(strlen(imagepath) + 1);
-		if (!pathname) {
+		path_filename(result) = strdup(imagepath);
+		if (!path_filename(result)) {
 			free(path_device(result));
 			return 0;
 		}
-		strcpy(pathname, imagepath);
-		path_filename(result) = pathname;
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 		prom_printf("hardcoded iscsi path '%s' '%d' '%s'\n", path_device(result), path_part(result), path_filename(result));
 #endif
@@ -531,8 +754,9 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 		len += 2;
 		pathname = malloc(len);
 		if (pathname)
-			sprintf(pathname, "%s:%s,%s%s%s", path_device(default_device),
+			sprintf(pathname, "%s:%s%s%s%s%s", path_device(default_device),
 				path_net_before(default_device) ? path_net_before(default_device) : "",
+				path_flags(default_device) & FLAG_IPV6 ? "" : ",",
 				past_device ? past_device : imagepath, comma, path_net_after(default_device) ? path_net_after(default_device) : "");
 #if defined(DEBUG) || defined(DEVPATH_TEST)
 		prom_printf("parsing net path '%s'\n", pathname);

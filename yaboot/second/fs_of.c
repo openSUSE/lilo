@@ -151,7 +151,7 @@ static int of_net_open(struct boot_file_t *file, const struct path_description *
 	DEBUG_ENTER;
 	DEBUG_OPEN_NEW;
 
-	sprintf(buffer, "%s:%s,", path_device(spec), path_net_before(spec));
+	sprintf(buffer, "%s:%s%s", path_device(spec), path_net_before(spec), path_flags(spec) & FLAG_IPV6 ? "" : ",");
 	p = p + strlen(buffer);
 	strcat(buffer, path_filename(spec));
 	while (*p) {
@@ -159,7 +159,7 @@ static int of_net_open(struct boot_file_t *file, const struct path_description *
 			*p = '\\';
 		p++;
 	}
-	if (path_net_after(spec) && strlen(path_net_after(spec))) {
+	if (path_net_after(spec)) {
 		strcat(buffer, ",");
 		strcat(buffer, path_net_after(spec));
 	}
