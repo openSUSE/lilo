@@ -67,6 +67,7 @@ enum flags {
  * network: <device>:<before_filename>,<filename>,<after_filename>
  */
 struct path_description {
+#define path_part(x) (x)->part
 	int part;		/* Partition number or -1 */
 
 	enum device_type type;

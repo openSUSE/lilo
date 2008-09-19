@@ -77,12 +77,12 @@ static void parse_block_device(struct path_description *result)
 	if (!path_partition(result))
 		return;
 
-	result->part = strtol(path_partition(result), &ip, 10);
-	DEBUG_F("part '%d', partition '%s', ip '%s'\n", result->part, path_partition(result), ip);
-	if (result->part)
+	path_part(result) = strtol(path_partition(result), &ip, 10);
+	DEBUG_F("part '%d', partition '%s', ip '%s'\n", path_part(result), path_partition(result), ip);
+	if (path_part(result))
 		*ip++ = '\0';
 	else {
-		result->part = -1;
+		path_part(result) = -1;
 		path_partition(result) = "";
 	}
 	if (',' == ip[0])
@@ -135,7 +135,7 @@ static void reset_device_to_iscsi(struct path_description *result)
  */
 static void parse_iscsi_device(struct path_description *result)
 {
-	result->part = -1;
+	path_part(result) = -1;
 	path_directory(result) = path_partition(result) = "";
 	reset_device_to_iscsi(result);
 	return;
@@ -421,8 +421,8 @@ char *path_description_to_string(const struct path_description *input)
 	switch (input->type) {
 	case TYPE_ISCSI:
 	case TYPE_BLOCK:
-		if (input->part > 0)
-			sprintf(part, "%d,", input->part);
+		if (path_part(input) > 0)
+			sprintf(part, "%d,", path_part(input));
 		else {
 			part[0] = ',';
 			part[1] = '\0';
@@ -475,7 +475,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 	pathname = NULL;
 	switch (default_device->type) {
 	case TYPE_ISCSI:
-		result->part = default_device->part;
+		path_part(result) = path_part(default_device);
 		pathname = malloc(strlen(path_device(default_device)) + 1);
 		if (!pathname)
 			return 0;
@@ -489,7 +489,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 		strcpy(pathname, imagepath);
 		path_filename(result) = pathname;
 #if defined(DEBUG) || defined(DEVPATH_TEST)
-		prom_printf("hardcoded iscsi path '%s' '%d' '%s'\n", path_device(result), result->part, path_filename(result));
+		prom_printf("hardcoded iscsi path '%s' '%d' '%s'\n", path_device(result), path_part(result), path_filename(result));
 #endif
 		/* do not call parse_device_path */
 		return 1;
@@ -499,8 +499,8 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 		if (past_device)
 			len = strlen(path_device(default_device)) + 1 + strlen(past_device);
 		else {
-			if (default_device->part > 0)
-				sprintf(part, "%d", default_device->part);
+			if (path_part(default_device) > 0)
+				sprintf(part, "%d", path_part(default_device));
 			comma = ",";
 			if (imagepath[0] != '/' && imagepath[0] != '\\' && path_directory(default_device))
 				dir = path_directory(default_device);
@@ -570,7 +570,7 @@ void set_default_device(const char *dev, const char *partition, struct path_desc
 		if (endp != partition && *endp == 0) {
 			if (TYPE_UNSET == default_device->type)
 				default_device->type = TYPE_BLOCK;
-			default_device->part = n;
+			path_part(default_device) = n;
 		}
 	}
 }

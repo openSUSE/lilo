@@ -79,7 +79,7 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 	struct partition_t *p;
 	char f[1024];
 	int fserrorno;
-	int partition = spec->part;
+	int partition = path_part(spec);
 
 	parts = partitions_lookup(path_device(spec));
 	sprintf(f, "%s%s", path_directory(spec), path_filename(spec));
