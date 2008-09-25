@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 25 13:30:26 CEST 2008 - olh@suse.de
+
+- bootheader: leave initrd where it is if the kernel has enough room
+  at address 0x0 (bnc#427960)
+
+-------------------------------------------------------------------
 Fri Sep 19 16:14:58 CEST 2008 - olh@suse.de
 
 - rewrite /chosen/bootpath parser to support IPv6 TFTP (bnc#417538)

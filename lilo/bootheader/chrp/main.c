@@ -267,17 +267,26 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	initrd.size = (unsigned long)(_initrd_end - _initrd_start);
 	initrd.memsize = initrd.size;
 	if (initrd.size > 0) {
-		initrd.addr = try_claim(initrd.size);
-		if (initrd.addr == 0 || initrd.addr == -1)
-			abort("Can't allocate memory for initial ramdisk !\n");
-		printf("Allocated %08lx bytes for initrd @ %08lx\n", initrd.size, initrd.addr);
+		/*
+		 * The kernel relocates itself to address 0x0
+		 * If the initrd is at a higher address, just leave it where it is
+		 */
+		if (vmlinux.memsize < (unsigned long)_initrd_start) {
+			initrd.addr = (unsigned long)_initrd_start;
+			printf("Leave %08lx bytes for initrd @ %08lx\n", initrd.size, initrd.addr);
+		} else {
+			initrd.addr = try_claim(initrd.size);
+			if (initrd.addr == 0 || initrd.addr == -1)
+				abort("Can't allocate memory for initial ramdisk !\n");
+			printf("Allocated %08lx bytes for initrd @ %08lx\n", initrd.size, initrd.addr);
+#ifdef DEBUG
+			printf("initial ramdisk moving %08lx <- %08lx (%08lx bytes)\n", initrd.addr, (unsigned long)_initrd_start, initrd.size);
+			printf("initrd head: %08lx\n", *((unsigned long *)_initrd_start));
+#endif
+			memmove((void *)initrd.addr, (void *)_initrd_start, initrd.size);
+		}
 		a1 = initrd.addr;
 		a2 = initrd.size;
-#ifdef DEBUG
-		printf("initial ramdisk moving %08lx <- %08lx (%08lx bytes)\n", initrd.addr, (unsigned long)_initrd_start, initrd.size);
-		printf("initrd head: %08lx\n", *((unsigned long *)_initrd_start));
-#endif
-		memmove((void *)initrd.addr, (void *)_initrd_start, initrd.size);
 	}
 
 	/* Eventually gunzip the kernel */
