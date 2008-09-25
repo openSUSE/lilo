@@ -41,7 +41,6 @@ extern char _vmlinuz_md5_end[];
 extern char _initrd_md5_start[];
 extern char _initrd_md5_end[];
 
-
 struct addr_range {
 	unsigned long addr;
 	unsigned long size;
@@ -59,7 +58,7 @@ typedef void (*kernel_entry_t) (unsigned long, unsigned long, prom_entry, void *
 void mdelay(int ms)
 {
 	ms = of1275_milliseconds() + ms;
-	while(of1275_milliseconds() < ms);
+	while (of1275_milliseconds() < ms) ;
 }
 
 int read(void *buf, int buflen)
@@ -83,13 +82,10 @@ static int check_elf32(void *p)
 	    elf32->e_ident[EI_MAG2] != ELFMAG2 ||
 	    elf32->e_ident[EI_MAG3] != ELFMAG3 ||
 	    elf32->e_ident[EI_CLASS] != ELFCLASS32 ||
-	    elf32->e_ident[EI_DATA] != ELFDATA2MSB ||
-	    !(elf32->e_type == ET_EXEC || elf32->e_type == ET_DYN) ||
-	    elf32->e_machine != EM_PPC)
+	    elf32->e_ident[EI_DATA] != ELFDATA2MSB || !(elf32->e_type == ET_EXEC || elf32->e_type == ET_DYN) || elf32->e_machine != EM_PPC)
 		return 0;
 
-	elf32ph = (Elf32_Phdr *) ((unsigned long)elf32 +
-				  (unsigned long)elf32->e_phoff);
+	elf32ph = (Elf32_Phdr *) ((unsigned long)elf32 + (unsigned long)elf32->e_phoff);
 
 	for (i = 0; i < (unsigned int)elf32->e_phnum; i++, elf32ph++)
 		if (elf32ph->p_type == PT_LOAD && elf32ph->p_offset != 0)
@@ -131,13 +127,10 @@ static int check_elf64(void *p)
 	    elf64->e_ident[EI_MAG2] != ELFMAG2 ||
 	    elf64->e_ident[EI_MAG3] != ELFMAG3 ||
 	    elf64->e_ident[EI_CLASS] != ELFCLASS64 ||
-	    elf64->e_ident[EI_DATA] != ELFDATA2MSB ||
-	    !(elf64->e_type == ET_EXEC || elf64->e_type == ET_DYN) ||
-	    elf64->e_machine != EM_PPC64)
+	    elf64->e_ident[EI_DATA] != ELFDATA2MSB || !(elf64->e_type == ET_EXEC || elf64->e_type == ET_DYN) || elf64->e_machine != EM_PPC64)
 		return 0;
 
-	elf64ph = (Elf64_Phdr *) ((unsigned long)elf64 +
-				  (unsigned long)elf64->e_phoff);
+	elf64ph = (Elf64_Phdr *) ((unsigned long)elf64 + (unsigned long)elf64->e_phoff);
 
 	for (i = 0; i < (unsigned int)elf64->e_phnum; i++, elf64ph++)
 		if (elf64ph->p_type == PT_LOAD && elf64ph->p_offset != 0)
@@ -156,14 +149,13 @@ static int check_elf64(void *p)
 	printf("p_filesz %016llx\n", elf64ph->p_filesz);
 	printf("p_memsz  %016llx\n", elf64ph->p_memsz);
 	printf("p_align  %016llx\n", elf64ph->p_align);
-	printf("... skipping %08lx bytes of ELF header\n",
-	       (unsigned long)elf64ph->p_offset);
+	printf("... skipping %08lx bytes of ELF header\n", (unsigned long)elf64ph->p_offset);
 #endif
 
 	return 64;
 }
 
-static unsigned long claim_base  = PROG_START ;
+static unsigned long claim_base = PROG_START;
 
 static unsigned long try_claim(unsigned long size)
 {
@@ -195,18 +187,14 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 
 	of1275_prominit(promptr);
 
-	printf("\nSuSE Linux zImage starting: loaded at %p-%p (%lx/%lx/%p; sp: %p)\n",
-	       _coff_start, _end, a1, a2, promptr, sp);
+	printf("\nSuSE Linux zImage starting: loaded at %p-%p (%lx/%lx/%p; sp: %p)\n", _coff_start, _end, a1, a2, promptr, sp);
 
 	/* if the zImage is too big, firmware may only load parts of it */
 	if (_vmlinuz_md5_start != _vmlinuz_md5_end) {
 		actual_md5 = md5sum_string(_vmlinuz_start, _vmlinuz_end - _vmlinuz_start);
 		if (strcmp(_vmlinuz_md5_start, actual_md5)) {
 			printf("\nvmlinuz CORRUPTION. memory range %p %p\n"
-					"Expected md5 %s\n"
-					"Got md5      %s\n",
-					_vmlinuz_start, _vmlinuz_end,
-					_vmlinuz_md5_start, actual_md5);
+			       "Expected md5 %s\n" "Got md5      %s\n", _vmlinuz_start, _vmlinuz_end, _vmlinuz_md5_start, actual_md5);
 			abort("\nvmlinuz corrupted\n");
 		}
 	}
@@ -214,10 +202,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 		actual_md5 = md5sum_string(_initrd_start, _initrd_end - _initrd_start);
 		if (strcmp(_initrd_md5_start, actual_md5)) {
 			printf("\ninitrd CORRUPTION. memory range %p %p\n"
-					"Expected md5 %s\n"
-					"Got md5      %s\n",
-					_initrd_start, _initrd_end,
-					_initrd_md5_start, actual_md5);
+			       "Expected md5 %s\n" "Got md5      %s\n", _initrd_start, _initrd_end, _initrd_md5_start, actual_md5);
 			abort("\ninitrd corrupted\n");
 		}
 	}
@@ -234,9 +219,9 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 		claim_base = 32 * 1024 * 1024;
 	/* the executable memrange may not be claimed by firmware */
 	of1275_claim((unsigned int)_coff_start, (unsigned int)(_end - _coff_start), 0);
-	
+
 	bootcpu_phandle[0] = 0;
-	find_type_devices(bootcpu_phandle, "cpu", sizeof(bootcpu_phandle)/sizeof(phandle));
+	find_type_devices(bootcpu_phandle, "cpu", sizeof(bootcpu_phandle) / sizeof(phandle));
 	if (!bootcpu_phandle[0])
 		abort("must be a dream");
 
@@ -250,8 +235,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 
 	/* Eventually gunzip the ELF header of the kernel */
 	if (*(unsigned short *)vmlinuz.addr == 0x1f8b)
-		gunzip((unsigned long)elfheader, sizeof(elfheader),
-		       vmlinuz.addr, vmlinuz.size, "ELF header");
+		gunzip((unsigned long)elfheader, sizeof(elfheader), vmlinuz.addr, vmlinuz.size, "ELF header");
 	else
 		memcpy(elfheader, _vmlinuz_start, sizeof(elfheader));
 
@@ -262,8 +246,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 		abort("not a powerpc ELF file\n");
 
 	if (cputype && cputype != elftype) {
-		printf("booting a %d-bit kernel on a %d-bit cpu.\n",
-		       elftype, cputype);
+		printf("booting a %d-bit kernel on a %d-bit cpu.\n", elftype, cputype);
 		abort("");
 	}
 
@@ -276,8 +259,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	if (vmlinux.addr == 0 || vmlinux.addr == -1)
 		abort("Can't allocate memory for kernel image !\n");
 
-	printf("Allocated %08lx bytes for kernel @ %08lx\n",
-	       vmlinux.memsize, vmlinux.addr);
+	printf("Allocated %08lx bytes for kernel @ %08lx\n", vmlinux.memsize, vmlinux.addr);
 
 	/*
 	 * Now we try to claim memory for the initrd (and copy it there)
@@ -287,39 +269,29 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	if (initrd.size > 0) {
 		initrd.addr = try_claim(initrd.size);
 		if (initrd.addr == 0 || initrd.addr == -1)
-			abort
-			    ("Can't allocate memory for initial ramdisk !\n");
-		printf("Allocated %08lx bytes for initrd @ %08lx\n",
-		       initrd.size, initrd.addr);
+			abort("Can't allocate memory for initial ramdisk !\n");
+		printf("Allocated %08lx bytes for initrd @ %08lx\n", initrd.size, initrd.addr);
 		a1 = initrd.addr;
 		a2 = initrd.size;
 #ifdef DEBUG
-		printf
-		    ("initial ramdisk moving %08lx <- %08lx (%08lx bytes)\n",
-		     initrd.addr, (unsigned long)_initrd_start, initrd.size);
-		printf("initrd head: %08lx\n",
-		       *((unsigned long *)_initrd_start));
+		printf("initial ramdisk moving %08lx <- %08lx (%08lx bytes)\n", initrd.addr, (unsigned long)_initrd_start, initrd.size);
+		printf("initrd head: %08lx\n", *((unsigned long *)_initrd_start));
 #endif
-		memmove((void *)initrd.addr, (void *)_initrd_start,
-			initrd.size);
+		memmove((void *)initrd.addr, (void *)_initrd_start, initrd.size);
 	}
 
 	/* Eventually gunzip the kernel */
 	if (*(unsigned short *)vmlinuz.addr == 0x1f8b)
-		gunzip(vmlinux.addr, vmlinux.memsize, vmlinuz.addr,
-		       vmlinuz.size, "kernel");
+		gunzip(vmlinux.addr, vmlinux.memsize, vmlinuz.addr, vmlinuz.size, "kernel");
 	else
-		memmove((void *)vmlinux.addr, (void *)vmlinuz.addr,
-			vmlinuz.size);
+		memmove((void *)vmlinux.addr, (void *)vmlinuz.addr, vmlinuz.size);
 
 	if (_builtin_cmd_line.prefer && _builtin_cmd_line.prefer != '0') {
 		int l = get_cmdline(_builtin_cmd_line.string, strlen(_builtin_cmd_line.string), sizeof(_builtin_cmd_line.string));
 #ifdef DEBUG
-		printf("copy built-in cmdline(%d):\n%s\n", l,
-		       _builtin_cmd_line.string);
+		printf("copy built-in cmdline(%d):\n%s\n", l, _builtin_cmd_line.string);
 #endif
-		l = of1275_setprop(chosen_handle, "bootargs",
-				 _builtin_cmd_line.string, l + 1);
+		l = of1275_setprop(chosen_handle, "bootargs", _builtin_cmd_line.string, l + 1);
 #ifdef DEBUG
 		printf("setprop bootargs: %d\n", l);
 #endif
@@ -328,8 +300,7 @@ void start(unsigned long a1, unsigned long a2, void *promptr, void *sp)
 	flush_cache((void *)vmlinux.addr, vmlinux.memsize);
 
 	kernel_entry = (kernel_entry_t) (vmlinux.addr + vmlinux.offset);
-	printf( "entering kernel at %p(%lx/%lx/%p)\n",
-			kernel_entry, a1, a2, promptr);
+	printf("entering kernel at %p(%lx/%lx/%p)\n", kernel_entry, a1, a2, promptr);
 	kernel_entry(a1, a2, promptr, NULL);
 
 	abort("Error: Linux kernel returned to zImage bootloader!\n");
