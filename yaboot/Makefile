@@ -123,7 +123,7 @@ include/version.h: FORCE
 	else \
 		rev=${VERSION} ; mod= ; \
 	fi ; \
-	echo "#define VERSION \"$$rev$$mod\"" > $@~ ; \
+	echo "#define VERSION \"r$$rev$$mod\"" > $@~ ; \
 	if test -f $@ ; then \
 		if ! diff -u $@ $@~ ; then \
 			cp -f $@~ $@ ; \
