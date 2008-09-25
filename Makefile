@@ -37,14 +37,21 @@ submit:	.submitted
 	fi  ; \
 	lv=`cat version` ; \
 	yv=$$lv-r`svn info yaboot | sed -n "/^Last Changed Rev:[[:blank:]]\+/s@^[^:]\+:[[:blank:]]\+@@p"` ; \
+	yt=`svn info yaboot | sed -n "/^Last Changed Date:[[:blank:]]\+/{s@^[^:]\+:[[:blank:]]\+@@;s@[[:blank:]]\+(.*)@@p}"` ; \
 	svn export . $$tmpdir ; \
 	svn log -v yaboot > $$tmpdir/yaboot/Changelog.SuSE ; \
+	touch -d "$$yt" $$tmpdir/yaboot/Changelog.SuSE ; \
 	cd $$tmpdir ; \
 	chmod -R a+rX .. ; \
 	rm -f yaboot*.tar.gz ; \
-	sed -i "/^VERSION/s@^.*@VERSION = $$yv@" yaboot/Makefile ; \
+	mv -f yaboot/Makefile yaboot/Makefile~ ; \
+	sed "/^VERSION/s@^.*@VERSION = $$yv@" yaboot/Makefile~ > yaboot/Makefile ; \
+	touch -r yaboot/Makefile~  yaboot/Makefile ; \
+	rm -f yaboot/Makefile~ ; \
+	find yaboot -type d -print0 | xargs -0 touch -d "$$yt"  ; \
 	mv -v yaboot yaboot-$$yv ; \
 	tar cfj yaboot-$$yv.tar.bz2 yaboot-$$yv ; \
+	touch -d "$$yt"  yaboot-$$yv.tar.bz2 ; \
 	touch --reference=lilo/lilo.new lilo.spec ; \
 	sed -i "s:@VERSION@:$$lv:" lilo/lilo.new ; \
 	touch --reference=lilo.spec lilo/lilo.new ; \
