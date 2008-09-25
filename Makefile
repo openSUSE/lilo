@@ -48,9 +48,8 @@ submit:	.submitted
 	sed "/^VERSION/s@^.*@VERSION = $$yv@" yaboot/Makefile~ > yaboot/Makefile ; \
 	touch -r yaboot/Makefile~  yaboot/Makefile ; \
 	rm -f yaboot/Makefile~ ; \
-	find yaboot -type d -print0 | xargs -0 touch -d "$$yt"  ; \
 	mv -v yaboot yaboot-$$yv ; \
-	tar cfj yaboot-$$yv.tar.bz2 yaboot-$$yv ; \
+	tar cfj yaboot-$$yv.tar.bz2 `find yaboot-$$yv -type f | sort -u`; \
 	touch -d "$$yt"  yaboot-$$yv.tar.bz2 ; \
 	touch --reference=lilo/lilo.new lilo.spec ; \
 	sed -i "s:@VERSION@:$$lv:" lilo/lilo.new ; \
