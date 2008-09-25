@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu Sep 25 13:37:46 CEST 2008 - olh@suse.de
+
+- bootheader: update RPA note in addnote to tell firmware to
+  relocate itself to make room for the downloaded ELF binary
+  there must be enough room for the TFTP download (bnc#427960)
+
+-------------------------------------------------------------------
 Thu Sep 25 13:30:26 CEST 2008 - olh@suse.de
 
 - bootheader: leave initrd where it is if the kernel has enough room
