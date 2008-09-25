@@ -6,7 +6,7 @@ export LC_COLLATE=POSIX
 
 include Config
 
-VERSION = r$(shell rev=`env -i svn info | sed -n "/^Last Changed Rev:[[:blank:]]\+/s@^[^:]\+:[[:blank:]]\+@@p"` ; mod=`env -i svn st | grep -q '^[MAD]' && echo M` ; echo $$rev$$mod )
+VERSION = unset
 # Debug mode (spam/verbose)
 DEBUG = 0
 # make install vars
@@ -26,7 +26,6 @@ CROSS =
 YBCFLAGS = -Os $(CFLAGS) -msoft-float -fno-builtin -nostdinc -Wall -isystem `gcc -print-file-name=include`
 YBCFLAGS += -g
 YBCFLAGS += -mcpu=powerpc
-YBCFLAGS += -DVERSION=\"${VERSION}\"	#"
 YBCFLAGS += -I ./include
 ifneq ($(DEBUG),0)
 YBCFLAGS += -DDEBUG=$(DEBUG)
@@ -115,6 +114,24 @@ OBJCOPY		:= $(CROSS)objcopy
 
 all yaboot: second/yaboot md5test
 
+.PHONY: FORCE
+FORCE:
+include/version.h: FORCE
+	@if test -d .svn ; then \
+		rev=`env -i svn info | sed -n "/^Last Changed Rev:[[:blank:]]\+/s@^[^:]\+:[[:blank:]]\+@@p"` ; \
+		mod=`env -i svn st | grep -q '^[MAD]' && echo M` ; \
+	else \
+		rev=${VERSION} ; mod= ; \
+	fi ; \
+	echo "#define VERSION \"$$rev$$mod\"" > $@~ ; \
+	if test -f $@ ; then \
+		if ! diff -u $@ $@~ ; then \
+			cp -f $@~ $@ ; \
+		fi ; \
+	else \
+		cp -f $@~ $@ ; \
+	fi
+
 second/empty.c:
 	rm -f $@
 	echo '' > $@
@@ -185,6 +202,7 @@ bindist: all
 	rm -rf ../yaboot-binary-${VERSION}
 
 clean:
+	rm -f include/version.h
 	rm -f second/yaboot util/addnote util/elfextract $(OBJS)
 	rm -f second/yaboot.debug
 	rm -f second/yaboot.chrp

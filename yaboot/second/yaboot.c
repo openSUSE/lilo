@@ -54,6 +54,7 @@
 #include <elf.h>
 #include <debug.h>
 #include <partition.h>
+#include <version.h>
 
 static char *hard_coded_bootpath(char *bootpath)
 {
