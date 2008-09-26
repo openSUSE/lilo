@@ -243,7 +243,7 @@ static void get_iscsi_options(struct path_description *path, const char *netdev_
 		    "                *** How exactly did you get that far?! ***                \n"
 		    "                                                                          \n");
 	path_part(path) = -1;	/* Scan all partitions */
-	path->type = TYPE_ISCSI;
+	path_type(path) = TYPE_ISCSI;
 	size = prom_getproplen_chosen(nas);
 	if (size <= 0) {
 		prom_printf("'%s' property missing for iSCSI boot\n", nas);
@@ -590,7 +590,7 @@ static int parse_device_path(const char *imagepath, struct path_description *res
 		return 0;
 
 	offset = 0;
-	if (result->type == TYPE_UNSET) {
+	if (path_type(result) == TYPE_UNSET) {
 		colon = strchr(imagepath, ':');
 		if (colon)
 			offset = colon - imagepath;
@@ -605,9 +605,9 @@ static int parse_device_path(const char *imagepath, struct path_description *res
 			offset++;	/* skip the colon */
 		path_device(result) = p;
 
-		result->type = prom_get_devtype(path_device(result));
+		path_type(result) = prom_get_devtype(path_device(result));
 	}
-	switch (result->type) {
+	switch (path_type(result)) {
 	case TYPE_BLOCK:
 		parse_block_device(result, imagepath + offset);
 		break;
@@ -619,7 +619,7 @@ static int parse_device_path(const char *imagepath, struct path_description *res
 		prom_printf("firmware said the path '%s' is invalid\n", path_device(result));
 		return 0;
 	default:
-		prom_printf("type %d of '%s' not handled\n", result->type, path_device(result));
+		prom_printf("type %d of '%s' not handled\n", path_type(result), path_device(result));
 		return 0;
 	}
 	dump_path_description(result);
@@ -638,7 +638,7 @@ char *path_description_to_string(const struct path_description *input)
 	len = strlen(path_device(input));
 	len += strlen(path_filename(input));
 	len += 1 + 1 + 1;	/* : , \0 */
-	switch (input->type) {
+	switch (path_type(input)) {
 	case TYPE_ISCSI:
 	case TYPE_BLOCK:
 		if (path_part(input) > 0)
@@ -701,7 +701,7 @@ int imagepath_to_path_description(const char *imagepath, struct path_description
 	}
 	comma = dir = "";
 	pathname = NULL;
-	switch (default_device->type) {
+	switch (path_type(default_device)) {
 	case TYPE_ISCSI:
 		path_part(result) = path_part(default_device);
 		path_device(result) = strdup(path_device(default_device));
@@ -787,20 +787,20 @@ void set_default_device(const char *dev, const char *partition, struct path_desc
 		endp = strchr(path_device(default_device), ':');
 		if (endp)
 			endp[0] = '\0';
-		default_device->type = prom_get_devtype(path_device(default_device));
+		path_type(default_device) = prom_get_devtype(path_device(default_device));
 	}
 
 	if (partition) {
 		n = simple_strtol(partition, &endp, 10);
 		if (endp != partition && *endp == 0) {
-			if (TYPE_UNSET == default_device->type)
-				default_device->type = TYPE_BLOCK;
+			if (TYPE_UNSET == path_type(default_device))
+				path_type(default_device) = TYPE_BLOCK;
 			path_part(default_device) = n;
 		}
 	}
 }
 int yaboot_set_bootpath(const char *imagepath, struct path_description *result)
 {
-	result->type = TYPE_UNSET;
+	path_type(result) = TYPE_UNSET;
 	return parse_device_path(imagepath, result);
 }

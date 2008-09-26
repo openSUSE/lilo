@@ -70,6 +70,7 @@ struct path_description {
 #define path_part(x) (x)->part
 	int part;		/* Partition number or -1 */
 
+#define path_type(x) (x)->type
 	enum device_type type;
 #define path_flags(x) (x)->flags
 	unsigned int flags;

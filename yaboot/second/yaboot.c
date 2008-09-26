@@ -213,7 +213,7 @@ static int find_and_load_config_file(const struct path_description *b, char *con
 	int i;
 	struct path_description config_fspec;
 
-	switch (b->type) {
+	switch (path_type(b)) {
 	case TYPE_NET:
 		names = config_file_names_net;
 		for (i = 0; i < 6; i++)
@@ -230,7 +230,7 @@ static int find_and_load_config_file(const struct path_description *b, char *con
 		names = config_file_names_block;
 		break;
 	default:
-		prom_printf("type '%d' not handled\n", b->type);
+		prom_printf("type '%d' not handled\n", path_type(b));
 		goto bail;
 		break;
 	}
