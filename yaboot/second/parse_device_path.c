@@ -242,6 +242,7 @@ static void get_iscsi_options(struct path_description *path, const char *netdev_
 		    "                                                                          \n"
 		    "                *** How exactly did you get that far?! ***                \n"
 		    "                                                                          \n");
+	path_part(path) = -1;	/* Scan all partitions */
 	path->type = TYPE_ISCSI;
 	size = prom_getproplen_chosen(nas);
 	if (size <= 0) {

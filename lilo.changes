@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Sep 26 08:45:10 CEST 2008 - olh@suse.de
+
+- scan all partitions if booted from iscsi (bnc#417539)
+
+-------------------------------------------------------------------
 Thu Sep 25 13:37:46 CEST 2008 - olh@suse.de
 
 - bootheader: update RPA note in addnote to tell firmware to
