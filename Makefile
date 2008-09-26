@@ -49,7 +49,7 @@ submit:	.submitted
 	touch -r yaboot/Makefile~  yaboot/Makefile ; \
 	rm -f yaboot/Makefile~ ; \
 	mv -v yaboot yaboot-$$yv ; \
-	tar cfj yaboot-$$yv.tar.bz2 `find yaboot-$$yv -type f | sort -u`; \
+	tar cfj yaboot-$$yv.tar.bz2 `find yaboot-$$yv -type f -o -type l | sort -u`; \
 	touch -d "$$yt"  yaboot-$$yv.tar.bz2 ; \
 	touch --reference=lilo/lilo.new lilo.spec ; \
 	sed -i "s:@VERSION@:$$lv:" lilo/lilo.new ; \
