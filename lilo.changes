@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Sep 29 17:15:53 CEST 2008 - olh@suse.de
+
+- do not force zImage if root is on iscsi (bnc#417539)
+  yaboot can handle iscsi now
+
+-------------------------------------------------------------------
 Fri Sep 26 08:45:10 CEST 2008 - olh@suse.de
 
 - scan all partitions if booted from iscsi (bnc#417539)

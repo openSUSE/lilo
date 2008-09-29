@@ -101,6 +101,8 @@ function running_on_chrp () {
 	if is_on_iscsi $OPTION_BOOT ; then
 		echo "boot device $OPTION_BOOT is on iscsi"
 	iscsi_bootdevice=1
+				# FIXME
+				iscsi_bootdevice=0
 	fi
 
 	# check whether the boot partition is under device mapper control an throw
@@ -147,6 +149,8 @@ function running_on_chrp () {
 		if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] && is_on_iscsi "$image" ; then
 				zimage_nr=$i
 				iscsi_bootdevice=1
+				# FIXME
+				iscsi_bootdevice=0
 		# if the boot device points to iscsi, force zImage
 		elif (( iscsi_bootdevice == 1 )) ; then
 			if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ]; then
