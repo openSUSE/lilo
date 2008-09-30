@@ -991,7 +991,7 @@ static void yaboot_text_ui(void)
 	enum get_params_result gpr;
 	struct boot_param_t params;
 	struct path_description *kernel, *rd;
-	void *claim_base;
+	unsigned long claim_base;
 	void *initrd_base;
 	unsigned long initrd_size;
 	kernel_entry_t kernel_entry;
@@ -1096,14 +1096,14 @@ static void yaboot_text_ui(void)
 				 * real-base and 32M. The kernel crashes at random places in
 				 * prom_init, usually in opening display. */
 				if (64 == _cpu)
-					claim_base = (void *)loadinfo.memsize;
+					claim_base = loadinfo.memsize;
 				else
-					claim_base = (void *)(32 * 1024 * 1024);
+					claim_base = 32 * 1024 * 1024;
 				for (result = 0; result < 128; result++) {
-					initrd_base = prom_claim(claim_base, INITRD_CHUNKSIZE, 0);
+					initrd_base = prom_claim((void *)claim_base, INITRD_CHUNKSIZE, 0);
 					if (initrd_base != (void *)-1)
 						break;
-					claim_base += (unsigned long)claim_base + (1 * 1024 * 1024);
+					claim_base += claim_base + (1 * 1024 * 1024);
 				}
 				if (initrd_base == (void *)-1) {
 					prom_printf("Claim failed for initrd memory\n");
