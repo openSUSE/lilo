@@ -1117,18 +1117,20 @@ static void yaboot_text_ui(void)
 					initrd_size = file.fs->read(&file, chunksize, initrd_base);
 					if (initrd_size == 0)
 						initrd_base = NULL;
-					initrd_read = initrd_size;
-					initrd_more = initrd_base;
-					while (initrd_read == chunksize) {	/* need to read more? */
-						initrd_want = (void *)((unsigned long)initrd_more + chunksize);
-						initrd_more = prom_claim(initrd_want, chunksize, 0);
-						if (initrd_more != initrd_want) {
-							prom_printf("Claim failed for initrd memory at %p rc=%p\n", initrd_want, initrd_more);
-							break;
+					if (file.dev_type != TYPE_NET) {
+						initrd_read = initrd_size;
+						initrd_more = initrd_base;
+						while (initrd_read == chunksize) {	/* need to read more? */
+							initrd_want = (void *)((unsigned long)initrd_more + chunksize);
+							initrd_more = prom_claim(initrd_want, chunksize, 0);
+							if (initrd_more != initrd_want) {
+								prom_printf("Claim failed for initrd memory at %p rc=%p\n", initrd_want, initrd_more);
+								break;
+							}
+							initrd_read = file.fs->read(&file, chunksize, initrd_more);
+							DEBUG_F("  block at %p rc=%lu\n", initrd_more, initrd_read);
+							initrd_size += initrd_read;
 						}
-						initrd_read = file.fs->read(&file, chunksize, initrd_more);
-						DEBUG_F("  block at %p rc=%lu\n", initrd_more, initrd_read);
-						initrd_size += initrd_read;
 					}
 				}
 				file.fs->close(&file);
