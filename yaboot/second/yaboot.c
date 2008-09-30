@@ -1103,7 +1103,8 @@ static void yaboot_text_ui(void)
 					chunksize = file.len;
 				else
 					chunksize = 4 * 1024 * 1024;
-				for (result = 0; result < 128; result++) {
+				/* try to claim memory up to 128MB */
+				while (claim_base + chunksize < 128 * 1024 * 1024) {
 					initrd_base = prom_claim((void *)claim_base, chunksize, 0);
 					if (initrd_base != (void *)-1)
 						break;
