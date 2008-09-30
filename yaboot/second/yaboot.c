@@ -1103,7 +1103,7 @@ static void yaboot_text_ui(void)
 					initrd_base = prom_claim((void *)claim_base, INITRD_CHUNKSIZE, 0);
 					if (initrd_base != (void *)-1)
 						break;
-					claim_base += claim_base + (1 * 1024 * 1024);
+					claim_base += 1 * 1024 * 1024;
 				}
 				if (initrd_base == (void *)-1) {
 					prom_printf("Claim failed for initrd memory\n");
