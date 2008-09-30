@@ -59,7 +59,7 @@
 static char *hard_coded_bootpath(char *bootpath)
 {
 #ifdef HARD_CODED_BOOTPATH
-	const char path[] = HARD_CODED_BOOTPATH ;
+	const char path[] = HARD_CODED_BOOTPATH;
 	prom_printf("original bootpath: '%s'\n using hardcoded bootpath: '%s'\n", bootpath, path);
 	bootpath = malloc(strlen(path) + 1);
 	if (bootpath)
@@ -78,8 +78,8 @@ static char *hard_coded_bootpath(char *bootpath)
 #define _ALIGN(addr,size)	(((addr)+size-1)&(~(size-1)))
 #define MAX_HEADERS	32
 
-#define SLES9_ZIMAGE_BASE ((4 * 1024 * 1024)) /* the zImage header used in SLES8/9 is not relocatable */
-#define SLES9_ZIMAGE_SIZE ((7 * 1024 * 1024)) /* its a binary blob from 2.4 kernel source ... */
+#define SLES9_ZIMAGE_BASE ((4 * 1024 * 1024))	/* the zImage header used in SLES8/9 is not relocatable */
+#define SLES9_ZIMAGE_SIZE ((7 * 1024 * 1024))	/* its a binary blob from 2.4 kernel source ... */
 #define MALLOCADDR ((2 * 1024 * 1024) + (512 * 1024))
 #define MALLOCSIZE ((1 * 1024 * 1024) + (512 * 1024))
 #define CLAIM_END (128 * 1024 * 1024)	/* FIXME: look at /memory/reg */
@@ -219,9 +219,7 @@ static int find_and_load_config_file(const struct path_description *b, char *con
 		for (i = 0; i < 6; i++)
 			if (b->u.n.mac[i]) {
 				sprintf(config_file_name_ether_mac, config_file_name_ether_mac_template,
-					b->u.n.mac[0], b->u.n.mac[1],
-					b->u.n.mac[2], b->u.n.mac[3],
-					b->u.n.mac[4], b->u.n.mac[5]);
+					b->u.n.mac[0], b->u.n.mac[1], b->u.n.mac[2], b->u.n.mac[3], b->u.n.mac[4], b->u.n.mac[5]);
 				break;
 			}
 		break;
@@ -349,10 +347,7 @@ static int is_elf32(loadinfo_t * loadinfo)
 		e->e_ident[EI_MAG1] == ELFMAG1 &&
 		e->e_ident[EI_MAG2] == ELFMAG2 &&
 		e->e_ident[EI_MAG3] == ELFMAG3 &&
-		e->e_ident[EI_CLASS] == ELFCLASS32 &&
-		e->e_ident[EI_DATA] == ELFDATA2MSB &&
-		(e->e_type == ET_EXEC || e->e_type == ET_DYN) &&
-		e->e_machine == EM_PPC);
+		e->e_ident[EI_CLASS] == ELFCLASS32 && e->e_ident[EI_DATA] == ELFDATA2MSB && (e->e_type == ET_EXEC || e->e_type == ET_DYN) && e->e_machine == EM_PPC);
 }
 
 static int is_elf64(loadinfo_t * loadinfo)
@@ -364,9 +359,7 @@ static int is_elf64(loadinfo_t * loadinfo)
 		e->e_ident[EI_MAG2] == ELFMAG2 &&
 		e->e_ident[EI_MAG3] == ELFMAG3 &&
 		e->e_ident[EI_CLASS] == ELFCLASS64 &&
-		e->e_ident[EI_DATA] == ELFDATA2MSB &&
-		(e->e_type == ET_EXEC || e->e_type == ET_DYN) &&
-		e->e_machine == EM_PPC64);
+		e->e_ident[EI_DATA] == ELFDATA2MSB && (e->e_type == ET_EXEC || e->e_type == ET_DYN) && e->e_machine == EM_PPC64);
 }
 
 static int load_elf32(struct boot_file_t *file, loadinfo_t * loadinfo)
@@ -638,11 +631,9 @@ static void setup_display(void)
 #ifdef COLOR_TEST
 	for (i = 0; i < 16; i++) {
 		prom_printf("\x1b[%d;%dm\x1b[1;47m%s \x1b[2;40m %s\n",
-			    ansi_color_table[i].index,
-			    ansi_color_table[i].value, ansi_color_table[i].name, ansi_color_table[i].name);
+			    ansi_color_table[i].index, ansi_color_table[i].value, ansi_color_table[i].name, ansi_color_table[i].name);
 		prom_printf("\x1b[%d;%dm\x1b[1;37m%s \x1b[2;30m %s\n",
-			    ansi_color_table[i].index,
-			    ansi_color_table[i].value + 10, ansi_color_table[i].name, ansi_color_table[i].name);
+			    ansi_color_table[i].index, ansi_color_table[i].value + 10, ansi_color_table[i].name, ansi_color_table[i].name);
 	}
 	prom_printf("\x1b[1;37m\x1b[2;40m");
 #endif				/* COLOR_TEST */
@@ -799,8 +790,7 @@ static void check_password(char *str)
 		}
 	}
 	prom_printf(" ___________________\n< Permission denied >\n -------------------\n"
-		    "        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n"
-		    "                ||----w |\n                ||     ||\n");
+		    "        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n" "                ||----w |\n                ||     ||\n");
 	prom_sleep(4);
 	prom_interpret("reset-all");
 }
@@ -1128,8 +1118,7 @@ static void yaboot_text_ui(void)
 						initrd_want = (void *)((unsigned long)initrd_more + INITRD_CHUNKSIZE);
 						initrd_more = prom_claim(initrd_want, INITRD_CHUNKSIZE, 0);
 						if (initrd_more != initrd_want) {
-							prom_printf("Claim failed for initrd memory at %p rc=%p\n", initrd_want,
-								    initrd_more);
+							prom_printf("Claim failed for initrd memory at %p rc=%p\n", initrd_want, initrd_more);
 							break;
 						}
 						initrd_read = file.fs->read(&file, INITRD_CHUNKSIZE, initrd_more);
@@ -1162,8 +1151,7 @@ static void yaboot_text_ui(void)
 		kernel_entry = loadinfo.base + loadinfo.entry - loadinfo.load_loc;
 
 		DEBUG_F("Kernel entry point = %p\n", kernel_entry);
-		DEBUG_F("kernel: arg1 = %p,\n"
-			"        arg2 = %08lx,\n" "        prom = %p,\n", initrd_base + loadinfo.load_loc, initrd_size, prom);
+		DEBUG_F("kernel: arg1 = %p,\n" "        arg2 = %08lx,\n" "        prom = %p,\n", initrd_base + loadinfo.load_loc, initrd_size, prom);
 
 		DEBUG_F("Entering kernel...\n");
 
@@ -1276,7 +1264,7 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 		prom_printf("brokenfirmware did not claim executable memory, fixed it myself\n");
 
 	sles9_base = prom_claim((void *)SLES9_ZIMAGE_BASE, SLES9_ZIMAGE_SIZE, 0);
-	if (sles9_base == (void*) - 1)
+	if (sles9_base == (void *)-1)
 		sles9_base = NULL;
 	DEBUG_F("Allocated %08x bytes @ %p for SLES8/9 install file\n", SLES9_ZIMAGE_SIZE, sles9_base);
 
@@ -1284,17 +1272,18 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 		addr = SLES9_ZIMAGE_BASE + SLES9_ZIMAGE_SIZE;
 	else
 		addr = 64 * 1024;
-	for ( ; addr < CLAIM_END - MALLOCSIZE; addr += 64*1024) {
+	for (; addr < CLAIM_END - MALLOCSIZE; addr += 64 * 1024) {
 		/* overlap check */
-		if ((addr < (unsigned long)_end || addr + MALLOCSIZE < (unsigned long)_end) && (addr >= (unsigned long)_start || addr + MALLOCSIZE >= (unsigned long)_start))
+		if ((addr < (unsigned long)_end || addr + MALLOCSIZE < (unsigned long)_end)
+		    && (addr >= (unsigned long)_start || addr + MALLOCSIZE >= (unsigned long)_start))
 			continue;
 		/* Allocate some memory for malloc'ator */
-		malloc_base = prom_claim((void*)addr , MALLOCSIZE, 0);
-		if (malloc_base && malloc_base != (void*) -1)
+		malloc_base = prom_claim((void *)addr, MALLOCSIZE, 0);
+		if (malloc_base && malloc_base != (void *)-1)
 			break;
 	}
 	if (malloc_base == (void *)-1) {
-		prom_printf("Can't claim malloc buffer (%x bytes between %08x and %08x)\n", MALLOCSIZE, 64*1024, CLAIM_END - MALLOCSIZE);
+		prom_printf("Can't claim malloc buffer (%x bytes between %08x and %08x)\n", MALLOCSIZE, 64 * 1024, CLAIM_END - MALLOCSIZE);
 		goto exit;
 	}
 	malloc_init(malloc_base, MALLOCSIZE);
