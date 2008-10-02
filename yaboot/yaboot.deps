@@ -185,6 +185,7 @@ second/setjmp.o: \
 second/yaboot.o: \
 	second/yaboot.c \
 	include/version.h \
+	include/hardcoded_bootpath.h \
 	include/string.h \
 	include/types.h \
 	include/ctype.h \

@@ -34,9 +34,6 @@ ifeq ($(DEBUG),2)
 YBCFLAGS += -O1 -g
 endif
 
-ifneq ($(HARD_CODED_BOOTPATH),)
-YBCFLAGS += -DHARD_CODED_BOOTPATH=\"$(HARD_CODED_BOOTPATH)\"
-endif
 ifeq ($(CONFIG_COLOR_TEXT),y)
 YBCFLAGS += -DCONFIG_COLOR_TEXT
 endif
@@ -125,6 +122,20 @@ include/version.h: FORCE
 	fi ; \
 	echo "#define VERSION \"r$$rev$$mod\"" > $@~ ; \
 	if test -f $@ ; then \
+		if ! diff -u $@ $@~ ; then \
+			cp -f $@~ $@ ; \
+		fi ; \
+	else \
+		cp -f $@~ $@ ; \
+	fi
+
+include/hardcoded_bootpath.h: FORCE
+ifeq ($(HARD_CODED_BOOTPATH),)
+	@echo "#undef HARD_CODED_BOOTPATH" > $@~
+else
+	@echo "#define HARD_CODED_BOOTPATH \"$(HARD_CODED_BOOTPATH)\"" > $@~
+endif
+	@if test -f $@ ; then \
 		if ! diff -u $@ $@~ ; then \
 			cp -f $@~ $@ ; \
 		fi ; \
