@@ -177,7 +177,6 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	return FILE_ERR_OK;
 }
 
-
 static int read_dump_range(void)
 {
 	int count = read_range_count;
@@ -220,8 +219,7 @@ static int read_dump_range(void)
 static int read_iterator(ext2_filsys fs, u32 * blocknr, int lg_block, void *private)
 {
 #ifdef VERBOSE_DEBUG
-	DEBUG_F("read_it: p_bloc: 0x%x, l_bloc: 0x%x, f_pos: 0x%Lx, rng_pos: 0x%lx   ",
-		*blocknr, lg_block, read_cur_file->pos, read_last_logical);
+	DEBUG_F("read_it: p_bloc: 0x%x, l_bloc: 0x%x, f_pos: 0x%Lx, rng_pos: 0x%lx   ", *blocknr, lg_block, read_cur_file->pos, read_last_logical);
 #endif
 	if (lg_block < 0) {
 #ifdef VERBOSE_DEBUG
@@ -329,7 +327,6 @@ static int read_iterator(ext2_filsys fs, u32 * blocknr, int lg_block, void *priv
 #endif
 	return 0;
 }
-
 
 static int ext2_read(struct boot_file_t *file, unsigned int size, void *buffer)
 {
