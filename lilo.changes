@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct  2 15:18:29 CEST 2008 - olh@suse.de
+
+- increase initrd malloc chunksize from 4MB to 10MB
+  if memory is fragmented, initrd allocation will fail
+
+-------------------------------------------------------------------
 Tue Sep 30 11:45:54 CEST 2008 - olh@suse.de
 
 - handle memory for initrd download correctly

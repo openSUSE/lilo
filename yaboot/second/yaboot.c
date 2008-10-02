@@ -1103,7 +1103,7 @@ static void yaboot_text_ui(void)
 				if (file.dev_type == TYPE_NET)
 					chunksize = file.len;
 				else
-					chunksize = 4 * 1024 * 1024;
+					chunksize = 10 * 1024 * 1024; /* FIXME: if we had a stat() ... */
 				/* try to claim memory up to 128MB */
 				while (claim_base + chunksize < 128 * 1024 * 1024) {
 					initrd_base = prom_claim((void *)claim_base, chunksize, 0);
