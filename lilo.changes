@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Oct  2 15:27:53 CEST 2008 - olh@suse.de
+
+- handle short reads in yaboot ext2fs
+
+-------------------------------------------------------------------
 Thu Oct  2 15:18:29 CEST 2008 - olh@suse.de
 
 - increase initrd malloc chunksize from 4MB to 10MB

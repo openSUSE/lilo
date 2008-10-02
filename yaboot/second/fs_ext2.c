@@ -433,7 +433,7 @@ static long linux_set_blksize(io_channel channel, int blksize)
 
 static long linux_read_blk(io_channel channel, unsigned long block, int count, void *data)
 {
-	int size, size_read;
+	int size, size_read, to_read, i;
 	unsigned long long tempb;
 
 	if (count == 0)
@@ -441,16 +441,32 @@ static long linux_read_blk(io_channel channel, unsigned long block, int count, v
 
 	tempb = (((unsigned long long)block) * ((unsigned long long)bs)) + doff;
 	size = (count < 0) ? -count : count * bs;
+	to_read = size;
+	i = 0;
 	if (dend && (tempb + size) > dend) {
 		prom_printf("bad seek: blk %08lx c %08x\n", block, count);
 		return EXT2_ET_LLSEEK_FAILED;
 	}
 	prom_seek(cur_file->of_device, tempb);
-	size_read = prom_read(cur_file->of_device, data, size);
-	if (size_read != size) {
-		DEBUG_F("\nRead error on block %lx. expected %x, got %x\n", block, size, size_read);
-		return EXT2_ET_SHORT_READ;
-	}
+	do {
+		size_read = prom_read(cur_file->of_device, data, size);
+		if (size_read == 0) {
+			if (i++ > 5) {
+				prom_printf("%s: block %08lx size %08x: read returned nothing, %08x bytes remaining\n", __func__, block, to_read, size);
+				return EXT2_ET_SHORT_READ;
+			}
+		} else {
+			if (size_read != size)
+				prom_printf("%s: block %08lx size %08x: got %08x bytes, expected %08x\n", __func__, block, to_read, size_read, size);
+			if (size_read > 0 && size_read <= size) {
+				i = 0;
+				size -= size_read;
+			} else {
+				if (i++ > 5)
+					return EXT2_ET_SHORT_READ;
+			}
+		}
+	} while (size > 0);
 	return 0;
 }
 
