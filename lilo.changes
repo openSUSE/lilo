@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Oct  6 13:04:57 CEST 2008 - olh@suse.de
+
+- assign tftp filename correctly if options are incomplete
+
+-------------------------------------------------------------------
 Thu Oct  2 15:27:53 CEST 2008 - olh@suse.de
 
 - handle short reads in yaboot ext2fs

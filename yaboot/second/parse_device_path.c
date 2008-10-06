@@ -406,6 +406,9 @@ static int get_tftp_ipv4_ibm_CAS(struct path_description *path, const char *netd
 					break;
 				p++;
 			}
+		} else {
+			/* nothing after filename */
+			path_filename(path) = strdup(p);
 		}
 	}
 	if (p) {
