@@ -36,7 +36,7 @@ YBCFLAGS += -isystem `gcc -print-file-name=include`
 YBCFLAGS += -mcpu=powerpc
 YBCFLAGS += -I ./include
 ifeq ($(DEBUG),2)
-YBCFLAGS += -O1 -g
+YBCFLAGS += -O1
 endif
 
 # Link flags
