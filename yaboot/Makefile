@@ -23,8 +23,16 @@ CROSS =
 
 # The flags for the yaboot binary.
 #
-YBCFLAGS = -Os $(CFLAGS) -msoft-float -fno-builtin -nostdinc -Wall -isystem `gcc -print-file-name=include`
+YBCFLAGS = -Os
 YBCFLAGS += -g
+ifneq ($(CFLAGS),)
+YBCFLAGS += $(CFLAGS)
+endif
+YBCFLAGS += -msoft-float
+YBCFLAGS += -fno-builtin
+YBCFLAGS += -nostdinc
+YBCFLAGS += -Wall
+YBCFLAGS += -isystem `gcc -print-file-name=include`
 YBCFLAGS += -mcpu=powerpc
 YBCFLAGS += -I ./include
 ifneq ($(DEBUG),0)
