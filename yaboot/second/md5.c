@@ -30,7 +30,6 @@
 
 #ifdef TEST
 # include <stdio.h>
-# define USE_MD5_PASSWORDS
 # define USE_MD5
 #endif
 
