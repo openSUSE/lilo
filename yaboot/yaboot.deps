@@ -157,6 +157,11 @@ second/md5.o: \
 	include/types.h \
 	include/md5.h
 
+second/parse_device_path.o: \
+	include/file.h \
+	include/errors.h \
+	include/debug.h
+
 second/partition.o: \
 	second/partition.c \
 	include/ctype.h \

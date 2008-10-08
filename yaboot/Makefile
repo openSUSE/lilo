@@ -35,9 +35,6 @@ YBCFLAGS += -Wall
 YBCFLAGS += -isystem `gcc -print-file-name=include`
 YBCFLAGS += -mcpu=powerpc
 YBCFLAGS += -I ./include
-ifneq ($(DEBUG),0)
-YBCFLAGS += -DDEBUG=$(DEBUG)
-endif
 ifeq ($(DEBUG),2)
 YBCFLAGS += -O1 -g
 endif
@@ -153,6 +150,11 @@ ifeq ($(CONFIG_FS_REISERFS),y)
 	@echo "#define CONFIG_FS_REISERFS 1" >> $@~
 else
 	@echo "#undef CONFIG_FS_REISERFS" >> $@~
+endif
+ifeq ($(DEBUG),0)
+	@echo "#undef DEBUG" >> $@~
+else
+	@echo "#define DEBUG $(DEBUG)" >> $@~
 endif
 	@if test -f $@ ; then \
 		if ! diff -u $@ $@~ ; then \
