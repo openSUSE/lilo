@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <fs.h>
 #include <errors.h>
+#include <config.h>
 
 extern const struct fs_t of_filesystem;
 extern const struct fs_t of_net_filesystem;

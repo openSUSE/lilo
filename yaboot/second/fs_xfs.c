@@ -30,7 +30,9 @@
 #include <xfs.h>
 #include <errors.h>
 #include <debug.h>
+#include <config.h>
 
+#ifdef CONFIG_FS_XFS
 #define SECTOR_BITS 9
 
 static int xfs_mount(void);
@@ -721,3 +723,4 @@ struct fs_t xfs_filesystem = {
  * c-basic-offset: 8
  * End:
  */
+#endif /* CONFIG_FS_XFS */

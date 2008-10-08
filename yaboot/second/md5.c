@@ -26,6 +26,7 @@
 
 #include <string.h>
 #include <md5.h>
+#include <config.h>
 
 #ifdef TEST
 # include <stdio.h>

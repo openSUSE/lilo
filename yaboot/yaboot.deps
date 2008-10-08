@@ -64,6 +64,7 @@ second/crt0.o: \
 
 second/file.o: \
 	second/file.c \
+	include/config.h \
 	include/ctype.h \
 	include/types.h \
 	include/stdlib.h \
@@ -116,6 +117,7 @@ second/fs_of.o: \
 
 second/fs_reiserfs.o: \
 	second/fs_reiserfs.c \
+	include/config.h \
 	include/types.h \
 	include/ctype.h \
 	include/string.h \
@@ -132,6 +134,7 @@ second/fs_reiserfs.o: \
 
 second/fs_xfs.o: \
 	second/fs_xfs.c \
+	include/config.h \
 	include/types.h \
 	include/ctype.h \
 	include/string.h \
@@ -149,6 +152,7 @@ second/iso_util.o: \
 
 second/md5.o: \
 	second/md5.c \
+	include/config.h \
 	include/string.h \
 	include/types.h \
 	include/md5.h
@@ -170,6 +174,7 @@ second/partition.o: \
 
 second/prom.o: \
 	second/prom.c \
+	include/config.h \
 	include/prom.h \
 	include/stdlib.h \
 	include/string.h \
@@ -184,6 +189,7 @@ second/setjmp.o: \
 
 second/yaboot.o: \
 	second/yaboot.c \
+	include/config.h \
 	include/version.h \
 	include/hardcoded_bootpath.h \
 	include/string.h \

@@ -56,6 +56,8 @@
 #include <partition.h>
 #include <version.h>
 #include <hardcoded_bootpath.h>
+#include <config.h>
+#include <md5.h>
 
 static char *hard_coded_bootpath(char *bootpath)
 {
@@ -71,9 +73,6 @@ static char *hard_coded_bootpath(char *bootpath)
 
 #define CONFIG_FILE_MAX		0x8000	/* 32k */
 
-#ifdef USE_MD5_PASSWORDS
-#include <md5.h>
-#endif				/* USE_MD5_PASSWORDS */
 
 /* align addr on a size boundry - adjust address up if needed -- Cort */
 #define _ALIGN(addr,size)	(((addr)+size-1)&(~(size-1)))

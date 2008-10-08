@@ -30,7 +30,9 @@
 #include <errors.h>
 #include <debug.h>
 #include <reiserfs.h>
+#include <config.h>
 
+#ifdef CONFIG_FS_REISERFS
 static int reiserfs_read_super(void);
 static int reiserfs_open_file(char *dirname);
 static int reiserfs_read_data(char *buf, u32 len);
@@ -915,3 +917,4 @@ struct fs_t reiserfs_filesystem = {
  * c-basic-offset: 8
  * End:
  */
+#endif /* CONFIG_FS_REISERFS */

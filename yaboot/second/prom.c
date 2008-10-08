@@ -33,6 +33,7 @@
 #include <ctype.h>
 #include <errors.h>
 #include <debug.h>
+#include <config.h>
 
 #define READ_BLOCKS_USE_READ	1
 
