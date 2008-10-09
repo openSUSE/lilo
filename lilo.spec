@@ -37,6 +37,7 @@ Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz
 Source86:     lilo-%{version}.src.tar.bz2
 Patch8601:    lilo.x86.mount_by_persistent_name.patch
 Patch8602:    lilo.x86.array-bounds.patch
+Patch8603:    lilo.x86.division-by-zero.patch
 
 # $Id$
 %description
@@ -49,6 +50,7 @@ mv yaboot-%{yaboot_vers} yaboot
 cd lilo-%{version}
 %patch8601 -p1
 %patch8602 -p1
+%patch8603 -p1
 
 %build
 %ifarch %ix86 x86_64

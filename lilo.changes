@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Oct  9 11:32:34 CEST 2008 - olh@suse.de
+
+- Avoid a division by zero on buggy BIOS (bnc#429544)
+
+-------------------------------------------------------------------
 Thu Oct  9 10:05:34 CEST 2008 - olh@suse.de
 
 - the ibm,client-architecture-support-reboot is in the /chosen node
