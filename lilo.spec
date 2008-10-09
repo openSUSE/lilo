@@ -1,28 +1,30 @@
 # norootforbuild
 
-Name:         lilo
-ExclusiveArch: ppc ppc64 %ix86 x86_64
-%define yaboot_vers 0
-Group:        System/Boot
-License:      BSD, Other License(s), see package
-Summary:      The LInux LOader, a boot menu
-BuildRoot:    %{_tmppath}/%{name}-%{version}-build
-Obsoletes:    yaboot activate quik 
+Url:            http://lilo.go.dyndns.org/
+
+Name:           lilo
+ExclusiveArch:  ppc ppc64 %ix86 x86_64
+%define yaboot_vers 22.8-r1151
+Group:          System/Boot
+License:        BSD 3-Clause
+Summary:        The Linux Loader, a Boot Menu
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+Obsoletes:      yaboot activate quik 
 %ifarch ppc ppc64
 %if 0%{?suse_version} > 1020
-BuildRequires:dtc
+BuildRequires:  dtc
 %endif
-Requires:     hfsutils
-Requires:     dosfstools
-Requires:     gawk sed coreutils
+Requires:       hfsutils
+Requires:       dosfstools
+Requires:       gawk sed coreutils
 # for nvsetenv
 %if 0%{?suse_version} > 1000
-Requires:     powerpc-utils
+Requires:       powerpc-utils
 %else
-Requires:     util-linux
+Requires:       util-linux
 %endif
-Requires:     binutils
-Requires:     parted
+Requires:       binutils
+Requires:       parted
 %endif
 %ifarch %ix86 x86_64
 BuildRequires:  bin86 nasm
@@ -30,16 +32,16 @@ BuildRequires:  bin86 nasm
 %ifarch x86_64
 BuildRequires:  gcc-32bit glibc-devel-32bit libgcc42-32bit libmudflap42-32bit
 %endif
-Version:      0
-Release:      0
-Source0:      lilo-ppc-%{version}.tar.bz2
-Source1:      http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
-Source86:     lilo-%{version}.src.tar.bz2
-Patch8601:    lilo.x86.mount_by_persistent_name.patch
-Patch8602:    lilo.x86.array-bounds.patch
-Patch8603:    lilo.x86.division-by-zero.patch
-
+Version:        0
+Release:        0
+Source0:        lilo-ppc-%{version}.tar.bz2
+Source1:        http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
+Source86:       lilo-%{version}.src.tar.bz2
+Patch8601:      lilo.x86.mount_by_persistent_name.patch
+Patch8602:      lilo.x86.array-bounds.patch
+Patch8603:      lilo.x86.division-by-zero.patch
 # $Id$
+
 %description
 lilo for ppc
 
@@ -149,7 +151,6 @@ exit 0
 /usr/sbin/*
 %else
 #powerpc
-
 %dir /lib/lilo
 %dir /lib/lilo/pmac
 %dir /lib/lilo/prep
@@ -174,7 +175,6 @@ exit 0
 %attr(755,root,root) %config /lib/lilo/scripts/*.sh
 %attr(755,root,root) /lib/lilo/utils/*
 %attr(755,root,root) %config /sbin/lilo
-
 %doc %{_docdir}/lilo
 %endif
 %doc %{_mandir}/*/*
