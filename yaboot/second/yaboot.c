@@ -1011,7 +1011,7 @@ static void yaboot_text_ui(void)
 	gpr = GET_PARAMS_OK;
 
 	memset(fw_nbr_reboots, 0, sizeof(fw_nbr_reboots));
-	if (prom_get_options("ibm,client-architecture-support-reboot", &fw_nbr_reboots, sizeof(fw_nbr_reboots)) == -1)
+	if (prom_get_chosen("ibm,client-architecture-support-reboot", &fw_nbr_reboots, sizeof(fw_nbr_reboots)) == -1)
 		prom_get_options("ibm,fw-nbr-reboots", &fw_nbr_reboots, sizeof(fw_nbr_reboots));
 	result = simple_strtol(fw_nbr_reboots, &msg, 10);
 	if (result > 0)

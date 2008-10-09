@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct  9 10:05:34 CEST 2008 - olh@suse.de
+
+- the ibm,client-architecture-support-reboot is in the /chosen node
+  not in the /options node (bnc#427960)
+
+-------------------------------------------------------------------
 Mon Oct  6 13:04:57 CEST 2008 - olh@suse.de
 
 - assign tftp filename correctly if options are incomplete
