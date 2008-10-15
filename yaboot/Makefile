@@ -186,7 +186,7 @@ second/yaboot: $(OBJS) util/addnote ld.script second/yaboot.a second/empty.o
 util/split_of_path: util/split_of_path.c second/parse_device_path.c
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ $@.c
 
-util/addnote:
+util/addnote: util/addnote.c
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ $@.c
 
 util/elfextract:
