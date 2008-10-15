@@ -1167,6 +1167,60 @@ static void yaboot_text_ui(void)
 	}
 }
 
+static char sysinfo[234];
+static const char si_model[] = "model";
+static const char si_serial[] = "serial-number";
+static const char si_systemid[] = "system-id";
+static const char si_partition_name[] = "ibm,partition-name";
+
+static int append_system_info(const char *node, const char *prop, char *s, size_t size, int off, const char *ident, int last, int mac_serial)
+{
+	char buf[32], *p;
+	int len, num;
+
+	len = prom_getprop(prom_finddevice(node), prop, buf, sizeof(buf) - 1);
+	if (len > 0 && len < sizeof(buf)) {
+		if (last) {
+			strncat(s, ",", size - off);
+			off = strlen(s);
+		}
+		strncat(s, " ", size - off);
+		off = strlen(s);
+		strncat(s, ident, size - off);
+		off = strlen(s);
+		strncat(s, " '", size - off);
+		off = strlen(s);
+		p = buf;
+		if (mac_serial) {
+			num = 10;
+			while (num) {
+				p = p + strlen(p);
+				num--;
+				p++;	/* skip null byte */
+			}
+		}
+		strncat(s, p, size - off);
+		off = strlen(s);
+		strncat(s, "'", size - off);
+		off = strlen(s);
+	}
+	return off;
+}
+static void get_system_info(char *s, size_t size)
+{
+	int off;
+
+	sprintf(s, "running");
+	off = strlen(s);
+	off = append_system_info("/openprom", si_model, s, size, off, "with firmware", 0, 0);
+	off = append_system_info("/", si_model, s, size, off, "on model", 0, 0);
+	if (prom_getproplen(prom_finddevice("/"), si_serial) > 0)
+		off = append_system_info("/", si_serial, s, size, off, "serial", 1, 1);
+	else
+		off = append_system_info("/", si_systemid, s, size, off, "serial", 1, 0);
+	off = append_system_info("/", si_partition_name, s, size, off, "partition", 1, 0);
+}
+
 static void yaboot_main(void)
 {
 	char *bootpath = NULL, *bootargs = NULL;
@@ -1240,8 +1294,10 @@ static void yaboot_main(void)
 		process_configfile();
 	free(conf_file_buf);
 
+	get_system_info(sysinfo, sizeof(sysinfo) - 1);
 	prom_printf("Welcome to yaboot version " VERSION "\n");
 	prom_printf("booted from '%s'\n", bootpath);
+	prom_printf("%s\n", sysinfo);
 	if (configfile && sz > 0)
 		prom_printf("Using configfile '%s'\n", configfile);
 	prom_printf("Enter \"help\" to get some basic usage information\n");

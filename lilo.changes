@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Oct 15 11:01:51 CEST 2008 - olh@suse.de
+
+- print some system info in yaboot on startup
+
+-------------------------------------------------------------------
 Thu Oct  9 11:32:34 CEST 2008 - olh@suse.de
 
 - Avoid a division by zero on buggy BIOS (bnc#429544)
