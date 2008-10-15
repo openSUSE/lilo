@@ -398,3 +398,25 @@ int sprintf(char *buf, const char *fmt, ...)
 	va_end(args);
 	return i;
 }
+
+char *strncat(char *dest, const char *src, size_t n)
+{
+	char *p;
+	size_t i;
+
+	if (n) {
+		p = dest + strlen(dest);
+		i = 0;
+		do {
+			if (*src) {
+				*p = *src;
+				src++;
+				p++;
+				i++;
+			} else
+				break;
+		} while (i < n);
+		p[1] = '\0';
+	}
+	return dest;
+}
