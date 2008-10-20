@@ -983,6 +983,8 @@ static enum get_params_result get_params(struct boot_param_t *params, enum get_p
  * to it
  * We also need to add initrd support to this whole mecanism
  */
+static const char imb_cas_reboot[] = "ibm,client-architecture-support-reboot";
+static const char imb_cas_fwbnr_reboot[] = "ibm,fw-nbr-reboots";
 static void yaboot_text_ui(void)
 {
 
@@ -999,7 +1001,10 @@ static void yaboot_text_ui(void)
 	loadinfo_t loadinfo;
 	void *initrd_more, *initrd_want;
 	unsigned long initrd_read;
-	char fw_nbr_reboots[4];
+	union {
+		char c[4];
+		unsigned int ui;
+	} fw_nbr_reboots;
 	char *msg;
 
 	kernel = &params.kernel;
@@ -1010,10 +1015,20 @@ static void yaboot_text_ui(void)
 	loadinfo.load_loc = 0;
 	gpr = GET_PARAMS_OK;
 
-	memset(fw_nbr_reboots, 0, sizeof(fw_nbr_reboots));
-	if (prom_get_chosen("ibm,client-architecture-support-reboot", &fw_nbr_reboots, sizeof(fw_nbr_reboots)) == -1)
-		prom_get_options("ibm,fw-nbr-reboots", &fw_nbr_reboots, sizeof(fw_nbr_reboots));
-	result = simple_strtol(fw_nbr_reboots, &msg, 10);
+	fw_nbr_reboots.ui = 0;
+	/* this is an integer */
+	result = prom_get_chosen(imb_cas_reboot, &fw_nbr_reboots.ui, sizeof(fw_nbr_reboots.ui));
+	prom_printf("yDEBUG: result for '/chosen/%s': %08x, content '%08x'\n", imb_cas_reboot, result, fw_nbr_reboots.ui);
+	if (result > 0) {
+		result = fw_nbr_reboots.ui;
+	} else {
+		/* this is a string */
+		result = prom_get_options(imb_cas_fwbnr_reboot, &fw_nbr_reboots.c, sizeof(fw_nbr_reboots.c));
+		prom_printf("yDEBUG: result for '/options/%s': %08x, content '%08x'\n", imb_cas_fwbnr_reboot, result, fw_nbr_reboots.ui);
+		if (result > 0)
+			result = simple_strtol(fw_nbr_reboots.c, &msg, 10);
+	}
+	prom_printf("yDEBUG: result == '%08x'\n", result);
 	if (result > 0)
 		prom_get_options("boot-last-label", lilo_once_cmdline, 512);
 
