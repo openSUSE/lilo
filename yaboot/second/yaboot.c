@@ -73,7 +73,6 @@ static char *hard_coded_bootpath(char *bootpath)
 
 #define CONFIG_FILE_MAX		0x8000	/* 32k */
 
-
 /* align addr on a size boundry - adjust address up if needed -- Cort */
 #define _ALIGN(addr,size)	(((addr)+size-1)&(~(size-1)))
 #define MAX_HEADERS	32
@@ -1117,7 +1116,7 @@ static void yaboot_text_ui(void)
 				if (file.dev_type == TYPE_NET)
 					chunksize = file.len;
 				else
-					chunksize = 10 * 1024 * 1024; /* FIXME: if we had a stat() ... */
+					chunksize = 10 * 1024 * 1024;	/* FIXME: if we had a stat() ... */
 				/* try to claim memory up to 128MB */
 				while (claim_base + chunksize < 128 * 1024 * 1024) {
 					initrd_base = prom_claim((void *)claim_base, chunksize, 0);
