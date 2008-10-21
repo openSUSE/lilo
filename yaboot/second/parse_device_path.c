@@ -651,10 +651,11 @@ char *path_description_to_string(const struct path_description *input)
 			part[1] = '\0';
 		}
 		len += strlen(part);
-		len += strlen(path_directory(input));
+		if (path_directory(input))
+			len += strlen(path_directory(input));
 		path = malloc(len);
 		if (path)
-			sprintf(path, "%s:%s%s%s", path_device(input), part, path_directory(input), path_filename(input));
+			sprintf(path, "%s:%s%s%s", path_device(input), part, path_directory(input) ? path_directory(input) : "", path_filename(input));
 		break;
 	case TYPE_NET:
 		len += strlen(path_net_before(input));

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Tue Oct 21 09:37:55 CEST 2008 - olh@suse.de
+
+- fix NULL pointer passed to strlen in yaboot when dumping pathname
+
+-------------------------------------------------------------------
 Mon Oct 20 11:28:10 CEST 2008 - olh@suse.de
 
 - update checks for CAS reboot (bnc#427960)
