@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct 23 10:17:20 CEST 2008 - olh@suse.de
+
+- use BuildRequires gcc-32bit on x86_64 only with SuSE > 10.1 
+- remove unused BuildRequires libgcc42-32bit on x86_64
+
+-------------------------------------------------------------------
 Thu Oct 23 10:09:20 CEST 2008 - olh@suse.de
 
 - disable broken x86 checkit script

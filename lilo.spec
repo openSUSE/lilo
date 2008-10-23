@@ -33,9 +33,10 @@ BuildRequires:  bin86
 BuildRequires:  nasm
 %endif
 %ifarch x86_64
-BuildRequires:  gcc-32bit 
 BuildRequires:  glibc-devel-32bit
-BuildRequires:  libgcc42-32bit
+%if 0%{?suse_version} > 1010
+BuildRequires:  gcc-32bit 
+%endif
 %endif
 Version:        0
 Release:        0
