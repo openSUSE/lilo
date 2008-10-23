@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Oct 23 10:09:20 CEST 2008 - olh@suse.de
+
+- disable broken x86 checkit script
+
+-------------------------------------------------------------------
 Tue Oct 21 09:37:55 CEST 2008 - olh@suse.de
 
 - fix NULL pointer passed to strlen in yaboot when dumping pathname

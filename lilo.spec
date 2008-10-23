@@ -45,6 +45,7 @@ Source86:       lilo-%{version}.src.tar.bz2
 Patch8601:      lilo.x86.mount_by_persistent_name.patch
 Patch8602:      lilo.x86.array-bounds.patch
 Patch8603:      lilo.x86.division-by-zero.patch
+Patch8604:      lilo.x86.checkit.patch
 # $Id$
 
 %description
@@ -58,6 +59,7 @@ cd lilo-%{version}
 %patch8601 -p1
 %patch8602 -p1
 %patch8603 -p1
+%patch8604 -p1
 
 %build
 %ifarch %ix86 x86_64
