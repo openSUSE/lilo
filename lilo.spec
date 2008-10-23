@@ -16,7 +16,9 @@ BuildRequires:  dtc
 %endif
 Requires:       hfsutils
 Requires:       dosfstools
-Requires:       gawk sed coreutils
+Requires:       gawk
+Requires:       sed
+Requires:       coreutils
 # for nvsetenv
 %if 0%{?suse_version} > 1000
 Requires:       powerpc-utils
@@ -27,10 +29,13 @@ Requires:       binutils
 Requires:       parted
 %endif
 %ifarch %ix86 x86_64
-BuildRequires:  bin86 nasm
+BuildRequires:  bin86
+BuildRequires:  nasm
 %endif
 %ifarch x86_64
-BuildRequires:  gcc-32bit glibc-devel-32bit libgcc42-32bit
+BuildRequires:  gcc-32bit 
+BuildRequires:  glibc-devel-32bit
+BuildRequires:  libgcc42-32bit
 %endif
 Version:        0
 Release:        0
