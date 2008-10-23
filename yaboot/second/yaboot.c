@@ -1205,14 +1205,8 @@ static int append_system_info(const char *node, const char *prop, char *s, size_
 		strncat(s, " '", size - off);
 		off = strlen(s);
 		p = buf;
-		if (mac_serial) {
-			num = 10;
-			while (num) {
-				p = p + strlen(p);
-				num--;
-				p++;	/* skip null byte */
-			}
-		}
+		if (mac_serial)
+			p += 0xd; /* serial is at a fixed (?) offset on pmac */
 		strncat(s, p, size - off);
 		off = strlen(s);
 		strncat(s, "'", size - off);
