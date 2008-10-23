@@ -30,7 +30,7 @@ Requires:       parted
 BuildRequires:  bin86 nasm
 %endif
 %ifarch x86_64
-BuildRequires:  gcc-32bit glibc-devel-32bit libgcc42-32bit libmudflap42-32bit
+BuildRequires:  gcc-32bit glibc-devel-32bit libgcc42-32bit
 %endif
 Version:        0
 Release:        0

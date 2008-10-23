@@ -10,6 +10,11 @@ Mon Oct 20 11:28:10 CEST 2008 - olh@suse.de
   one property is a string, another is an integer
 
 -------------------------------------------------------------------
+Sat Oct 18 12:29:58 CEST 2008 - ro@suse.de
+
+- update buildreqs for x86_64 
+
+-------------------------------------------------------------------
 Wed Oct 15 11:01:51 CEST 2008 - olh@suse.de
 
 - print some system info in yaboot on startup
