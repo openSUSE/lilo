@@ -129,6 +129,23 @@ function get_port () {
 	fi
 }
 
+#
+# int_to_scsilun
+# Conversion routine for SCSI HBTL LUN => SCSI LUN name
+#
+function int_to_scsilun() {
+	local lunint=$1
+	local A B C D
+
+	A=$(( ($lunint >> 8) & 0xff ))
+	B=$(($lunint & 0xff))
+	C=$(( ($lunint >> 24) & 0xff ))
+	D=$(( ($lunint >> 16) & 0xff ))
+
+	local lunstr=$(printf "%02x%02x%02x%02x00000000" $A $B $C $D)
+	echo "$lunstr"
+}
+
 # if no file path is given on cmd line check for root file system
 file=/
 #
@@ -542,6 +559,7 @@ if [ -f devspec ] ; then
 	
 	device_id=$(read_int ${file_of_hw_devtype}/device-id)
 	vendor_id=$(read_int ${file_of_hw_devtype}/vendor-id)
+	read compatible < ${file_of_hw_devtype}/compatible
 
 	dbg_show device_id vendor_id
 
@@ -560,6 +578,9 @@ if [ -f devspec ] ; then
 	elif (( vendor_id == 0x1077 )); then
 		# PCI_VENDOR_ID_QLOGIC==0x1077
 		lun_format="%04x000000000000"
+	elif [[ "$compatible" == "IBM,vfc-client" ]]; then
+		of_disk_fc_lun=`int_to_scsilun $of_disk_scsi_lun`
+		lun_format="%s"
 	fi
 
 	file_of_hw_path=$(

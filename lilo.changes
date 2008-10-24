@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Oct 24 17:03:43 CEST 2008 - olh@suse.de
+
+- handle ibmvfc in show_of_path.sh (bnc#438689 - LTC49376)
+
+-------------------------------------------------------------------
 Fri Oct 24 08:16:11 CEST 2008 - olh@suse.de
 
 - remove debug output from yaboot iscsi path (bnc#417539)
