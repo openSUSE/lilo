@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Oct 24 08:16:11 CEST 2008 - olh@suse.de
+
+- remove debug output from yaboot iscsi path (bnc#417539)
+
+-------------------------------------------------------------------
 Thu Oct 23 14:21:12 CEST 2008 - olh@suse.de
 
 - fix serial-number handling on pmac in yaboot

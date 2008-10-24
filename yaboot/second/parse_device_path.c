@@ -237,11 +237,7 @@ static void get_iscsi_options(struct path_description *path, const char *netdev_
 {
 	char *p;
 	int size;
-	prom_printf("                                                                          \n"
-		    "                *** This is the yaboot iSCSI codepath. ***                \n"
-		    "                                                                          \n"
-		    "                *** How exactly did you get that far?! ***                \n"
-		    "                                                                          \n");
+
 	path_part(path) = -1;	/* Scan all partitions */
 	path_type(path) = TYPE_ISCSI;
 	size = prom_getproplen_chosen(nas);
