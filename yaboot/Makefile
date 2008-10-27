@@ -236,6 +236,8 @@ bindist: all
 
 clean:
 	rm -f include/version.h
+	rm -f include/config.h
+	rm -f include/hardcoded_bootpath.h
 	rm -f second/yaboot util/addnote util/elfextract $(OBJS)
 	rm -f second/yaboot.debug
 	rm -f second/yaboot.chrp
