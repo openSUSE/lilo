@@ -1190,7 +1190,7 @@ static const char si_partition_name[] = "ibm,partition-name";
 static int append_system_info(const char *node, const char *prop, char *s, size_t size, int off, const char *ident, int last, int mac_serial)
 {
 	char buf[32], *p;
-	int len, num;
+	int len;
 
 	len = prom_getprop(prom_finddevice(node), prop, buf, sizeof(buf) - 1);
 	if (len > 0 && len < sizeof(buf)) {
