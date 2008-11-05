@@ -269,11 +269,11 @@ Example:
 yaboot will not decompress the initial ramdisk, the Linux kernel will do that.
 .TP
 .BI "initrd-size=" size
-When more than one initial ramdisk part is specified in the \fIinitrd\fP
-setting, this option is required to be the sum of sizes of all the images
-mentioned on that line, in bytes. It is required so that yaboot can reserve
-space for the image, even though size of some parts has not been determined
-yet.
+Optional setting, it specifies the file size of the \fIinitrd\fP image.
+It is required so that yaboot can reserve space for the image.
+If not specified, yaboot will use a default value.
+Space allocation may fail if memory is fragmented.
+lilo will maintain this option.
 .TP
 .BI "single-key"
 Enables booting the image by hitting a single key when the cursor is at the

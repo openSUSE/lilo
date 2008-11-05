@@ -320,6 +320,8 @@ function running_on_chrp () {
 			if [ "$OPTION_INITRD"  ]; then
 				echo -n "initrd = "
 				strip_device_partnr "$OPTION_INITRD" $boot_device $boot_partnr
+				echo "# remove initrd-size= line if yaboot.conf is not updated by lilo"
+				echo "initrd-size = $OPTION_INITRD_SIZE"
 			fi
 
 			echo "# image section"
@@ -340,6 +342,8 @@ function running_on_chrp () {
 				if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
 					echo -n "	initrd = "
 					strip_device_partnr "${CONFIG_IMAGE_INITRD[$i]}" $boot_device $boot_partnr
+					echo "	# remove initrd-size= line if yaboot.conf is not updated by lilo"
+					echo "	initrd-size = ${CONFIG_IMAGE_INITRD_SIZE[$i]}"
 				fi
 			done
 		} > $TEMP/yaboot.conf

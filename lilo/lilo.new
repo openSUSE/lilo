@@ -82,6 +82,7 @@ OPTION_ROOT=
 OPTION_APPEND=
 # OPTION_INITRD containes the global or local initrd filename
 OPTION_INITRD=
+OPTION_INITRD_SIZE=
 OPTION_INITRD_DISK_DEVICE=
 OPTION_INITRD_PARTITION_NUMBER=
 OPTION_INITRD_PATH_ON_FILESYSTEM=
@@ -101,6 +102,7 @@ declare -a CONFIG_IMAGE_OTHER_PARTITION_NUMBER
 declare -a CONFIG_IMAGE_LABEL
 # CONFIG_IMAGE_INITRD array contains the (optional) initrd file
 declare -a CONFIG_IMAGE_INITRD
+declare -a CONFIG_IMAGE_INITRD_SIZE
 declare -a CONFIG_IMAGE_INITRD_DISK_DEVICE
 declare -a CONFIG_IMAGE_INITRD_PARTITION_NUMBER
 declare -a CONFIG_IMAGE_INITRD_PATH_ON_FILESYSTEM
@@ -839,6 +841,7 @@ function parse_config_file () {
 		if [ -z "$CONFIG_PARSE_HASIMAGE" ] ; then
 		    if [ -f "$value" ] ; then
 			OPTION_INITRD=$value
+			OPTION_INITRD_SIZE=`$STAT_CMD  -L -c %s "$value"`
 			OPTION_INITRD_DISK_DEVICE="`collect_path_info disk_name $value`"
 			OPTION_INITRD_PARTITION_NUMBER="`collect_path_info partition_number $value`"
 			OPTION_INITRD_PATH_ON_FILESYSTEM="`get_relative_path_on_filesystem $value`"
@@ -887,7 +890,7 @@ function check_config_file () {
 		error "no image section is specified"
 	fi
 
-	for (( i=1; i < CONFIG_IMAGE_COUNT; i++ )) ; do
+	for (( i=1; i <= CONFIG_IMAGE_COUNT; i++ )) ; do
 		if [ -f "${CONFIG_IMAGE_FILE[$i]}" ] ; then
 			CONFIG_IMAGE_FILE_DISK_DEVICE[$i]="`collect_path_info disk_name ${CONFIG_IMAGE_FILE[$i]}`"
 			CONFIG_IMAGE_FILE_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_FILE[$i]}`"
@@ -902,6 +905,7 @@ function check_config_file () {
 		fi
 		if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
 			if [ -f "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
+				CONFIG_IMAGE_INITRD_SIZE[$i]=`$STAT_CMD  -L -c %s "${CONFIG_IMAGE_INITRD[$i]}"`
 				CONFIG_IMAGE_INITRD_DISK_DEVICE[$i]="`collect_path_info disk_name ${CONFIG_IMAGE_INITRD[$i]}`"
 				CONFIG_IMAGE_INITRD_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_INITRD[$i]}`"
 				CONFIG_IMAGE_INITRD_PATH_ON_FILESYSTEM[$i]="`get_relative_path_on_filesystem ${CONFIG_IMAGE_INITRD[$i]}`"

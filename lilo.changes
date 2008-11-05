@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Nov  5 11:16:46 CET 2008 - olh@suse.de
+
+- use initrd-size in yaboot.conf to make initrd memory allocation
+  in yaboot more robust (bnc#441735)
+- loop through all images in check_config_file()
+
+-------------------------------------------------------------------
 Fri Oct 24 17:03:43 CEST 2008 - olh@suse.de
 
 - handle ibmvfc in show_of_path.sh (bnc#438689 - LTC49376)

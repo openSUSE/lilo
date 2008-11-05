@@ -29,6 +29,8 @@ function running_on_pmac_old () {
 	test -z "$OPTION_ROOT"	|| echo "root = $OPTION_ROOT"
 	test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 	test -z "$OPTION_INITRD"  || echo "initrd = ${HFS_BOOTFOLDER}:initrd.def"
+	test -z "$OPTION_INITRD"  || echo "# remove initrd-size= line if yaboot.conf is not updated by lilo"
+	test -z "$OPTION_INITRD"  || echo "initrd-size = $OPTION_INITRD_SIZE"
 	echo
 	for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 		test -z "${CONFIG_IMAGE_OTHER[$i]}" || continue
@@ -38,6 +40,8 @@ function running_on_pmac_old () {
 		test -z "${CONFIG_IMAGE_ROOT[$i]}"   || echo "	root = ${CONFIG_IMAGE_ROOT[$i]}"
 		test -z "${CONFIG_IMAGE_APPEND[$i]}" || echo "	append = \"${CONFIG_IMAGE_APPEND[$i]}\""
 		test -z "${CONFIG_IMAGE_INITRD[$i]}" || echo "	initrd = ${HFS_BOOTFOLDER}:"$(printf "initrd.%03d" $i)
+		test -z "${CONFIG_IMAGE_INITRD[$i]}" ||	echo "  # remove initrd-size= line if yaboot.conf is not updated by lilo"
+		test -z "${CONFIG_IMAGE_INITRD[$i]}" ||	echo "	initrd-size = ${CONFIG_IMAGE_INITRD_SIZE[$i]}"
 		echo
 	done
 	echo
@@ -154,6 +158,8 @@ function running_on_pmac_new () {
 		test -z "$OPTION_ROOT"	|| echo "root = $OPTION_ROOT"
 		test -z "$OPTION_APPEND"  || echo "append = \"$OPTION_APPEND\""
 		test -z "$OPTION_INITRD"  || echo "initrd = initrd.def"
+		test -z "$OPTION_INITRD"  || echo "# remove initrd-size= line if yaboot.conf is not updated by lilo"
+		test -z "$OPTION_INITRD"  || echo "initrd-size = $OPTION_INITRD_SIZE"
 
 		for (( i=1; i<=CONFIG_IMAGE_COUNT; i++ )); do
 			[ "${CONFIG_IMAGE_OTHER[$i]}" ] &&  continue
@@ -166,6 +172,8 @@ function running_on_pmac_new () {
 
 			if [ "${CONFIG_IMAGE_INITRD[$i]}" ]; then
 				echo "	initrd = ${CONFIG_IMAGE_INITRD_YABOOT_CONF_PATH[$i]}"
+				echo "  # remove initrd-size= line if yaboot.conf is not updated by lilo"
+				echo "	initrd-size = ${CONFIG_IMAGE_INITRD_SIZE[$i]}"
 			fi
 		done
 	} > $TEMP/yaboot.conf

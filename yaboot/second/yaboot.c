@@ -736,13 +736,6 @@ static char *make_params(char *label, char *params)
 		q = strchr(q, 0);
 		*q++ = ' ';
 	}
-	p = cfg_get_strg(label, "initrd-size");
-	if (p) {
-		strcpy(q, "ramdisk_size=");
-		strcpy(q + 13, p);
-		q = strchr(q, 0);
-		*q++ = ' ';
-	}
 	if (cfg_get_flag(label, "novideo")) {
 		strcpy(q, "video=ofonly");
 		q = strchr(q, 0);
@@ -974,6 +967,27 @@ static enum get_params_result get_params(struct boot_param_t *params, enum get_p
 		if (!imagepath_to_path_description(p, &params->rd, &img_def_device))
 			prom_printf("%s: Unable to parse\n", p);
 	}
+	p = strstr(params->args, "initrd-size=");
+	if (p) {
+		p = strdup(p + sizeof("initrd-size=") - 1);
+		if (p) {
+			q = strchr(p, ' ');
+			if (q)
+				*q = '\0';
+		}
+	} else if (useconf)
+		p = cfg_get_strg(label, "initrd-size");
+
+	if (p && *p) {
+		params->initrdsize = strtol(p, &p, 10);
+		if (params->initrdsize && p) {
+			if (p[0] == 'k' || p[0] == 'K')
+				params->initrdsize *= 1024;
+			else if (p[0] == 'm' || p[0] == 'M')
+				params->initrdsize *= 1024 * 1024;
+		}
+		prom_printf("Using %08x bytes for initrd buffer\n", params->initrdsize);
+	}
 	return GET_PARAMS_OK;
 }
 
@@ -1113,10 +1127,14 @@ static void yaboot_text_ui(void)
 					claim_base = loadinfo.memsize;
 				else
 					claim_base = 32 * 1024 * 1024;
-				if (file.dev_type == TYPE_NET)
-					chunksize = file.len;
-				else
-					chunksize = 10 * 1024 * 1024;	/* FIXME: if we had a stat() ... */
+				if (params.initrdsize)
+					chunksize = params.initrdsize;
+				else {
+					if (file.dev_type == TYPE_NET)
+						chunksize = file.len;
+					else
+						chunksize = 10 * 1024 * 1024;	/* FIXME: if we had a stat() ... */
+				}
 				/* try to claim memory up to 128MB */
 				while (claim_base + chunksize < 128 * 1024 * 1024) {
 					initrd_base = prom_claim((void *)claim_base, chunksize, 0);
@@ -1131,7 +1149,7 @@ static void yaboot_text_ui(void)
 					initrd_size = file.fs->read(&file, chunksize, initrd_base);
 					if (initrd_size == 0)
 						initrd_base = NULL;
-					if (file.dev_type != TYPE_NET) {
+					if (file.dev_type != TYPE_NET && !params.initrdsize) {
 						initrd_read = initrd_size;
 						initrd_more = initrd_base;
 						while (initrd_read == chunksize) {	/* need to read more? */

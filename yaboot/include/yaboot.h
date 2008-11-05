@@ -51,6 +51,7 @@ struct boot_param_t {
 	struct path_description	rd;
 
 	char*	args;
+	unsigned int initrdsize;
 };
 
 extern int useconf;
