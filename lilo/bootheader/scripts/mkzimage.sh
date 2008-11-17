@@ -149,6 +149,7 @@ if [ "$board_type" = "guess" ] ; then
 	while read line; do
 		case "$line" in
 		  *MacRISC*)	board_type="pmac" ;;
+		  *EFIKA5K2*)	board_type="pmac" ;;
 		  *CHRP*)  	board_type="chrp";;
 		  *PReP*)  	board_type="prep";;
 		  *iSeries*)    board_type="iseries";;

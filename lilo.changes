@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon Nov 17 10:51:49 CET 2008 - olh@suse.de
+
+- handle EFIKA5K2 in mkzimage
+  the CHRP string disappeared from /proc/cpuinfo
+
+-------------------------------------------------------------------
 Fri Nov  7 09:34:30 CET 2008 - olh@suse.de
 
 - remove RPA addnote change because older firmware versions can
