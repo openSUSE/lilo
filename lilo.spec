@@ -56,23 +56,25 @@ lilo for ppc
 %setup -q -T -c -a 0 -a 1 -a 86
 mv lilo-ppc-%{version} lilo.ppc
 mv yaboot-%{yaboot_vers} yaboot
-cd lilo-%{version}
+pushd lilo-%{version}
 %patch8601 -p1
 %patch8602 -p1
 %patch8603 -p1
 %patch8604 -p1
+popd
 
 %build
 %ifarch %ix86 x86_64
-cd lilo-%{version}
+pushd lilo-%{version}
 cflags="$RPM_OPT_FLAGS -fno-strict-aliasing"
 %ifarch x86_64
 cflags="$cflags -m32"
 %endif
 make CC="gcc $cflags" MAN_DIR=/usr/share/man all activate
+popd
 # powerpc
 %else
-cd yaboot
+pushd yaboot
 #
 make clean
 make DEBUG=1 VERSION=%{yaboot_vers}.SuSE yaboot HOSTCFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
@@ -85,16 +87,18 @@ mv second/yaboot yaboot
 mv second/yaboot.chrp yaboot.chrp
 mv second/yaboot.a second/crt0.o .
 #
-cd ..
+popd
 #
-cd lilo.ppc
-cd bootheader
+pushd lilo.ppc
+pushd bootheader
 make HOST_CFLAGS="$RPM_OPT_FLAGS -U_FORTIFY_SOURCE -g"
+popd
+popd
 %endif
 
 %install
 %ifarch %ix86 x86_64
-cd lilo-%{version}
+pushd lilo-%{version}
 make MAN_DIR=/usr/share/man install ROOT=$RPM_BUILD_ROOT
 install -m 0755 activate $RPM_BUILD_ROOT/sbin
 rm -rfv $RPM_BUILD_ROOT/boot
@@ -114,7 +118,7 @@ mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man8
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man5
-cd lilo.ppc
+pushd lilo.ppc
 cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo
 cp -av lilo-pmac.lib $RPM_BUILD_ROOT/lib/lilo/lilo-pmac.lib
 cp -av lilo-chrp.lib $RPM_BUILD_ROOT/lib/lilo/lilo-chrp.lib
@@ -128,11 +132,11 @@ cp -av COPYING $RPM_BUILD_ROOT%{_docdir}/lilo/
 cp -av man/lilo.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5
 cp -av man/lilo.8 $RPM_BUILD_ROOT%{_mandir}/man8
 cp -av man/show_of_path.sh.8 $RPM_BUILD_ROOT%{_mandir}/man8
-cd bootheader
+pushd bootheader
 make install DESTDIR=$RPM_BUILD_ROOT
-cd ..
-cd ..
-cd yaboot
+popd
+popd
+pushd yaboot
 cp -av yaboot yaboot.debug $RPM_BUILD_ROOT/lib/lilo/pmac
 cp -av yaboot.chrp* $RPM_BUILD_ROOT/lib/lilo/chrp
 cp -av crt0.o $RPM_BUILD_ROOT/lib/lilo/chrp/yaboot.crt0.o
@@ -141,7 +145,7 @@ cp -av yaboot.a $RPM_BUILD_ROOT/lib/lilo/chrp/
 cp -av make_yaboot.sh $RPM_BUILD_ROOT/lib/lilo/scripts/
 cp -av man/bootstrap.8 man/yaboot.8 $RPM_BUILD_ROOT%{_mandir}/man8
 cp -av man/yaboot.conf.5 $RPM_BUILD_ROOT%{_mandir}/man5
-cd ..
+popd
 #powerpc
 %endif
 
