@@ -142,8 +142,9 @@ case "$(file -Lb $vmlinux)" in
 		;;
 esac
 if [ ! -f /proc/cpuinfo ] ; then
-	mount -v -n -t proc proc /proc
-	proc_mounted=yes
+	if mount -v -n -t proc proc /proc ; then
+		proc_mounted=yes
+	fi
 fi
 if [ "$board_type" = "guess" ] ; then
 	while read line; do
