@@ -3,7 +3,7 @@ SRCROOT  = ..
 include ../MCONFIG
 include ../MRULES
 
-PROGS       := addnote hack-coff iseries-addRamDisk iseries-addSystemMap mkprep mkzimage_cmdline mknote
+PROGS       := addnote hack-coff iseries-addRamDisk iseries-addSystemMap mkprep mkzimage_cmdline
 
 all:	$(PROGS)
 
@@ -15,8 +15,6 @@ hack-coff: hack-coff.c rs6000.h
 iseries-addRamDisk: iseries-addRamDisk.c
 	$(HOST_CC)  $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $<
 iseries-addSystemMap: iseries-addSystemMap.c
-	$(HOST_CC)  $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $<
-mknote: mknote.c
 	$(HOST_CC)  $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $<
 mkprep: mkprep.c
 	$(HOST_CC)  $(HOST_CFLAGS) $(HOST_LDFLAGS) -o $@ $<

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 17 18:38:24 CET 2008 - olh@suse.de
+
+- remove mknote usage from mkzimage for target pmac (bnc#443859)
+
+-------------------------------------------------------------------
 Mon Nov 17 10:53:11 CET 2008 - olh@suse.de
 
 - remove LTC48297 debug output from yaboot

@@ -120,14 +120,7 @@ ld \
 	$obj_dir/common/common.a \
 	$obj_dir/chrp/prom.a \
 	$obj_dir/common/zlib.a
-#
-$obj_dir/utils/mknote > $tmp/note
-objcopy \
-	$tmp/output \
-	$tmp/output \
-	--add-section=.note=$tmp/note \
-	-R .comment
-	
+
 rm -f "$output"
 cp "$tmp/output" "$output"
 bootfile_finalsize=`wc -c < "$output"`
