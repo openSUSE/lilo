@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Nov 17 10:53:11 CET 2008 - olh@suse.de
+
+- remove LTC48297 debug output from yaboot
+
+-------------------------------------------------------------------
 Mon Nov 17 10:51:49 CET 2008 - olh@suse.de
 
 - handle EFIKA5K2 in mkzimage

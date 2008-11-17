@@ -1031,17 +1031,14 @@ static void yaboot_text_ui(void)
 	fw_nbr_reboots.ui = 0;
 	/* this is an integer */
 	result = prom_get_chosen(imb_cas_reboot, &fw_nbr_reboots.ui, sizeof(fw_nbr_reboots.ui));
-	prom_printf("LTC48297 DEBUG: result for '/chosen/%s': %08x, content '%08x'\n", imb_cas_reboot, result, fw_nbr_reboots.ui);
 	if (result > 0) {
 		result = fw_nbr_reboots.ui;
 	} else {
 		/* this is a string */
 		result = prom_get_options(imb_cas_fwbnr_reboot, &fw_nbr_reboots.c, sizeof(fw_nbr_reboots.c));
-		prom_printf("LTC48297 DEBUG: result for '/options/%s': %08x, content '%08x'\n", imb_cas_fwbnr_reboot, result, fw_nbr_reboots.ui);
 		if (result > 0)
 			result = simple_strtol(fw_nbr_reboots.c, &msg, 10);
 	}
-	prom_printf("LTC48297 DEBUG: result == '%08x'\n", result);
 	if (result > 0)
 		prom_get_options("boot-last-label", lilo_once_cmdline, 512);
 
