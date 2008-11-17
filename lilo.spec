@@ -72,6 +72,7 @@ cflags="$cflags -m32"
 %endif
 make CC="gcc $cflags" MAN_DIR=/usr/share/man all activate
 popd
+make -C lilo.ppc/bootheader/utils addnote
 # powerpc
 %else
 pushd yaboot
@@ -102,6 +103,9 @@ pushd lilo-%{version}
 make MAN_DIR=/usr/share/man install ROOT=$RPM_BUILD_ROOT
 install -m 0755 activate $RPM_BUILD_ROOT/sbin
 rm -rfv $RPM_BUILD_ROOT/boot
+popd
+mkdir $RPM_BUILD_ROOT/bin
+install -m 0755 lilo.ppc/bootheader/utils/addnote $RPM_BUILD_ROOT/bin
 %else
 # powerpc
 # get rid of /usr/lib/rpm/brp-strip-debug 
@@ -159,6 +163,7 @@ exit 0
 %files
 %defattr (-,root,root)
 %ifarch %ix86 x86_64
+/bin/*
 /sbin/*
 /usr/sbin/*
 %else
