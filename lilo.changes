@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Nov 19 15:01:12 CET 2008 - olh@suse.de
+
+- show &device; as device-path if no devspec file is found
+  by show_of_path.sh (bnc#439619 - LTC49387)
+
+-------------------------------------------------------------------
 Mon Nov 17 19:31:29 CET 2008 - olh@suse.de
 
 - build addnote binary to the x86 lilo package, required for

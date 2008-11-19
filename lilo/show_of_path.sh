@@ -153,6 +153,8 @@ sysfs_ide_media_type=
 of_ide_media_type=
 ide_port=
 ide_channel=
+# initialize to something, in case no devspec file is found
+file_of_hw_path="&device;"
 
 if [ "$#" -gt 0 ] ; then
     until  [ "$#" = 0 ] ; do
