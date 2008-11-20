@@ -10,6 +10,7 @@ initrd=
 tmp=
 outputfile=
 no_addnote=false
+addnote_bin=
 until [ "$#" = "0" ] ; do
 	case "$1" in
 		--help|-h|--version)
@@ -140,8 +141,23 @@ ld \
 	$obj_dir/common/zlib.a
 #
 if [ "$no_addnote" = "false" ] ; then
-echo add note section for RS6K
-$obj_dir/utils/addnote $tmp/output
+	case "$HOSTTYPE" in
+		rowerpc*)
+			addnote_bin=$obj_dir/utils/addnote
+			;;
+		*)
+			addnote_bin="`type -p chrp-addnote || :`"
+			if test -z "$addnote_bin" ; then
+				addnote_bin="`type -p addnote || :`"
+			fi
+			;;
+	esac
+	if test -z "$addnote_bin" ; then
+		echo "Could not find addnote or chrp-addnote binary"
+	else
+		echo add note section for RS6K
+		$addnote_bin $tmp/output
+	fi
 fi
 #
 rm -f "$output"

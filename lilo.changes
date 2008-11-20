@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Nov 19 16:20:42 CET 2008 - olh@suse.de
+
+- remove addnote again, it will be chrp-addnote in util-linux
+
+-------------------------------------------------------------------
 Wed Nov 19 15:01:12 CET 2008 - olh@suse.de
 
 - show &device; as device-path if no devspec file is found
