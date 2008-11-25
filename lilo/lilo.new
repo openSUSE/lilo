@@ -347,6 +347,7 @@ function parted_call() {
 # readable by yaboot
 function can_yaboot_read () {
     local path="$1"
+    local num
 
     # check for invalid path
     [ -e "$path" ] || return 1;
@@ -357,16 +358,24 @@ function can_yaboot_read () {
 	local device mount type opts
 
 	while read device mount type opts; do
+		: device $device
+		: mount $mount
+		: type $type
+		: opts $opts
 	    if [ "${device:0:1}" = "/" ]; then
 		local -i dn=$(( `stat -L --format="0x%D" $mount` ))
 		(( dn == 0 )) && continue;
+		[[ "$type" == @(anon_inodefs|autofs|bdev|cgroup|cpuset|debugfs|devpts|fuse|fusectl|hugetlbfs|inotifyfs|mqueue|pipefs|proc|rootfs|rpc_pipefs|securityfs|sockfs|sysfs|tmpfs|usbfs) ]] && continue
+		: dn $dn gets type $type
 		_filesystem[$dn]="$type";
 	    fi
 	done < /proc/mounts
 	_filesystem[0]="invalid"
     fi
 
-    local fs=${_filesystem[$(( ` stat -L --format="0x%D" $path` ))]}
+    num=`$STAT_CMD -L --format="0x%D" $path`
+    : num $(( $num ))
+    local fs=${_filesystem[$(( $num ))]}
 
     # check for a file system yaboot can handle
     [[ "$fs" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]] || return 1;

@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Tue Nov 25 15:23:26 CET 2008 - olh@suse.de
+
+- update can_yaboot_read to handle bind mounts
+  they return the same major:minor number as the underlying
+  filesystem and overwrite the previous valid filesystem entry
+  which incorrectly forces booting from a FAT filesystem
+
+-------------------------------------------------------------------
 Wed Nov 19 16:20:42 CET 2008 - olh@suse.de
 
 - remove addnote again, it will be chrp-addnote in util-linux
