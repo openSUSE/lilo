@@ -1064,8 +1064,13 @@ if [ "$get_arch" ]; then
     echo "$MACHINE"
     exit 0
 fi
+case "$MACHINE" in
+	ps3) ;;
+	*)
 parse_config_file
 check_config_file
+	;;
+esac
 
 if [ "$boot_once" ]; then
 	setup_boot_once "$boot_once"

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Nov 28 14:16:11 CET 2008 - olh@suse.de
+
+- skip config file handling on PS3 because kboot.conf is used
+
+-------------------------------------------------------------------
 Tue Nov 25 15:23:26 CET 2008 - olh@suse.de
 
 - update can_yaboot_read to handle bind mounts
