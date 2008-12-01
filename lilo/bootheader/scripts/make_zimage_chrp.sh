@@ -142,7 +142,7 @@ ld \
 #
 if [ "$no_addnote" = "false" ] ; then
 	case "$HOSTTYPE" in
-		rowerpc*)
+		ppc*|powerpc*)
 			addnote_bin=$obj_dir/utils/addnote
 			;;
 		*)

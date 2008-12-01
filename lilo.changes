@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Dec  1 12:57:35 CET 2008 - olh@suse.de
+
+- fix typo in addnote detection
+
+-------------------------------------------------------------------
 Fri Nov 28 14:16:11 CET 2008 - olh@suse.de
 
 - skip config file handling on PS3 because kboot.conf is used
