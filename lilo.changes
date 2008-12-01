@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Dec  1 13:37:12 CET 2008 - olh@suse.de
+
+- fix warning in other= section when calling lilo
+
+-------------------------------------------------------------------
 Mon Dec  1 13:29:48 CET 2008 - olh@suse.de
 
 - the sysfs layout for iscsi changed, iscsi_connection is now

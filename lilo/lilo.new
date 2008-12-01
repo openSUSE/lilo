@@ -905,11 +905,15 @@ function check_config_file () {
 			CONFIG_IMAGE_FILE_PARTITION_NUMBER[$i]="`collect_path_info partition_number ${CONFIG_IMAGE_FILE[$i]}`"
 			CONFIG_IMAGE_FILE_PATH_ON_FILESYSTEM[$i]="`get_relative_path_on_filesystem ${CONFIG_IMAGE_FILE[$i]}`"
 		else
-			if [ "${CONFIG_IMAGE_OPTIONAL[$i]}" = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
-				error   "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
+			if [ -b "${CONFIG_IMAGE_OTHER[$i]}" -a "${CONFIG_IMAGE_LABEL[$i]}" = "macos" ] ; then
+				: other"${CONFIG_IMAGE_LABEL[$i]}" 
 			else
-				warning "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
-				CONFIG_IMAGE_OPTIONAL[$i]="skip"
+				if [ "${CONFIG_IMAGE_OPTIONAL[$i]}" = "no" -o "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] ; then
+					error   "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
+				else
+					warning "${CONFIG_IMAGE_LABEL[$i]}: image = ${CONFIG_IMAGE_FILE[$i]}: No such file or directory"
+					CONFIG_IMAGE_OPTIONAL[$i]="skip"
+				fi
 			fi
 		fi
 		if [ ! -z "${CONFIG_IMAGE_INITRD[$i]}" ] ; then
