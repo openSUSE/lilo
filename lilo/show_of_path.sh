@@ -667,9 +667,42 @@ else # no 'devspec' found
 		*)    iscsi_subnet_mask=0.0.0.0 ;;
 	esac
 	iscsi_ciaddr="${iscsi_ciaddr%/*}"
-	iscsi_siaddr="` cat connection$iscsi_connection:0/iscsi_connection:connection$iscsi_connection:0/persistent_address `"
-	iscsi_iname="` cat iscsi_session:$iscsi_session/targetname `"
-	iscsi_iport="` cat connection$iscsi_connection:0/iscsi_connection:connection$iscsi_connection:0/persistent_port `"
+	iscsi_siaddr="`
+			f=\"connection$iscsi_connection:0/iscsi_connection:connection$iscsi_connection:0/persistent_address\"
+			if test ! -f \"\$f\"
+			then
+					f=\"connection$iscsi_connection:0/iscsi_connection/connection$iscsi_connection:0/persistent_address\"
+			fi
+			if test ! -f \"\$f\"
+			then
+					f=/dev/null
+			fi
+			cat \"\$f\"
+			`"
+	iscsi_iname="`
+			f=\"iscsi_session:$iscsi_session/targetname\"
+			if test ! -f \"\$f\"
+			then
+					f=\"iscsi_session/$iscsi_session/targetname\"
+			fi
+			if test ! -f \"\$f\"
+			then
+					f=/dev/null
+			fi
+			cat \"\$f\"
+		`"
+	iscsi_iport="`
+			f=\"connection$iscsi_connection:0/iscsi_connection:connection$iscsi_connection:0/persistent_port\"
+			if test ! -f \"\$f\"
+			then
+					f=\"connection$iscsi_connection:0/iscsi_connection/connection$iscsi_connection:0/persistent_port\"
+			fi
+			if test ! -f \"\$f\"
+			then
+					f=/dev/null
+			fi
+			cat \"\$f\"
+			`"
 	#FIXME
 	iscsi_ilun="${file_full_sysfs_path##*:}"
 	iscsi_ilun="` printf '%x%012x' $iscsi_ilun 0 `"
