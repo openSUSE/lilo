@@ -9,7 +9,7 @@ Group:          System/Boot
 License:        BSD 3-Clause
 Summary:        The Linux Loader, a Boot Menu
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Obsoletes:      yaboot activate quik 
+Obsoletes:      yaboot activate quik
 %ifarch ppc ppc64
 %if 0%{?suse_version} > 1020
 BuildRequires:  dtc
@@ -35,7 +35,7 @@ BuildRequires:  nasm
 %ifarch x86_64
 BuildRequires:  glibc-devel-32bit
 %if 0%{?suse_version} > 1010
-BuildRequires:  gcc-32bit 
+BuildRequires:  gcc-32bit
 %endif
 %endif
 Version:        0
