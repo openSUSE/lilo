@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Dec  9 15:12:39 CET 2008 - olh@suse.de
+
+- handle short reads in of_read() in yaboot
+  POWER4 firmware does not load more than 11MB at once (bnc#436064)
+
+-------------------------------------------------------------------
 Mon Dec  1 13:37:12 CET 2008 - olh@suse.de
 
 - fix warning in other= section when calling lilo

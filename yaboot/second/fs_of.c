@@ -196,9 +196,33 @@ static int of_net_open(struct boot_file_t *file, const struct path_description *
 
 static int of_read(struct boot_file_t *file, unsigned int size, void *buffer)
 {
-	unsigned int count;
-
-	count = prom_read(file->of_device, buffer, size);
+	unsigned int size_read, i;
+	int count;
+	unsigned char *p;
+	p = buffer;
+	i = 5;
+	count = size_read = 0;
+	do {
+		size_read = prom_read(file->of_device, p, size);
+		if (size_read == 0) {
+			if (i++ > 5) {
+				prom_printf("%s: read returned nothing, %08x bytes remaining\n", __func__, size);
+				break;
+			}
+		} else {
+			if (size_read != size)
+				prom_printf("%s: short read? expected %08x, got %08x at %p, base %p\n", __func__, size, size_read, p, buffer);
+			if (size_read > 0 && size_read <= size) {
+				i = 0;
+				size -= size_read;
+				p += size_read;
+				count += size_read;
+			} else {
+				if (i++ > 5)
+					break;
+			}
+		}
+	} while (size > 0);
 	file->pos += count;
 	return count;
 }
