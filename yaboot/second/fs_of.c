@@ -205,13 +205,11 @@ static int of_read(struct boot_file_t *file, unsigned int size, void *buffer)
 	do {
 		size_read = prom_read(file->of_device, p, size);
 		if (size_read == 0) {
-			if (i++ > 5) {
-				prom_printf("%s: read returned nothing, %08x bytes remaining\n", __func__, size);
+			if (i++ > 5)
 				break;
-			}
 		} else {
 			if (size_read != size)
-				prom_printf("%s: short read? expected %08x, got %08x at %p, base %p\n", __func__, size, size_read, p, buffer);
+				DEBUG_F("short read? expected %08x, got %08x at %p, base %p\n", size, size_read, p, buffer);
 			if (size_read > 0 && size_read <= size) {
 				i = 0;
 				size -= size_read;
