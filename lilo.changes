@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Feb  4 11:51:04 CET 2009 - olh@suse.de
+
+- if tftp download fails in yaboot, close the device to release
+  all resources.
+  the ehea kernel driver can not use all required resources if 
+  they are still partly used by the firmware (bnc#468189)
+
+-------------------------------------------------------------------
 Tue Dec  9 15:12:39 CET 2008 - olh@suse.de
 
 - handle short reads in of_read() in yaboot

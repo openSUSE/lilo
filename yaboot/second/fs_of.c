@@ -186,6 +186,7 @@ static int of_net_open(struct boot_file_t *file, const struct path_description *
 		} else {
 			prom_printf("download failed: %d\n", ret);
 			ret = FILE_IOERR;
+			prom_close(file->of_device);
 		}
 	}
 
