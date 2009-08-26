@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Aug 26 13:44:46 CEST 2009 - uli@suse.de
+
+- ppc: added Emulex Zephyr-X support (bnc#527024)
+
+-------------------------------------------------------------------
 Wed Feb  4 11:51:04 CET 2009 - olh@suse.de
 
 - if tftp download fails in yaboot, close the device to release
