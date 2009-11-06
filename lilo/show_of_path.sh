@@ -244,6 +244,25 @@ fi
 dbg_show file_sysfs_path
 
 file_sysfs_dir="${file_sysfs_path%/dev}"
+if [[ "$file_sysfs_dir" == */dm-* ]] ; then
+    file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/*|head -n 1`
+    if [ ! -L "$file_sysfs_dir/device" ] ; then
+        if [[ "$file_sysfs_dir" == */dm-* ]] ; then
+            file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/*|head -n 1`
+        fi
+    fi
+
+    devmajorminor=`printf '(%d,%2d)' $file_major $file_minor`
+    DMDEV=`dmsetup ls | grep "$devmajorminor"`
+
+    if [[ "$DMDEV" == *part* ]]; then
+       read device devnode <<< "$DMDEV"
+       part=`echo "$device" | sed 's/.*part//g'`
+
+       DEV=`echo "$file_sysfs_dir" | sed 's/.*\///g'`
+       file_sysfs_dir="$file_sysfs_dir/$DEV$part"
+    fi
+fi
 dbg_show file_sysfs_dir
 if [ ! -L "$file_sysfs_dir/device" ] ; then
     # maybe a partition
@@ -255,8 +274,6 @@ if [ ! -L "$file_sysfs_dir/device" ] ; then
 	# array, but til then I´d consider this a hack, maybe a
 	# special parameter --raid is an option 
 	error "soft raid (${file_sysfs_dir##*/}) is not readable by open firmware"
-	elif [[ "$file_sysfs_dir" == */dm-* ]]; then
-	error "mapped devices like ${file_sysfs_dir##*/} are not readable by open firmware"
 	else
 	error "driver for sysfs path $file_sysfs_dir has no full sysfs support"
 	fi
@@ -573,7 +590,7 @@ if [ -f devspec ] ; then
 		warning "Emulex FC HBA with device id 0x$id not yet tested." \
 			"Reboot may fail."
 		fi
-		if [[ $id == @(f900|f901|f980|f981|f982|fa00|fa01|fd00|fe00) ]]; then
+		if [[ $id == @(f900|f901|f980|f981|f982|fa00|fa01|fd00) ]]; then
 		# TODO: may be check /sys/class/scsi_host/hostX/lpfc_max_luns
 		lun_format="%x000000000000"
 		fi
