@@ -121,6 +121,7 @@ declare -a _filesystem
 err_var1=
 FDISK=/sbin/fdisk
 PARTED="/usr/sbin/parted -s"
+PARTPROBE="/usr/sbin/partprobe"
 # the parted kids keep the userinterface stable:
 #-
 # GNU Parted 1.6.25.1
@@ -748,6 +749,9 @@ function parse_boot_option () {
                if [ ! -L "$parent/device" ] ; then
                   DEV=`ls -1 $parent/slaves/|head -n 1`
                   BOOT_DEV="/dev/$DEV$part"
+                  if [ ! -b "$BOOT_DEV" ]; then
+                     $PARTPROBE "/dev/$DEV"
+                  fi
                fi
             else
                DEV=`echo $BOOT_DEV | sed 's/\/dev\///g'`

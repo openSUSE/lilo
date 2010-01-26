@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jan 26 14:37:37 CET 2010 - uli@suse.de
+
+- ppc: rescan for partition tables of multipath devices
+  (bnc#572144)
+
+-------------------------------------------------------------------
 Fri Nov  6 16:25:42 CET 2009 - uli@suse.de
 
 - ppc: dm-multipath support (bnc#475544)
