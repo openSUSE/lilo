@@ -306,13 +306,43 @@ static void ipv4_to_ascii(char *buf, u32 ip)
 		sprintf(buf, "%u.%u.%u.%u", (ip & 0xff000000) >> 24, (ip & 0x00ff0000) >> 16, (ip & 0x0000ff00) >> 8, (ip & 0x000000ff));
 }
 
+static u32 ascii_to_ipv4(char *str)
+{
+	int i;
+	long tmp;
+	u32 ip = 0;
+	char *ptr=str, *endptr;
+
+	if (str == NULL)
+		return 0;
+
+	for (i=0; i<4; i++, ptr = ++endptr) {
+		tmp = strtol(ptr, &endptr, 10);
+		if ((tmp & 0xff) != tmp)
+			return 0;
+
+		/* If we reach the end of the string but we're not in the 4th
+		 * octet we have an invalid IP */
+		if (*endptr == '\x0' && i!=3)
+			return 0;
+
+		/* If we have anything other than a NULL or '.' we have an
+		 * invlaid IP */
+		if (*endptr != '\x0' && *endptr != '.')
+			return 0;
+
+		ip += (tmp << (24-(i*8)));
+	}
+	return ip;
+}
+
 static void get_dhcp_ipv4_options(const struct dhcp_packet *dp, int size, u32 * netmask, u32 * gateway)
 {
 	unsigned char *p, value, len;
 	u32 i;
 	/* add 4 byte cookie offset */
 	i = offsetof(struct dhcp_packet, options) + 4;
-	*netmask = *gateway = 0;
+	*netmask = 0;
 	if (size >= i) {
 		p = (unsigned char *)dp;
 		p += i;
@@ -341,101 +371,6 @@ static void get_dhcp_ipv4_options(const struct dhcp_packet *dp, int size, u32 * 
 }
 
 /*
- * Copy the string from source to dest till newline or comma(,) is seen
- * in the source.
- * Move source and dest pointers respectively.
- * Returns pointer to the start of the string that has just been copied.
- */
-static char *
-scopy(char **dest, char **source)
-{
-     char *ret = *dest;
-
-     if (!**source)
-	  return NULL;
-
-     while (**source != ',' && **source != '\0')
-	  *(*dest)++ = *(*source)++;
-     if (**source != '\0')
-	  *(*source)++;
-     **dest = '\0';
-     *(*dest)++;
-     return ret;
-}
-
-/*
- * Extract all the ipv4 arguments from the bootpath provided and fill result
- * Returns 1 on success, 0 on failure.
- */
-#define IP_INVALID(IP) (IP == NULL || *IP == '0')
-static int
-extract_ipv4_args(char *imagepath, struct boot_fspec_t *result)
-{
-     char *tmp, *args, *str, *start;
-
-     args = strrchr(imagepath, ':');
-     if (!args)
-	  return 1;
-
-     start = args; /* used to see if we read any optional parameters */
-
-     /* The obp-tftp device arguments should be at the end of
-      * the argument list.  Skip over any extra arguments (promiscuous,
-      * speed, duplex, bootp, rarp).
-      */
-
-     tmp = strstr(args, "promiscuous");
-     if (tmp && tmp > args)
-	  args = tmp + strlen("promiscuous");
-
-     tmp = strstr(args, "speed=");
-     if (tmp && tmp > args)
-	  args = tmp + strlen("speed=");
-
-     tmp = strstr(args, "duplex=");
-     if (tmp && tmp > args)
-	  args = tmp + strlen("duplex=");
-
-     tmp = strstr(args, "bootp");
-     if (tmp && tmp > args)
-	  args = tmp + strlen("bootp");
-
-     tmp = strstr(args, "rarp");
-     if (tmp && tmp > args)
-	  args = tmp + strlen("rarp");
-
-     if (args != start) /* we read some parameters, so go past the next comma(,) */
-	  args = strchr(args, ',');
-     if (!args)
-	  return 1;
-
-     str = malloc(strlen(args) + 1); /*long enough to hold all strings */
-     if (!str)
-	  return 0;
-
-     if (args[-1] != ':')
-	  args++; /* If comma(,) is not immediately followed by ':' then go past the , */
-
-     /*
-      * read the arguments in order: siaddr,filename,ciaddr,giaddr,
-      * bootp-retries,tftp-retries,addl_prameters
-      */
-     result->siaddr = scopy(&str, &args);
-     result->file = scopy(&str, &args);
-     result->ciaddr = scopy(&str, &args);
-     result->giaddr = scopy(&str, &args);
-     result->bootp_retries = scopy(&str, &args);
-     result->tftp_retries = scopy(&str, &args);
-     if (*args) {
-	  result->addl_params = strdup(args);
-	  if (!result->addl_params)
-		return 0;
-     }
-     return 1;
-}
-
-
-/*
  * pmac and older chrp (up to power5) can request any file from the tfp server
  * Newer IBM firmware requires a boot path with static ip addresses and the
  * desired filename. If /chosen/bootpath is reused, the bootfile (yaboot) itself
@@ -453,36 +388,24 @@ extract_ipv4_args(char *imagepath, struct boot_fspec_t *result)
  * Assume all data was supplied manually if the property does not exist
  */
 
-#define IP_INVALID(IP) (IP == NULL || *IP == '0')
 static int get_tftp_ipv4_ibm_CAS(struct path_description *path, const char *netdev_options, size_t offset)
 {
 	const char *p;
 	char *p1, *pf, buf[sizeof("000.000.000.000")];
+	char gw[sizeof("000.000.000.000")];
 	int bootp_retry, tftp_retry, tftp_blocksize;
 	struct dhcp_packet *dp;
-  struct boot_fspec_t bp_str;
-	u32 netmask_ipv4, gateway_ipv4;
-  int size, i;
-  int dp_valid = 1;
-
-  extract_ipv4_args(boot_path(path),&bp_str);
-  DEBUG_F("bp_str.dev=<%s>\n",bp_str.dev );
-  DEBUG_F("bp_str.siaddr=<%s>\n",bp_str.siaddr );
-  DEBUG_F("bp_str.file=<%s>\n",bp_str.file );
-  DEBUG_F("bp_str.ciaddr=<%s>\n",bp_str.ciaddr );
-  DEBUG_F("bp_str.giaddr=<%s>\n",bp_str.giaddr );
-  DEBUG_F("bp_str.bootp_retries=<%s>\n",bp_str.bootp_retries );
-  DEBUG_F("bp_str.addl_params=<%s>\n",bp_str.addl_params );
+	u32 netmask_ipv4 = 0, gateway_ipv4 = 0;
+	int size, i;
 
 	size = prom_getproplen_chosen("bootp-response");
 	if (size <= 0)
-		dp_valid = 0;
+		return 0;
 	/* IPv4 data via DHCP */
 	dp = malloc(size);
 	if (!dp)
-		dp_valid = 0;
-  if(dp_valid)
-	  prom_get_chosen("bootp-response", dp, size);
+		return 0;
+	prom_get_chosen("bootp-response", dp, size);
 
 	bootp_retry = tftp_retry = 5;
 	tftp_blocksize = 512;
@@ -504,12 +427,21 @@ static int get_tftp_ipv4_ibm_CAS(struct path_description *path, const char *netd
 			}
 			p1++;	/* skip comma */
 			p = p1;
-			/* skip client IPv4 and gateway IPv4, move forward after comma  */
-			for (i = 0; i < 2; i++) {
-				p = strchr(p, ',');
-				if (!p)
-					break;
-				p++;
+
+			/* Skip the client IPv4, snarf the IPv4 gateway */
+			p = strchr(p, ',');
+			if (p) {
+				p++; /* skip comma */
+				p1 = strchr(p, ',');
+				if (p1) {
+					/* copy the gw IP string */
+					i = p1 - p;
+					memcpy(gw, p, i);
+					p = p1;
+
+					gw[i] = '\x0';
+					gateway_ipv4 = ascii_to_ipv4(&gw[0]);
+				}
 			}
 		} else {
 			/* nothing after filename */
@@ -547,12 +479,10 @@ static int get_tftp_ipv4_ibm_CAS(struct path_description *path, const char *netd
 			}
 		}
 	}
-  if(dp_valid)
-	  get_dhcp_ipv4_options(dp, size, &netmask_ipv4, &gateway_ipv4);
-  if(IP_INVALID(bp_str.siaddr) && dp_valid)
-    ipv4_to_ascii(buf, dp->siaddr);
-  else
-    strcpy(buf,bp_str.siaddr);
+	/* FIXME: We propably should check for subnetmask in the options, we're
+	 * okay as long as it's also in the vendor oprions */
+	get_dhcp_ipv4_options(dp, size, &netmask_ipv4, &gateway_ipv4);
+	ipv4_to_ascii(buf, dp->siaddr);
 	i = offset + 1 + strlen(buf) + 1;	/* options + comma + server IPv4 + null */
 	p1 = malloc(i);
 	if (p1) {
@@ -563,19 +493,13 @@ static int get_tftp_ipv4_ibm_CAS(struct path_description *path, const char *netd
 	i = 3 * sizeof(buf) + 3 * sizeof(buf) + 5 + 1;	/* 3 * IPv4 + 3 * int + 5 comma + null */
 	p1 = malloc(i);
 	if (p1) {
-    if(IP_INVALID(bp_str.ciaddr) && dp_valid)
-      ipv4_to_ascii(buf, dp->yiaddr);
-    else
-      strcpy(buf,bp_str.ciaddr);
+		ipv4_to_ascii(buf, dp->yiaddr);
 		i = strlen(buf);
 		memcpy(p1, buf, i);
 		p1[i] = ',';
 		i++;
 
-    if(IP_INVALID(bp_str.giaddr) && dp_valid)
-      ipv4_to_ascii(buf,gateway_ipv4);
-    else
-      strcpy(buf,bp_str.giaddr);
+		ipv4_to_ascii(buf, gateway_ipv4);
 		memcpy(p1 + i, buf, strlen(buf));
 		i += strlen(buf);
 		p1[i] = ',';
@@ -595,9 +519,54 @@ static void get_tftp_ipv4_options(struct path_description *path, const char *net
 	char *p, *pf;
 	size_t i;
 
-	if (netdev_options[offset])
-	  get_tftp_ipv4_ibm_CAS(path, netdev_options, offset);
-	else {
+	if (netdev_options[offset]) {
+		if (get_tftp_ipv4_ibm_CAS(path, netdev_options, offset) == 0) {
+			/* find comma after server IPv4 */
+			p = strchr(netdev_options + offset, ',');
+			DEBUG_F("comma after server IPv4 '%s' -> '%s'\n", netdev_options + offset, p);
+			if (p) {
+				offset = p - netdev_options;
+				p = malloc(offset + 1);
+				if (p) {
+					/* keep everything up to the filename */
+					memcpy(p, netdev_options, offset);
+					p[offset] = '\0';
+					path_net_before(path) = p;
+				}
+				offset++;	/* skip the comma before the filename */
+				p = strchr(netdev_options + offset, ',');	/* comma after the filename */
+				DEBUG_F("comma after filename '%s'\n", p);
+				if (p) {
+					i = p - (netdev_options + offset);
+					pf = malloc(i + 1);
+					if (pf) {
+						memcpy(pf, netdev_options + offset, i);
+						pf[i] = '\0';
+						path_filename(path) = pf;
+					}
+					offset = p - netdev_options;
+					offset++;	/* skip the comma after the filename */
+					i = strlen(netdev_options + offset);
+					p = malloc(i + 1);
+					if (p) {
+						strcpy(p, netdev_options + offset);
+						path_net_after(path) = p;
+					}
+				} else {
+					/* nothing after filename */
+					path_filename(path) = strdup(netdev_options + offset);
+				}
+			} else {
+				/* no filename was provided */
+				i = strlen(netdev_options + offset);
+				p = malloc(i + 1);
+				if (p) {
+					strcpy(p, netdev_options + offset);
+					path_net_before(path) = p;
+				}
+			}
+		}
+	} else {
 		/* maybe pmac, booted without any options */
 		p = malloc(offset + 1);
 		if (p) {
@@ -685,8 +654,6 @@ static int parse_device_path(const char *imagepath, struct path_description *res
 		parse_block_device(result, imagepath + offset);
 		break;
 	case TYPE_NET:
-    boot_path(result) = malloc(strlen(imagepath) + 1);
-    strcpy(boot_path(result),imagepath);
 		get_mac_address(result);
 		parse_net_device(result, imagepath + offset);
 		break;

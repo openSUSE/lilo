@@ -77,8 +77,6 @@ struct path_description {
 
 #define path_device(x) (x)->device
 	char *device;
-#define boot_path(x) (x)->bpath
-      char *bpath;
 
 	union {
 		struct {
@@ -103,19 +101,6 @@ struct path_description {
 #define path_filename(x) (x)->filename
 	char *filename;
 };
-
-struct boot_fspec_t {
-	char*	dev;		/* OF device path */
-	int	part;		/* Partition number or -1 */
-	char*	siaddr;		/* Server address */
-	char*	file;		/* File path */
-	char*	ciaddr;		/* Client address */
-	char*	giaddr;		/* Gateway address */
-	char*	bootp_retries;	/* Bootp retries */
-	char*	tftp_retries;	/* TFTP retries */
-	char*	addl_params;	/* copy all additional parameters */
-};
-
 
 struct boot_file_t {
 
