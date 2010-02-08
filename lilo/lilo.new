@@ -720,7 +720,7 @@ function parse_boot_option () {
 
    majorminor=`$STAT_CMD -L --format="0x%t 0x%T" "$BOOT_DEV"`
    devmajorminor=`printf '%d:%d' $majorminor`
-   majorminor=`printf '(%d,%2d)' $majorminor`
+   majorminor=`printf '(%d, %d)' $majorminor`
 
    for dev in /sys/block/*/*/dev /sys/block/*/dev
    do
