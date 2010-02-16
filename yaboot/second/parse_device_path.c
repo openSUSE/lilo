@@ -438,6 +438,7 @@ static int get_tftp_ipv4_ibm_CAS(struct path_description *path, const char *netd
 					i = p1 - p;
 					memcpy(gw, p, i);
 					p = p1;
+					p++;
 
 					gw[i] = '\x0';
 					gateway_ipv4 = ascii_to_ipv4(&gw[0]);
