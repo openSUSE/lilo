@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 16 13:28:24 CET 2010 - uli@suse.de
+
+- ppc: fix for tftp download problem breaking installation
+  (bnc#579263) 
+
+-------------------------------------------------------------------
 Mon Feb  8 13:14:25 CET 2010 - uli@suse.de
 
 - ppc: fix dmsetup parsing (bnc#576251)
