@@ -216,6 +216,15 @@ int prom_getproplen_options(const char *name)
 	return prom_getproplen(prom_options, name);
 }
 
+long get_options_long(char *name)
+{
+     char tmp[16];
+     int rc=0;
+     rc = prom_get_options(name, &tmp, 16);
+
+     return simple_strtol(tmp,NULL,10);
+}
+
 int prom_get_options(const char *name, void *mem, int len)
 {
 	return prom_getprop(prom_options, name, mem, len);

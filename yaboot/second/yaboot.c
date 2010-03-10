@@ -601,6 +601,94 @@ static int load_elf64(struct boot_file_t *file, loadinfo_t * loadinfo)
 	return 1;
 }
 
+static struct fake_elf {
+	Elf32_Ehdr	elfhdr;
+	Elf32_Phdr	phdr[1];
+	struct chrpnote {
+		u32	namesz;
+		u32	descsz;
+		u32	type;
+		char	name[8];	/* "PowerPC" */
+		struct chrpdesc {
+			u32	real_mode;
+			u32	real_base;
+			u32	real_size;
+			u32	virt_base;
+			u32	virt_size;
+			u32	load_base;
+		} chrpdesc;
+	} chrpnote;
+} fake_elf = {
+	.elfhdr = {
+		.e_ident = { 0x7f, 'E', 'L', 'F',
+			     ELFCLASS32, ELFDATA2MSB, EV_CURRENT },
+		.e_type = ET_EXEC,	/* yeah right */
+		.e_machine = EM_PPC,
+		.e_version = EV_CURRENT,
+		.e_phoff = offsetof(struct fake_elf, phdr),
+		.e_phentsize = sizeof(Elf32_Phdr),
+		.e_phnum = 1
+	},
+	.phdr = {
+		[0] = {
+			.p_type = PT_NOTE,
+			.p_offset = offsetof(struct fake_elf, chrpnote),
+			.p_filesz = sizeof(struct chrpnote)
+		},
+	},
+	.chrpnote = {
+		.namesz = sizeof("PowerPC"),
+		.descsz = sizeof(struct chrpdesc),
+		.type = 0x1275,
+		.name = "PowerPC",
+		.chrpdesc = {
+			.real_mode = ~0U,	/* ~0 means "don't care" */
+			.real_base = 0xC00000U,
+			.real_size = ~0U,
+			.virt_base = ~0U,
+			.virt_size = ~0U,
+			.load_base = ~0U,
+		},
+	},
+};
+
+/* On some IBM pSeries systems with large firmware images, it's critical that
+ * real-base is set to 12Mb.  Without doing this the RMA becomes to fragmented
+ * and once we initialise the installer image there is no room for RTAS to the
+ * kernel is next to usless. */
+static void load_fake_elf_note(void)
+{
+	DEBUG_ENTER;
+	unsigned long real_base, real_size;
+
+	real_base = get_options_long("real-base");
+	real_size = get_options_long("real-size");
+
+	DEBUG_F("real-base == %lx\n", real_base);
+	DEBUG_F("real-size == %lx\n", real_size);
+
+	if (_cpu == 64 && real_base == 0x2000000 /* 32Mb */
+	    && real_size > 0x1000000 /* 16Mb */) {
+		ihandle elfloader = call_prom("open", 1, 1,
+		                              "/packages/elf-loader");
+		if (elfloader == 0) {
+			prom_printf("couldn't open /packages/elf-loader\n");
+			return;
+		}
+
+		prom_printf("About to pass CHRP note to FW\nThis may result in a reset\n");
+		DEBUG_F("real-base == %x\n",
+		        fake_elf.chrpnote.chrpdesc.real_base);
+		DEBUG_F("real-size == %x\n",
+		        fake_elf.chrpnote.chrpdesc.real_size);
+
+		call_prom("call-method", 3, 1, "process-elf-header",
+		          elfloader, &fake_elf);
+		call_prom("close", 1, 0, elfloader);
+	}
+	DEBUG_LEAVE();
+}
+
 static void setup_display(void)
 {
 #ifdef CONFIG_SET_COLORMAP
@@ -1254,6 +1342,8 @@ static void yaboot_main(void)
 		stdout_is_screen = 1;
 		setup_display();
 	}
+
+	load_fake_elf_note();
 
 	bootpath_len = prom_getproplen_chosen("bootpath");
 	bootargs_len = prom_getproplen_chosen("bootargs");
