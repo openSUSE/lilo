@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 10 12:36:55 CET 2010 - duwe@suse.de
+
+- pseries-address-tight-rma: fix bnc#465601
+
+-------------------------------------------------------------------
 Tue Feb 16 13:28:24 CET 2010 - uli@suse.de
 
 - ppc: fix for tftp download problem breaking installation
