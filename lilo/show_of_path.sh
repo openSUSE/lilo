@@ -245,22 +245,36 @@ dbg_show file_sysfs_path
 
 file_sysfs_dir="${file_sysfs_path%/dev}"
 if [[ "$file_sysfs_dir" == */dm-* ]] ; then
-    file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/*|head -n 1`
+    parent=$file_sysfs_dir
+    file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/* 2> /dev/null |head -n 1`
     if [ ! -L "$file_sysfs_dir/device" ] ; then
         if [[ "$file_sysfs_dir" == */dm-* ]] ; then
-            file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/*|head -n 1`
+            parent=$file_sysfs_dir
+            file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/* 2> /dev/null |head -n 1`
         fi
     fi
 
     devmajorminor=`printf '(%d, %d)' $file_major $file_minor`
     DMDEV=`dmsetup ls | grep "$devmajorminor"`
+    DEV=`echo "$file_sysfs_dir" | sed 's/.*\///g'`
 
     if [[ "$DMDEV" == *part* ]]; then
        read device devnode <<< "$DMDEV"
        part=`echo "$device" | sed 's/.*part//g'`
+       DEVNAME="/dev/$DEV$part"
 
-       DEV=`echo "$file_sysfs_dir" | sed 's/.*\///g'`
+       if [ ! -b "$DEVNAME" ]; then
+          file_sysfs_dir=`ls -d $parent/slaves/* 2> /dev/null |tail -n 1`
+          DEV=`echo "$file_sysfs_dir" | sed 's/.*\///g'`
+       fi
+
        file_sysfs_dir="$file_sysfs_dir/$DEV$part"
+    else
+       /bin/dd if=/dev/$DEV of=/dev/null bs=4096 count=1 > /dev/null 2> /dev/null
+       if test "$?" != "0"
+       then
+          file_sysfs_dir=`ls -d $parent/slaves/* 2> /dev/null |tail -n 1`
+       fi
     fi
 fi
 dbg_show file_sysfs_dir
@@ -428,11 +442,6 @@ if [ -f devspec ] ; then
 	of_device_path=${of_device_path##/proc/device-tree}
 	file_storage_type=sata
 	;;
-	scsi*)
-	if [ "$file_storage_type" = "" ] ; then
-		file_storage_type=scsi
-	fi
-	;;
 	sas*)
 	file_storage_type=sas
 	;;
@@ -455,7 +464,7 @@ if [ -f devspec ] ; then
 	vscsi)
 	file_storage_type=vscsi
 	;;
-	fcp)
+	fcp|scsi-fcp)
 	declare of_disk_fc_wwpn
 
 	# modprobe scsi_transport_fc  ## loaded through dependencies
@@ -496,6 +505,11 @@ if [ -f devspec ] ; then
 	[ "$of_disk_fc_wwpn" ] || error "could not get a WWPN for that FC disk"
 	file_storage_type=fcp
 	;;
+        scsi*)
+        if [ "$file_storage_type" = "" ] ; then
+                file_storage_type=scsi
+        fi
+        ;;
 	ieee1394)
 	;;
 	*)
@@ -564,7 +578,7 @@ if [ -f devspec ] ; then
 	fi
 
 	;;
-        fcp)
+        fcp|scsi-fcp)
 	declare of_disk_fc_dir
 	declare of_disk_fc_lun=$of_disk_scsi_lun
 
@@ -572,6 +586,12 @@ if [ -f devspec ] ; then
 		of_disk_fc_dir=disk
 	elif [ -d ${file_of_hw_devtype}/sd ]; then
 		of_disk_fc_dir=sd
+	elif [ -d $(ls -d $file_of_hw_devtype/fp*/disk) ]; then
+		of_disk_fc_dir=`echo $(ls -d $file_of_hw_devtype/fp*) | sed 's/.*\///'`
+		of_disk_fc_dir=$of_disk_fc_dir"/disk"
+	elif [ -d $(ls -d $file_of_hw_devtype/fp*/sd) ]; then
+		of_disk_fc_dir=`echo $(ls -d $file_of_hw_devtype/fp*) | sed 's/.*\///'`
+		of_disk_fc_dir=$of_disk_fc_dir"/sd"
 	else
 		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
 	fi
@@ -820,7 +840,7 @@ else # no 'devspec' found
 	sata)
 		file_of_hw_path="${of_device_path##/proc/device-tree}"
 		;;
-	fcp)
+	fcp|scsi-fcp)
 		# TODO is that true? current version is a copy from scsi
 		dir=disk
 		file_of_hw_path=$(printf  "%s/${dir}@%016x,%016x"  "${of_device_path##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)

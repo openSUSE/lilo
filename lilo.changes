@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Mar 17 21:55:46 UTC 2010 - dmair@novell.com
+
+- lilo_asymmetric_access.patch supplied by Brian King of IBM:
+  <brking@linux.vnet.ibm.com>
+  (bnc#580221)
+
+-------------------------------------------------------------------
 Wed Mar 10 12:36:55 CET 2010 - duwe@suse.de
 
 - pseries-address-tight-rma: fix bnc#465601
