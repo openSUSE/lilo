@@ -495,7 +495,33 @@ function running_on_chrp () {
 				fi
 			fi
 
-			mkfs.msdos $MKDOSFS $boot_partition || exit 2
+			mkfs.msdos $MKDOSFS $boot_partition
+			ret=$?
+
+			if test "$ret" != "0"; then
+				PART=${boot_partition#/dev/}
+				DEV="${PART%%[0-9]*}"
+				PARTNO=${PART##$DEV}
+				found=0
+
+				for MDDEV in $(ls -1 /sys/block/$DEV/holders/*/holders/ 2> /dev/null); do
+					NAME=`cat /sys/block/$DEV/holders/*/holders/$MDDEV/dm/name`
+					DMPART=$(echo `expr "$NAME" : '.*\(_part[0-9]*\)'`)
+					DMPART=${DMPART##_part}
+
+					if (($DMPART == $DMPART)); then
+						mkfs.msdos $MKDOSFS /dev/$MDDEV || exit 2
+						boot_partition="/dev/$MDDEV"
+						found=1
+						break;
+					fi
+				done
+
+				if ((found == 0)); then
+					exit 2
+				fi
+			fi
+
 			cd $TEMP
 			mkdir -p boot || exit 2
 			mount $boot_partition boot || exit 2

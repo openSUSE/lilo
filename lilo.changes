@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Mar 24 17:09:57 CET 2010 - uli@suse.de
+
+- ppc: fix for LVM over multipath (bnc#588910)
+
+-------------------------------------------------------------------
 Wed Mar 17 21:55:46 UTC 2010 - dmair@novell.com
 
 - lilo_asymmetric_access.patch supplied by Brian King of IBM:
