@@ -81,7 +81,7 @@ static char *hard_coded_bootpath(char *bootpath)
 #define SLES9_ZIMAGE_SIZE ((7 * 1024 * 1024))	/* its a binary blob from 2.4 kernel source ... */
 #define MALLOCADDR ((2 * 1024 * 1024) + (512 * 1024))
 #define MALLOCSIZE ((1 * 1024 * 1024) + (512 * 1024))
-#define CLAIM_END (128 * 1024 * 1024)	/* FIXME: look at /memory/reg */
+#define CLAIM_END (256 * 1024 * 1024)	/* FIXME: look at /memory/reg */
 
 typedef struct {
 	union {
@@ -1220,8 +1220,7 @@ static void yaboot_text_ui(void)
 					else
 						chunksize = 10 * 1024 * 1024;	/* FIXME: if we had a stat() ... */
 				}
-				/* try to claim memory up to 128MB */
-				while (claim_base + chunksize < 128 * 1024 * 1024) {
+				while (claim_base + chunksize < CLAIM_END) {
 					initrd_base = prom_claim((void *)claim_base, chunksize, 0);
 					if (initrd_base != (void *)-1)
 						break;
