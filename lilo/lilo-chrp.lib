@@ -509,7 +509,7 @@ function running_on_chrp () {
 					DMPART=$(echo `expr "$NAME" : '.*\(_part[0-9]*\)'`)
 					DMPART=${DMPART##_part}
 
-					if (($DMPART == $DMPART)); then
+					if (($PARTNO == $DMPART)); then
 						mkfs.msdos $MKDOSFS /dev/$MDDEV || exit 2
 						boot_partition="/dev/$MDDEV"
 						found=1

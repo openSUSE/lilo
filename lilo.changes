@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr  9 10:07:25 CEST 2010 - sf@suse.de
+
+- added addtional patch for (bnc#588910) 
+
+-------------------------------------------------------------------
 Fri Apr  9 09:39:49 CEST 2010 - sf@suse.de
 
 - integrated patch for bnc #594710 into incomplete 
