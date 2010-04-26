@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Mon Apr 26 12:20:32 CEST 2010 - duwe@suse.de
+
+- Shrinking the PReP partition was required by obsolete hardware,
+  but failing to do so now blocks initrd creation. Drop the shrink.
+  (bnc#596847)
+
+-------------------------------------------------------------------
 Fri Apr  9 10:07:25 CEST 2010 - sf@suse.de
 
 - added addtional patch for (bnc#588910) 
