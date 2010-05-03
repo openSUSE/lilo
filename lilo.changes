@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Mon May  3 14:17:46 CEST 2010 - duwe@suse.de
+
+- Contrary to previous information, there are systems that need
+  a smaller PReP partition, so be more gentle: try to shrink the
+  the PReP partition, but only warn if it fails, and continue
+  to build an initrd. Still bnc#596847, new bnc#601585.
+
+-------------------------------------------------------------------
 Mon Apr 26 12:20:32 CEST 2010 - duwe@suse.de
 
 - Shrinking the PReP partition was required by obsolete hardware,

@@ -627,6 +627,12 @@ function running_on_chrp () {
 
 			local resize_errmsg=""
 
+			# shrink PReP boot partition if bigger than 11MB
+			# a free memory region on RS6K is between 64K and 12M
+			if (( (p_end[boot_partnr]-p_start[boot_partnr]) > 22528 )); then
+				warning "Shrinking PReP boot partition $boot_partition, avoiding firmware confusion"
+				resize_errmsg="Partition shrink failed for $boot_partition"
+			fi
 			# extend PReP boot partition if too small to hold yaboot binary
 			if (( (p_end[boot_partnr]-p_start[boot_partnr]) < yaboot_size )); then
 				warning "Extend PReP boot partition $boot_partition to hold yaboot"
@@ -643,7 +649,7 @@ function running_on_chrp () {
 					YAST_IS_RUNNING=1 parted_call $boot_device resize $boot_partnr $start $end &&
 					parted_call $boot_device set $boot_partnr type 0x41; ) >& $TEMP/parted.log
 				then
-					error "$resize_errmsg" 11
+					warning "$resize_errmsg" 11
 				fi
 			fi
 
