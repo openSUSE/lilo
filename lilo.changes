@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Aug 30 23:25:54 UTC 2010 - cristian.rodriguez@opensuse.org
+
+- Do not include build dates 
+
+-------------------------------------------------------------------
 Wed Feb  4 11:51:04 CET 2009 - olh@suse.de
 
 - if tftp download fails in yaboot, close the device to release

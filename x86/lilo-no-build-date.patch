@@ -1,0 +1,13 @@
+Index: lilo.c
+===================================================================
+--- lilo.c.orig	2010-08-31 01:14:33.000000000 +0200
++++ lilo.c	2010-08-31 01:16:27.412954000 +0200
+@@ -825,8 +825,6 @@ fprintf(errstd,"REBOOT=\"%s\"\n", reboot
+ #include <sys/utsname.h>
+ 	    struct utsname buf;
+ #endif
+-            printf("Released %s%s and compiled at %s on %s%s\n",
+-		VERSION_DATE, comma ? "," : "", __TIME__, __DATE__, semi);
+ #if !__MSDOS__
+ 	    if (verbose>=2 && uname(&buf)==0) {
+ 		printf("Running %s kernel %s on %s\n",

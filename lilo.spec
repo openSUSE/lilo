@@ -1,12 +1,29 @@
+#
+# spec file for package lilo (Version 22.8)
+#
+# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
+#
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
+
+# Please submit bugfixes or comments via http://bugs.opensuse.org/
+#
+
 # norootforbuild
 
 Url:            http://lilo.go.dyndns.org/
 
 Name:           lilo
 ExclusiveArch:  ppc ppc64 %ix86 x86_64
-%define yaboot_vers 22.8-r1151
+%define yaboot_vers 22.8-r1190
 Group:          System/Boot
-License:        BSD 3-Clause
+License:        BSD3c
 Summary:        The Linux Loader, a Boot Menu
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Obsoletes:      yaboot activate quik
@@ -38,8 +55,8 @@ BuildRequires:  glibc-devel-32bit
 BuildRequires:  gcc-32bit
 %endif
 %endif
-Version:        0
-Release:        0
+Version:        22.8
+Release:        50
 Source0:        lilo-ppc-%{version}.tar.bz2
 Source1:        http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
 Source86:       lilo-%{version}.src.tar.bz2
@@ -47,10 +64,29 @@ Patch8601:      lilo.x86.mount_by_persistent_name.patch
 Patch8602:      lilo.x86.array-bounds.patch
 Patch8603:      lilo.x86.division-by-zero.patch
 Patch8604:      lilo.x86.checkit.patch
-# $Id$
+Patch8605:      lilo-no-build-date.patch
+# $Id: lilo.spec 1188 2008-12-09 14:29:53Z olh $
 
 %description
-lilo for ppc
+LILO boots Linux from your hard drive. It can also boot other operating
+systems, such as MS-DOS and OS/2, and can even boot DOS from the second
+hard drive. The configuration file is /etc/lilo.conf.
+
+The PowerPC variant can be used on new PowerMacs and CHRP machines.
+
+The ix86 variant comes with Memtest86, offering an image that can be
+booted to perform a memory test.
+
+
+
+Authors:
+--------
+    John Coffman <JohnInSD@san.rr.com>
+    Werner Almesberger <Werner.Almesberger@epfl.ch>
+    PowerPC part:
+    Paul Mackeras <paulus@samba.org>
+    Cort Dougan <cort@fsmlabs.com>
+    Benjamin Herrenschmidt <benh@kernel.crashing.org>
 
 %prep
 %setup -q -T -c -a 0 -a 1 -a 86
@@ -61,6 +97,7 @@ pushd lilo-%{version}
 %patch8602 -p1
 %patch8603 -p1
 %patch8604 -p1
+%patch8605
 popd
 
 %build
@@ -191,3 +228,5 @@ exit 0
 %doc %{_docdir}/lilo
 %endif
 %doc %{_mandir}/*/*
+
+%changelog
