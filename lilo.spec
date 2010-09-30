@@ -49,14 +49,20 @@ Requires:       parted
 BuildRequires:  bin86
 BuildRequires:  nasm
 %endif
+%ifarch %ix86
+BuildRequires:  device-mapper
+BuildRequires:  device-mapper-devel
+%endif
 %ifarch x86_64
 BuildRequires:  glibc-devel-32bit
 %if 0%{?suse_version} > 1010
+BuildRequires:  device-mapper-32bit
+BuildRequires:  device-mapper-devel-32bit
 BuildRequires:  gcc-32bit
 %endif
 %endif
 Version:        22.8
-Release:        50
+Release:        51
 Source0:        lilo-ppc-%{version}.tar.bz2
 Source1:        http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
 Source86:       lilo-%{version}.src.tar.bz2

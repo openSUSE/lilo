@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 30 09:02:39 UTC 2010 - stefan.fent@novell.com
+
+- add device-mapper and device-mapper-devel (respective -32 bit
+  for x86_64) to build with devicemapper supprt (bnc #642400) 
+
+-------------------------------------------------------------------
 Mon Aug 30 23:25:54 UTC 2010 - cristian.rodriguez@opensuse.org
 
 - Do not include build dates 
