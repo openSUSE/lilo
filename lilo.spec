@@ -36,9 +36,9 @@ Requires:       dosfstools
 Requires:       gawk
 Requires:       sed
 Requires:       coreutils
-# for nvsetenv
+# for nvram
 %if 0%{?suse_version} > 1000
-Requires:       powerpc-utils
+Requires:       powerpc-utils >= 1.2.6
 %else
 Requires:       util-linux
 %endif

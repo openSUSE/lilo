@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Feb 10 17:51:36 UTC 2011 - dvaleev@novell.com
+
+- require powerpc-utils 1.2.6
+- changed nvsetenv to nvram 
+
+-------------------------------------------------------------------
 Thu Sep 30 09:02:39 UTC 2010 - stefan.fent@novell.com
 
 - add device-mapper and device-mapper-devel (respective -32 bit
