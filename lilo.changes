@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Feb 11 13:05:15 UTC 2011 - dvaleev@novell.com
+
+- don't try to set bootinfo-linux variable
+   Not needed for fat boot partitions
+
+-------------------------------------------------------------------
 Thu Feb 10 17:51:36 UTC 2011 - dvaleev@novell.com
 
 - require powerpc-utils 1.2.6
