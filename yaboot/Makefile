@@ -178,7 +178,7 @@ second/yaboot.a: $(OBJS)
 	mv -f $@.~ $@
 
 second/yaboot: $(OBJS) util/addnote ld.script second/yaboot.a second/empty.o
-	$(LD) -T ld.script $(LFLAGS) second/empty.o second/crt0.o second/yaboot.a -o $@
+	$(LD) -T ld.script $(LFLAGS) second/empty.o second/crt0.o second/yaboot.a -o $@ /usr/lib/gcc/powerpc64-suse-linux/4.5/libgcc.a
 	chmod -x $@
 	cp $@ $@.chrp
 	util/addnote $@.chrp

@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Sun Feb 20 18:49:22 CET 2011 - meissner@suse.de
+
+- make it build by explicitly linking libgcc.a
+
+-------------------------------------------------------------------
 Fri Feb 11 13:05:15 UTC 2011 - dvaleev@novell.com
 
 - don't try to set bootinfo-linux variable
@@ -9,6 +14,11 @@ Thu Feb 10 17:51:36 UTC 2011 - dvaleev@novell.com
 
 - require powerpc-utils 1.2.6
 - changed nvsetenv to nvram 
+
+-------------------------------------------------------------------
+Thu Nov 18 09:51:28 UTC 2010 - coolo@novell.com
+
+- set SUSE_ASNEEDED=0 for powerpc
 
 -------------------------------------------------------------------
 Thu Sep 30 09:02:39 UTC 2010 - stefan.fent@novell.com
