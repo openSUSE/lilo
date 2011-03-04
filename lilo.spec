@@ -1,7 +1,7 @@
 #
-# spec file for package lilo (Version 22.8)
+# spec file for package lilo
 #
-# Copyright (c) 2010 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2011 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -61,8 +61,9 @@ BuildRequires:  device-mapper-devel-32bit
 BuildRequires:  gcc-32bit
 %endif
 %endif
+# note: already outdated; download fresh sources from: https://alioth.debian.org/frs/?group_id=100507
 Version:        22.8
-Release:        51
+Release:        56
 Source0:        lilo-ppc-%{version}.tar.bz2
 Source1:        http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
 Source86:       lilo-%{version}.src.tar.bz2
@@ -71,6 +72,8 @@ Patch8602:      lilo.x86.array-bounds.patch
 Patch8603:      lilo.x86.division-by-zero.patch
 Patch8604:      lilo.x86.checkit.patch
 Patch8605:      lilo-no-build-date.patch
+Patch8606:      lilo.ppc.nvram-fix.patch	
+Patch8607:      yaboot-libgcc.patch
 # $Id: lilo.spec 1188 2008-12-09 14:29:53Z olh $
 
 %description
@@ -83,17 +86,6 @@ The PowerPC variant can be used on new PowerMacs and CHRP machines.
 The ix86 variant comes with Memtest86, offering an image that can be
 booted to perform a memory test.
 
-
-
-Authors:
---------
-    John Coffman <JohnInSD@san.rr.com>
-    Werner Almesberger <Werner.Almesberger@epfl.ch>
-    PowerPC part:
-    Paul Mackeras <paulus@samba.org>
-    Cort Dougan <cort@fsmlabs.com>
-    Benjamin Herrenschmidt <benh@kernel.crashing.org>
-
 %prep
 %setup -q -T -c -a 0 -a 1 -a 86
 mv lilo-ppc-%{version} lilo.ppc
@@ -105,6 +97,10 @@ pushd lilo-%{version}
 %patch8604 -p1
 %patch8605
 popd
+%patch8606
+cd yaboot
+%patch8607 -p1
+cd ..
 
 %build
 %ifarch %ix86 x86_64
@@ -145,6 +141,8 @@ pushd lilo-%{version}
 make MAN_DIR=/usr/share/man install ROOT=$RPM_BUILD_ROOT
 install -m 0755 activate $RPM_BUILD_ROOT/sbin
 rm -rfv $RPM_BUILD_ROOT/boot
+mkdir -p $RPM_BUILD_ROOT/boot
+cp -av *.b $RPM_BUILD_ROOT/boot
 popd
 %else
 # powerpc
@@ -205,6 +203,7 @@ exit 0
 %ifarch %ix86 x86_64
 /sbin/*
 /usr/sbin/*
+/boot/*.b
 %else
 #powerpc
 %dir /lib/lilo

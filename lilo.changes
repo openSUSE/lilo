@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Fri Mar  4 16:47:18 UTC 2011 - estellnb@elstel.com
+
+- include chain.b and other *.b-s 
+  for chainloading and for booting other OSes
+  (resolves bnc#642401)
+
+-------------------------------------------------------------------
 Sun Feb 20 18:49:22 CET 2011 - meissner@suse.de
 
 - make it build by explicitly linking libgcc.a
