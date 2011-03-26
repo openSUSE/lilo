@@ -263,6 +263,12 @@ static int of_close(struct boot_file_t *file)
 	return 0;
 }
 
+static unsigned int
+of_net_ino_size(struct boot_file_t *file)
+{
+	return file->len;
+}
+
 struct fs_t of_filesystem = {
 	.name = "built-in",
 	.open = of_open,
@@ -276,7 +282,8 @@ struct fs_t of_net_filesystem = {
 	.new_open = of_net_open,
 	.read = of_net_read,
 	.seek = of_net_seek,
-	.close = of_close
+	.close = of_close,
+	.ino_size = of_net_ino_size,
 };
 
 /* 

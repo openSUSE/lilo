@@ -34,6 +34,7 @@ struct fs_t {
 	int (*read) (struct boot_file_t * file, unsigned int size, void *buffer);
 	int (*seek) (struct boot_file_t * file, unsigned long long newpos);
 	int (*close) (struct boot_file_t * file);
+	unsigned int (*ino_size)(struct boot_file_t *file);
 };
 
 #endif
