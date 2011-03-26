@@ -393,6 +393,16 @@ static int ext2_close(struct boot_file_t *file)
 	return 0;
 }
 
+static unsigned int ext2_ino_size(struct boot_file_t *file)
+{
+	struct ext2_inode ei;
+
+	if (ext2fs_read_inode(fs, file->inode, &ei))
+		return 0;
+
+	return ei.i_size;
+}
+
 static long linux_open(const char *name, int flags, io_channel * channel)
 {
 	io_channel io;
@@ -498,7 +508,8 @@ struct fs_t ext2_filesystem = {
 	.open = ext2_open,
 	.read = ext2_read,
 	.seek = ext2_seek,
-	.close = ext2_close
+	.close = ext2_close,
+	.ino_size = ext2_ino_size,
 };
 
 /* 
