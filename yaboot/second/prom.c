@@ -606,6 +606,29 @@ void *prom_claim(void *virt, unsigned int size, unsigned int align)
 	return p;
 }
 
+/* If address given is claimed look for other addresses to get the needed
+ * space before giving up
+ */
+void *
+prom_claim_chunk(void *virt, unsigned int size, unsigned int align)
+{
+	void *found, *addr;
+
+	for (addr = virt; addr <= (void *)PROM_CLAIM_MAX_ADDR;
+			addr += (0x100000/sizeof(addr))) {
+		found = call_prom("claim", 3, 1, addr, size, align);
+		if (found != (void *)-1) {
+			DEBUG_F("claim of 0x%x at 0x%x returned 0x%x\n", size,
+					(int)addr, (int)found);
+			return found;
+		}
+	}
+
+	prom_printf("ERROR: claim of 0x%x in range 0x%x-0x%x failed\n", size,
+			(int)virt, PROM_CLAIM_MAX_ADDR);
+	return (void *)-1;
+}
+
 void prom_release(void *virt, unsigned int size)
 {
 	call_prom("release", 2, 0, virt, size);
