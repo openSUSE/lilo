@@ -81,7 +81,6 @@ static char *hard_coded_bootpath(char *bootpath)
 #define SLES9_ZIMAGE_SIZE ((7 * 1024 * 1024))	/* its a binary blob from 2.4 kernel source ... */
 #define MALLOCADDR ((2 * 1024 * 1024) + (512 * 1024))
 #define MALLOCSIZE ((1 * 1024 * 1024) + (512 * 1024))
-#define CLAIM_END (256 * 1024 * 1024)	/* FIXME: look at /memory/reg */
 
 typedef struct {
 	union {
@@ -1415,7 +1414,7 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 {
 	void *malloc_base;
 	prom_handle cpus[1];
-	unsigned long addr;
+	unsigned long low_addr;
 
 	memset(__bss_start, 0, _end - __bss_start);
 
@@ -1434,23 +1433,15 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 	DEBUG_F("Allocated %08x bytes @ %p for SLES8/9 install file\n", SLES9_ZIMAGE_SIZE, sles9_base);
 
 	if (sles9_base)
-		addr = SLES9_ZIMAGE_BASE + SLES9_ZIMAGE_SIZE;
+		low_addr = SLES9_ZIMAGE_BASE + SLES9_ZIMAGE_SIZE;
 	else
-		addr = 64 * 1024;
-	for (; addr < CLAIM_END - MALLOCSIZE; addr += 64 * 1024) {
-		/* overlap check */
-		if ((addr < (unsigned long)_end || addr + MALLOCSIZE < (unsigned long)_end)
-		    && (addr >= (unsigned long)_start || addr + MALLOCSIZE >= (unsigned long)_start))
-			continue;
-		/* Allocate some memory for malloc'ator */
-		malloc_base = prom_claim((void *)addr, MALLOCSIZE, 0);
-		if (malloc_base && malloc_base != (void *)-1)
-			break;
-	}
-	if (malloc_base == (void *)-1) {
-		prom_printf("Can't claim malloc buffer (%x bytes between %08x and %08x)\n", MALLOCSIZE, 64 * 1024, CLAIM_END - MALLOCSIZE);
+		low_addr = 64 * 1024;
+
+	malloc_base = prom_claim_chunk_top((void *)low_addr, MALLOCSIZE, 0);
+
+	if (malloc_base == (void *)-1)
 		goto exit;
-	}
+
 	malloc_init(malloc_base, MALLOCSIZE);
 	DEBUG_F("Malloc buffer allocated at %p (%x bytes)\n", malloc_base, MALLOCSIZE);
 

@@ -34,7 +34,7 @@ typedef void *ihandle;
 typedef void *phandle;
 
 #define PROM_INVALID_HANDLE	((prom_handle)-1UL)
-#define PROM_CLAIM_MAX_ADDR	(128 * 1024 * 1024)
+#define PROM_CLAIM_MAX_ADDR	(256 * 1024 * 1024)
 
 struct prom_args;
 typedef int (*prom_entry) (struct prom_args *);
@@ -85,6 +85,7 @@ void prom_set_color(prom_handle device, int color, int r, int g, int b);
 /* memory */
 
 void *prom_claim_chunk(void *virt, unsigned int size, unsigned int align);
+void *prom_claim_chunk_top(void *addr, unsigned int size, unsigned int align);
 void *prom_claim(void *virt, unsigned int size, unsigned int align);
 void prom_release(void *virt, unsigned int size);
 void prom_map(void *phys, void *virt, int size);
