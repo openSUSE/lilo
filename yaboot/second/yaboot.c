@@ -1209,12 +1209,8 @@ static void yaboot_text_ui(void)
 					else
 						chunksize = 10 * 1024 * 1024;	/* FIXME: if we had a stat() ... */
 				}
-				while (claim_base + chunksize < CLAIM_END) {
-					initrd_base = prom_claim((void *)claim_base, chunksize, 0);
-					if (initrd_base != (void *)-1)
-						break;
-					claim_base += 64 * 1024;
-				}
+				initrd_base = prom_claim_chunk((void *)claim_base,
+							chunksize, 0);
 				if (initrd_base == (void *)-1) {
 					prom_printf("Claim failed for initrd memory\n");
 					initrd_base = NULL;
