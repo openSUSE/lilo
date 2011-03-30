@@ -1193,6 +1193,7 @@ static void yaboot_text_ui(void)
 				}
 				gpr = GET_PARAMS_STOP;
 			} else {
+#define	INITRD_CHUNKSIZE 0x100000
 				/* put initrd after the kernels final location */
 				/* it seems that the B50 has trouble with a location between
 				 * real-base and 32M. The kernel crashes at random places in
@@ -1201,16 +1202,23 @@ static void yaboot_text_ui(void)
 					claim_base = loadinfo.memsize;
 				else
 					claim_base = 32 * 1024 * 1024;
+
+				/*
+				 * If 'initrdsize' is specified, use it only if ->ino_size()
+				 * is not implemented.
+				 * TODO: Can we punt on 'initrdsize' parameter
+				 *
+				 * We add a bit to actual size in case of initrdsize or
+				 * ->ino_size() so the loop below doesn't think there is
+				 *  more to load.
+				 */
+				chunksize = INITRD_CHUNKSIZE;
 				if (params.initrdsize)
-					chunksize = params.initrdsize;
-				else {
-					if (file.dev_type == TYPE_NET)
-						chunksize = file.len;
-					else
-						chunksize = 10 * 1024 * 1024;	/* FIXME: if we had a stat() ... */
-				}
-				initrd_base = prom_claim_chunk((void *)claim_base,
-							chunksize, 0);
+					chunksize = params.initrdsize + 0x1000;
+				if (file.fs->ino_size && file.fs->ino_size(&file) > 0)
+					chunksize = file.fs->ino_size(&file) + 0x1000;
+
+				initrd_base = prom_claim_chunk((void *)claim_base, chunksize, 0);
 				if (initrd_base == (void *)-1) {
 					prom_printf("Claim failed for initrd memory\n");
 					initrd_base = NULL;
@@ -1218,20 +1226,19 @@ static void yaboot_text_ui(void)
 					initrd_size = file.fs->read(&file, chunksize, initrd_base);
 					if (initrd_size == 0)
 						initrd_base = NULL;
-					if (file.dev_type != TYPE_NET && !params.initrdsize) {
-						initrd_read = initrd_size;
-						initrd_more = initrd_base;
-						while (initrd_read == chunksize) {	/* need to read more? */
-							initrd_want = (void *)((unsigned long)initrd_more + chunksize);
-							initrd_more = prom_claim(initrd_want, chunksize, 0);
-							if (initrd_more != initrd_want) {
-								prom_printf("Claim failed for initrd memory at %p rc=%p\n", initrd_want, initrd_more);
-								break;
-							}
-							initrd_read = file.fs->read(&file, chunksize, initrd_more);
-							DEBUG_F("  block at %p rc=%lu\n", initrd_more, initrd_read);
-							initrd_size += initrd_read;
+
+					initrd_read = initrd_size;
+					initrd_more = initrd_base;
+					while (initrd_read == chunksize) {	/* need to read more? */
+						initrd_want = (void *)((unsigned long)initrd_more + chunksize);
+						initrd_more = prom_claim(initrd_want, chunksize, 0);
+						if (initrd_more != initrd_want) {
+							prom_printf("Claim failed for initrd memory at %p rc=%p\n", initrd_want, initrd_more);
+							break;
 						}
+						initrd_read = file.fs->read(&file, chunksize, initrd_more);
+						DEBUG_F("  block at %p rc=%lu\n", initrd_more, initrd_read);
+						initrd_size += initrd_read;
 					}
 				}
 				file.fs->close(&file);
