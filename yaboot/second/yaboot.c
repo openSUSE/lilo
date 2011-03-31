@@ -1234,6 +1234,7 @@ static void yaboot_text_ui(void)
 						initrd_more = prom_claim(initrd_want, chunksize, 0);
 						if (initrd_more != initrd_want) {
 							prom_printf("Claim failed for initrd memory at %p rc=%p\n", initrd_want, initrd_more);
+							prom_pause();
 							break;
 						}
 						initrd_read = file.fs->read(&file, chunksize, initrd_more);
