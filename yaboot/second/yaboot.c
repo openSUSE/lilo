@@ -1271,6 +1271,8 @@ static void yaboot_text_ui(void)
 
 		DEBUG_F("Entering kernel...\n");
 
+		prom_print_available();
+
 		/* call the kernel with our stack. */
 		kernel_entry(initrd_base + loadinfo.load_loc, initrd_size, prom, 0, 0);
 	}
@@ -1424,6 +1426,8 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 
 	/* Initialize OF interface */
 	prom_init((prom_entry) r5);
+
+	prom_print_available();
 
 	prom_printf("\nyaboot starting: loaded at %p %p (%lx/%lx/%08lx; sp: %p)\n", _start, _end, r3, r4, r5, sp);
 

@@ -89,6 +89,7 @@ void *prom_claim_chunk_top(void *addr, unsigned int size, unsigned int align);
 void *prom_claim(void *virt, unsigned int size, unsigned int align);
 void prom_release(void *virt, unsigned int size);
 void prom_map(void *phys, void *virt, int size);
+void prom_print_available(void);
 
 /* packages and device nodes */
 

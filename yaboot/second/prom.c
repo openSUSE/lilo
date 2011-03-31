@@ -36,6 +36,7 @@
 #include <config.h>
 
 #define READ_BLOCKS_USE_READ	1
+static int yaboot_debug;
 
 prom_entry prom;
 
@@ -333,6 +334,9 @@ void prom_init(prom_entry pp)
 		prom_abort("\nCan't open stdin");
 	if (prom_get_chosen("mmu", &prom_mmu, sizeof(prom_mmu)) <= 0)
 		prom_abort("\nCan't get mmu handle");
+
+	yaboot_debug = 0;
+	prom_get_options("linux,yaboot-debug", &yaboot_debug, sizeof(yaboot_debug));
 }
 
 prom_handle prom_open(const char *spec)
@@ -691,5 +695,68 @@ int prom_getms(void)
 
 void prom_pause(void)
 {
+	prom_print_available();
 	call_prom("enter", 0, 0);
+}
+
+/* We call this too early to use malloc, 128 cells should be large enough */
+#define NR_AVAILABLE 128
+
+void prom_print_available(void)
+{
+	prom_handle root;
+	unsigned int addr_cells, size_cells;
+	ihandle mem;
+	unsigned int available[NR_AVAILABLE];
+	unsigned int len;
+	unsigned int *p;
+
+	if (!yaboot_debug)
+		return;
+
+	root = prom_finddevice("/");
+	if (!root)
+		return;
+
+	addr_cells = 2;
+	prom_getprop(root, "#address-cells", &addr_cells, sizeof(addr_cells));
+
+	size_cells = 1;
+	prom_getprop(root, "#size-cells", &size_cells, sizeof(size_cells));
+
+	mem = prom_finddevice("/memory@0");
+	if (mem == PROM_INVALID_HANDLE)
+		return;
+
+	len = prom_getprop(mem, "available", available, sizeof(available));
+	if (len == -1)
+		return;
+	len /= 4;
+
+	prom_printf("\nAvailable memory ranges:\n");
+
+	p = available;
+	while (len > 0) {
+		unsigned int addr, size;
+
+		/*
+		 * Since we are in 32bit mode it should be safe to only print the
+		 * bottom 32bits of each range.
+		 */
+		p += (addr_cells - 1);
+		addr = *p;
+		p++;
+
+		p += (size_cells - 1);
+		size = *p;
+		p++;
+
+		if (size)
+			prom_printf("0x%08x-0x%08x (%3d MB)\n", addr, addr + size,
+					size/1024/1024);
+
+		len -= (addr_cells + size_cells);
+	}
+
+	prom_printf("\n");
 }
