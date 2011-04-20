@@ -46,7 +46,6 @@
 
 #define LOAD_BUFFER_BASE (24*1024*1024)
 #define LOAD_BUFFER_SIZE (24*1024*1024)
-#define LOAD_BUFFER_TRIES 172
 
 static int of_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
@@ -98,25 +97,20 @@ static int of_open(struct boot_file_t *file, const char *dev_name, struct partit
 static int of_net_download(unsigned char **buffer, ihandle of_device)
 {
 	int ms;
-	int ret = LOAD_BUFFER_TRIES;
+	int ret = FILE_IOERR;
 	unsigned char *p, *mem = (unsigned char *)LOAD_BUFFER_BASE;
 
 	DEBUG_ENTER;
 
-	do {
-		p = prom_claim(mem, LOAD_BUFFER_SIZE, 0);
-		if (p == mem)
-			break;
-		mem += 1 * 1024 * 1024;
-	} while (--ret);
-	if (0 == ret) {
-		prom_printf("Can't claim memory for TFTP download (%08x @ %08x-%08x)\n",
-			    LOAD_BUFFER_SIZE, LOAD_BUFFER_BASE, LOAD_BUFFER_BASE + (LOAD_BUFFER_TRIES * 1024 * 1024));
-		ret = FILE_IOERR;
+	p = prom_claim_chunk_top(mem, LOAD_BUFFER_SIZE, 0);
+	if (p == (void *)-1) {
+		DEBUG_F("Can't claim memory for TFTP download\n");
 		goto out;
 	}
+
 	memset(p, 0, LOAD_BUFFER_SIZE);
 	ms = prom_getms();
+
 	DEBUG_F("TFTP...\n");
 	ret = prom_loadmethod(of_device, p);
 	DEBUG_F("result: %d\n", ret);
