@@ -117,6 +117,7 @@ declare -a CONFIG_IMAGE_OPTIONAL
 declare -i CONFIG_IMAGE_COUNT
 # used by can_yaboot_read function
 declare -a _filesystem
+declare -a _device
 
 err_var1=
 FDISK=/sbin/fdisk
@@ -369,17 +370,25 @@ function can_yaboot_read () {
 		[[ "$type" == @(anon_inodefs|autofs|bdev|cgroup|cpuset|debugfs|devpts|fuse|fusectl|hugetlbfs|inotifyfs|mqueue|pipefs|proc|rootfs|rpc_pipefs|securityfs|sockfs|sysfs|tmpfs|usbfs) ]] && continue
 		: dn $dn gets type $type
 		_filesystem[$dn]="$type";
+		_device[$dn]="$device";
 	    fi
 	done < /proc/mounts
 	_filesystem[0]="invalid"
+	_device[0]="invalid"
     fi
 
     num=`$STAT_CMD -L --format="0x%D" $path`
     : num $(( $num ))
     local fs=${_filesystem[$(( $num ))]}
+    local device=${_device[$(( $num ))]}
 
     # check for a file system yaboot can handle
     [[ "$fs" == @(ext2|ext3|msdos|vfat|reiserfs|iso9660|xfs) ]] || return 1;
+
+    local islv=`lvdisplay $device 2> /dev/null | grep -c "LV Name"`
+    if [ "$islv" = "1" ]; then
+        return 1;
+    fi
 
     # return true finally
     return 0
@@ -439,16 +448,18 @@ function collect_path_info() {
 	elif test -b "$direntry"
 	then
 		direntry_majorminor=`$STAT_CMD -L --format="0x%t 0x%T" "$direntry"`
+		majorminor=`printf '(%d, %d)' $direntry_majorminor`
 		direntry_majorminor=`printf '%d:%d' $direntry_majorminor`
 	else
 		direntry_majorminor=`$STAT_CMD -L --format="%d" "$direntry"`
 		direntry_major="$[direntry_majorminor >> 8]"
 		direntry_minor="$[direntry_majorminor & 255]"
+		majorminor="($direntry_major, $direntry_minor)"
 		direntry_majorminor=$direntry_major:$direntry_minor
 	fi
 	# find kernel name for major:minor pair
 	: direntry_majorminor $direntry_majorminor
-	for dev in /sys/block/*/*/dev /sys/block/*/dev
+	for dev in $(ls /sys/block/*/*/dev /sys/block/*/dev 2> /dev/null)
 	do
 		: looking at $dev
 		if test "$(< $dev)" = "$direntry_majorminor"
@@ -469,6 +480,17 @@ function collect_path_info() {
 		direntry_kernel_disk_name="${direntry_kernel_disk_name##*/}"
 		direntry_kernel_partition_name=
 		direntry_kernel_partition_number=
+
+		if [[ "$direntry" == /dev/dm-* ]]; then
+			DMDEV=`dmsetup ls | grep "$majorminor"`
+			DEV=`echo $direntry | sed 's/\/dev\///g'`
+			if [[ "$DMDEV" == *part* ]]; then
+				read device devnode <<< "$DMDEV"
+				direntry_kernel_partition_number=`echo "$device" | sed 's/.*part//g'`
+				direntry_kernel_partition_name=$direntry_kernel_disk_name
+				direntry_kernel_disk_name=`ls -1 /sys/block/$DEV/slaves/|head -n 1`
+			fi
+		fi
 	elif test -f "${direntry_sysfspath%/dev}/../range"
 	then
 		direntry_kernel_partition_name="${direntry_sysfspath%/dev}"
@@ -722,7 +744,7 @@ function parse_boot_option () {
    devmajorminor=`printf '%d:%d' $majorminor`
    majorminor=`printf '(%d, %d)' $majorminor`
 
-   for dev in /sys/block/*/*/dev /sys/block/*/dev
+   for dev in $(ls /sys/block/*/*/dev /sys/block/*/dev 2> /dev/null)
    do
       if test "$(< $dev)" = "$devmajorminor"
       then
@@ -735,44 +757,6 @@ function parse_boot_option () {
       direntry_disk="${direntry_sysfspath%/dev}"
       direntry_disk="${direntry_disk##*/}"
       BOOT_DEV="/dev/$direntry_disk"
-
-      if [[ "$BOOT_DEV" == /dev/dm-* ]]; then
-         if test -b "$BOOT_DEV"; then
-            DMDEV=`dmsetup ls | grep "$majorminor"`
-            DEV=`echo $BOOT_DEV | sed 's/\/dev\///g'`
-
-            if [[ "$DMDEV" == *part* ]]; then
-               read device devnode <<< "$DMDEV"
-               part=`echo "$device" | sed 's/.*part//g'`
-               parent=`ls -d /sys/block/$DEV/slaves/*|head -n 1`
-
-               if [ ! -L "$parent/device" ] ; then
-                  DEV=`ls -1 $parent/slaves/|head -n 1`
-                  BOOT_DEV="/dev/$DEV$part"
-                  if [ ! -b "$BOOT_DEV" ]; then
-                     $PARTPROBE "/dev/$DEV"
-                  fi
-                  if [ ! -b "$BOOT_DEV" ]; then
-                     DEV=`ls -1 $parent/slaves/|tail -n 1`
-                     BOOT_DEV="/dev/$DEV$part"
-                  fi
-                  if [ ! -b "$BOOT_DEV" ]; then
-                     $PARTPROBE "/dev/$DEV"
-                  fi
-               fi
-            else
-               DEV=`echo $BOOT_DEV | sed 's/\/dev\///g'`
-               DEV=`ls -1 /sys/block/$DEV/slaves/|head -n 1`
-               BOOT_DEV="/dev/$DEV"
-               /bin/dd if=$BOOT_DEV of=/dev/null bs=4096 count=1 > /dev/null 2> /dev/null
-               if test "$?" != "0"
-               then
-                  DEV=`ls -1 /sys/block/$DEV/slaves/|tail -n 1`
-                  BOOT_DEV="/dev/$DEV"
-               fi
-            fi
-         fi
-      fi
    fi
 
    OPTION_BOOT[$2]=$BOOT_DEV

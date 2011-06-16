@@ -245,36 +245,43 @@ dbg_show file_sysfs_path
 
 file_sysfs_dir="${file_sysfs_path%/dev}"
 if [[ "$file_sysfs_dir" == */dm-* ]] ; then
-    parent=$file_sysfs_dir
-    file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/* 2> /dev/null |head -n 1`
-    if [ ! -L "$file_sysfs_dir/device" ] ; then
-        if [[ "$file_sysfs_dir" == */dm-* ]] ; then
-            parent=$file_sysfs_dir
-            file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/* 2> /dev/null |head -n 1`
+    islvm=0
+    while read; do
+	read ignore1 ignore2 lvdevice <<< "$REPLY"
+        lvmajor=$(printf '%d\n' 0x$(stat -L --format="%t" "$lvdevice"))
+        lvminor=$(printf '%d\n' 0x$(stat -L --format="%T" "$lvdevice"))
+        lvmajorminor=$lvmajor:$lvminor
+
+        if [[ "$lvmajorminor" == "$file_majorminor" ]] ; then
+                islvm=1
+                break
         fi
-    fi
+    done < <( lvdisplay 2> /dev/null | grep "LV Name" )
 
-    devmajorminor=`printf '(%d, %d)' $file_major $file_minor`
-    DMDEV=`dmsetup ls | grep "$devmajorminor"`
-    DEV=`echo "$file_sysfs_dir" | sed 's/.*\///g'`
+    if [[ "$islvm" != "1" ]] ; then
+        parent=$file_sysfs_dir
+        file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/* 2> /dev/null |head -n 1`
+        if [ ! -L "$file_sysfs_dir/device" ] ; then
+                if [[ "$file_sysfs_dir" == */dm-* ]] ; then
+                        parent=$file_sysfs_dir
+                        file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/* 2> /dev/null |head -n 1`
+                fi
+        fi
 
-    if [[ "$DMDEV" == *part* ]]; then
-       read device devnode <<< "$DMDEV"
-       part=`echo "$device" | sed 's/.*part//g'`
-       DEVNAME="/dev/$DEV$part"
+        devmajorminor=`printf '(%d, %d)' $file_major $file_minor`
+        DMDEV=`dmsetup ls | grep "$devmajorminor"`
+        DEV=`echo "$file_sysfs_dir" | sed 's/.*\///g'`
 
-       if [ ! -b "$DEVNAME" ]; then
-          file_sysfs_dir=`ls -d $parent/slaves/* 2> /dev/null |tail -n 1`
-          DEV=`echo "$file_sysfs_dir" | sed 's/.*\///g'`
-       fi
-
-       file_sysfs_dir="$file_sysfs_dir/$DEV$part"
-    else
-       /bin/dd if=/dev/$DEV of=/dev/null bs=4096 count=1 > /dev/null 2> /dev/null
-       if test "$?" != "0"
-       then
-          file_sysfs_dir=`ls -d $parent/slaves/* 2> /dev/null |tail -n 1`
-       fi
+        if [[ "$DMDEV" == *part* ]]; then
+                read device devnode <<< "$DMDEV"
+                file_partition=`echo "$device" | sed 's/.*part//g'`
+        else
+                /bin/dd if=/dev/$DEV of=/dev/null bs=4096 count=1 > /dev/null 2> /dev/null
+                if test "$?" != "0"
+                then
+                        file_sysfs_dir=`ls -d $parent/slaves/* 2> /dev/null |tail -n 1`
+                fi
+        fi
     fi
 fi
 dbg_show file_sysfs_dir
@@ -294,7 +301,9 @@ if [ ! -L "$file_sysfs_dir/device" ] ; then
     fi
     file_partition="${file_sysfs_dir##*[a-z]}"
     dbg_show file_partition
-    file_sysfs_dir="${file_sysfs_dir%/*}"
+    cd "$file_sysfs_dir"
+    file_full_sysfs_path="`pwd -P`"
+    file_sysfs_dir="${file_full_sysfs_path%/*}"
     dbg_show file_sysfs_dir
 fi
 

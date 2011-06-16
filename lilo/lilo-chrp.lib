@@ -87,6 +87,11 @@ function running_on_chrp () {
 				err_var1=$OPTION_BOOT; error 10 2
 				;;
 		esac
+	elif [[ "$OPTION_BOOT_DISK_DEVICE_NODE" == /dev/dm-* ]]; then
+		BOOT_PART=`echo ${prep_part[*]} ${fat_part[*]} ${fat32_part[*]} | sed 's/ //g'`
+		if [[ $BOOT_PART != ${OPTION_BOOT_DISK_DEVICE_NODE}p${OPTION_BOOT_PARTITION_NUMBER} ]]; then
+			err_var1=$OPTION_BOOT; error 9 1
+		fi
 	else
 		# we have the device, but better safe than sorry
 		if [[ "${prep_part[*]} ${fat_part[*]} ${fat32_part[*]}" != *$OPTION_BOOT* ]]; then
@@ -373,6 +378,19 @@ function running_on_chrp () {
 		boot_device=${boot_partition%%+([0-9])}
 		boot_partnr=${boot_partition##+([^0-9])}
 
+		if [[ "$boot_partition" == /dev/dm-* ]]; then
+			majorminor=`$STAT_CMD -L --format="0x%t 0x%T" "$boot_partition"`
+			majorminor=`printf '(%d, %d)' $majorminor`
+			DMDEV=`dmsetup ls | grep "$majorminor"`
+			if [[ "$DMDEV" == *part* ]]; then
+				read device devnode <<< "$DMDEV"
+				DEV=`echo $boot_partition | sed 's/\/dev\///g'`
+				boot_device=`ls -1 /sys/block/$DEV/slaves/|head -n 1`
+				boot_device=/dev/$boot_device
+				boot_partnr=`echo "$device" | sed 's/.*part//g'`
+			fi
+		fi
+
 		# read specifications for primary partitions from boot device
 
 		# parse and output like the following
@@ -393,6 +411,10 @@ function running_on_chrp () {
 		# Ok, so we switch to calculate internally with 512 Byte units
 
 		local -a p_start p_end p_type p_flags
+
+		if [ ! -b "$boot_partition" ]; then
+			$PARTPROBE "$boot_partition"
+		fi
 
 		while read; do
 			local minor start end type fs_n_flags
