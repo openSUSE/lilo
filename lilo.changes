@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jun 16 15:23:30 UTC 2011 - rw@suse.de
+
+- yaboot: Backport of memory changes.  (bnc#699217, fate#311680)
+
+-------------------------------------------------------------------
 Mon May  3 14:17:46 CEST 2010 - duwe@suse.de
 
 - Contrary to previous information, there are systems that need
