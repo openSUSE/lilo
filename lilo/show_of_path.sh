@@ -544,7 +544,6 @@ if [ -f devspec ] ; then
 	)
 	;;
         sas)
-	    lun_format="%x"	# fallback LUN encoding
 	vendor_id=$(read_int ${file_of_hw_devtype%%/sas}/vendor-id)
 	if (( vendor_id == 0x1000 )); then
 		# PCI_VENDOR_ID_LSI_LOGIC==0x1000
@@ -555,20 +554,41 @@ if [ -f devspec ] ; then
 		of_disk_addr=$(< $sas_address)
 		fi
 
-		lun_format="%x000000000000"
-
+		lunstr=$(printf "%x000000000000" $of_disk_scsi_lun)
 	else
-		(( of_disk_addr = ( (of_disk_scsi_chan<<16) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) )); #
+		fwtype="0"
+		HOST=$(printf "%d" $of_disk_scsi_host)
+
+		if [[ -e /sys/class/scsi_host/host$HOST/fw_type ]]; then
+			fwtype=`cat /sys/class/scsi_host/host$of_disk_scsi_host/fw_type`
+		fi
+
+		if [[ $fwtype = "1" ]]; then
+			device_id="$file_sysfs_dir/device/device_id"
+			of_disk_addr=$(< $device_id)
+			lunstr=`int_to_scsilun $of_disk_scsi_lun`
+			lunstr=`echo $lunstr | sed 's/^[0]*//'`
+		else
+			lunstr=$(printf "%x" $of_disk_scsi_lun)
+			(( of_disk_addr = ( (of_disk_scsi_chan<<16) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) )); #
+		fi
 	fi
 
 	dbg_show of_disk_addr
 	: $file_of_hw_devtype
 	if [ -d ${file_of_hw_devtype}/disk ]; then
 		of_disk_scsi_dir=disk
-		file_of_hw_path=$(
-		printf "%s/%s@%x,${lun_format}"  "${file_of_hw_devtype##/proc/device-tree}" \
-		$of_disk_scsi_dir $of_disk_addr $of_disk_scsi_lun
-		)
+		if [[ $of_disk_scsi_lun = 0 ]]; then
+			file_of_hw_path=$(
+			printf "%s/%s@%x"  "${file_of_hw_devtype##/proc/device-tree}" \
+			$of_disk_scsi_dir $of_disk_addr
+			)
+		else
+			file_of_hw_path=$(
+			printf "%s/%s@%x,%s"  "${file_of_hw_devtype##/proc/device-tree}" \
+			$of_disk_scsi_dir $of_disk_addr $lunstr
+			)
+		fi
 	else
 		for i in ${file_of_hw_devtype}/disk*/sas-address ; do
 			if test -f "$i" ; then

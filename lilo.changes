@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Jun 28 15:13:33 UTC 2011 - rw@suse.de
+
+- yaboot: Remove excess message.  (bnc#659319)
+- lilo.ppc: Fix multipathing for pSeries machines.  (bnc#689172)
+- lilo.ppc: Fix support for ipr SAS adapters.  (bnc#694561)
+
+-------------------------------------------------------------------
 Thu Jun 16 15:23:30 UTC 2011 - rw@suse.de
 
 - yaboot: Backport of memory changes.  (bnc#699217, fate#311680)
