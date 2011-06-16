@@ -126,9 +126,6 @@ static int of_net_download(unsigned char **buffer, ihandle of_device)
 		}
 		ms /= 1000;
 		prom_printf("yaboot downloaded %08x bytes via network, download rate %d KB/s.\n", ret, ms);
-		if (ms > 42 && ms < 666)
-			prom_printf("\n A download rate of %d KB/s is really slow, isn't it? \n\n", ms);
-
 	} else
 		prom_release(p, LOAD_BUFFER_SIZE);
       out:
