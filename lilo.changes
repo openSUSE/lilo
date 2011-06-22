@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Jun 22 16:58:31 CEST 2011 - meissner@suse.de
+
+- also add the libgcc.a linking in the make*.sh lilo scripts
+- build against 4.6 gcc, also require it during install
+
+-------------------------------------------------------------------
 Fri Mar  4 16:47:18 UTC 2011 - estellnb@elstel.com
 
 - include chain.b and other *.b-s 
