@@ -36,6 +36,10 @@ Requires:       dosfstools
 Requires:       gawk
 Requires:       sed
 Requires:       coreutils
+# for relinking the prep/chrp images in lilo
+%ifarch ppc ppc64
+Requires:       gcc
+%endif
 # for nvram
 %if 0%{?suse_version} > 1000
 Requires:       powerpc-utils >= 1.2.6
@@ -63,7 +67,7 @@ BuildRequires:  gcc-32bit
 %endif
 # note: already outdated; download fresh sources from: https://alioth.debian.org/frs/?group_id=100507
 Version:        22.8
-Release:        56
+Release:        58
 Source0:        lilo-ppc-%{version}.tar.bz2
 Source1:        http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
 Source86:       lilo-%{version}.src.tar.bz2
@@ -74,6 +78,7 @@ Patch8604:      lilo.x86.checkit.patch
 Patch8605:      lilo-no-build-date.patch
 Patch8606:      lilo.ppc.nvram-fix.patch	
 Patch8607:      yaboot-libgcc.patch
+Patch8608:      lilo-libgcc.patch
 # $Id: lilo.spec 1188 2008-12-09 14:29:53Z olh $
 
 %description
@@ -98,9 +103,12 @@ pushd lilo-%{version}
 %patch8605
 popd
 %patch8606
-cd yaboot
+pushd yaboot
 %patch8607 -p1
-cd ..
+popd
+pushd lilo.ppc
+%patch8608 -p1
+popd
 
 %build
 %ifarch %ix86 x86_64

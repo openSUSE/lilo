@@ -80,7 +80,8 @@ ld \
 	-o $tmp/output \
 	$obj_dir/chrp/yaboot.crt0.o \
 	$tmp/empty.o \
-	$obj_dir/chrp/yaboot.a
+	$obj_dir/chrp/yaboot.a \
+	`gcc -print-libgcc-file-name`
 #
 if [ "$do_addnote" = "true" ] ; then
 echo add note section for RS6K

@@ -120,7 +120,7 @@ ld \
 	$obj_dir/common/common.a \
 	$obj_dir/chrp/prom.a \
 	$obj_dir/common/zlib.a \
-	/usr/lib/gcc/powerpc64-suse-linux/4.6/libgcc.a
+	`gcc -print-libgcc-file-name`
 
 rm -f "$output"
 cp "$tmp/output" "$output"

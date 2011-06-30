@@ -124,7 +124,7 @@ ld \
 	$tmp/ps3-head.o \
 	$tmp/empty.o \
 	$obj_dir/ps3/ps3.a \
-	/usr/lib/gcc/powerpc64-suse-linux/4.6/libgcc.a
+	`gcc -print-libgcc-file-name`
 
 # convert to RAW format
 objcopy -O binary --set-section-flags=.bss=contents,alloc,load,data $tmp/zImage.ps3 $tmp/zImage.ps3.bin

@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Jun 30 16:06:11 CEST 2011 - meissner@suse.de
+
+- require just gcc, unversioned, and use `gcc -print-libgcc-file-name`
+  in linking calls.
+
+-------------------------------------------------------------------
 Wed Jun 22 16:58:31 CEST 2011 - meissner@suse.de
 
 - also add the libgcc.a linking in the make*.sh lilo scripts
