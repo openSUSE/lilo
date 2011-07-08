@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Jul  8 15:15:40 UTC 2011 - dvaleev@novell.com
+
+- fix ps3.dts compiling with new dtc version
+
+-------------------------------------------------------------------
 Thu Jun 30 16:06:11 CEST 2011 - meissner@suse.de
 
 - require just gcc, unversioned, and use `gcc -print-libgcc-file-name`
