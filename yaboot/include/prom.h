@@ -79,7 +79,6 @@ void prom_printf(const char *fmt, ...);
 #endif
 
 void prom_perror(int error, const char *filename);
-void prom_readline(const char *prompt, char *line, int len);
 void prom_set_color(prom_handle device, int color, int r, int g, int b);
 
 /* memory */

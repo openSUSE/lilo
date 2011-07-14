@@ -429,19 +429,16 @@ int prom_readblocks(prom_handle dev, int blockNum, int blockCount, void *buffer)
 
 int prom_getchar()
 {
-	char c[4];
+	char c;
 	int a;
 
-	memset(c, 0, sizeof(c));
-	while (1) {
-		a = (int)call_prom("read", 3, 1, prom_stdin, c, 4);
-		/* if ret val is zero or negative, the read operation did not succeed. */
-		if (a > 0)
-			break;
-	}
-	if (a == 3 && c[0] == '\e' && c[1] == '[')
-		return 0x100 | c[2];
-	return c[0];
+	while ((a = (int)call_prom ("read", 3, 1, prom_stdin, &c, 1)) == 0)
+		continue;
+
+	if (a == -1)
+		prom_abort ("EOF on console\n");
+
+	return c;
 }
 
 int prom_nbgetchar()
@@ -544,35 +541,6 @@ void prom_perror(int error, const char *filename)
 	else
 		prom_printf("%s: Unknown error\n", filename);
 }
-
-#if 0
-void prom_readline(const char *prompt, char *buf, int len)
-{
-	int i = 0;
-	int c;
-
-	if (prompt)
-		prom_puts(prom_stdout, prompt);
-
-	while (i < len - 1 && (c = prom_getchar()) != '\r') {
-		if (c >= 0x100)
-			continue;
-		if (c == 8) {
-			if (i > 0) {
-				prom_puts(prom_stdout, "\b \b");
-				i--;
-			} else
-				prom_putchar('\a');
-		} else if (isprint(c)) {
-			prom_putchar(c);
-			buf[i++] = c;
-		} else
-			prom_putchar('\a');
-	}
-	prom_putchar('\n');
-	buf[i] = 0;
-}
-#endif
 
 #ifdef CONFIG_SET_COLORMAP
 void prom_set_color(prom_handle device, int color, int r, int g, int b)
