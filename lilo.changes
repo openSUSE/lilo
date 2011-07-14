@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jul 14 11:07:51 UTC 2011 - jloeser@novell.com
+
+- yaboot: backport of prompt eats characters patch (bnc#705667) 
+
+-------------------------------------------------------------------
 Tue Jun 28 15:13:33 UTC 2011 - rw@suse.de
 
 - yaboot: Remove excess message.  (bnc#659319)
