@@ -17,16 +17,17 @@
 
 # norootforbuild
 
-Url:            http://lilo.go.dyndns.org/
+Url:            http://lilo.alioth.debian.org/
 
 Name:           lilo
 ExclusiveArch:  ppc ppc64 %ix86 x86_64
 %define yaboot_vers 22.8-r1190
+%define ppc_version 22.8
 Group:          System/Boot
 License:        BSD3c
 Summary:        The Linux Loader, a Boot Menu
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Obsoletes:      yaboot activate quik
+Obsoletes:      yaboot quik
 %ifarch ppc ppc64
 %if 0%{?suse_version} > 1020
 BuildRequires:  dtc
@@ -59,26 +60,28 @@ BuildRequires:  device-mapper-devel
 %endif
 %ifarch x86_64
 BuildRequires:  glibc-devel-32bit
-%if 0%{?suse_version} > 1010
 BuildRequires:  device-mapper-32bit
+# openSUSE 11.3 and SLE_11 do not have device-mapper-devel-32bit
+%if 0%{?suse_version} != 1130 && 0%{?suse_version} != 1110
 BuildRequires:  device-mapper-devel-32bit
+%endif
 BuildRequires:  gcc-32bit
 %endif
-%endif
 # note: already outdated; download fresh sources from: https://alioth.debian.org/frs/?group_id=100507
-Version:        22.8
-Release:        58
-Source0:        lilo-ppc-%{version}.tar.bz2
+Version:        23.2
+Release:        65
+Source0:        lilo-ppc-%{ppc_version}.tar.bz2
 Source1:        http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
-Source86:       lilo-%{version}.src.tar.bz2
+Source86:       lilo-%{version}.tar.gz
 Patch8601:      lilo.x86.mount_by_persistent_name.patch
 Patch8602:      lilo.x86.array-bounds.patch
-Patch8603:      lilo.x86.division-by-zero.patch
 Patch8604:      lilo.x86.checkit.patch
 Patch8605:      lilo-no-build-date.patch
 Patch8606:      lilo.ppc.nvram-fix.patch	
 Patch8607:      yaboot-libgcc.patch
 Patch8608:      lilo-libgcc.patch
+Patch8609:      lilo.ppc.ps3.patch
+Patch8610:      lilo.src.Makefile.patch
 # $Id: lilo.spec 1188 2008-12-09 14:29:53Z olh $
 
 %description
@@ -93,14 +96,14 @@ booted to perform a memory test.
 
 %prep
 %setup -q -T -c -a 0 -a 1 -a 86
-mv lilo-ppc-%{version} lilo.ppc
+mv lilo-ppc-%{ppc_version} lilo.ppc
 mv yaboot-%{yaboot_vers} yaboot
 pushd lilo-%{version}
 %patch8601 -p1
 %patch8602 -p1
-%patch8603 -p1
 %patch8604 -p1
-%patch8605
+%patch8605 -p1
+%patch8610 -p1
 popd
 %patch8606
 pushd yaboot
@@ -108,6 +111,7 @@ pushd yaboot
 popd
 pushd lilo.ppc
 %patch8608 -p1
+%patch8609 -p1
 popd
 
 %build
@@ -117,7 +121,7 @@ cflags="$RPM_OPT_FLAGS -fno-strict-aliasing"
 %ifarch x86_64
 cflags="$cflags -m32"
 %endif
-make CC="gcc $cflags" MAN_DIR=/usr/share/man all activate
+make CC="gcc $cflags" MAN_DIR=/usr/share/man all 
 popd
 # powerpc
 %else
@@ -146,11 +150,10 @@ popd
 %install
 %ifarch %ix86 x86_64
 pushd lilo-%{version}
-make MAN_DIR=/usr/share/man install ROOT=$RPM_BUILD_ROOT
-install -m 0755 activate $RPM_BUILD_ROOT/sbin
+make MAN_DIR=/usr/share/man install DESTDIR=$RPM_BUILD_ROOT
 rm -rfv $RPM_BUILD_ROOT/boot
 mkdir -p $RPM_BUILD_ROOT/boot
-cp -av *.b $RPM_BUILD_ROOT/boot
+cp -av src/*.b $RPM_BUILD_ROOT/boot
 popd
 %else
 # powerpc
@@ -165,7 +168,6 @@ mkdir -p $RPM_BUILD_ROOT/lib/lilo/chrp
 mkdir -p $RPM_BUILD_ROOT/sbin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/bin
-mkdir -p $RPM_BUILD_ROOT/%{_docdir}/lilo/activate
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man8
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man5
 pushd lilo.ppc

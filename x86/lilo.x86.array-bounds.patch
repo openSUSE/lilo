@@ -8,8 +8,8 @@ bsect.c:1597: warning: array subscript is below array bounds
  lilo.c   |    6 ------
  3 files changed, 11 deletions(-)
 
---- a/bsect.c
-+++ b/bsect.c
+--- a/src/bsect.c
++++ b/src/bsect.c
 @@ -1594,9 +1594,6 @@ void bsect_uninstall(char *boot_dev,char
      if (*(unsigned short *) &bsect.sector[BOOT_SIG_OFFSET] != BOOT_SIGNATURE)
  	die("Boot sector of %s does not have a boot signature",boot_dev ?
@@ -20,8 +20,8 @@ bsect.c:1597: warning: array subscript is below array bounds
      if (strncmp(bsect.par_1.signature,"LILO",4))
  	die("Boot sector of %s doesn't have a LILO signature",boot_dev ?
  	  boot_dev : dev.name);
---- a/common.c
-+++ b/common.c
+--- a/src/common.c
++++ b/src/common.c
 @@ -172,8 +172,6 @@ void check_version(BOOT_SECTOR *sect,int
  {
      int bs_major, bs_minor;
@@ -31,8 +31,8 @@ bsect.c:1597: warning: array subscript is below array bounds
      if (strncmp(sect->par_1.signature,"LILO",4))
  	die("%s doesn't have a valid LILO signature",name(stage));
      if ((sect->par_1.stage&0xFF) != stage)
---- a/lilo.c
-+++ b/lilo.c
+--- a/src/lilo.c
++++ b/src/lilo.c
 @@ -216,12 +216,6 @@ static void show_other(int fd)
  
      if (read(fd,buf,sizeof(buf)) != sizeof(buf))

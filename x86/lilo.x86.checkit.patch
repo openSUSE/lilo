@@ -1,13 +1,15 @@
-Passt schon
+No need to check.
 ---
- checkit |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ checkit |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---- a/checkit
-+++ b/checkit
-@@ -1,4 +1,5 @@
- #! /bin/sh
-+exit 0
+diff -urp a/checkit b/checkit
+--- a/checkit	2010-11-01 16:52:58.000000000 +0100
++++ b/checkit	2011-09-23 09:58:03.662339674 +0200
+@@ -106,5 +106,5 @@ echo
  #
- #  check:
- #	Test for correct versions of utilities
+ # Uncomment the line below to bypass all the checks
+ #
+-#exit 0
++exit 0
+ exit $ret

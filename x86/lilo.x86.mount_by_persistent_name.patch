@@ -1,11 +1,12 @@
 Do not pass root=major:minor to the initrd
 ---
- bsect.c |   41 ++++++++++++++---------------------------
- 1 file changed, 14 insertions(+), 27 deletions(-)
+ bsect.c |   42 +++++++++++++-----------------------------
+ 1 file changed, 13 insertions(+), 29 deletions(-)
 
---- a/bsect.c
-+++ b/bsect.c
-@@ -943,18 +943,6 @@ printf("MAX_IMAGES = %d\n", MAX_IMAGES);
+diff -urp a/src/bsect.c b/src/bsect.c
+--- a/src/bsect.c	2010-11-01 17:22:29.000000000 +0100
++++ b/src/bsect.c	2011-09-23 08:22:56.017387013 +0200
+@@ -947,18 +947,6 @@ printf("MAX_IMAGES = %d\n", MAX_IMAGES);
  }
  
  
@@ -23,8 +24,8 @@ Do not pass root=major:minor to the initrd
 -
  static int get_image(char *name,char *label,IMAGE_DESCR *descr)
  {
-     char *here,*deflt;
-@@ -1040,7 +1028,6 @@ static char options[SECTOR_SIZE]; /* thi
+     char *here,*deflt,*tmp;
+@@ -1062,7 +1050,6 @@ static char options[SECTOR_SIZE]; /* thi
  
  static void bsect_common(IMAGE_DESCR *descr, int image)
  {
@@ -32,7 +33,7 @@ Do not pass root=major:minor to the initrd
      char *here,*root,*ram_disk,*vga,*password;
      char *literal,*append,*fback;
      char fallback_buf[SECTOR_SIZE];
-@@ -1063,20 +1050,20 @@ if (image) { /* long section specific to
+@@ -1085,22 +1072,19 @@ if (image) { /* long section specific to
        "read-write")) strcat(options,"rw ");
      if ((root = cfg_get_strg(cf_kernel,"root")) || (root = cfg_get_strg(
        cf_options,"root")))  {
@@ -40,30 +41,31 @@ Do not pass root=major:minor to the initrd
 -	    if (stat("/",&st) < 0) pdie("stat /");
 -	    sprintf(strchr(options,0),"root=%x ",(unsigned int) st.st_dev);
 -	}
+-	else if (strlen(root)>12 && !strncmp(root,"/dev/mapper/",12)) {
+-	    sprintf(strchr(options,0),"root=%s ", root);
+-	}
 -	else if (strlen(root)>6 && !strncmp(root,"LABEL=",6)) {
 -	    sprintf(strchr(options,0),"root=%s ", root);
 -	}
--        else if (strlen(root)>5 && !strncmp(root,"UUID=",5)) {
--            sprintf(strchr(options,0),"root=%s ", root);
+-	else if (strlen(root)>5 && !strncmp(root,"UUID=",5)) {
+-	    sprintf(strchr(options,0),"root=%s ", root);
 -        }
 -	else {
 -	    sprintf(strchr(options,0),"root=%x ",dev_number(root));
 -	}
--      }	
-+	/* root= is a property of either:
-+	* prepare_namespace()
-+	* or /init in initramfs
-+	* or /linuxrc in a loopmounted initrd
-+	* Its not a property of the bootloader or anything else
-+	* related to loading the kernel/initrd into memory (or configuring
-+	* that event)
-+	*
-+	* Pass root= via /proc/cmdline as configured in the config file
-+	* If no root= is configured, initrd has a hardcoded value
-+	* based on the '/' entry in /etc/fstab
-+	*/
-+	sprintf(strchr(options,0),"root=%s ", root);
-+      }
++       /* root= is a property of either:
++       * prepare_namespace()
++       * or /init in initramfs
++       * or /linuxrc in a loopmounted initrd
++       * Its not a property of the bootloader or anything else
++       * related to loading the kernel/initrd into memory (or configuring
++       * that event)
++       *
++       * Pass root= via /proc/cmdline as configured in the config file
++       * If no root= is configured, initrd has a hardcoded value
++       * based on the '/' entry in /etc/fstab
++       */
++       sprintf(strchr(options,0),"root=%s ", root);
+       }	
      if ((ram_disk = cfg_get_strg(cf_kernel,"ramdisk")) || (ram_disk =
        cfg_get_strg(cf_options,"ramdisk")))
- 	sprintf(strchr(options,0),"ramdisk=%d ",to_number(ram_disk));

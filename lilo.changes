@@ -1,4 +1,22 @@
 -------------------------------------------------------------------
+Fri Sep 23 09:32:26 UTC 2011 - per@opensuse.org
+
+- upgrade to lilo 23.2.  Amended mount_by_persistent_name patch so
+  it applies, removed division-by-zero patch (code now in upstream),
+  amended other patches to work with new src/ dir. Updated Makefile
+  to skip hooks, images and samples. Updated spec to skip 'activate'
+  which was removed from source package. Updated spec to not require
+  device-mapper-devel-32bit for build.
+  For a complete changelog for 22.8 to 23.2, see the tarball; lots of
+  clean-up, optimization, removal of obsolete code etc. Some of the 
+  more significant changes are:
+  - increase maximum number of sectors (MAX_SETUPSECS) for
+    kernel setup code to 63.
+  - support for newer MD RAID metadata format
+  - support for root on LVM
+  - allow spaces in boot menu  
+
+-------------------------------------------------------------------
 Fri Jul  8 15:15:40 UTC 2011 - dvaleev@novell.com
 
 - fix ps3.dts compiling with new dtc version

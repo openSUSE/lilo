@@ -1,0 +1,36 @@
+--- a/Makefile	2011-04-09 17:14:05.000000000 +0200
++++ b/Makefile	2011-09-23 19:30:20.268889339 +0200
+@@ -38,14 +38,12 @@ help:
+ #
+ all: test
+ 	$(MAKE) -C src all
+-	$(MAKE) -C images all
+ 
+ #
+ # everything above plus the statically linked version
+ #
+ alles: test
+ 	$(MAKE) -C src alles
+-	$(MAKE) -C images all
+ 
+ #
+ # documentation files
+@@ -105,9 +103,6 @@ ins:
+ #
+ install:  all
+ 	$(MAKE) -C src install
+-	$(MAKE) -C images install
+-	$(MAKE) -C hooks install
+-	$(MAKE) -C sample install
+ 	$(MAKE) -C scripts install
+ 	$(MAKE) -C man install
+ 	$(MAKE) -C dos install
+@@ -134,8 +129,5 @@ distclean: clean
+ 
+ uninstall:
+ 	$(MAKE) -C src uninstall
+-	$(MAKE) -C images uninstall
+-	$(MAKE) -C hooks uninstall
+-	$(MAKE) -C sample uninstall
+ 	$(MAKE) -C scripts uninstall
+ 	$(MAKE) -C man uninstall
