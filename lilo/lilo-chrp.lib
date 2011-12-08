@@ -154,10 +154,9 @@ function running_on_chrp () {
 		if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] && is_on_iscsi "$image" ; then
 				zimage_nr=$i
 				iscsi_bootdevice=1
-				# FIXME
-				iscsi_bootdevice=0
+		fi
 		# if the boot device points to iscsi, force zImage
-		elif (( iscsi_bootdevice == 1 )) ; then
+		if (( iscsi_bootdevice == 1 )) ; then
 			if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ]; then
 				zimage_nr=$i
 			fi

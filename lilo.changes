@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Dec  8 17:12:54 UTC 2011 - duwe@suse.com
+
+- fix bnc#733369 at least partially: initrds on iscsi don't get
+  their iscsi configuration prepended any more.
+
+-------------------------------------------------------------------
 Thu Jul 14 11:07:51 UTC 2011 - jloeser@novell.com
 
 - yaboot: backport of prompt eats characters patch (bnc#705667) 
