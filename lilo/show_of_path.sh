@@ -639,7 +639,8 @@ if [ -f devspec ] ; then
 		warning "Emulex FC HBA with device id 0x$id not yet tested." \
 			"Reboot may fail."
 		fi
-		if [[ $id == @(f900|f901|f980|f981|f982|fa00|fa01|fd00) ]]; then
+		if [[ $id == @(f900|f901|f980|f981|f982|fa00|fa01|fd00|\
+                               e220|e228|e260|e268|e200|e208) ]]; then
 		# TODO: may be check /sys/class/scsi_host/hostX/lpfc_max_luns
 		lun_format="%x000000000000"
 		fi

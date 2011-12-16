@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Dec 16 12:47:16 UTC 2011 - jloeser@suse.com
+
+- correct LUN format for new Emulex adapters (bnc#737211) 
+
+-------------------------------------------------------------------
 Thu Dec  8 17:12:54 UTC 2011 - duwe@suse.com
 
 - fix bnc#733369 at least partially: initrds on iscsi don't get
