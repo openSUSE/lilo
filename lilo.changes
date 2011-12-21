@@ -1,4 +1,14 @@
 -------------------------------------------------------------------
+Wed Dec 21 09:18:01 UTC 2011 - aj@suse.de
+
+- Fix yaboot download URL.
+
+-------------------------------------------------------------------
+Tue Nov 22 11:55:11 UTC 2011 - dvaleev@suse.com
+
+- fix ppc64 build, by do not using size optimization 
+
+-------------------------------------------------------------------
 Fri Sep 23 09:32:26 UTC 2011 - per@opensuse.org
 
 - upgrade to lilo 23.2.  Amended mount_by_persistent_name patch so

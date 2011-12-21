@@ -23,7 +23,7 @@ CROSS =
 
 # The flags for the yaboot binary.
 #
-YBCFLAGS = -Os
+YBCFLAGS = -O2
 YBCFLAGS += -g
 ifneq ($(CFLAGS),)
 YBCFLAGS += $(CFLAGS)
