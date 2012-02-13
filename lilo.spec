@@ -1,7 +1,7 @@
 #
 # spec file for package lilo
 #
-# Copyright (c) 2011 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -15,7 +15,6 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
-# norootforbuild
 
 Url:            http://lilo.alioth.debian.org/
 
@@ -23,9 +22,9 @@ Name:           lilo
 ExclusiveArch:  ppc ppc64 %ix86 x86_64
 %define yaboot_vers 22.8-r1190
 %define ppc_version 22.8
-Group:          System/Boot
-License:        BSD3c
 Summary:        The Linux Loader, a Boot Menu
+License:        BSD-3-Clause
+Group:          System/Boot
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Obsoletes:      yaboot quik
 %ifarch ppc ppc64
@@ -69,9 +68,10 @@ BuildRequires:  gcc-32bit
 %endif
 # note: already outdated; download fresh sources from: https://alioth.debian.org/frs/?group_id=100507
 Version:        23.2
-Release:        65
+Release:        0
 Source0:        lilo-ppc-%{ppc_version}.tar.bz2
-Source1:        http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
+# From git repo at http://git.ozlabs.org/?p=yaboot.git
+Source1:        yaboot-%{yaboot_vers}.tar.bz2
 Source86:       lilo-%{version}.tar.gz
 Patch8601:      lilo.x86.mount_by_persistent_name.patch
 Patch8602:      lilo.x86.array-bounds.patch
@@ -170,6 +170,7 @@ mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT/bin
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man8
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man5
+mkdir -p $RPM_BUILD_ROOT%{_docdir}/lilo
 pushd lilo.ppc
 cp -av lilo.new $RPM_BUILD_ROOT/sbin/lilo
 cp -av lilo-pmac.lib $RPM_BUILD_ROOT/lib/lilo/lilo-pmac.lib

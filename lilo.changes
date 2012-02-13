@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Feb 13 10:49:49 UTC 2012 - coolo@suse.com
+
+- patch license to follow spdx.org standard
+
+-------------------------------------------------------------------
 Wed Dec 21 09:18:01 UTC 2011 - aj@suse.de
 
 - Fix yaboot download URL.
