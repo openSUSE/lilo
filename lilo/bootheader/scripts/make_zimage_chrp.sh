@@ -139,7 +139,7 @@ ld \
 	$obj_dir/common/common.a \
 	$obj_dir/chrp/prom.a \
 	$obj_dir/common/zlib.a \
-	`gcc -print-libgcc-file-name`
+	`gcc -m32 -print-libgcc-file-name`
 #
 if [ "$no_addnote" = "false" ] ; then
 	case "$HOSTTYPE" in
