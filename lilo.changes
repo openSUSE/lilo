@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Mar 12 22:18:47 UTC 2012 - dvaleev@suse.com
+
+- Add support for PowerNV platform 
+
+-------------------------------------------------------------------
 Fri Mar  2 23:55:10 CET 2012 - meissner@suse.de
 
 - pass -m32 to print-gcc-lib , as the boot images are 32bit.
