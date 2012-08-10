@@ -381,7 +381,7 @@ function running_on_pmac_new () {
 	if [ "$OPTION_ACTIVATE" = "yes" ] ; then
 		NV_BOOT_PATH=$(get_of_path $OPTION_BOOT)
 		echo set OF boot-device $NV_BOOT_PATH",\\\\:tbxi"
-		nvram --update-config boot-device=$NV_BOOT_PATH",\\\\:tbxi"
+		nvsetenv boot-device $NV_BOOT_PATH",\\\\:tbxi"
 	fi
 }
 

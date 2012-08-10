@@ -361,6 +361,11 @@ case "$file_full_sysfs_path" in
 		fi
 	done
 	;;
+	*/pci+([0-9:])+([0-9]):*/virtio[0-9])
+	declare spec="${file_full_sysfs_path##*/}"
+	dbg_show spec
+	cd ..
+	;;
     *)
         # TODO check the rest of the (hardware) world
 	: file_full_sysfs_path $file_full_sysfs_path
@@ -481,6 +486,8 @@ if [ -f devspec ] ; then
 	;;
 	ieee1394)
 	;;
+	block)
+	file_storage_type=virtio
 	*)
 	error "Unknown device type $(< ${file_of_hw_devtype}/device_type)"
 	;;
@@ -610,7 +617,7 @@ if [ -f devspec ] ; then
 	;;
         vscsi)
 	(( of_disk_vscsi_nr = ( (2 << 14) | (of_disk_scsi_chan<<5) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) <<48 )); #
-	if [ -d ${file_of_hw_devtype}/disk ]; then
+	if $(ls -d ${file_of_hw_devtype}/disk* >/dev/null 2>&1); then
 		of_disk_vscsi_dir=disk
 	elif [ -d ${file_of_hw_devtype}/sd ]; then
 		of_disk_vscsi_dir=sd
@@ -627,6 +634,9 @@ if [ -f devspec ] ; then
 	# MacOS: boot-device=fw/node@1d20000038f29/sbp-2@c000/@0:7,\\:tbxi
 	file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}"/node@${ieee1394_id}/sbp-2/disk@0
 	;;
+	virtio)
+	file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}"
+	dbg_show file_of_hw_path
 	*)
 	error "Internal error, can't handle storage type '${file_storage_type}'"
 	;;

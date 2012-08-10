@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Fri Aug 10 22:06:31 UTC 2012 - dvaleev@suse.com
+
+- drop lilo.ppc.nvram-fix.patch. Use nvsetenv wrapper from 
+  powerpc-utils instead
+- get OF path for virtio. Don't run nvsetenv if /dev/nvram is not
+  available
+- find SLOF disks, they are disk@id,lun
+
+-------------------------------------------------------------------
 Mon Mar 12 22:18:47 UTC 2012 - dvaleev@suse.com
 
 - Add support for PowerNV platform 
