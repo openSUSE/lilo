@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue Oct  2 22:17:42 UTC 2012 - dvaleev@suse.com
+
+- add gcc-32bit as BuildRequires for ppc64
+  we need 32bit library to link against (bootloaders are always
+  32bit)  
+
+-------------------------------------------------------------------
 Fri Aug 10 22:06:31 UTC 2012 - dvaleev@suse.com
 
 - drop lilo.ppc.nvram-fix.patch. Use nvsetenv wrapper from 

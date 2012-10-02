@@ -26,19 +26,23 @@ Summary:        The Linux Loader, a Boot Menu
 License:        BSD-3-Clause
 Group:          System/Boot
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-Obsoletes:      yaboot quik
+Obsoletes:      quik
+Obsoletes:      yaboot
 %ifarch ppc ppc64
 %if 0%{?suse_version} > 1020
 BuildRequires:  dtc
 %endif
-Requires:       hfsutils
+Requires:       coreutils
 Requires:       dosfstools
 Requires:       gawk
+Requires:       hfsutils
 Requires:       sed
-Requires:       coreutils
 # for relinking the prep/chrp images in lilo
-%ifarch ppc ppc64
+%ifarch ppc
 Requires:       gcc
+%endif
+%ifarch ppc64
+Requires:       gcc-32bit
 %endif
 # for nvram
 %if 0%{?suse_version} > 1000
@@ -58,12 +62,15 @@ BuildRequires:  device-mapper
 BuildRequires:  device-mapper-devel
 %endif
 %ifarch x86_64
-BuildRequires:  glibc-devel-32bit
 BuildRequires:  device-mapper-32bit
+BuildRequires:  glibc-devel-32bit
 # openSUSE 11.3 and SLE_11 do not have device-mapper-devel-32bit
 %if 0%{?suse_version} != 1130 && 0%{?suse_version} != 1110
 BuildRequires:  device-mapper-devel-32bit
 %endif
+BuildRequires:  gcc-32bit
+%endif
+%ifarch ppc64
 BuildRequires:  gcc-32bit
 %endif
 # note: already outdated; download fresh sources from: https://alioth.debian.org/frs/?group_id=100507
@@ -77,11 +84,12 @@ Patch8601:      lilo.x86.mount_by_persistent_name.patch
 Patch8602:      lilo.x86.array-bounds.patch
 Patch8604:      lilo.x86.checkit.patch
 Patch8605:      lilo-no-build-date.patch
-Patch8606:      lilo.ppc.nvram-fix.patch	
 Patch8607:      yaboot-libgcc.patch
 Patch8608:      lilo-libgcc.patch
 Patch8609:      lilo.ppc.ps3.patch
 Patch8610:      lilo.src.Makefile.patch
+Patch8611:      lilo.ppc-22.8.opal.patch
+Patch8612:      lilo.ppc-kvm.patch
 # $Id: lilo.spec 1188 2008-12-09 14:29:53Z olh $
 
 %description
@@ -105,13 +113,14 @@ pushd lilo-%{version}
 %patch8605 -p1
 %patch8610 -p1
 popd
-%patch8606
 pushd yaboot
 %patch8607 -p1
 popd
 pushd lilo.ppc
 %patch8608 -p1
 %patch8609 -p1
+%patch8611 
+%patch8612 -p1
 popd
 
 %build
