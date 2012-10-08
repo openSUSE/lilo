@@ -327,7 +327,14 @@ case "$file_full_sysfs_path" in
 	ide_port=$of_disk_scsi_host
 	ide_channel=$of_disk_scsi_id
 
-	cd ../../..
+	until test -f devspec
+	do
+		cd ..
+		if test "$PWD" = "/"
+		then
+			break
+		fi
+	done
 	;;
     */host+([0-9])/rport-+([0-9]):+([0-9])-+([0-9])/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
 	# new sysfs layout starting with kernel 2.6.15
@@ -488,6 +495,7 @@ if [ -f devspec ] ; then
 	;;
 	block)
 	file_storage_type=virtio
+	;;
 	*)
 	error "Unknown device type $(< ${file_of_hw_devtype}/device_type)"
 	;;
@@ -637,6 +645,7 @@ if [ -f devspec ] ; then
 	virtio)
 	file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}"
 	dbg_show file_of_hw_path
+	;;
 	*)
 	error "Internal error, can't handle storage type '${file_storage_type}'"
 	;;
