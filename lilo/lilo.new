@@ -695,7 +695,15 @@ while [ "$1" ]; do case "$1" in
 	;;
 esac; shift; done
 
-
+function is_nvram () {
+	if [ -e /dev/nvram ];then
+		return 0
+	else
+		echo "NVRAM is missing."
+		echo "Skipping setting NVRAM variables"
+		return 1
+	fi
+}
 
 function running_on_iseries () {
     source /lib/lilo/lilo-iseries.lib

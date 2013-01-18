@@ -696,7 +696,9 @@ function running_on_chrp () {
 		fi
 
 		if (( fat_boot == 1 )); then
-			nvsetenv bootinfo-linux "${boot_path},\\ppc\\bootinfo.txt"
+			if [ is_nvram ];then
+				nvsetenv bootinfo-linux "${boot_path},\\ppc\\bootinfo.txt"
+			fi
 			boot_path=${boot_path},yaboot
 		elif [[ "${p_flags[*]}" != *type=41*type=41* ]]; then
 			# open firmware is confused about more than one PReP partition, in that
@@ -705,17 +707,18 @@ function running_on_chrp () {
 		fi
 
 		if [ "$OPTION_ACTIVATE" = "yes" ] ; then
-			echo "Prepending  '$boot_path'" to open firmware variable boot-device
+			if [ is_nvram ];then
+				echo "Prepending  '$boot_path'" to open firmware variable boot-device
 
-			local -a bootdevice=( $(nvsetenv boot-device) )
-			bootdevice[0]=${bootdevice[0]#boot-device=}
-			for (( i=${#bootdevice[*]}; i-- >0; )); do
-				if [[ "${bootdevice[$i]}" == ${boot_path}* ]]; then
-					unset bootdevice[$i];
-				fi
-			done
-			nvsetenv boot-device "$boot_path ${bootdevice[*]}"
-
+				local -a bootdevice=( $(nvsetenv boot-device) )
+				bootdevice[0]=${bootdevice[0]#boot-device=}
+				for (( i=${#bootdevice[*]}; i-- >0; )); do
+					if [[ "${bootdevice[$i]}" == ${boot_path}* ]]; then
+						unset bootdevice[$i];
+					fi
+				done
+				nvsetenv boot-device "$boot_path ${bootdevice[*]}"
+			fi
 		else
 			warning "boot path not set to boot linux as requested" \
 			"please add '$boot_path' somewhere to your boot path manually"
