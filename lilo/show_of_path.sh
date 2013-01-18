@@ -367,7 +367,13 @@ case "$file_full_sysfs_path" in
 	ide_port=$of_disk_scsi_host
 	ide_channel=$of_disk_scsi_id
 
-	cd ../../..
+	until test -f devspec
+	do
+		cd ..
+		if test "$PWD" = "/"
+			break
+		fi
+	done
 	;;
     */host+([0-9])/rport-+([0-9]):+([0-9])-+([0-9])/target+([0-9:])/+([0-9]):+([0-9]):+([0-9]):+([0-9]))
 	# new sysfs layout starting with kernel 2.6.15
@@ -400,6 +406,11 @@ case "$file_full_sysfs_path" in
 			break
 		fi
 	done
+	;;
+	*/pci+([0-9:])+([0-9]):*/virtio[0-9])
+		declare spec="${file_full_sysfs_path##*/}"
+		dbg_show spec
+		cd ..
 	;;
     *)
         # TODO check the rest of the (hardware) world
@@ -520,6 +531,9 @@ if [ -f devspec ] ; then
         fi
         ;;
 	ieee1394)
+	;;
+	block)
+		file_storage_type=virtio
 	;;
 	*)
 	error "Unknown device type $(< ${file_of_hw_devtype}/device_type)"
@@ -677,7 +691,7 @@ if [ -f devspec ] ; then
 	;;
         vscsi)
 	(( of_disk_vscsi_nr = ( (2 << 14) | (of_disk_scsi_chan<<5) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) <<48 )); #
-	if [ -d ${file_of_hw_devtype}/disk ]; then
+	if $(ls -d ${file_of_hw_devtype}/disk* >/dev/null 2>&1); then
 		of_disk_vscsi_dir=disk
 	elif [ -d ${file_of_hw_devtype}/sd ]; then
 		of_disk_vscsi_dir=sd
@@ -693,6 +707,10 @@ if [ -f devspec ] ; then
 	# /proc/device-tree/pci@f4000000/firewire@e/node@0001d20000038f29/sbp-2@c000/disk@0
 	# MacOS: boot-device=fw/node@1d20000038f29/sbp-2@c000/@0:7,\\:tbxi
 	file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}"/node@${ieee1394_id}/sbp-2/disk@0
+	;;
+	virtio)
+	file_of_hw_path="${file_of_hw_devtype##/proc/device-tree}"
+	dbg_show file_of_hw_path
 	;;
 	*)
 	error "Internal error, can't handle storage type '${file_storage_type}'"
