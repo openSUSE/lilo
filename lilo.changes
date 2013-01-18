@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Fri Jan 18 14:45:43 UTC 2013 - dvaleev@suse.com
+
+- apply lilo.ppc patches in correct order
+- convert patches to git format
+- Don't set NVRAM if nvram is missing 
+  (lilo-ppc.Don-t-set-NVRAM-if-nvram-is-missing.patch)
+- fix board detection on 7R2 machine, when running OPAL firmware
+  (lilo-ppc.Fix-running-lilo-on-OPAL.patch)
+- fix show_of_path.sh under KVM. virtio support
+  (lilo-ppc.OF-path-under-KVM.patch)
+
+-------------------------------------------------------------------
 Fri Dec 16 12:47:16 UTC 2011 - jloeser@suse.com
 
 - correct LUN format for new Emulex adapters (bnc#737211) 
