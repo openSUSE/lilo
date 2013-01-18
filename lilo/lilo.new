@@ -605,7 +605,7 @@ function check_arch () {
 			*Power\ Macintosh*)
 				board_type=pmac
 				;;
-			IBM,*)
+			IBM,*|ibm,*)
 				board_type=chrp
 				;;
 			Momentum,Maple-D)
