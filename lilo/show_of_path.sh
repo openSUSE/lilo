@@ -371,6 +371,7 @@ case "$file_full_sysfs_path" in
 	do
 		cd ..
 		if test "$PWD" = "/"
+		then
 			break
 		fi
 	done

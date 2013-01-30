@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Jan 30 10:36:31 UTC 2013 - dvaleev@suse.com
+
+- fix syntax error in lilo-ppc.OF-path-under-KVM.patch (bnc#800512) 
+
+-------------------------------------------------------------------
 Fri Jan 18 14:45:43 UTC 2013 - dvaleev@suse.com
 
 - apply lilo.ppc patches in correct order
