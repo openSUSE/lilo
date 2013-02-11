@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Mon Feb 11 10:42:23 UTC 2013 - stefan.fent@suse.com
+
+- add patch for yaboot to support 4k/sector (fate #314346, bnc 802559) 
+
+-------------------------------------------------------------------
 Wed Jan 30 10:36:31 UTC 2013 - dvaleev@suse.com
 
 - fix syntax error in lilo-ppc.OF-path-under-KVM.patch (bnc#800512) 
