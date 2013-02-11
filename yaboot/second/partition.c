@@ -42,7 +42,7 @@
 #include <errors.h>
 #include <byteorder.h>
 
-#define MAX_BLOCK_SIZE	2048
+#define MAX_BLOCK_SIZE	4096
 static char block_buffer[MAX_BLOCK_SIZE];
 
 static void
@@ -144,7 +144,9 @@ static int msdos_is_extended_partition(unsigned char sys_ind)
 	return (EXTENDED == sys_ind || WIN98_EXTENDED == sys_ind || LINUX_EXTENDED == sys_ind);
 }
 
-static void msdos_parse_extended(prom_handle disk, struct partition_t **list, unsigned int start, unsigned int size)
+static void msdos_parse_extended(prom_handle disk, struct partition_t **list,
+				 unsigned int start, unsigned int size,
+				 unsigned int prom_blksize)
 {
 	int i, partition = 5;
 	unsigned int partition_start = start;
@@ -176,7 +178,7 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t **list, un
 					continue;
 			}
 			if (msdos_is_linux_partition(part->sys_ind))
-				add_new_partition(list, partition, next, length, LABEL_MSDOS, 512, part->sys_ind);
+				add_new_partition(list, partition, next, length, LABEL_MSDOS, prom_blksize, part->sys_ind);
 			partition++;
 		}
 		part -= 4;
@@ -190,7 +192,8 @@ static void msdos_parse_extended(prom_handle disk, struct partition_t **list, un
 	}
 }
 
-static void partition_msdos_lookup(prom_handle disk, struct partition_t **list)
+static void partition_msdos_lookup(prom_handle disk, unsigned int prom_blksize,
+				   struct partition_t **list)
 {
 	int partition;
 
@@ -202,10 +205,10 @@ static void partition_msdos_lookup(prom_handle disk, struct partition_t **list)
 	DEBUG_F("\n");
 	for (partition = 1; partition <= 4; partition++, part++) {
 		if (msdos_is_linux_partition(part->sys_ind) || msdos_is_fat_partition(part->sys_ind))
-			add_new_partition(list, partition, le32_to_cpu(part->start), le32_to_cpu(part->size), LABEL_MSDOS, 512,
+			add_new_partition(list, partition, le32_to_cpu(part->start), le32_to_cpu(part->size), LABEL_MSDOS, prom_blksize,
 					  part->sys_ind);
 		else if (msdos_is_extended_partition(part->sys_ind))
-			msdos_parse_extended(disk, list, le32_to_cpu(part->start), le32_to_cpu(part->size));
+			msdos_parse_extended(disk, list, le32_to_cpu(part->start), le32_to_cpu(part->size), prom_blksize);
 	}
 }
 
@@ -373,7 +376,7 @@ struct partition_t *partitions_lookup(const char *device)
 		partition_mac_lookup(disk, &list, block_buffer);
 	} else if (msdos_magic_present(block_buffer)) {
 		/* msdos partition format */
-		partition_msdos_lookup(disk, &list);
+		partition_msdos_lookup(disk, prom_blksize, &list);
 	} else if (prom_blksize == 2048 && identify_iso_fs(disk, &iso_root_block)) {
 		add_new_partition(&list, 0, iso_root_block, 0, LABEL_ISO9660, prom_blksize, 0);
 		prom_printf("ISO9660 disk\n");
