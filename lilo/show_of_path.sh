@@ -268,7 +268,7 @@ if [[ "$file_sysfs_dir" == */dm-* ]] ; then
                 fi
         fi
 
-        devmajorminor=`printf '(%d, %d)' $file_major $file_minor`
+        devmajorminor=`printf '(%d:%d)' $file_major $file_minor`
         DMDEV=`dmsetup ls | grep "$devmajorminor"`
         DEV=`echo "$file_sysfs_dir" | sed 's/.*\///g'`
 

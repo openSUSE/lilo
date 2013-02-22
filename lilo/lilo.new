@@ -482,7 +482,7 @@ function collect_path_info() {
 		direntry_kernel_partition_number=
 
 		if [[ "$direntry" == /dev/dm-* ]]; then
-			DMDEV=`dmsetup ls | grep "$majorminor"`
+			DMDEV=`dmsetup ls | grep "$direntry_majorminor"`
 			DEV=`echo $direntry | sed 's/\/dev\///g'`
 			if [[ "$DMDEV" == *part* ]]; then
 				read device devnode <<< "$DMDEV"

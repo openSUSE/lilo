@@ -379,7 +379,7 @@ function running_on_chrp () {
 
 		if [[ "$boot_partition" == /dev/dm-* ]]; then
 			majorminor=`$STAT_CMD -L --format="0x%t 0x%T" "$boot_partition"`
-			majorminor=`printf '(%d, %d)' $majorminor`
+			majorminor=`printf '(%d:%d)' $majorminor`
 			DMDEV=`dmsetup ls | grep "$majorminor"`
 			if [[ "$DMDEV" == *part* ]]; then
 				read device devnode <<< "$DMDEV"
