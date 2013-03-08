@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Mar  8 12:33:13 UTC 2013 - stefan.fent@suse.com
+
+- refine bnc-804629_fix-dmsetup-output-parse.diff to
+  exactly match 
+
+-------------------------------------------------------------------
 Fri Feb 22 14:51:22 UTC 2013 - stefan.fent@suse.com
 
 - fix for bnc #804629:
