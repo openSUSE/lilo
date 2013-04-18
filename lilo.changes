@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Apr 18 15:20:13 UTC 2013 - dvaleev@suse.com
+
+- Add GPT support to yaboot (bug-797485_yaboot-gpt.patch)
+  bnc#797485 
+
+-------------------------------------------------------------------
 Fri Mar  8 12:33:13 UTC 2013 - stefan.fent@suse.com
 
 - refine bnc-804629_fix-dmsetup-output-parse.diff to
