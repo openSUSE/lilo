@@ -30,6 +30,7 @@ enum disk_label {
 	LABEL_MSDOS,
 	LABEL_AMIGA,
 	LABEL_ISO9660,
+	LABEL_GPT,
 };
 
 struct partition_t {
