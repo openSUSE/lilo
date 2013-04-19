@@ -1,7 +1,7 @@
 #
 # spec file for package lilo
 #
-# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -126,7 +126,7 @@ popd
 %build
 %ifarch %ix86 x86_64
 pushd lilo-%{version}
-cflags="$RPM_OPT_FLAGS -fno-strict-aliasing"
+cflags="$RPM_OPT_FLAGS -fno-strict-aliasing -DLCF_DEVMAPPER"
 %ifarch x86_64
 cflags="$cflags -m32"
 %endif

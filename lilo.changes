@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Fri Apr 19 13:06:38 UTC 2013 - dvaleev@suse.com
+
+- Build with devmapper support (bnc#816102) 
+
+-------------------------------------------------------------------
 Mon Oct  8 09:29:19 UTC 2012 - dvaleev@suse.com
 
 - refresh kvm patch (fix syntax errors)
