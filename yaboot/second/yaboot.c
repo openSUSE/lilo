@@ -80,7 +80,7 @@ static char *hard_coded_bootpath(char *bootpath)
 #define SLES9_ZIMAGE_BASE ((4 * 1024 * 1024))	/* the zImage header used in SLES8/9 is not relocatable */
 #define SLES9_ZIMAGE_SIZE ((7 * 1024 * 1024))	/* its a binary blob from 2.4 kernel source ... */
 #define MALLOCADDR ((2 * 1024 * 1024) + (512 * 1024))
-#define MALLOCSIZE ((1 * 1024 * 1024) + (512 * 1024))
+#define MALLOCSIZE 0x1000000
 
 typedef struct {
 	union {
