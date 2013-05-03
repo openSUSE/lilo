@@ -238,9 +238,9 @@ static void partition_gpt_lookup(prom_handle disk, unsigned int prom_blksize,
 	}
 	struct gpt_partition *part = (struct gpt_partition *)(block_buffer);
 
-	for (partition = 1; partition <= cpu_to_le32(header->maxpart); partition++, part++) {
+	for (partition = 1; partition <= le32_to_cpu(header->maxpart); partition++, part++) {
 		if ((!guid_cmp(part->type, GPT_BASIC_DATA))||(!guid_cmp(part->type, GPT_LINUX_NATIVE))||(!guid_cmp(part->type, GPT_LINUX_RAID))) {
-			add_new_partition(list, partition, le64_to_cpu(part->start), cpu_to_le64(part->end) - cpu_to_le64(part->start) + 1, \
+			add_new_partition(list, partition, le64_to_cpu(part->start), le64_to_cpu(part->end) - le64_to_cpu(part->start) + 1, \
 														LABEL_GPT, prom_blksize, 1);
 		}
 	}
