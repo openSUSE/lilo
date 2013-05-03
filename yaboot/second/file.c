@@ -91,7 +91,7 @@ static int file_block_open(struct boot_file_t *file, const struct path_descripti
 		prom_printf("partitions:\n");
 #endif
 		for (p = parts; p; p = p->next) {
-			DEBUG_F("#%02d, start: %08lx, length: %08lx\n", p->part_number, p->part_start, p->part_size);
+			DEBUG_F("#%02d, start: %08Lx, length: %08Lx\n", p->part_number, p->part_start, p->part_size);
 			if (partition == -1 || partition == p->part_number) {
 				if (fs_open(file, path_device(spec), p, f)) {
 					fserrorno = FILE_ERR_OK;

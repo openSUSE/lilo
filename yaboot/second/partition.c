@@ -48,7 +48,7 @@ static char block_buffer[MAX_BLOCK_SIZE];
 
 static void
 add_new_partition(struct partition_t **list, int part_number,
-		  unsigned long part_start, unsigned long part_size,
+		  unsigned long long part_start, unsigned long long part_size,
 		  enum disk_label label, unsigned short part_blocksize, int sys_ind)
 {
 	struct partition_t *part;
