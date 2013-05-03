@@ -98,8 +98,8 @@ static int ext2_open(struct boot_file_t *file, const char *dev_name, struct part
 	 * attempt.
 	 */
 	bs = 1024;
-	doff = (unsigned long long)(part->part_start) * part->blocksize;
-	dend = doff + (unsigned long long)part->part_size * part->blocksize;
+	doff = part->part_start * part->blocksize;
+	dend = doff + part->part_size * part->blocksize;
 	cur_file = file;
 
 	DEBUG_F("partition offset: %Lx end:%Lx\n", doff, dend);
