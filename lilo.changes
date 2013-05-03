@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Fri May  3 21:38:21 UTC 2013 - dvaleev@suse.com
+
+- Fix handling partitions more than 2TB 
+  (bug-797485_yaboot-2tbdisk.patch)
+- GPT partition data is LittleEndian (bug-797485_yaboot-gpt.patch)
+- Increase memory for filesystems bigger than 2TB
+  (bug-797485_yaboot-memory-1M.patch)
+-------------------------------------------------------------------
 Thu Apr 18 15:20:13 UTC 2013 - dvaleev@suse.com
 
 - Add GPT support to yaboot (bug-797485_yaboot-gpt.patch)

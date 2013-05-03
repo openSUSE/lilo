@@ -43,7 +43,7 @@
 #include <errors.h>
 #include <byteorder.h>
 
-#define MAX_BLOCK_SIZE 4096	
+#define MAX_BLOCK_SIZE 4096
 static char block_buffer[MAX_BLOCK_SIZE];
 
 static void
@@ -227,20 +227,20 @@ guid_cmp (gpt_part_type_t left, gpt_part_type_t right)
 }
 
 static void partition_gpt_lookup(prom_handle disk, unsigned int prom_blksize,
-					struct partition_t **list)				
+					struct partition_t **list)			
 {
-	int partition; 
+	int partition;
 	struct gpt_header *header = (struct gpt_header *)(block_buffer + prom_blksize);
 
 	if (prom_readblocks(disk, cpu_to_le64(header->partitions), 1, block_buffer) != 1) {
-		prom_printf("Can't read GPT partition table %Lu\n", header->partitions);	
+		prom_printf("Can't read GPT partition table %Lu\n", header->partitions);
 		return;
 	}
 	struct gpt_partition *part = (struct gpt_partition *)(block_buffer);
 
-	for (partition = 1; partition <= cpu_to_le32(header->maxpart); partition++, part++) {
+	for (partition = 1; partition <= le32_to_cpu(header->maxpart); partition++, part++) {
 		if ((!guid_cmp(part->type, GPT_BASIC_DATA))||(!guid_cmp(part->type, GPT_LINUX_NATIVE))||(!guid_cmp(part->type, GPT_LINUX_RAID))) {
-			add_new_partition(list, partition, le64_to_cpu(part->start), cpu_to_le64(part->end) - cpu_to_le64(part->start) + 1, \
+			add_new_partition(list, partition, le64_to_cpu(part->start), le64_to_cpu(part->end) - le64_to_cpu(part->start) + 1, \
 														LABEL_GPT, prom_blksize, 1);
 		}
 	}
