@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Mon May 20 16:06:50 UTC 2013 - dvaleev@suse.com
+
+- Fix yaboot 4K breakage (bug-820287_yaboot-4k.patch)
+  bnc#820287 
+
+-------------------------------------------------------------------
 Fri May  3 21:38:21 UTC 2013 - dvaleev@suse.com
 
 - Fix handling partitions more than 2TB 
