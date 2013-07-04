@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Jul  4 14:44:04 UTC 2013 - matz@suse.com
+
+- Fix build with gcc 4.8: lilo.gcc48.patch
+
+-------------------------------------------------------------------
 Fri Apr 19 13:06:38 UTC 2013 - dvaleev@suse.com
 
 - Build with devmapper support (bnc#816102) 

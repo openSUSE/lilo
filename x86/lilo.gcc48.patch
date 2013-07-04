@@ -1,0 +1,13 @@
+Index: lilo-23.2/src/Makefile
+===================================================================
+--- lilo-23.2.orig/src/Makefile	2011-04-09 16:59:26.000000000 +0200
++++ lilo-23.2/src/Makefile	2013-07-04 16:35:53.000000000 +0200
+@@ -16,7 +16,7 @@ include ../make.vars
+ 
+ SHELL=/bin/sh
+ CC=gcc
+-CPP=$(CC) -E
++CPP=$(CC) -E -ffreestanding
+ AS86=as86 -0 -a
+ LD86=ld86 -0
+ NASM=nasm

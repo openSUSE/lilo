@@ -90,6 +90,7 @@ Patch8609:      lilo.ppc.ps3.patch
 Patch8610:      lilo.src.Makefile.patch
 Patch8611:      lilo.ppc-22.8.opal.patch
 Patch8612:      lilo.ppc-kvm.patch
+Patch8613:      lilo.gcc48.patch
 # $Id: lilo.spec 1188 2008-12-09 14:29:53Z olh $
 
 %description
@@ -112,6 +113,7 @@ pushd lilo-%{version}
 %patch8604 -p1
 %patch8605 -p1
 %patch8610 -p1
+%patch8613 -p1
 popd
 pushd yaboot
 %patch8607 -p1
