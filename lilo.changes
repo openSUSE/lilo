@@ -1,4 +1,17 @@
 -------------------------------------------------------------------
+Thu Jan 15 15:23:23 UTC 2015 - dvaleev@suse.com
+
+- Fix typo in bug-797485_lilo-script-gpt-support.patch 
+- Fix boot on flag
+
+-------------------------------------------------------------------
+Fri Jan  2 14:26:26 UTC 2015 - dvaleev@suse.com
+
+- Extend lilo script to cover gpt partition tables
+  bnc#797485 fate#317610
+  bug-797485_lilo-script-gpt-support.patch 
+
+-------------------------------------------------------------------
 Mon May 20 16:06:50 UTC 2013 - dvaleev@suse.com
 
 - Fix yaboot 4K breakage (bug-820287_yaboot-4k.patch)
