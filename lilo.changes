@@ -1,4 +1,31 @@
 -------------------------------------------------------------------
+Thu Feb  5 10:50:45 UTC 2015 - dvaleev@suse.com
+
+- Allocate as low as possible
+  0001-Upstream-mallocator.patch
+
+- Remove second zero of BSS
+    
+    We zero the BSS in two places: once in _start() and then
+    again in yaboot_start(). The second time we actually get
+    it wrong and zero 1/4 of the BSS (since we subtract two
+    pointers).
+    
+    Since this second zeroing is superfluous and buggy, remove
+    it.
+    
+    While here, fix the comments in _start. It claims we aren't
+    clearing the BSS when we are. 
+  0005-get-rid-of-bss_start.patch
+
+- Bump PROM_CLAIM_MAX_ADDR to 256MB
+
+   A number of machines are failing to boot because firmware takes up a
+   significant amount of the first 128MB. Bump our maximum to 256MB since these
+   boxes almost always have a 256MB RMO region.
+   0006-PROM_CLAIM_MAX_ADDR.patch
+
+-------------------------------------------------------------------
 Thu Jan 15 15:23:23 UTC 2015 - dvaleev@suse.com
 
 - Fix typo in bug-797485_lilo-script-gpt-support.patch 
