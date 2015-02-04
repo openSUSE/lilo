@@ -102,7 +102,7 @@ static int of_net_download(unsigned char **buffer, ihandle of_device)
 
 	DEBUG_ENTER;
 
-	p = prom_claim_chunk_top(mem, LOAD_BUFFER_SIZE, 0);
+	p = prom_claim_chunk_top(LOAD_BUFFER_SIZE, 0);
 	if (p == (void *)-1) {
 		DEBUG_F("Can't claim memory for TFTP download\n");
 		goto out;
