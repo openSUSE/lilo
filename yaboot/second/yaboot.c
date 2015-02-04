@@ -77,8 +77,6 @@ static char *hard_coded_bootpath(char *bootpath)
 #define _ALIGN(addr,size)	(((addr)+size-1)&(~(size-1)))
 #define MAX_HEADERS	32
 
-#define SLES9_ZIMAGE_BASE ((4 * 1024 * 1024))	/* the zImage header used in SLES8/9 is not relocatable */
-#define SLES9_ZIMAGE_SIZE ((7 * 1024 * 1024))	/* its a binary blob from 2.4 kernel source ... */
 #define MALLOCADDR ((2 * 1024 * 1024) + (512 * 1024))
 #define MALLOCSIZE 0x1000000
 
@@ -432,25 +430,16 @@ static int load_elf32(struct boot_file_t *file, loadinfo_t * loadinfo)
 	/* leave some room (1Mb) for boot infos */
 	loadinfo->memsize = _ALIGN(loadinfo->memsize, (1 << 20)) + 0x100000;
 
-	/* it seems that the B50 has trouble with a location between
-	 * real-base and 32M. The kernel crashes at random places in
-	 * prom_init, usually in opening display. */
-	if (64 == _cpu)
-		loadaddr = 0;
-	else
-		loadaddr = 32 * 1024 * 1024;
-
-	if (sles9_base && loadinfo->memsize <= SLES9_ZIMAGE_SIZE)
-		loadinfo->base = sles9_base;
-	else {
-		loadinfo->base = prom_claim_chunk((void *)loadaddr,
-						loadinfo->memsize, 0);
-		if (loadinfo->base == (void *)-1) {
-			prom_printf("Claim error, can't allocate kernel memory\n");
-			return 0;
-		}
+	loadinfo->base = prom_claim_chunk((void *)loadaddr, loadinfo->memsize, 0);
+	if (loadinfo->base == (void *)-1) {
+		prom_printf("Claim error, can't allocate kernel memory\n");
+		return 0;
 	}
-	prom_printf("Allocated %08lx bytes for executable @ %p\n", loadinfo->memsize, loadinfo->base);
+
+	DEBUG_F("After ELF parsing, load base: %p, mem_sz: 0x%08lx\n",
+		loadinfo->base, loadinfo->memsize);
+	DEBUG_F("    wanted load base: 0x%08lx, mem_sz: 0x%08lx\n",
+		loadaddr, loadinfo->memsize);
 
 	/* Load the program segments... */
 	p = ph;
@@ -1435,17 +1424,7 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 	if (prom_claim(_start, _end - _start, 0) == _start)
 		prom_printf("brokenfirmware did not claim executable memory, fixed it myself\n");
 
-	sles9_base = prom_claim((void *)SLES9_ZIMAGE_BASE, SLES9_ZIMAGE_SIZE, 0);
-	if (sles9_base == (void *)-1)
-		sles9_base = NULL;
-	DEBUG_F("Allocated %08x bytes @ %p for SLES8/9 install file\n", SLES9_ZIMAGE_SIZE, sles9_base);
-
-	if (sles9_base)
-		low_addr = SLES9_ZIMAGE_BASE + SLES9_ZIMAGE_SIZE;
-	else
-		low_addr = 64 * 1024;
-
-	malloc_base = prom_claim_chunk_top((void *)low_addr, MALLOCSIZE, 0);
+	malloc_base = prom_claim_chunk_top(MALLOCSIZE, 0);
 
 	if (malloc_base == (void *)-1)
 		goto exit;
