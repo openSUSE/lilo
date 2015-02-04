@@ -264,7 +264,7 @@ static int load_config_file(const char *configfile, char *conf_file_buf, const s
 			sz = file.fs->read(&file, CONFIG_FILE_MAX, conf_file_buf);
 			file.fs->close(&file);
 			if (sz <= 0)
-				prom_printf("Error, can't read config file\n");
+				prom_printf("Error, can't load config file\n");
 			else
 				prom_printf("Config file '%s' read, %d bytes\n", configfile, sz);
 		}

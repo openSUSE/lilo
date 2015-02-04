@@ -34,7 +34,7 @@ typedef void *ihandle;
 typedef void *phandle;
 
 #define PROM_INVALID_HANDLE	((prom_handle)-1UL)
-#define PROM_CLAIM_MAX_ADDR	(256 * 1024 * 1024)
+#define PROM_CLAIM_MAX_ADDR     0x10000000
 
 struct prom_args;
 typedef int (*prom_entry) (struct prom_args *);
