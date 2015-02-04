@@ -106,9 +106,7 @@ static void *sles9_base;
 static struct path_description default_device;
 static int _cpu;
 
-extern char __bss_start[];
 extern char _start[];
-extern char _end[];
 extern char _yaboot_conf_start[];
 extern char _yaboot_conf_end[];
 
@@ -1411,18 +1409,12 @@ void yaboot_start(unsigned long r3, unsigned long r4, unsigned long r5, void *sp
 	prom_handle cpus[1];
 	unsigned long low_addr;
 
-	memset(__bss_start, 0, _end - __bss_start);
-
 	/* Initialize OF interface */
 	prom_init((prom_entry) r5);
 
 	prom_print_available();
 
-	prom_printf("\nyaboot starting: loaded at %p %p (%lx/%lx/%08lx; sp: %p)\n", _start, _end, r3, r4, r5, sp);
-
-	/* the executable memrange may not be claimed by firmware */
-	if (prom_claim(_start, _end - _start, 0) == _start)
-		prom_printf("brokenfirmware did not claim executable memory, fixed it myself\n");
+	prom_printf("\nyaboot starting: loaded (%lx/%lx/%08lx; sp: %p)\n", r3, r4, r5, sp);
 
 	malloc_base = prom_claim_chunk_top(MALLOCSIZE, 0);
 
