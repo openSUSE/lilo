@@ -58,16 +58,17 @@ function running_on_chrp () {
 			fi
 			;;
 		1|2|3|4) #set {prep,fat,fat32}_part
+			device_minor=$(check_dm $device $minor)
 			case $fs_n_flags in
 			*prep*) # PReP boot partition
-				prep_part=(${prep_part[*]} $device$minor)
+				prep_part=(${prep_part[*]} $device_minor)
 				echo "$prep_part"
 				;;
 			*type=06*)  # FAT16 partition
-				fat_part=(${fat_part[*]} $device$minor)
+				fat_part=(${fat_part[*]} $device_minor)
 				;;
 			*type=0c*) # FAT32 partition
-				fat32_part=(${fat32_part[*]} $device$minor)
+				fat32_part=(${fat32_part[*]} $device_minor)
 				;;
 			esac
 		esac
@@ -97,11 +98,6 @@ function running_on_chrp () {
 				err_var1=$OPTION_BOOT; error 10 2
 				;;
 		esac
-	elif [[ "$OPTION_BOOT_DISK_DEVICE_NODE" == /dev/dm-* ]]; then
-		BOOT_PART=`echo ${prep_part[*]} ${fat_part[*]} ${fat32_part[*]} | sed 's/ //g'`
-		if [[ $BOOT_PART != ${OPTION_BOOT_DISK_DEVICE_NODE}p${OPTION_BOOT_PARTITION_NUMBER} ]]; then
-			err_var1=$OPTION_BOOT; error 9 1
-		fi
 	else
 		# we have the device, but better safe than sorry
 		if [[ "${prep_part[*]} ${fat_part[*]} ${fat32_part[*]}" != *$OPTION_BOOT* ]]; then

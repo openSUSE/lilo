@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Thu Feb 12 00:46:36 UTC 2015 - dvaleev@suse.com
+
+- Fix install yaboot to multipath-device (bsc#916696)
+  With change from fdisk to parted we're no longer see partition 
+  device only it's minor. We need to compute /dev/dm-X partition
+  device once again.
+  0001-Fix-device-mapper-devices-handling-bsc-916696.patch
+
+-------------------------------------------------------------------
 Thu Feb  5 10:50:45 UTC 2015 - dvaleev@suse.com
 
 - Allocate as low as possible

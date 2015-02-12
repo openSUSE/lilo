@@ -423,6 +423,22 @@ function get_relative_path_on_filesystem() {
 	echo "$file_relative_path"
 }
 
+function check_dm() {
+	local device=$1
+	local partn=$2
+	local dev
+	local dmdev
+	local part
+
+	if [[ "$device" == *dm-* ]];then
+		dev=`echo $device | sed 's/\/dev\///g'`
+		dmdev=`cat /sys/block/$dev/dm/name`
+		part=`readlink -f /dev/mapper/${dmdev}_part$partn`
+		echo "$part"
+	else
+		echo "$device$partn"
+	fi
+}
 function collect_path_info() {
 	local querytype
 	local direntry
