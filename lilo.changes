@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Feb 17 20:56:57 UTC 2015 - dvaleev@suse.com
+
+- Remove 0005-get-rid-of-bss_start.patch as it breaks yaboot on
+  PowerVM
+
+-------------------------------------------------------------------
 Thu Feb 12 00:46:36 UTC 2015 - dvaleev@suse.com
 
 - Fix install yaboot to multipath-device (bsc#916696)
