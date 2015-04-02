@@ -612,11 +612,21 @@ static void parse_net_device(struct path_description *path, const char *netdev_o
 static void get_mac_address(struct path_description *result)
 {
 	phandle dev = prom_finddevice(path_device(result));
+
+	int len;
+	unsigned char* m;
+
 	if (dev != PROM_INVALID_HANDLE) {
-		if (prom_getprop(dev, "mac-address", &result->u.n.mac, 6) == -1)
-			prom_getprop(dev, "local-mac-address", &result->u.n.mac, 6);
-		prom_printf("MAC for %s: %02x:%02x:%02x:%02x:%02x:%02x\n", path_device(result),
-			    result->u.n.mac[0], result->u.n.mac[1], result->u.n.mac[2], result->u.n.mac[3], result->u.n.mac[4], result->u.n.mac[5]);
+		len = prom_getproplen(dev, "mac-address");
+		if (prom_getprop(dev, "mac-address", &result->u.n.mac, len) < 0) {
+			len = prom_getproplen(dev, "local-mac-address");
+			prom_getprop(dev, "local-mac-address", &result->u.n.mac, len);
+			m = result->u.n.mac;
+			if (len == 8)
+				m = m + 2;
+			 prom_printf("MAC for %s: %02x:%02x:%02x:%02x:%02x:%02x\n", path_device(result),
+				     m[0], m[1], m[2], m[3], m[4], m[5]);
+		}
 	}
 }
 

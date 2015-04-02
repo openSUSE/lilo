@@ -208,14 +208,18 @@ static int find_and_load_config_file(const struct path_description *b, char *con
 	int sz = 0, opened = 0, result;
 	int i;
 	struct path_description config_fspec;
-
+	unsigned char* m;
 	switch (path_type(b)) {
 	case TYPE_NET:
 		names = config_file_names_net;
+		m = b->u.n.mac;
+		if ( m[7] != NULL )
+			m = m + 2;
+
 		for (i = 0; i < 6; i++)
-			if (b->u.n.mac[i]) {
+			if (m[i]) {
 				sprintf(config_file_name_ether_mac, config_file_name_ether_mac_template,
-					b->u.n.mac[0], b->u.n.mac[1], b->u.n.mac[2], b->u.n.mac[3], b->u.n.mac[4], b->u.n.mac[5]);
+					m[0], m[1], m[2], m[3], m[4], m[5]);
 				break;
 			}
 		break;
