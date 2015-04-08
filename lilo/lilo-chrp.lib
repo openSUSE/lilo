@@ -45,23 +45,34 @@ function running_on_chrp () {
 
 	# find all PReP boot and FAT partitions
 	while read; do
-	local device start end blocks id system
-	[ "${REPLY:0:1}" = "/" ] || continue
-	REPLY="${REPLY/[*]}" # remove all 'bootable' markers
-	read device start end blocks id system <<< "$REPLY"
+	local device p_start p_end p_type p_flags
+	read minor start end type fs_n_flags <<< "$REPLY"
 
-	case $id in
-		41) # PReP boot partition
-			prep_part=(${prep_part[*]} $device)
+	case $minor in
+		Disk) #get device name
+			if [[ "$start" == *"/dev"* ]];then
+				REPLY=${REPLY#Disk }
+				REPLY=${REPLY%:*}
+				device=$REPLY
+				echo "$device"
+			fi
 			;;
-		6)  # FAT16 partition
-			fat_part=(${fat_part[*]} $device)
-			;;
-		c) # FAT32 partition
-			fat32_part=(${fat32_part[*]} $device)
-			;;
-	esac
-	done < <( $FDISK -l $OPTION_BOOT_DISK_DEVICE_NODE )
+		1|2|3|4) #set {prep,fat,fat32}_part
+			device_minor=$(check_dm $device $minor)
+			case $fs_n_flags in
+			*prep*) # PReP boot partition
+				prep_part=(${prep_part[*]} $device_minor)
+				echo "$prep_part"
+				;;
+			*type=06*)  # FAT16 partition
+				fat_part=(${fat_part[*]} $device_minor)
+				;;
+			*type=0c*) # FAT32 partition
+				fat32_part=(${fat32_part[*]} $device_minor)
+				;;
+			esac
+		esac
+	done < <( parted_print $OPTION_BOOT_DISK_DEVICE_NODE )
 
 	# only the device is given and dd to the raw device is a bad idea
 	if [ -z "$OPTION_BOOT_PARTITION_NUMBER" ] ; then
@@ -149,10 +160,9 @@ function running_on_chrp () {
 		if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ] && is_on_iscsi "$image" ; then
 				zimage_nr=$i
 				iscsi_bootdevice=1
-				# FIXME
-				iscsi_bootdevice=0
+		fi
 		# if the boot device points to iscsi, force zImage
-		elif (( iscsi_bootdevice == 1 )) ; then
+		if (( iscsi_bootdevice == 1 )) ; then
 			if [ "${CONFIG_IMAGE_LABEL[$i]}" = "$OPTION_DEFAULT" ]; then
 				zimage_nr=$i
 			fi
@@ -373,6 +383,19 @@ function running_on_chrp () {
 		boot_device=${boot_partition%%+([0-9])}
 		boot_partnr=${boot_partition##+([^0-9])}
 
+		if [[ "$boot_partition" == /dev/dm-* ]]; then
+			majorminor=`$STAT_CMD -L --format="0x%t 0x%T" "$boot_partition"`
+			majorminor=`printf '(%d:%d)' $majorminor`
+			DMDEV=`dmsetup ls | grep "$majorminor"`
+			if [[ "$DMDEV" == *part* ]]; then
+				read device devnode <<< "$DMDEV"
+				DEV=`echo $boot_partition | sed 's/\/dev\///g'`
+				boot_device=`ls -1 /sys/block/$DEV/slaves/|head -n 1`
+				boot_device=/dev/$boot_device
+				boot_partnr=`echo "$device" | sed 's/.*part//g'`
+			fi
+		fi
+
 		# read specifications for primary partitions from boot device
 
 		# parse and output like the following
@@ -392,12 +415,16 @@ function running_on_chrp () {
 		# of 1024. Hurray! SI units make so much sense here :-(
 		# Ok, so we switch to calculate internally with 512 Byte units
 
-		local -a p_start p_end p_type p_flags
+		local -a p_start p_end p_type p_flags p_mode
+
+		if [ ! -b "$boot_partition" ]; then
+			$PARTPROBE "$boot_partition"
+		fi
 
 		while read; do
 			local minor start end type fs_n_flags
 
-			[[ "${REPLY:0:1}" == [1234D] ]] || continue
+			[[ "${REPLY:0:1}" == [1234DP] ]] || continue
 			read minor start end type fs_n_flags <<< "$REPLY"
 			(( minor > 4 )) && continue
 			case $minor in
@@ -413,6 +440,11 @@ function running_on_chrp () {
 					REPLY=${REPLY#Disk geometry*-}
 					REPLY=${REPLY% megabytes*}
 					p_start[5]=$(parted2sect $REPLY)
+					;;
+				Partition)
+					[ "$start" = "Table:" ] || continue
+					REPLY=${REPLY#Partition Table:*}
+					p_mode=$REPLY
 					;;
 				*)
 					error "unparsable line on parted output: $REPLY"
@@ -495,7 +527,33 @@ function running_on_chrp () {
 				fi
 			fi
 
-			mkfs.msdos $MKDOSFS $boot_partition || exit 2
+			mkfs.msdos $MKDOSFS $boot_partition
+			ret=$?
+
+			if test "$ret" != "0"; then
+				PART=${boot_partition#/dev/}
+				DEV="${PART%%[0-9]*}"
+				PARTNO=${PART##$DEV}
+				found=0
+
+				for MDDEV in $(ls -1 /sys/block/$DEV/holders/*/holders/ 2> /dev/null); do
+					NAME=`cat /sys/block/$DEV/holders/*/holders/$MDDEV/dm/name`
+					DMPART=$(echo `expr "$NAME" : '.*\(_part[0-9]*\)'`)
+					DMPART=${DMPART##_part}
+
+					if (($PARTNO == $DMPART)); then
+						mkfs.msdos $MKDOSFS /dev/$MDDEV || exit 2
+						boot_partition="/dev/$MDDEV"
+						found=1
+						break;
+					fi
+				done
+
+				if ((found == 0)); then
+					exit 2
+				fi
+			fi
+
 			cd $TEMP
 			mkdir -p boot || exit 2
 			mount $boot_partition boot || exit 2
@@ -577,10 +635,10 @@ function running_on_chrp () {
 			umount boot
 		else # of if (( fat_boot == 1 )) 
 			# check for PReP partition and convert $boot_partition if neseccary
-			if [[ "${p_flags[$boot_partnr]}" != *type=41* ]]; then
+			if [[ "${p_flags[$boot_partnr]}" != *prep* ]]; then
 				# set type to be PReP boot
 				warning "Boot partition $boot_partition converted to PReP boot type"
-				if ! parted_call $boot_device set $boot_partnr type 0x41 >& $TEMP/parted.log; then
+				if ! parted_call $boot_device set $boot_partnr prep on >& $TEMP/parted.log; then
 					error "Partition conversion failed for $boot_partition" 11
 				fi
 			fi
@@ -588,7 +646,7 @@ function running_on_chrp () {
 			# check whether $boot_partition is the first PReP partition on
 			# the boot disk else delete the others to please OF
 			for (( i=1; i<boot_partnr; i++ )); do
-				if [[ "${p_flags[$i]}" == *type=41* ]]; then
+				if [[ "${p_flags[$i]}" == *prep* ]]; then
 					warning "Delete ambiguous PReP boot  partition ${boot_device}$i"
 					if ! parted_call $boot_device rm $i >& $TEMP/parted.log; then
 						warning "Partition deletion failed for ${boot_device}$i"
@@ -621,9 +679,9 @@ function running_on_chrp () {
 				dd if=/dev/zero of=$boot_partition bs=4096 count=1
 				if ! ( set -x;
 					YAST_IS_RUNNING=1 parted_call $boot_device resize $boot_partnr $start $end &&
-					parted_call $boot_device set $boot_partnr type 0x41; ) >& $TEMP/parted.log
+					parted_call $boot_device set $boot_partnr prep on; ) >& $TEMP/parted.log
 				then
-					error "$resize_errmsg" 11
+					warning "$resize_errmsg" 11
 				fi
 			fi
 
@@ -644,7 +702,7 @@ function running_on_chrp () {
 		fi # of if (( fat_boot == 1 )) 
 
 		# TODO check whether this is neccessary
-		if [[ ${p_flags[$boot_partnr]} != *boot* ]]; then
+		if [[ ${p_flags[$boot_partnr]} != *boot* && ${p_mode} == " msdos" ]]; then
 			parted_call $boot_device set $boot_partnr boot on >& $TEMP/parted.log || error 11
 		fi
 
@@ -652,7 +710,7 @@ function running_on_chrp () {
 			if [ is_nvram ];then
 				nvsetenv bootinfo-linux "${boot_path},\\ppc\\bootinfo.txt"
 			fi
-				boot_path=${boot_path},yaboot
+			boot_path=${boot_path},yaboot
 		elif [[ "${p_flags[*]}" != *type=41*type=41* ]]; then
 			# open firmware is confused about more than one PReP partition, in that
 			# case keep full OF path

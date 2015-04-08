@@ -244,6 +244,46 @@ fi
 dbg_show file_sysfs_path
 
 file_sysfs_dir="${file_sysfs_path%/dev}"
+if [[ "$file_sysfs_dir" == */dm-* ]] ; then
+    islvm=0
+    while read; do
+	read ignore1 ignore2 lvdevice <<< "$REPLY"
+        lvmajor=$(printf '%d\n' 0x$(stat -L --format="%t" "$lvdevice"))
+        lvminor=$(printf '%d\n' 0x$(stat -L --format="%T" "$lvdevice"))
+        lvmajorminor=$lvmajor:$lvminor
+
+        if [[ "$lvmajorminor" == "$file_majorminor" ]] ; then
+                islvm=1
+                break
+        fi
+    done < <( lvdisplay 2> /dev/null | grep "LV Name" )
+
+    if [[ "$islvm" != "1" ]] ; then
+        parent=$file_sysfs_dir
+        file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/* 2> /dev/null |head -n 1`
+        if [ ! -L "$file_sysfs_dir/device" ] ; then
+                if [[ "$file_sysfs_dir" == */dm-* ]] ; then
+                        parent=$file_sysfs_dir
+                        file_sysfs_dir=`ls -d $file_sysfs_dir/slaves/* 2> /dev/null |head -n 1`
+                fi
+        fi
+
+        devmajorminor=`printf '(%d:%d)' $file_major $file_minor`
+        DMDEV=`dmsetup ls | grep "$devmajorminor"`
+        DEV=`echo "$file_sysfs_dir" | sed 's/.*\///g'`
+
+        if [[ "$DMDEV" == *part* ]]; then
+                read device devnode <<< "$DMDEV"
+                file_partition=`echo "$device" | sed 's/.*part//g'`
+        else
+                /bin/dd if=/dev/$DEV of=/dev/null bs=4096 count=1 > /dev/null 2> /dev/null
+                if test "$?" != "0"
+                then
+                        file_sysfs_dir=`ls -d $parent/slaves/* 2> /dev/null |tail -n 1`
+                fi
+        fi
+    fi
+fi
 dbg_show file_sysfs_dir
 if [ ! -L "$file_sysfs_dir/device" ] ; then
     # maybe a partition
@@ -255,15 +295,15 @@ if [ ! -L "$file_sysfs_dir/device" ] ; then
 	# array, but til then I´d consider this a hack, maybe a
 	# special parameter --raid is an option 
 	error "soft raid (${file_sysfs_dir##*/}) is not readable by open firmware"
-	elif [[ "$file_sysfs_dir" == */dm-* ]]; then
-	error "mapped devices like ${file_sysfs_dir##*/} are not readable by open firmware"
 	else
 	error "driver for sysfs path $file_sysfs_dir has no full sysfs support"
 	fi
     fi
     file_partition="${file_sysfs_dir##*[a-z]}"
     dbg_show file_partition
-    file_sysfs_dir="${file_sysfs_dir%/*}"
+    cd "$file_sysfs_dir"
+    file_full_sysfs_path="`pwd -P`"
+    file_sysfs_dir="${file_full_sysfs_path%/*}"
     dbg_show file_sysfs_dir
 fi
 
@@ -369,9 +409,9 @@ case "$file_full_sysfs_path" in
 	done
 	;;
 	*/pci+([0-9:])+([0-9]):*/virtio[0-9])
-	declare spec="${file_full_sysfs_path##*/}"
-	dbg_show spec
-	cd ..
+		declare spec="${file_full_sysfs_path##*/}"
+		dbg_show spec
+		cd ..
 	;;
     *)
         # TODO check the rest of the (hardware) world
@@ -423,11 +463,6 @@ if [ -f devspec ] ; then
 	of_device_path=${of_device_path##/proc/device-tree}
 	file_storage_type=sata
 	;;
-	scsi*)
-	if [ "$file_storage_type" = "" ] ; then
-		file_storage_type=scsi
-	fi
-	;;
 	sas*)
 	file_storage_type=sas
 	;;
@@ -450,7 +485,7 @@ if [ -f devspec ] ; then
 	vscsi)
 	file_storage_type=vscsi
 	;;
-	fcp)
+	fcp|scsi-fcp)
 	declare of_disk_fc_wwpn
 
 	# modprobe scsi_transport_fc  ## loaded through dependencies
@@ -491,10 +526,15 @@ if [ -f devspec ] ; then
 	[ "$of_disk_fc_wwpn" ] || error "could not get a WWPN for that FC disk"
 	file_storage_type=fcp
 	;;
+        scsi*)
+        if [ "$file_storage_type" = "" ] ; then
+                file_storage_type=scsi
+        fi
+        ;;
 	ieee1394)
 	;;
 	block)
-	file_storage_type=virtio
+		file_storage_type=virtio
 	;;
 	*)
 	error "Unknown device type $(< ${file_of_hw_devtype}/device_type)"
@@ -519,7 +559,6 @@ if [ -f devspec ] ; then
 	)
 	;;
         sas)
-	    lun_format="%x"	# fallback LUN encoding
 	vendor_id=$(read_int ${file_of_hw_devtype%%/sas}/vendor-id)
 	if (( vendor_id == 0x1000 )); then
 		# PCI_VENDOR_ID_LSI_LOGIC==0x1000
@@ -530,20 +569,41 @@ if [ -f devspec ] ; then
 		of_disk_addr=$(< $sas_address)
 		fi
 
-		lun_format="%x000000000000"
-
+		lunstr=$(printf "%x000000000000" $of_disk_scsi_lun)
 	else
-		(( of_disk_addr = ( (of_disk_scsi_chan<<16) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) )); #
+		fwtype="0"
+		HOST=$(printf "%d" $of_disk_scsi_host)
+
+		if [[ -e /sys/class/scsi_host/host$HOST/fw_type ]]; then
+			fwtype=`cat /sys/class/scsi_host/host$of_disk_scsi_host/fw_type`
+		fi
+
+		if [[ $fwtype = "1" ]]; then
+			device_id="$file_sysfs_dir/device/device_id"
+			of_disk_addr=$(< $device_id)
+			lunstr=`int_to_scsilun $of_disk_scsi_lun`
+			lunstr=`echo $lunstr | sed 's/^[0]*//'`
+		else
+			lunstr=$(printf "%x" $of_disk_scsi_lun)
+			(( of_disk_addr = ( (of_disk_scsi_chan<<16) |  (of_disk_scsi_id<<8) |  of_disk_scsi_lun ) )); #
+		fi
 	fi
 
 	dbg_show of_disk_addr
 	: $file_of_hw_devtype
 	if [ -d ${file_of_hw_devtype}/disk ]; then
 		of_disk_scsi_dir=disk
-		file_of_hw_path=$(
-		printf "%s/%s@%x,${lun_format}"  "${file_of_hw_devtype##/proc/device-tree}" \
-		$of_disk_scsi_dir $of_disk_addr $of_disk_scsi_lun
-		)
+		if [[ $of_disk_scsi_lun = 0 ]]; then
+			file_of_hw_path=$(
+			printf "%s/%s@%x"  "${file_of_hw_devtype##/proc/device-tree}" \
+			$of_disk_scsi_dir $of_disk_addr
+			)
+		else
+			file_of_hw_path=$(
+			printf "%s/%s@%x,%s"  "${file_of_hw_devtype##/proc/device-tree}" \
+			$of_disk_scsi_dir $of_disk_addr $lunstr
+			)
+		fi
 	else
 		for i in ${file_of_hw_devtype}/disk*/sas-address ; do
 			if test -f "$i" ; then
@@ -562,7 +622,7 @@ if [ -f devspec ] ; then
 	fi
 
 	;;
-        fcp)
+        fcp|scsi-fcp)
 	declare of_disk_fc_dir
 	declare of_disk_fc_lun=$of_disk_scsi_lun
 
@@ -570,6 +630,12 @@ if [ -f devspec ] ; then
 		of_disk_fc_dir=disk
 	elif [ -d ${file_of_hw_devtype}/sd ]; then
 		of_disk_fc_dir=sd
+	elif [ -d $(ls -d $file_of_hw_devtype/fp*/disk) ]; then
+		of_disk_fc_dir=`echo $(ls -d $file_of_hw_devtype/fp*) | sed 's/.*\///'`
+		of_disk_fc_dir=$of_disk_fc_dir"/disk"
+	elif [ -d $(ls -d $file_of_hw_devtype/fp*/sd) ]; then
+		of_disk_fc_dir=`echo $(ls -d $file_of_hw_devtype/fp*) | sed 's/.*\///'`
+		of_disk_fc_dir=$of_disk_fc_dir"/sd"
 	else
 		error "Could not find a known hard disk directory under '${file_of_hw_devtype}'"
 	fi
@@ -588,7 +654,8 @@ if [ -f devspec ] ; then
 		warning "Emulex FC HBA with device id 0x$id not yet tested." \
 			"Reboot may fail."
 		fi
-		if [[ $id == @(f900|f901|f980|f981|f982|fa00|fa01|fd00) ]]; then
+		if [[ $id == @(f900|f901|f980|f981|f982|fa00|fa01|fd00|\
+                               e220|e228|e260|e268|e200|e208) ]]; then
 		# TODO: may be check /sys/class/scsi_host/hostX/lpfc_max_luns
 		lun_format="%x000000000000"
 		fi
@@ -822,7 +889,7 @@ else # no 'devspec' found
 	sata)
 		file_of_hw_path="${of_device_path##/proc/device-tree}"
 		;;
-	fcp)
+	fcp|scsi-fcp)
 		# TODO is that true? current version is a copy from scsi
 		dir=disk
 		file_of_hw_path=$(printf  "%s/${dir}@%016x,%016x"  "${of_device_path##/proc/device-tree}" $of_disk_scsi_id $of_disk_scsi_lun)

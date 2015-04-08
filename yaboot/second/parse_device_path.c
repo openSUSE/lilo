@@ -508,7 +508,7 @@ static int get_tftp_ipv4_ibm_CAS(struct path_description *path, const char *netd
 
 		ipv4_to_ascii(buf, netmask_ipv4);
 
-		sprintf(p1 + i, "%d,%d,%s,%d", bootp_retry, tftp_retry, buf, tftp_blocksize);
+		sprintf(p1 + i, "%d,%d,%s,%d", bootp_retry, tftp_retry, buf, 1024);
 
 		path_net_after(path) = p1;
 	}

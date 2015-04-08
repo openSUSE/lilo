@@ -1,4 +1,23 @@
 -------------------------------------------------------------------
+Wed Apr  8 15:51:16 UTC 2015 - dvlaeev@suse.com
+
+- move yaboot and lilo-ppc into github and merge all patches there
+  Drop patches from the spec:
+  lilo.ppc.ps3.patch
+  lilo.ppc-22.8.opal.patch
+  lilo-libgcc.patch
+  lilo.ppc-kvm.patch
+  yaboot-libgcc.patch
+  0001-Use-tftp-1M-blocksize.patch
+
+-------------------------------------------------------------------
+Wed Oct 30 12:58:04 UTC 2013 - dvaleev@suse.com
+
+- Use 1024 blocksize for tftp. openSUSE initrd is too big to fit
+  32M limit
+  + added 0001-Use-tftp-1M-blocksize.patch
+
+-------------------------------------------------------------------
 Thu Jul  4 14:44:04 UTC 2013 - matz@suse.com
 
 - Fix build with gcc 4.8: lilo.gcc48.patch

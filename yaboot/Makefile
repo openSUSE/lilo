@@ -6,7 +6,7 @@ export LC_COLLATE=POSIX
 
 include Config
 
-VERSION = unset
+VERSION = 22.8
 # Debug mode (spam/verbose)
 DEBUG = 0
 # make install vars
@@ -253,6 +253,10 @@ clean:
 	find . -not -path './\{arch\}*' -name ',,*' | xargs rm -rf
 	find man -name '*.gz' | xargs -r gunzip
 	rm -rf man.deb
+dist:
+	mkdir -p ../yaboot-${VERSION}
+	rsync -r --exclude=.git ./ ../yaboot-${VERSION}
+	tar -cjf 'yaboot-${VERSION}.tar.bz2' ../yaboot-${VERSION}
 
 cleandocs:
 	make -C doc clean

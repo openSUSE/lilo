@@ -44,8 +44,8 @@
 #include <errors.h>
 #include <debug.h>
 
-#define LOAD_BUFFER_BASE (24*1024*1024)
-#define LOAD_BUFFER_SIZE (32*1024*1024)
+#define LOAD_BUFFER_BASE (64*1024*1024)
+#define LOAD_BUFFER_SIZE (64*1024*1024)
 
 static int of_open(struct boot_file_t *file, const char *dev_name, struct partition_t *part, const char *file_name)
 {
@@ -126,6 +126,7 @@ static int of_net_download(unsigned char **buffer, ihandle of_device)
 		}
 		ms /= 1000;
 		prom_printf("yaboot downloaded %08x bytes via network, download rate %d KB/s.\n", ret, ms);
+		prom_release(p, LOAD_BUFFER_SIZE);
 	} else
 		prom_release(p, LOAD_BUFFER_SIZE);
       out:

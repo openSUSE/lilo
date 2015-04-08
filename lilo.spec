@@ -1,7 +1,7 @@
 #
 # spec file for package lilo
 #
-# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
+# Copyright (c) 2015 SUSE LINUX GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -20,7 +20,7 @@ Url:            http://lilo.alioth.debian.org/
 
 Name:           lilo
 ExclusiveArch:  ppc ppc64 %ix86 x86_64
-%define yaboot_vers 22.8-r1190
+%define yaboot_vers 22.8
 %define ppc_version 22.8
 Summary:        The Linux Loader, a Boot Menu
 License:        BSD-3-Clause
@@ -76,20 +76,14 @@ BuildRequires:  gcc-32bit
 # note: already outdated; download fresh sources from: https://alioth.debian.org/frs/?group_id=100507
 Version:        23.2
 Release:        0
-Source0:        lilo-ppc-%{ppc_version}.tar.bz2
-# From git repo at http://git.ozlabs.org/?p=yaboot.git
-Source1:        yaboot-%{yaboot_vers}.tar.bz2
+Source0:        https://github.com/k0da/lilo-ppc/releases/download/22.8-openSUSE/lilo-ppc-%{ppc_version}.tar.bz2
+Source1:        https://github.com/k0da/yaboot_suse/releases/download/22.8-openSUSE/yaboot-%{yaboot_vers}.tar.bz2
 Source86:       lilo-%{version}.tar.gz
 Patch8601:      lilo.x86.mount_by_persistent_name.patch
 Patch8602:      lilo.x86.array-bounds.patch
 Patch8604:      lilo.x86.checkit.patch
 Patch8605:      lilo-no-build-date.patch
-Patch8607:      yaboot-libgcc.patch
-Patch8608:      lilo-libgcc.patch
-Patch8609:      lilo.ppc.ps3.patch
 Patch8610:      lilo.src.Makefile.patch
-Patch8611:      lilo.ppc-22.8.opal.patch
-Patch8612:      lilo.ppc-kvm.patch
 Patch8613:      lilo.gcc48.patch
 # $Id: lilo.spec 1188 2008-12-09 14:29:53Z olh $
 
@@ -114,15 +108,6 @@ pushd lilo-%{version}
 %patch8605 -p1
 %patch8610 -p1
 %patch8613 -p1
-popd
-pushd yaboot
-%patch8607 -p1
-popd
-pushd lilo.ppc
-%patch8608 -p1
-%patch8609 -p1
-%patch8611 
-%patch8612 -p1
 popd
 
 %build
