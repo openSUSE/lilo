@@ -446,10 +446,10 @@ if [ -f devspec ] ; then
 	k2-sata-root)
 	: found k2-sata-root, guessing channel
 	counter=0
-	for i in host+([0-9]); do
+	for i in {0..9}; do
 		: working on virtual scsi host $i
 		case "$file_full_sysfs_path" in
-		*/$i/*)
+		*/host+($i)/*)
 		: found $i $counter
 			break
 			;;
@@ -855,10 +855,10 @@ else # no 'devspec' found
 	k2-sata-root)
 		: found k2-sata-root, guessing channel
 		counter=0
-		for i in host+([0-9]); do
+		for i in {0..9}; do
 		: working on virtual scsi host $i
 		case "$file_full_sysfs_path" in
-		*/$i/*)
+		*/host+($i)/*)
 			: found $i $counter
 			break
 			;;
