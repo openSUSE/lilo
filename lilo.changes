@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Thu May 21 11:22:03 UTC 2015 - dvaleev@suse.com
+
+- Put everything into git
+- Use a github tarball
+- Implement vfat support on GPT disk label (bsc#921941)
+
+-------------------------------------------------------------------
 Wed Apr 22 07:11:58 UTC 2015 - ohering@suse.de
 
 - Update show_of_path.sh to find second SATA channel on Apple G5

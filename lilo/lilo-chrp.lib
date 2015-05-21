@@ -64,7 +64,7 @@ function running_on_chrp () {
 				prep_part=(${prep_part[*]} $device_minor)
 				echo "$prep_part"
 				;;
-			*type=06*)  # FAT16 partition
+			*type=06*|*msftdata*) # FAT16 partition
 				fat_part=(${fat_part[*]} $device_minor)
 				;;
 			*type=0c*) # FAT32 partition
@@ -502,6 +502,12 @@ function running_on_chrp () {
 				defaultsize=$MINDOSFSSIZE;
 			fi
 
+			#set vfat flag based on disk label
+			case ${p_mode} in
+				*msdos) p_type_flag="type 6" ;;
+				*gpt) p_type_flag="msftdata on";;
+			esac
+
 			if (( bootsize < defaultsize )); then
 				# may be resize of the partition is possible and helps?
 				if (( (p_start[boot_partnr+1]-p_start[boot_partnr])  < defaultsize )); then
@@ -512,17 +518,17 @@ function running_on_chrp () {
 				local end=$(sect2parted $((${p_start[$((boot_partnr+1))]}-1)) )
 				if ! ( set -x;
 					YAST_IS_RUNNING=1 parted_call $boot_device resize $boot_partnr $start $end &&
-					parted_call $boot_device set $boot_partnr type 6; ) >& $TEMP/parted.log
+					parted_call $boot_device set $boot_partnr $p_type_flag; ) >& $TEMP/parted.log
 				then
 					error "Partition extension failed for $boot_partition" 11
 				fi
 			fi
 
 			# create the FAT partition and file system on $boot_partition
-			if [[ "${p_flags[$boot_partnr]}" != *type=06* ]]; then
+			if [[ "${p_flags[$boot_partnr]}" != *type=06* || "${p_flags[$boot_partnr]}" != *msftdata* ]]; then
 				# set type to be FAT16
 				warning "Boot partition $boot_partition converted to FAT16 type"
-				if ! parted_call $boot_device set $boot_partnr type 6 >& $TEMP/parted.log; then
+				if ! parted_call $boot_device set $boot_partnr $p_type_flag >& $TEMP/parted.log; then
 					error "Partition conversion failed for $boot_partition" 11
 				fi
 			fi
