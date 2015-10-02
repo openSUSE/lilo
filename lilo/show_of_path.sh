@@ -408,7 +408,7 @@ case "$file_full_sysfs_path" in
 		fi
 	done
 	;;
-	*/pci+([0-9:])+([0-9]):*/virtio[0-9])
+    */pci+([0-9:])+([0-9]):*/virtio+([0-9]))
 		declare spec="${file_full_sysfs_path##*/}"
 		dbg_show spec
 		cd ..
