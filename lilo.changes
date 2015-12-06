@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Sun Dec  6 15:58:59 UTC 2015 - dvaleev@suse.com
+
+- Fix qemu LUNs in show_of_path (bsc#941790)
+- Add support for more than 10 virtio devices (bsc#945831)
+
+-------------------------------------------------------------------
 Thu May 21 11:22:03 UTC 2015 - dvaleev@suse.com
 
 - Put everything into git

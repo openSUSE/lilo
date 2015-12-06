@@ -427,13 +427,13 @@ if [ -f devspec ] ; then
     file_of_hw_devtype=/proc/device-tree${file_of_hw_devtype}
     dbg_show file_of_hw_devtype
     if ! [ -f ${file_of_hw_devtype}/device_type ]; then
-	if ! [ -d ${file_of_hw_devtype}/sas ]; then
+	if ! [ -d ${file_of_hw_devtype}/sas -o -d ${file_of_hw_devtype}/disk ]; then
                 # check for scsi@$of_disk_scsi_chan/device_type else bail out ..
                 file_of_hw_devtype=$(printf "%s/scsi@%x" $file_of_hw_devtype $of_disk_scsi_chan)
                 dbg_show file_of_hw_devtype
         else
-                # check for sas/device_type else bail out ..
-                file_of_hw_devtype=$(printf "%s/sas" $file_of_hw_devtype)
+                test -d ${file_of_hw_devtype}/sas && file_of_hw_devtype=$(printf "%s/sas" $file_of_hw_devtype)
+                test -d ${file_of_hw_devtype}/disk && file_of_hw_devtype=$(printf "%s/disk" $file_of_hw_devtype)
                 dbg_show file_of_hw_devtype
         fi
     fi
