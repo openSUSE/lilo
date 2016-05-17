@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Tue May 17 10:10:07 UTC 2016 - dimstar@opensuse.org
+
+- Do not buildrequire device-mapper-32bit: this package contains
+  the libraries needed by device-mapper-devel-32bit and as such
+  it is the -devel package's responsibility, to bring the libs in.
+
+-------------------------------------------------------------------
 Wed Apr  8 15:51:16 UTC 2015 - dvlaeev@suse.com
 
 - move yaboot and lilo-ppc into github and merge all patches there

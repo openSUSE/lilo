@@ -1,7 +1,7 @@
 #
 # spec file for package lilo
 #
-# Copyright (c) 2015 SUSE LINUX GmbH, Nuernberg, Germany.
+# Copyright (c) 2016 SUSE LINUX GmbH, Nuernberg, Germany.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -62,7 +62,12 @@ BuildRequires:  device-mapper
 BuildRequires:  device-mapper-devel
 %endif
 %ifarch x86_64
+# device-mapper-32bit was dropped in Tumbleweed in favor of SLPP
+# a direct build dep is wrong: it is the -devel packages responsibility
+# to pull in the depending libraries
+%if 0%{?suse_version} < 1330
 BuildRequires:  device-mapper-32bit
+%endif
 BuildRequires:  glibc-devel-32bit
 # openSUSE 11.3 and SLE_11 do not have device-mapper-devel-32bit
 %if 0%{?suse_version} != 1130 && 0%{?suse_version} != 1110
