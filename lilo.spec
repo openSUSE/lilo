@@ -67,19 +67,17 @@ BuildRequires:  device-mapper-devel
 # to pull in the depending libraries
 %if 0%{?suse_version} < 1330
 BuildRequires:  device-mapper-32bit
-%endif
-BuildRequires:  glibc-devel-32bit
-# openSUSE 11.3 and SLE_11 do not have device-mapper-devel-32bit
-%if 0%{?suse_version} != 1130 && 0%{?suse_version} != 1110
+%else
 BuildRequires:  device-mapper-devel-32bit
 %endif
 BuildRequires:  gcc-32bit
+BuildRequires:  glibc-devel-32bit
 %endif
 %ifarch ppc64
 BuildRequires:  gcc-32bit
 %endif
 # note: already outdated; download fresh sources from: https://alioth.debian.org/frs/?group_id=100507
-Version:        23.2
+Version:        24.2
 Release:        0
 Source0:        https://github.com/k0da/lilo-ppc/releases/download/22.8-openSUSE/lilo-ppc-%{ppc_version}.tar.bz2
 Source1:        https://github.com/k0da/yaboot_suse/releases/download/22.8-openSUSE/yaboot-%{yaboot_vers}.tar.bz2
@@ -87,9 +85,7 @@ Source86:       lilo-%{version}.tar.gz
 Patch8601:      lilo.x86.mount_by_persistent_name.patch
 Patch8602:      lilo.x86.array-bounds.patch
 Patch8604:      lilo.x86.checkit.patch
-Patch8605:      lilo-no-build-date.patch
 Patch8610:      lilo.src.Makefile.patch
-Patch8613:      lilo.gcc48.patch
 # $Id: lilo.spec 1188 2008-12-09 14:29:53Z olh $
 
 %description
@@ -110,9 +106,7 @@ pushd lilo-%{version}
 %patch8601 -p1
 %patch8602 -p1
 %patch8604 -p1
-%patch8605 -p1
 %patch8610 -p1
-%patch8613 -p1
 popd
 
 %build

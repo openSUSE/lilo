@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed May 18 13:53:11 UTC 2016 - per@jessen.ch
+
+- updated to source 24.2
+- removed obsolete patches (lilo.gcc48.patch lilo-no-build-date.patch) 
+- updated lilo.src.Makefile.patch
+- minor change to buildrequires.
+
+-------------------------------------------------------------------
 Tue May 17 10:10:07 UTC 2016 - dimstar@opensuse.org
 
 - Do not buildrequire device-mapper-32bit: this package contains

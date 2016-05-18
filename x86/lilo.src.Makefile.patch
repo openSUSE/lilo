@@ -1,13 +1,16 @@
---- a/Makefile	2011-04-09 17:14:05.000000000 +0200
-+++ b/Makefile	2011-09-23 19:30:20.268889339 +0200
-@@ -38,14 +38,12 @@ help:
+--- a/Makefile	2015-11-22 00:46:57.000000000 +0100
++++ b/Makefile	2016-05-24 12:23:43.091977974 +0200
+@@ -11,8 +11,7 @@
+ # everything needed to run, just short of installation
  #
  all: test
- 	$(MAKE) -C src all
--	$(MAKE) -C images all
+-	make -C src all
+-	make -C images all
++	$(MAKE) -C src all
  
  #
- # everything above plus the statically linked version
+ #  make help
+@@ -45,7 +44,6 @@
  #
  alles: test
  	$(MAKE) -C src alles
@@ -15,7 +18,7 @@
  
  #
  # documentation files
-@@ -105,9 +103,6 @@ ins:
+@@ -104,9 +102,6 @@
  #
  install:  all
  	$(MAKE) -C src install
@@ -25,7 +28,7 @@
  	$(MAKE) -C scripts install
  	$(MAKE) -C man install
  	$(MAKE) -C dos install
-@@ -134,8 +129,5 @@ distclean: clean
+@@ -131,8 +126,5 @@
  
  uninstall:
  	$(MAKE) -C src uninstall
