@@ -1,10 +1,27 @@
+#
+# spec file for package lilo
+#
+# Copyright (c) 2013 SUSE LINUX Products GmbH, Nuernberg, Germany.
+#
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
+
+# Please submit bugfixes or comments via http://bugs.opensuse.org/
+#
+
 # norootforbuild
 
-Url:            http://lilo.go.dyndns.org/
+Url:            https://github.com/openSUSE/lilo
 
 Name:           lilo
 ExclusiveArch:  ppc ppc64 %ix86 x86_64
-%define yaboot_vers 22.8-r1151
+%define yaboot_vers 0
 Group:          System/Boot
 License:        BSD 3-Clause
 Summary:        The Linux Loader, a Boot Menu
@@ -38,19 +55,38 @@ BuildRequires:  glibc-devel-32bit
 BuildRequires:  gcc-32bit
 %endif
 %endif
+BuildRequires:  xz
 Version:        0
 Release:        0
-Source0:        lilo-ppc-%{version}.tar.bz2
-Source1:        http://penguinppc.org/projects/yaboot/yaboot-%{yaboot_vers}.tar.bz2
-Source86:       lilo-%{version}.src.tar.bz2
+Source0:        lilo-ppc-%{version}.tar.xz
+Source1:        yaboot-%{yaboot_vers}.tar.xz
+Source86:       lilo-%{version}.src.tar.bz2 
 Patch8601:      lilo.x86.mount_by_persistent_name.patch
 Patch8602:      lilo.x86.array-bounds.patch
 Patch8603:      lilo.x86.division-by-zero.patch
 Patch8604:      lilo.x86.checkit.patch
-# $Id$
+
 
 %description
-lilo for ppc
+LILO boots Linux from your hard drive. It can also boot other operating
+systems, such as MS-DOS and OS/2, and can even boot DOS from the second
+hard drive. The configuration file is /etc/lilo.conf.
+
+The PowerPC variant can be used on new PowerMacs and CHRP machines.
+
+The ix86 variant comes with Memtest86, offering an image that can be
+booted to perform a memory test.
+
+
+
+Authors:
+--------
+    John Coffman <JohnInSD@san.rr.com>
+    Werner Almesberger <Werner.Almesberger@epfl.ch>
+    PowerPC part:
+    Paul Mackeras <paulus@samba.org>
+    Cort Dougan <cort@fsmlabs.com>
+    Benjamin Herrenschmidt <benh@kernel.crashing.org>
 
 %prep
 %setup -q -T -c -a 0 -a 1 -a 86
@@ -191,3 +227,5 @@ exit 0
 %doc %{_docdir}/lilo
 %endif
 %doc %{_mandir}/*/*
+
+%changelog

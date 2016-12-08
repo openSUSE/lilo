@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Thu Dec  8 15:30:28 UTC 2016 - olaf@aepfle.de
+
+- Sources moved to https://github.com/openSUSE/lilo
+
+-------------------------------------------------------------------
 Sun Dec  6 15:58:59 UTC 2015 - dvaleev@suse.com
 
 - Fix qemu LUNs in show_of_path (bsc#941790)
