@@ -16,7 +16,7 @@
 #
 
 
-Url:            http://lilo.alioth.debian.org/
+Url:            https://github.com/openSUSE/lilo
 
 Name:           lilo
 ExclusiveArch:  ppc ppc64 %ix86 x86_64
