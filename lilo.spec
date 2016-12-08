@@ -21,7 +21,6 @@ Url:            http://lilo.alioth.debian.org/
 Name:           lilo
 ExclusiveArch:  ppc ppc64 %ix86 x86_64
 %define yaboot_vers 22.8
-%define ppc_version 22.8
 Summary:        The Linux Loader, a Boot Menu
 License:        BSD-3-Clause
 Group:          System/Boot
@@ -76,17 +75,15 @@ BuildRequires:  glibc-devel-32bit
 %ifarch ppc64
 BuildRequires:  gcc-32bit
 %endif
-# note: already outdated; download fresh sources from: https://alioth.debian.org/frs/?group_id=100507
 Version:        24.2
 Release:        0
-Source0:        https://github.com/k0da/lilo-ppc/releases/download/22.8-openSUSE/lilo-ppc-%{ppc_version}.tar.bz2
-Source1:        https://github.com/k0da/yaboot_suse/releases/download/22.8-openSUSE/yaboot-%{yaboot_vers}.tar.bz2
+Source0:        lilo-ppc-%{version}.tar.xz
+Source1:        yaboot-%{yaboot_vers}.tar.xz
 Source86:       lilo-%{version}.tar.gz
 Patch8601:      lilo.x86.mount_by_persistent_name.patch
 Patch8602:      lilo.x86.array-bounds.patch
 Patch8604:      lilo.x86.checkit.patch
 Patch8610:      lilo.src.Makefile.patch
-# $Id: lilo.spec 1188 2008-12-09 14:29:53Z olh $
 
 %description
 LILO boots Linux from your hard drive. It can also boot other operating
@@ -100,7 +97,7 @@ booted to perform a memory test.
 
 %prep
 %setup -q -T -c -a 0 -a 1 -a 86
-mv lilo-ppc-%{ppc_version} lilo.ppc
+mv lilo-ppc-%{version} lilo.ppc
 mv yaboot-%{yaboot_vers} yaboot
 pushd lilo-%{version}
 %patch8601 -p1
