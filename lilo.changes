@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Oct 31 08:02:40 UTC 2018 - olaf@aepfle.de
+
+- mkzimage needs to link with libgcc.a (bgo#53803)
+
+-------------------------------------------------------------------
 Thu Dec  8 15:30:28 UTC 2016 - olaf@aepfle.de
 
 - Sources moved to https://github.com/openSUSE/lilo

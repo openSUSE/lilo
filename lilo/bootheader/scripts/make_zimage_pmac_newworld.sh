@@ -119,7 +119,8 @@ ld \
 	$obj_dir/chrp/chrp.a \
 	$obj_dir/common/common.a \
 	$obj_dir/chrp/prom.a \
-	$obj_dir/common/zlib.a
+	$obj_dir/common/zlib.a \
+	`gcc -m32 -print-libgcc-file-name`
 
 rm -f "$output"
 cp "$tmp/output" "$output"
